@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 /* Notes to self (Keith)
  * load groups, load group tracks
- * try to promote along a track
- * if no track is found than try to find a group with inheritance
- * if multiple groups inherit or no inheritance is found then throw a error
+ * try to promote along a track  //done??
+ * if no track is found than try to find a group with inheritance //done??
+ * if multiple groups inherit or no inheritance is found then throw a error  //done
  * methods (groups) to add/remove inheritance add/remove permissions, change attributes
  * methods (players) change color, canbuild, suffix/prefix, etc, etc, etc
  */
@@ -19,7 +19,114 @@ namespace SMP
 	public static class GroupUtils
 	{
 		#region group methods
+		public static bool AddGroupInheritance(Group g, Group addg)
+		{
+			if (!g.InheritanceList.Contains(addg))
+			{
+				g.InheritanceList.Add(addg);  //TODO: add inherited permissions
+				//UpdateGroupPermissions(g);
+				return true;
+			}
+			return false;
+		}
 		
+		public static bool DelGroupInheritance(Group g, Group delg)
+		{
+			if (!g.InheritanceList.Contains(delg))
+			{
+				g.InheritanceList.Remove(delg);
+				//UpdateGroupPermissions(g);
+				return true;
+			}				
+			return false;
+				
+		}
+		
+		public static bool AddGroup(string name, bool isDefaultGroup, bool canBuild, string prefix, string suffix, char color)
+		{
+			Group g = new Group();
+			
+			if(name == "" || name == null)
+				return false;
+			
+			g.Name = name;
+			
+			if(isDefaultGroup)
+				Group.DefaultGroup = g;
+			
+			g.CanBuild = canBuild;
+			
+			if(prefix == null)
+				prefix = "";
+			
+			g.Prefix = prefix;
+			
+			if(suffix == null)
+				suffix == "";
+			
+			g.Suffix = suffix;
+			
+			if(!Color.IsColorValid(color))
+				return false;
+			
+			g.GroupColor = color;
+			
+			if (Group.FindGroup(g.Name))
+				return false;
+			
+			Group.GroupList.Add(g);
+			return true;
+				
+		}
+		
+		public static bool DelGroup(Group g)
+		{
+			if (Group.GroupList.Contains(g))
+			{
+				Group.GroupList.Remove(g);  //update permissions list
+				return true;
+			}
+			return false;
+		}
+		
+		public static bool AddGroupPermission(Group g, string perm)
+		{
+			//TODO
+		}
+		
+		public static bool DelGroupPermission(Group g, string perm)
+		{
+			//TODO
+		}
+		
+		public static void ChangeCanBuild(Group g, bool cb)
+		{
+			g.CanBuild = cb;			
+		}
+		
+		public static bool ChangeGroupColor(Group g, char color)
+		{
+			if (Color.IsColorValid(color))
+			{
+				g.GetType = "§" + color;
+				return true;
+			}
+			return false;		
+		}
+		
+		public static void ChangeGroupPrefix(Group g, string prefix)
+		{
+			g.Prefix = prefix;		
+		}
+		
+		public static void ChangeGroupSuffix(Group g, string suffix)
+		{
+			g.Suffix = suffix;
+		}
+		#endregion
+		
+		#region Tracks
+		//TODO
 		#endregion
 		
 		
@@ -152,17 +259,66 @@ namespace SMP
 			return false;
 		}
 		
-		public static void AddPlayerPermission(Player p, string perm)
+		public static bool AddPlayerPermission(Player p, string perm)
 		{
 			if(!p.AdditionalPermissions.Contains(perm))
+			{
 				p.AdditionalPermissions.Add(perm);
+				return true;	
+			}
+			return false;
 		}
 		
-		public static void DelPlayerPermission(Player p, string perm)
+		public static bool DelPlayerPermission(Player p, string perm)
 		{
 			if(p.AdditionalPermissions.Contains(perm))
+			{
 				p.AdditionalPermissions.Remove(perm);
+				return true;	
+			}
+			return false;
 			   
+		}
+		
+		public static bool ChangePlayerColor(Player p, char color)
+		{
+			if (Color.IsColorValid(color))
+			{
+				p.color = "§" + color;
+				return true;
+			}
+			return false;
+				
+		}
+		
+		public static void ChangePlayerCanBuild(Player p, bool cb)
+		{
+			p.CanBuild = cb;	
+		}
+		
+		public static void ChangePlayerPrefix(Player p, string prefix)
+		{
+			p.Prefix = prefix;		
+		}
+		
+		public static void ChangePlayerSuffix(Player p, string suffix)
+		{
+			p.Suffix = suffix;	
+		}
+		#endregion
+		
+		#region Misc
+		
+		public static void UpdateGroupPermissions(Group g)
+		{
+			//TODO
+			
+		}
+		
+		
+		public static void UpdatePlayerPermissions(Player p)
+		{
+			//TODO	
 		}
 		#endregion
 	}
