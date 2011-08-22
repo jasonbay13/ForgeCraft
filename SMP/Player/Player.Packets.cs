@@ -53,7 +53,7 @@ namespace SMP
 			SendLoginPass();
 			
 			this.group = Group.DefaultGroup;
-            UpdateShi(this);
+			UpdateShi(this);
 			//OnPlayerConnect Event
 			if (PlayerAuth != null)
 				PlayerAuth(this);
