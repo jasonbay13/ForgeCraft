@@ -139,17 +139,14 @@ namespace RemoteConsole
 				}
 				else
 				{
-					Console.WriteLine("Password is empty...");
-					Console.WriteLine(Password);
-					Thread.Sleep(10000);
+					Console.WriteLine("Internal Error... Resetting (0x01)");
+					Thread.Sleep(5000);
 					return false;
 				}
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e.Message);
-				Console.WriteLine(e.StackTrace);
-				Console.WriteLine("Server Does not appear to be Online. (F6 to try again)");
+				Console.WriteLine("Server Does not appear to be Online.");
 				Thread.Sleep(1000);
 				return false;
 			}

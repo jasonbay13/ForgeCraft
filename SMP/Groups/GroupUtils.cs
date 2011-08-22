@@ -62,16 +62,16 @@ namespace SMP
 			g.Prefix = prefix;
 			
 			if(suffix == null)
-				suffix == "";
+				suffix = "";
 			
 			g.Suffix = suffix;
 			
 			if(!Color.IsColorValid(color))
 				return false;
 			
-			g.GroupColor = color;
-			
-			if (Group.FindGroup(g.Name))
+			g.GroupColor = color.ToString();
+			Group tempG = Group.FindGroup(g.Name);
+			if (tempG != null)
 				return false;
 			
 			Group.GroupList.Add(g);
@@ -92,11 +92,13 @@ namespace SMP
 		public static bool AddGroupPermission(Group g, string perm)
 		{
 			//TODO
+			return false;
 		}
 		
 		public static bool DelGroupPermission(Group g, string perm)
 		{
 			//TODO
+			return false;
 		}
 		
 		public static void ChangeCanBuild(Group g, bool cb)
@@ -108,7 +110,7 @@ namespace SMP
 		{
 			if (Color.IsColorValid(color))
 			{
-				g.GetType = "§" + color;
+				g.GroupColor = "§" + color;
 				return true;
 			}
 			return false;		

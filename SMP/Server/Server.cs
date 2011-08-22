@@ -47,10 +47,13 @@ namespace SMP
 				}; updateTimer.Start();
 			});
 			#endregion
-			
+			//TODO AI Update Timer
+
 			//Setup();
 			
 			Log("Server Started");
+
+			//new Creeper(new Point3(0, 0, 0), mainlevel);
 		}
 		
 		public bool Setup()
