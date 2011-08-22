@@ -8,6 +8,8 @@ namespace SMP
    
    public partial class World
     {
+
+
        public bool Israining = false;
        
        //public Weather()

@@ -219,7 +219,7 @@ namespace SMP
 			if (InBound(x, y, z))
 			{
 				blocks[PosToInt(x, y, z)] = id;
-				SetMetaData(x, y, z, meta);
+				//TODO SET METADATA
 			}
 		}
 
