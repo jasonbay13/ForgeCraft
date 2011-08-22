@@ -7,5 +7,6 @@ namespace SMP
 {
 	public interface AI
 	{
+
 	}
 }

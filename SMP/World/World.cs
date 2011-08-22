@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace SMP
 {
@@ -36,7 +37,8 @@ namespace SMP
 		public event OnBlockChange BlockChanged;
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		#endregion
-		
+        public World()
+        { }
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.World"/> class and generates 49 chunks.
 		/// </summary>
@@ -54,15 +56,6 @@ namespace SMP
 			chunkData = new Dictionary<Point, Chunk>();
 			generator = new GenStandard();
 			Server.Log("Generating...");
-
-			/*for (int x = -3; x <= 3; x++)
-			{
-			    for (int z = -3; z <= 3; z++)
-			    {
-			        GenerateChunk(x, z);
-			    }
-			    Server.Log(x + " Row Generated.");
-			}*/
 
 			Parallel.For(-3, 3, delegate(int x)
 			{
@@ -108,18 +101,75 @@ namespace SMP
 			//TODO Load files
 			//if (WorldLoad != null)
 			//	WorldLoad(this);
-			return null;
+            World w = new World();
+            //Load properties
+            string[] prop = File.ReadAllLines("maps/" + filename + "/properties.forge");
+            try
+            {
+                if (prop[7] == "1")
+                {
+                    w.SpawnX = int.Parse(prop[0]);
+                    w.SpawnY = int.Parse(prop[1]);
+                    w.SpawnZ = int.Parse(prop[2]);
+                    w.SpawnYaw = int.Parse(prop[3]);
+                    w.SpawnPitch = int.Parse(prop[4]);
+                    w.seed = int.Parse(prop[5]);
+                    w.time = int.Parse(prop[6]);
+                }
+                else
+                {
+                    Server.Log("This save is using another version of the forgecraft save format");
+                    Server.Log("Let me convert that for you..");
+                    //TODO CONVERT
+                }
+            }
+            catch { Server.Log("The world " + filename + " failed to load!"); Server.Log("Please fix the properties file.."); return null; }
+            /*foreach (string file in Directory.GetFiles("maps/" + filename + "/data", "*.forgemap"))
+            {
+                byte[] read = File.ReadAllBytes(file);
+                int x = util.EndianBitConverter.Big.ToInt32(read, 0);
+                int z = util.EndianBitConverter.Big.ToInt32(read, 4);
+                Chunk temp = new Chunk(x, z);
+                Point p = new Point(x, z);
+                byte[] compressed = new byte[util.EndianBitConverter.Big.ToInt32(read, 8)];
+
+                
+            }*/
+            return w;
 		}
-		public void SaveLVL(World  w)
+        /// <summary>
+        /// Saves the world in the default location
+        /// </summary>
+		public void SaveLVL()
 		{
 			if (Save != null)
 				Save(this);
 			if (OnSave != null)
 				OnSave(this);
-			//TODO Save files
+            //Save properties
+            string[] save = new string[8];
+            save[0] = "" + SpawnX;
+            save[1] = "" + SpawnY;
+            save[2] = "" + SpawnZ;
+            save[3] = "" + SpawnYaw;
+            save[4] = "" + SpawnPitch;
+            save[5] = "" + seed;
+            save[6] = "" + time;
+            save[7] = "1"; //Saving Version
+            File.WriteAllLines("maps/" + name + "/properties.forge", save);
+            /*foreach (Chunk c in chunkData.Values)
+            {
+                byte[] tosave = c.GetCompressedData(); //Get compressed data
+                byte[] bytes = new byte[12 + tosave.Length]; //New array
+                util.EndianBitConverter.Big.GetBytes((int)(c.x * 16)).CopyTo(bytes, 0); //Save x of chunk
+                util.EndianBitConverter.Big.GetBytes((int)(c.z * 16)).CopyTo(bytes, 4); //Save z of chunk
+                util.EndianBitConverter.Big.GetBytes(tosave.Length).CopyTo(bytes, 8);
+                tosave.CopyTo(bytes, 12); //Copy compressed data
+                File.WriteAllBytes("maps/" + name + "/data/" + c.x + " " + c.z + ".forgemap", bytes); //Save to file
+            }*/
 		}
 
-		public void GenerateChunk(int x, int z)
+        public void GenerateChunk(int x, int z)
 		{
 			Chunk c = new Chunk(x, z);
 			generator.Generate(this, c);
@@ -175,10 +225,10 @@ namespace SMP
 		public int X;
 		public int Z;
 
-		public Point(int X, int Y)
+		public Point(int X, int Z)
 		{
 			this.X = X;
-			this.Z = Y;
+			this.Z = Z;
 		}
 
 		public static bool operator ==(Point a, Point b)

@@ -158,6 +158,7 @@ namespace SMP
 		}
 		public byte isStackable(short id)
 		{
+
 			//TODO
 			return 64;
 		}
