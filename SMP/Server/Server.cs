@@ -35,9 +35,6 @@ namespace SMP
 		{
 			Log("Starting Server");
 			s = this;
-			consolePlayer = new ConsolePlayer(s);
-			consolePlayer.SetUsername(ConsoleName);
-			//Group.DefaultGroup = new DefaultGroup(); //debugging
 			mainlevel = new World(0, 127, 0, "main", new Random().Next());
 			World.worlds.Add(mainlevel);
 			ml = new MainLoop("server");
@@ -65,6 +62,10 @@ namespace SMP
 			Plugin.Load();
 			//load groups
 			//load whitelist, banlist, VIPlist
+			
+			consolePlayer = new ConsolePlayer(s);
+			consolePlayer.SetUsername(ConsoleName);
+			Group.DefaultGroup = new DefaultGroup(); //debuggin g
 			
 			try
 			{

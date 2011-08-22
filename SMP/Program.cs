@@ -22,19 +22,6 @@ namespace SMP
         [MTAThread]
         public static void Main(string[] args)
         {
-            /*for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i])
-                {
-                    case "-port":
-                        Settings.Default.Port = Convert.ToInt32(args[++i]);
-                        break;
-                    case "-ip":
-                        Settings.Default.IPAddress = args[++i];
-                        break;
-                }
-            }*/
-
             StartServer();
             StartInput();
         }

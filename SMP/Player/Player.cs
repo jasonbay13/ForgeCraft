@@ -59,6 +59,11 @@ namespace SMP
 		public Group group;
 		public List<string> AdditionalPermissions = new List<string>();
 		public List<Group> SubGroups = new List<Group>();
+		public string Prefix = "";
+		public string Suffix = "";
+		public string color = "";
+		public bool CanBuild = false;
+		public string NickName = "";
 		
 		//Other Player settings Donotdisturb, god mode etc.
 		public bool DoNotDisturb = false; //blocks all incoming chat except pm's
@@ -871,7 +876,7 @@ namespace SMP
 				
 				//will uncomment when group system is added for now everybody can use every command ;)
 				//Player p = FindPlayer(this.username);
-	            if (Group.CheckPermission(this, "core.info.help"))
+	            if (Group.CheckPermission(this, command.PermissionNode))
 	            {
 	            List<string> args = new List<string>();
 	            while (true)
@@ -894,7 +899,7 @@ namespace SMP
 	            command.Use(this, args.ToArray());
 	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
 	            }
-	            else if (!Group.CheckPermission(this, command.PermissionNode))
+	            else
 	            {
 	                Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
 	                SendMessage(Color.Purple + "HelpBot V12: You don't have access to command /" + cmd + ".");
@@ -1167,6 +1172,53 @@ namespace SMP
             if (tempPlayer != null) return tempPlayer;
             return null;
         }
+		
+		public string GetPrefix()
+		{
+			if(this.Prefix == "" && this.group.Prefix != "")
+				return this.group.Prefix;
+			else if (this.Prefix != "")
+				return this.Prefix;
+			else
+				return "";
+		}
+		
+		public string GetSuffix()
+		{
+			if(this.Suffix == "" && this.group.Suffix != "")
+				return this.group.Suffix;
+			else if(this.Suffix != "")
+				return this.Suffix;
+			else
+				return "";
+		}
+		
+		public string GetColor()
+		{
+			if(this.color == "")
+				return this.group.GroupColor;
+			else
+				return this.color;
+		}
+		
+		public bool GetCanBuild()
+		{
+			if(this.CanBuild || this.group.CanBuild)
+				return true;
+			else
+				return false;
+		}
+		
+		/// <summary>
+		///used for getting the name to use in chat, whether a nick or not 
+		/// </summary>
+		public string GetName()
+		{
+			if(this.NickName == "")
+				return this.username;
+			else
+				return "~" + this.NickName;
+		}
 		#endregion
 
 	}

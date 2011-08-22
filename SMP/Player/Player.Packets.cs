@@ -18,7 +18,7 @@ namespace SMP
 			if (length > 32) { Kick("Username too long"); return; }
 			username = Encoding.BigEndianUnicode.GetString(message, 6, (length * 2));
 			Server.Log(ip + " Logged in as " + username);
-			Player.GlobalMessage(username + " has joined the game!");
+			Player.GlobalMessage(Color.Announce + username + " has joined the game!");
 			
 			if (version > Server.protocolversion)
 	            {
@@ -31,12 +31,12 @@ namespace SMP
 	                return;
 	            }
 			
-			//may cause issues :s
+			/*//may cause issues :s
 			foreach(Player p in players)
 			{
 				if(p.username == this.username && p != this)
 					this.Kick("Someone is already logged in as you!");
-			}	
+			}*/	
 			
 			if (Player.players.Count >= Server.MaxPlayers)
 			{
@@ -52,7 +52,7 @@ namespace SMP
 			LoggedIn = true;
 			SendLoginPass();
 			
-			this.group = new DefaultGroup();
+			this.group = Group.DefaultGroup;
             UpdateShi(this);
 			//OnPlayerConnect Event
 			if (PlayerAuth != null)
@@ -134,7 +134,7 @@ namespace SMP
             //GlobalMessage(this.PlayerColor + "{1}§f: {2}", WrapMethod.Chat, this.Prefix, Username, message);
 			if (!DoNotDisturb)
 			{
-				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + group.GroupColor + "[" + group.Name + "] " + Color.White + username + ": " + m);
+				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + Color.Gray + "[" + group.GroupColor + group.Name + Color.Gray + "] " + GetColor() + GetName() + ": " + m);
             	Server.ServerLogger.Log(LogLevel.Info, username + ": " + m);
 			}
         }

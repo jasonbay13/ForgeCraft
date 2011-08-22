@@ -7,10 +7,8 @@ namespace SMP
 	{
 		public DefaultGroup ()
 		{
-			GroupList.Add(this);
-			Group.DefaultGroup = this;
 			Name = "Default";
-			IsDefaultGroup = true;
+			//IsDefaultGroup = true;
 			CanBuild = true;
 			Prefix = "";
 			Suffix = "";
@@ -20,6 +18,8 @@ namespace SMP
 			{
 				this.PermissionList.Add(c.PermissionNode);
 			}
+			GroupList.Add(this);
+			Group.DefaultGroup = this;
 		}
 	}
 }
