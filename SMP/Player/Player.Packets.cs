@@ -9,7 +9,12 @@ namespace SMP
     /// Handles packets.
     /// </summary>
 	public partial class Player : System.IDisposable
-	{
+    {
+        #region blockchangehandler
+        public delegate void BlockChangeHandler(Player p, int x, int y, int z, short type);
+        public event BlockChangeHandler OnBlockChange;
+        public void ClearBlockChange() { OnBlockChange = null; }
+        #endregion
 		#region Login
 		private void HandleLogin(byte[] message)
 		{
@@ -302,6 +307,9 @@ namespace SMP
                     if( p.level == level && p != this )
                         p.SendAnimation( id, 1 );
                 }
+
+                if (OnBlockChange != null)
+                    OnBlockChange(this, x, y, z, rc);
 			}
 			if (message[0] == 2)
 			{
@@ -429,6 +437,9 @@ namespace SMP
 				case 4: blockX--; break;
 				case 5: blockX++; break;				
 			}
+
+            if (OnBlockChange != null)
+                OnBlockChange(this, blockX, blockY, blockZ, blockID);
 
 			if (blockID == -1)
 			{
