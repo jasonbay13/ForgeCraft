@@ -134,7 +134,7 @@ namespace SMP
             //GlobalMessage(this.PlayerColor + "{1}§f: {2}", WrapMethod.Chat, this.Prefix, Username, message);
 			if (!DoNotDisturb)
 			{
-				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + Color.Gray + "[" + group.GroupColor + group.Name + Color.Gray + "] " + GetColor() + GetName() + ": " + m);
+				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + Color.Gray + "[" + group.GroupColor + group.Name + Color.Gray + "] " + this.GetColor() + GetName() + Color.White + ": " + m);
             	Server.ServerLogger.Log(LogLevel.Info, username + ": " + m);
 			}
         }
