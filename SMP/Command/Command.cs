@@ -30,6 +30,7 @@ namespace SMP
         {
 			#region please put in alphabetical order and use core.add now not all.add
             core.Add(new CmdAFK());
+            core.Add(new CmdCuboid());
 			//core.Add(new CmdBan());
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
