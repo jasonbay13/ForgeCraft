@@ -336,12 +336,7 @@ namespace SMP
 		
 		public static void UpdatePlayerPermissions(Player p)
 		{
-			p.AdditionalPermissions.Clear();
-			
-			foreach (Group sg in p.SubGroups)
-			{
-				
-			}
+			//TODO
 		}
 		#endregion
 	}
