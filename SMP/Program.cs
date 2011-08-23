@@ -7,7 +7,6 @@ namespace SMP
     internal static class Program
     {
         private static Server Server;
-
         static Program()
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledException_Handler;

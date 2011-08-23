@@ -32,6 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
     <Reference Include="zlib.net, Version=1.0.3.0, Culture=neutral, PublicKeyToken=47d7877cb3620160">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>zlib.net.dll</HintPath>
@@ -53,6 +57,12 @@
     <Compile Include="Command\Commands\CmdRain.cs" />
     <Compile Include="Command\Commands\CmdStrike.cs" />
     <Compile Include="Command\Commands\CmdViewDistance.cs" />
+    <Compile Include="GUI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\MainWindow.Designer.cs">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Objects\McObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Command\Commands\CmdFire.cs" />
@@ -256,6 +266,11 @@
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
     <None Include="Command\Commands\CMDBLANK.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\MainWindow.resx">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -23,7 +23,8 @@ namespace SMP
 		public static Logger ServerLogger = new Logger();
 		internal ConsolePlayer consolePlayer;
 		public static string ConsoleName = "Console";
-		
+        public delegate void OnLog(string message);
+        public static event OnLog ServerLog = null;
 		public static string KickMessage = "You've been kicked!!";
 		public static string Motd = "Powered By ForgeCraft.";
 		public static int MaxPlayers = 16;
@@ -132,6 +133,8 @@ namespace SMP
 		
 		public void Stop()
 		{
+            Plugin.Unload();
+
 			if (listen != null)
             {
                 listen.Close();
