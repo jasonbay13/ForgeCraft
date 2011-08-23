@@ -51,6 +51,7 @@ namespace SMP
 		/// </param>
 		public World (double spawnx, double spawny, double spawnz, string name, int seed)
 		{
+            this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
 			generator = new GenStandard();
 			Server.Log("Generating...");

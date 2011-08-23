@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="AI\AI.cs" />
     <Compile Include="AI\Creeper.cs" />
+    <Compile Include="Command\Commands\CmdCuboid.cs" />
     <Compile Include="Command\Commands\CmdFly.cs" />
     <Compile Include="Command\Commands\CmdRain.cs" />
     <Compile Include="Command\Commands\CmdStrike.cs" />

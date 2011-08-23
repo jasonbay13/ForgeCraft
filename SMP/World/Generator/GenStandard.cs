@@ -61,83 +61,113 @@ namespace SMP {
         /// </summary>
         /// <param name="w"></param>
         /// <param name="c"></param>
-        public override void Generate( World w, Chunk c ) {
+        public override void Generate(World w, Chunk c)
+        {
             int cx = c.x << 4, cz = c.z << 4;
             int waterLevel = 64 + 15 / 2 - 4;
-
-            for( int x = 0; x < 16; x++ ) {
-                for( int z = 0; z < 16; z++ ) {
-
-                    int v = (int) ( 64 + voronoi.GetValue( cx + x, 5, cz + z ) * 7 + ( perlin2.GetValue( cx + x, 7, cz + z ) + ( perlin.GetValue( cx + x, 10, cz + z ) ) ) * 15 );
-
-                    // Bedrock
-                    int bedrockHeight = random.Next( 1, 6 );
-                    for( int y = 0; y < bedrockHeight; y++ )
-                        c.PlaceBlock( x, y, z, 0x07 );
-
-                    // Stone
-                    for ( int y = bedrockHeight; y < v - 5; y++ )
-                        c.PlaceBlock( x, y, z, 0x01 );
-
-                    // Dirt
-                    for( int y = v - 5; y < v; y++ )
-                        c.PlaceBlock( x, y, z, (byte)( desertSelector.GetValue( cx + x, y, cz + z ) > 0.4 ? 0x0C : 0x03 ) );
-
-
-                    if( v <= waterLevel ) {
-                        c.PlaceBlock( x, v, z, 0x0C ); // Send
+            if (w.seed == 0)
+            {
+                for (int x = 0; x < 16; ++x)
+                    for (int z = 0; z < 128; ++z)
+                    {
+                        for (int y = 0; y < 1; ++y)
+                            c.PlaceBlock(x, y, z, 0x07);
+                        for (int y = 1; y < 50; ++y)
+                            c.PlaceBlock(x, y, z, 0x01);
+                        for (int y = 50; y < 65; ++y)
+                            c.PlaceBlock(x, y, z, 0x03);
+                        c.PlaceBlock(x, 65, z, 0x02);
                     }
-                    else {
-                        c.PlaceBlock( x, v, z, (byte) ( desertSelector.GetValue( cx + x, v, cz + z ) > 0.35 ? 0x0C : 0x02 ) );
+            }
+            else
+            {
+                for (int x = 0; x < 16; x++)
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+
+                        int v = (int)(64 + voronoi.GetValue(cx + x, 5, cz + z) * 7 + (perlin2.GetValue(cx + x, 7, cz + z) + (perlin.GetValue(cx + x, 10, cz + z))) * 15);
+
+                        // Bedrock
+                        int bedrockHeight = random.Next(1, 6);
+                        for (int y = 0; y < bedrockHeight; y++)
+                            c.PlaceBlock(x, y, z, 0x07);
+
+                        // Stone
+                        for (int y = bedrockHeight; y < v - 5; y++)
+                            c.PlaceBlock(x, y, z, 0x01);
+
+                        // Dirt
+                        for (int y = v - 5; y < v; y++)
+                            c.PlaceBlock(x, y, z, (byte)(desertSelector.GetValue(cx + x, y, cz + z) > 0.4 ? 0x0C : 0x03));
+
+
+                        if (v <= waterLevel)
+                        {
+                            c.PlaceBlock(x, v, z, 0x0C); // Send
+                        }
+                        else
+                        {
+                            c.PlaceBlock(x, v, z, (byte)(desertSelector.GetValue(cx + x, v, cz + z) > 0.35 ? 0x0C : 0x02));
+                        }
                     }
                 }
-            }
 
-            for( int x = 0; x < 16; x++ ) {
-                //for( int y = 0; y < 128; y++ ) {
-                    for( int z = 0; z < 16; z++ ) {
+                for (int x = 0; x < 16; x++)
+                {
+                    //for( int y = 0; y < 128; y++ ) {
+                    for (int z = 0; z < 16; z++)
+                    {
                         var d = 0.0;
-                        var prevV = ( 64 + voronoi.GetValue( cx + x, 5, cz + z ) * 7 + ( perlin2.GetValue( cx + x, 7, cz + z ) + ( perlin.GetValue( cx + x, 10, cz + z ) ) ) * 15 );
-                        if( prevV < waterLevel )
-                            d = ( waterLevel - prevV ) * 0.78;
+                        var prevV = (64 + voronoi.GetValue(cx + x, 5, cz + z) * 7 + (perlin2.GetValue(cx + x, 7, cz + z) + (perlin.GetValue(cx + x, 10, cz + z))) * 15);
+                        if (prevV < waterLevel)
+                            d = (waterLevel - prevV) * 0.78;
 
-                        var v = ( -mountains.GetValue( cx + x, 127, cz + z ) );
-                        if( v >= d ) {
-                            var h = ( 64 + (int)( v * 39 ) );
+                        var v = (-mountains.GetValue(cx + x, 127, cz + z));
+                        if (v >= d)
+                        {
+                            var h = (64 + (int)(v * 39));
 
                             int lvl = 0;
 
-                            for( int y = h - 1; y >= 0; y-- ) {
-                                var mv = mountains2.GetValue( cx + x, y, cz + z );
-                                bool desert = desertSelector.GetValue( cx + x, y, cz + z ) > 0.4;
+                            for (int y = h - 1; y >= 0; y--)
+                            {
+                                var mv = mountains2.GetValue(cx + x, y, cz + z);
+                                bool desert = desertSelector.GetValue(cx + x, y, cz + z) > 0.4;
                                 //if( mv > 0.4 ) {
-                                    if ( lvl == 0 )
-                                        c.PlaceBlock( x, y, z, (byte)(desert ? 0x0C : 0x02) );
-                                    else if ( lvl < 5 )
-                                        c.PlaceBlock( x, y, z, (byte)(desert ? 0x0C : 0x03) );
-                                    else
-                                        c.PlaceBlock( x, y, z, 0x01 );
+                                if (lvl == 0)
+                                    c.PlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x02));
+                                else if (lvl < 5)
+                                    c.PlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x03));
+                                else
+                                    c.PlaceBlock(x, y, z, 0x01);
 
-                                    ++lvl;
+                                ++lvl;
                                 //}
                             }
                         }
                     }
-                //}
-            }
+                    //}
+                }
 
 
-            for( int x = 0; x < 16; x++ ) {
-                for( int z = 0; z < 16; z++ ) {
-                    for( int y = 0; y < 128; y++ ) {
-                        if( caves.GetValue( cx + x, y, cz + z ) > ( 128 - y ) * 0.0132 ) {
-                            c.PlaceBlock( x, y, z, 0x00 );
-                            if( c.SGB( x, y - 1, z ) == 0x03 )
-                                c.PlaceBlock( x, y - 1, z, 0x02 );
-                        }
+                for (int x = 0; x < 16; x++)
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+                        for (int y = 0; y < 128; y++)
+                        {
+                            if (caves.GetValue(cx + x, y, cz + z) > (128 - y) * 0.0132)
+                            {
+                                c.PlaceBlock(x, y, z, 0x00);
+                                if (c.SGB(x, y - 1, z) == 0x03)
+                                    c.PlaceBlock(x, y - 1, z, 0x02);
+                            }
 
-                        if( y <= waterLevel && c.SGB( x, y, z ) == 0x00 ) {
-                            c.PlaceBlock( x, y, z, 0x08 );
+                            if (y <= waterLevel && c.SGB(x, y, z) == 0x00)
+                            {
+                                c.PlaceBlock(x, y, z, 0x08);
+                            }
                         }
                     }
                 }
