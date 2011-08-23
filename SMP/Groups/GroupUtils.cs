@@ -81,9 +81,17 @@ namespace SMP
 		
 		public static bool DelGroup(Group g)
 		{
+			foreach(Player p in Player.players)
+			{
+				if (p.group == g)
+				{
+					return false;
+				}
+			}
+			
 			if (Group.GroupList.Contains(g))
 			{
-				Group.GroupList.Remove(g);  //update permissions list
+				Group.GroupList.Remove(g);
 				return true;
 			}
 			return false;
@@ -91,13 +99,21 @@ namespace SMP
 		
 		public static bool AddGroupPermission(Group g, string perm)
 		{
-			//TODO
+			if (!g.PermissionList.Contains(perm))
+			{
+				g.PermissionList.Add(perm);
+				return true;
+			}
 			return false;
 		}
 		
 		public static bool DelGroupPermission(Group g, string perm)
 		{
-			//TODO
+			if (g.PermissionList.Contains(perm))
+			{
+				g.PermissionList.Remove(perm);
+				return true;
+			}
 			return false;
 		}
 		
@@ -320,7 +336,7 @@ namespace SMP
 		
 		public static void UpdatePlayerPermissions(Player p)
 		{
-			//TODO	
+			//TODO
 		}
 		#endregion
 	}
