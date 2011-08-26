@@ -66,6 +66,11 @@ namespace SMP
 							}
                             Exit();
                             return;
+                        case "gui":
+                            GUI.MainWindow window = new GUI.MainWindow();
+                            
+                            window.ShowDialog();
+                            break;
                         default:
                             Command command = Command.all.Find(cmd);
                             if (command == null)

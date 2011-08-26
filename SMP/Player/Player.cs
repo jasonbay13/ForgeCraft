@@ -903,21 +903,23 @@ namespace SMP
             string[] lines = WordWrap.GetWrappedText(message, method);
             for (int i = 0; i < lines.Length; i++)
             {
-				byte[] bytes = new byte[(lines[i].Length * 2) + 2];
-				util.EndianBitConverter.Big.GetBytes((ushort)lines[i].Length).CopyTo(bytes, 0);
-				Encoding.BigEndianUnicode.GetBytes(lines[i]).CopyTo(bytes, 2);
+                byte[] bytes = new byte[(lines[i].Length * 2) + 2];
+                util.EndianBitConverter.Big.GetBytes((ushort)lines[i].Length).CopyTo(bytes, 0);
+                Encoding.BigEndianUnicode.GetBytes(lines[i]).CopyTo(bytes, 2);
 
                 for (int j = 0; j < players.Count; j++)
                 {
                     if (!players[j].disconnected)
                     {
-						if (!players[j].DoNotDisturb)
-						{
-                        	players[j].SendRaw((byte)KnownPackets.ChatMessage, bytes);
-						}
+                        if (!players[j].DoNotDisturb)
+                        {
+                            players[j].SendRaw((byte)KnownPackets.ChatMessage, bytes);
+                        }
                     }
                 }
             }
+            
+            
         }
         public static void GlobalMessage(string message, WrapMethod method, params object[] args)
         {
@@ -928,22 +930,22 @@ namespace SMP
         }
 		#endregion
 		#region TARGETED
-		protected virtual void SendMessageInternal(string message)
+        protected virtual void SendMessageInternal(string message)
         {
             //once again please check			
-			byte[] bytes = new byte[(message.Length * 2) + 2];
-			util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
-			Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
-			this.SendRaw((byte)KnownPackets.ChatMessage, bytes);
-			
+            byte[] bytes = new byte[(message.Length * 2) + 2];
+            util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
+            Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
+            this.SendRaw((byte)KnownPackets.ChatMessage, bytes);
+
         }
         public void SendMessage(string message)
         {
-            SendMessage(message, WrapMethod.Default);
+            SendMessage(this.MessageAdditions(message), WrapMethod.Default);
         }
         public void SendMessage(string message, WrapMethod method)
         {
-            string[] lines = WordWrap.GetWrappedText(message, method);
+            string[] lines = WordWrap.GetWrappedText(this.MessageAdditions(message), method);
             for (int i = 0; i < lines.Length; i++)
             {
                 SendMessageInternal(lines[i]);
@@ -952,11 +954,21 @@ namespace SMP
         public void SendMessage(string message, WrapMethod method, params object[] args)
         {
             if (method == WrapMethod.None)
-                SendMessageInternal(string.Format(message, args));
+                SendMessageInternal(string.Format(this.MessageAdditions(message), args));
             else
                 SendMessage(string.Format(message, args), method);
         }
-		#endregion
+        #endregion
+        public string MessageAdditions(string msg)
+        {
+            //$s
+            msg.Replace("$name", this.username);
+            msg.Replace("$server", Server.name);
+            msg.Replace("$ip", this.ip);
+            msg.Replace("$rank", this.group.Name);
+
+            return msg;
+        }
 		#endregion
 
 		void FlyCode()
