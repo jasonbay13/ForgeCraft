@@ -30,6 +30,7 @@ namespace SMP
         {
 			#region please put in alphabetical order and use core.add now not all.add
             core.Add(new CmdAFK());
+            core.Add(new CmdCheckPort());
             core.Add(new CmdCuboid());
 			//core.Add(new CmdBan());
             core.Add(new CmdDevs());
@@ -42,7 +43,7 @@ namespace SMP
             core.Add(new CmdHelp());
 			core.Add(new CmdHackz());
             core.Add(new CmdKick());
-			core.Add(new CmdKill());  //currently just DEBUG mode
+			core.Add(new CmdKill());  
             core.Add(new CmdList());
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());

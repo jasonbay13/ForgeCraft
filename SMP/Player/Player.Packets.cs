@@ -70,7 +70,7 @@ namespace SMP
 
             if (w.Israining)
             {
-                w.rain(true, p);
+                w.rain(true);
                // p.SendMessage("IS IT RAINING?"); for debugging :P
             }
             

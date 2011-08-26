@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AI\AI.cs" />
     <Compile Include="AI\Creeper.cs" />
+    <Compile Include="Command\Commands\CmdCheckPort.cs" />
     <Compile Include="Command\Commands\CmdCuboid.cs" />
     <Compile Include="Command\Commands\CmdFly.cs" />
     <Compile Include="Command\Commands\CmdRain.cs" />
