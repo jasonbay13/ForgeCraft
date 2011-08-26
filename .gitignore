@@ -174,3 +174,13 @@ SMP/SMP.pidb
 /SMP/obj/Debug/ResolveAssemblyReference.cache
 /SMP/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache
 /SMP/obj/Release/SMP.csproj.FileListAbsolute.txt
+SMP/obj/Debug/GenerateResource.write.1.tlog
+RemoteConsole/bin/Debug/RemoteConsole.exe
+RemoteConsole/bin/Debug/RemoteConsole.pdb
+RemoteConsole/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+RemoteConsole/obj/x86/Debug/RemoteConsole.csproj.FileListAbsolute.txt
+RemoteConsole/obj/x86/Debug/RemoteConsole.exe
+RemoteConsole/obj/x86/Debug/RemoteConsole.pdb
+SMP/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+SMP/obj/Debug/GenerateResource.read.1.tlog
+SMP/obj/Debug/GenerateResource.write.1.tlog
