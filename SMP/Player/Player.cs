@@ -894,45 +894,53 @@ namespace SMP
 		#endregion
 		#region Messaging
 		#region GLOBAL
-		public static void GlobalMessage(string message)
+        public static void GlobalMessage(string message)
         {
-            GlobalMessage(message, WrapMethod.Default);
-        }
-        public static void GlobalMessage(string message, WrapMethod method)
-        {
-            string[] lines = WordWrap.GetWrappedText(message, method);
-            for (int i = 0; i < lines.Length; i++)
+            foreach (Player p in players)
             {
-                byte[] bytes = new byte[(lines[i].Length * 2) + 2];
-                util.EndianBitConverter.Big.GetBytes((ushort)lines[i].Length).CopyTo(bytes, 0);
-                Encoding.BigEndianUnicode.GetBytes(lines[i]).CopyTo(bytes, 2);
-
-                for (int j = 0; j < players.Count; j++)
-                {
-                    if (!players[j].disconnected)
-                    {
-                        if (!players[j].DoNotDisturb)
-                        {
-                            players[j].SendRaw((byte)KnownPackets.ChatMessage, bytes);
-                        }
-                    }
-                }
+                p.SendMessage(message);
             }
+        }
+        //public static void GlobalMessage(string message)
+        //{
+        //    GlobalMessage(message, WrapMethod.Default);
+        //}
+        //public static void GlobalMessage(string message, WrapMethod method)
+        //{
+        //    string[] lines = WordWrap.GetWrappedText(message, method);
+        //    for (int i = 0; i < lines.Length; i++)
+        //    {
+        //        byte[] bytes = new byte[(lines[i].Length * 2) + 2];
+        //        util.EndianBitConverter.Big.GetBytes((ushort)lines[i].Length).CopyTo(bytes, 0);
+        //        Encoding.BigEndianUnicode.GetBytes(lines[i]).CopyTo(bytes, 2);
+
+        //        for (int j = 0; j < players.Count; j++)
+        //        {
+        //            if (!players[j].disconnected)
+        //            {
+        //                if (!players[j].DoNotDisturb)
+        //                {
+        //                    players[j].SendRaw((byte)KnownPackets.ChatMessage, bytes);
+        //                }
+        //            }
+        //        }
+        //    }
             
             
-        }
-        public static void GlobalMessage(string message, WrapMethod method, params object[] args)
-        {
-            if (method == WrapMethod.None)
-                GlobalMessage(string.Format(message, args));
-            else
-                GlobalMessage(string.Format(message, args), method);
-        }
+        //}
+        //public static void GlobalMessage(string message, WrapMethod method, params object[] args)
+        //{
+        //    if (method == WrapMethod.None)
+        //        GlobalMessage(string.Format(message, args));
+        //    else
+        //        GlobalMessage(string.Format(message, args), method);
+        //}
 		#endregion
 		#region TARGETED
         protected virtual void SendMessageInternal(string message)
         {
             //once again please check			
+            message = MessageAdditions(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
@@ -956,16 +964,17 @@ namespace SMP
             if (method == WrapMethod.None)
                 SendMessageInternal(string.Format(this.MessageAdditions(message), args));
             else
-                SendMessage(string.Format(message, args), method);
+                SendMessage(string.Format(this.MessageAdditions(message), args), method);
         }
         #endregion
         public string MessageAdditions(string msg)
         {
             //$s
-            msg.Replace("$name", this.username);
-            msg.Replace("$server", Server.name);
-            msg.Replace("$ip", this.ip);
-            msg.Replace("$rank", this.group.Name);
+           msg =  msg.Replace("$name", this.username);
+           msg =  msg.Replace("$server", Server.name);
+           msg =  msg.Replace("$ip", this.ip);
+           msg = msg.Replace("%", "§");
+           // msg.Replace("$rank", this.group.Name);
 
             return msg;
         }
@@ -1061,7 +1070,7 @@ namespace SMP
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
             if (LoggedIn)
-                GlobalMessage("§5{0} §fhas been kicked from the server!", WrapMethod.None, username);
+                GlobalMessage("§5" + username +" §fhas been kicked from the server!");
             LoggedIn = false;
 			
 			try
@@ -1085,7 +1094,7 @@ namespace SMP
 			//Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //	LoggedIn ? "" : "/", LoggedIn ? username : ip);
             if (LoggedIn)
-                GlobalMessage("§5{0} §fhas disconnected.", WrapMethod.None, username);
+                GlobalMessage("§5" + username + " §fhas disconnected.");
             LoggedIn = false;
 			
 			//TODO: Despawn
