@@ -37,18 +37,18 @@ namespace SMP
 				Help(p);
 			}
 			
-			p.SendMessage("Currently doesn't do anything. :(");
+			p.SendMessage("%3Currently doesn't do anything. :(");
 			if (!p.GodMode)
 			{
 				p.GodMode = true;
 				p.SendMessage("You are now invincible. Type /god again to be a mortal", WrapMethod.Chat);
-				Player.GlobalMessage(p.username + " is now being cheap and immortal, kill them!", WrapMethod.Chat);
+				Player.GlobalMessage(p.username + " is now being cheap and immortal, kill them!");
 			}
 			else if (p.GodMode)
 			{
 				p.GodMode = false;
 				p.SendMessage("You are no longer invincible.", WrapMethod.Chat);
-				Player.GlobalMessage(p.username + " is no longer being a wuss, don't kill them.", WrapMethod.Chat);
+				Player.GlobalMessage(p.username + " is no longer being a wuss, don't kill them.");
 			}
 		}
 		

@@ -21,5 +21,15 @@ namespace SMP.GUI
         {
             log.Text += message;
         }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Player.GlobalMessage(textBox1.Text);
+        }
     }
 }
