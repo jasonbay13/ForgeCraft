@@ -69,6 +69,8 @@ namespace SMP
 		public event OnPlayerAuth PlayerAuth;
 		public delegate void OnPlayerChat(string message, Player p);
 		public delegate void OnPlayerCommand(string cmd, string message, Player p);
+        public delegate void OnPlayerRespawn(Player p);
+        public delegate void OnPlayerDig(Player p, ushort x, ushort y, ushort z, byte block);
 		//Events for Custom Command and Plugins -------------------------------------
 		#endregion
 
