@@ -77,7 +77,7 @@ namespace SMP
             Console.WriteLine("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
 			timeupdate.Elapsed += delegate {
-				time += 20;
+				time += 10;
 				if (time > 24000)
 					time = 0;
 				Player.players.ForEach(delegate(Player p) { if (p.level == this) p.SendTime(); });
