@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using MonoTorrent.Client;
 using System.Threading;
+using System.IO;
 
 namespace SMP
 {
@@ -17,22 +18,43 @@ namespace SMP
 		public static World mainlevel;
 		public static int protocolversion = 14;
 		public static string Version = "0.1";
-		public static string name = "sc";
-		public static int port = 25565; //DEBUGGING CHANGE BACK TO 25565
+		
 		public static bool unsafe_plugin = false;
 		public static Logger ServerLogger = new Logger();
 		internal ConsolePlayer consolePlayer;
-		public static string ConsoleName = "Console";
+        #region ==EVENTS==
+        #region -DELEGATES-
         public delegate void OnLog(string message);
+        public delegate void VoidHandler();
+        #endregion
+        #region -EVENT-
         public static event OnLog ServerLog = null;
-		public static string KickMessage = "You've been kicked!!";
+        public event VoidHandler OnSettingsUpdate;
+        #endregion
+        
+        #endregion
+
+        public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
+		public static MainLoop ml;
+
+        #region ==SETTINGS==
+
+        public static string salt = "";
+        public static string KickMessage = "You've been kicked!!";
 		public static string Motd = "Powered By ForgeCraft.";
 		public static int MaxPlayers = 16;
-		
-		public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
-		public static MainLoop ml;
-		
-		public Server()
+        public static string name = "sc";
+        public static int port = 25566;
+        public static string ConsoleName = "Console";
+        //---------------//
+        public static bool whitelist = false;   //TODO
+        public static string DefaultColor = "%e"; //TODO
+        public static string IRCColour = "%5";   //TODO
+        //---------------//
+        #endregion
+
+
+        public Server()
 		{
 			Log("Starting Server");
 			s = this;
@@ -51,26 +73,28 @@ namespace SMP
 			//TODO AI Update Timer
 
 			//Setup();
-			
-			Log("Server Started");
-
+            
+            
 			//new Creeper(new Point3(0, 0, 0), mainlevel);
 		}
 		
 		public bool Setup()
 		{
 		//TODO: (in order)
-			//load configuration
+
+            LoadFiles();
+            Properties.Load("properties/server.properties");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
 			//load groups
 			//load whitelist, banlist, VIPlist
+            loadCleanUp();
 			
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
 			Group.DefaultGroup = new DefaultGroup(); //debuggin g
-			
+            
 			try
 			{
 				IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
@@ -79,11 +103,32 @@ namespace SMP
 				listen.Listen((int)SocketOptionName.MaxConnections);
 				
 				listen.BeginAccept(new AsyncCallback(Accept), null);
-				return true;
+				
+                return true;
 			}
 			catch (SocketException e) { Log(e.Message + e.StackTrace); return false; }
 			catch (Exception e) { Log(e.Message + e.StackTrace); return false; }
+            
 		}
+
+        private void loadCleanUp()
+        {
+            //load any extra stuff, announce any thing after every things has been loaded
+
+            Log("Setting up on port: " + port);
+            Log("Server Started");
+        }
+
+        private void LoadFiles()
+        {
+            if (!Directory.Exists("properties")) Directory.CreateDirectory("properties");
+            if (!Directory.Exists("text")) Directory.CreateDirectory("text");
+
+            if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
+            if (Server.whitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "ranks/whitelist.txt");
+
+            
+        }
 		
 		void Accept(IAsyncResult result)
 		{
@@ -147,5 +192,9 @@ namespace SMP
 			ConsoleName = name;
 			consolePlayer.username = name;
 		}
+        internal void SettingsUpdate()
+        {
+            if (OnSettingsUpdate != null) OnSettingsUpdate();
+        }
 	}
 }
