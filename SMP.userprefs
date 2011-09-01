@@ -1,30 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Player/Player.Packets.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Groups/GroupUtils.cs" ctype="Workbench">
     <Files>
-      <File FileName="SMP/Groups/GroupUtils.cs" Line="343" Column="5" />
-      <File FileName="SMP/Constants/Color.cs" Line="13" Column="66" />
-      <File FileName="SMP/Groups/Group.cs" Line="1" Column="1" />
-      <File FileName="SMP/Player/Player.Packets.cs" Line="149" Column="30" />
-      <File FileName="SMP/Player/Player.cs" Line="1187" Column="12" />
-      <File FileName="SMP/Groups/DefaultGroup.cs" Line="1" Column="1" />
-      <File FileName="SMP/Command/Commands/CmdList.cs" Line="56" Column="5" />
-      <File FileName="SMP/Command/CommandList.cs" Line="58" Column="32" />
-      <File FileName="RemoteConsole/Program.cs" Line="1" Column="1" />
+      <File FileName="SMP/Groups/GroupUtils.cs" Line="1" Column="1" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State expanded="True">
-          <Node name="SMP" expanded="True">
-            <Node name="Player" expanded="True">
-              <Node name="Player.Packets.cs" selected="True" />
-            </Node>
-            <Node name="Server" expanded="True" />
-            <Node name="World" expanded="True" />
-          </Node>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />

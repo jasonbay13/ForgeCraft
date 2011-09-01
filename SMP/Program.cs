@@ -67,9 +67,16 @@ namespace SMP
                             Exit();
                             return;
                         case "gui":
-                            GUI.MainWindow window = new GUI.MainWindow();
-                            
-                            window.ShowDialog();
+							if (!RunningInMono())
+							{
+	                            GUI.MainWindow window = new GUI.MainWindow();
+	                            
+	                            window.ShowDialog();
+							}
+							else
+						{
+							Server.ServerLogger.Log(LogLevel.Warning, "Can not use GUI on Mono!");		
+						}
                             break;
                         default:
                             Command command = Command.all.Find(cmd);
