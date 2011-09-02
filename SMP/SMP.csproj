@@ -268,6 +268,8 @@
     <Compile Include="Command\Commands\CmdUnban.cs" />
     <Compile Include="Command\Commands\CmdVIPList.cs" />
     <Compile Include="Command\Commands\CmdWhiteList.cs" />
+    <Compile Include="Economy\Bank.cs" />
+    <Compile Include="Economy\Account.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
@@ -279,4 +281,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Economy\" />
+    <Folder Include="Economy\Commands\" />
+  </ItemGroup>
 </Project>

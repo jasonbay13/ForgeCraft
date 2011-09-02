@@ -59,7 +59,7 @@ namespace SMP
             core.Add(new CmdUnban());
 			core.Add(new CmdViewDistance());
 			core.Add(new CmdVIPList());
-            //core.Add(new CmdWhiteList());
+            core.Add(new CmdWhiteList());
             all.commands = new List<Command>(core.commands);
             InitCommandTypes();
 			#endregion
