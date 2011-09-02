@@ -87,6 +87,7 @@ namespace SMP
 		{
 		//TODO: (in order)
 
+			DatabaseReader db = new DatabaseReader();
             LoadFiles();
             Properties.Load("properties/server.properties");
 			Command.InitCore();

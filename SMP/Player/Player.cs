@@ -73,6 +73,8 @@ namespace SMP
         public bool IsOnFire = false;
         public bool isFlying = false;
         public int FlyingUpdate = 100;
+		public Account DefaultAccount;
+		public List<Account> Accounts = new List<Account>();
 		
 		Entity e;
 		public string ip;
@@ -1165,7 +1167,8 @@ namespace SMP
         {
             List<Player> tempList = new List<Player>();
             tempList.AddRange(players);
-            Player tempPlayer = null; bool returnNull = false;
+            Player tempPlayer = null; 
+			bool returnNull = false;
 
             foreach (Player p in tempList)
             {

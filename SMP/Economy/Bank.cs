@@ -7,11 +7,12 @@ namespace SMP
 	{
 		public string Name;
 		public bool Default;
-		//public Currency currency;
+		public Currency currency;
 		public float OpenFee;
 		public float IntialHolding;
-		public int InterestInterval; //in secs
-		public List<Account> Accounts = new List<Account>();
+		public int InterestInterval; //in seconds
+		public float DefaultInterest;
+		public List<Account> Accounts = new List<Account>(); //only holds online accounts
 		
 		public static List<Bank> Banks = new List<Bank>();
 		public static Bank DefaultBank;
@@ -46,6 +47,20 @@ namespace SMP
 			{
 				if (b.Name.ToLower() == name.ToLower())	
 					return b;
+			}
+			return null;
+		}
+		
+		/// <summary>
+		/// Finds the account with name in this.Bank
+		/// </summary>
+		public Account FindAccount(string name)
+		{
+			//TODO: extend to search DB
+			foreach(Account acc in Accounts)
+			{
+				if (acc.Name == name)
+					return acc;
 			}
 			return null;
 		}

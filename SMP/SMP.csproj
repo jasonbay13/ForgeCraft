@@ -48,6 +48,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Ionic.Zlib.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\bin\ManagedOnly\System.Data.SQLite.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\AI.cs" />
@@ -270,6 +274,7 @@
     <Compile Include="Command\Commands\CmdWhiteList.cs" />
     <Compile Include="Economy\Bank.cs" />
     <Compile Include="Economy\Account.cs" />
+    <Compile Include="Economy\Currency.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
