@@ -38,8 +38,7 @@ namespace SMP
                         string value = "";
                         if (line.IndexOf('=') >= 0)
                             value = line.Substring(line.IndexOf('=') + 1).Trim(); // allowing = in the values
-                        string color = "";
-
+						
                         switch (key.ToLower())
                         {
                             case "server-name":

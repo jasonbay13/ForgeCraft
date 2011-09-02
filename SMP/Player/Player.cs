@@ -135,11 +135,11 @@ namespace SMP
 				p.socket.BeginReceive(p.tempbuffer, 0, p.tempbuffer.Length, SocketFlags.None,
 									  new AsyncCallback(Receive), p);
 			}
-			catch (SocketException e)
+			catch (SocketException)
 			{
 				p.Disconnect();
 			}
-			catch (ObjectDisposedException e)
+			catch (ObjectDisposedException)
 			{
 				
 			}
