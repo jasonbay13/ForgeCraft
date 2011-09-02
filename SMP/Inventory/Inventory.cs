@@ -183,7 +183,7 @@ namespace SMP
 				return 16;	
 			}
 			
-			if(id = 357) //cookies
+			if(id == 357) //cookies
 			{
 				return 8;	
 			}

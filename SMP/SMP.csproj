@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -264,6 +264,10 @@
     <Compile Include="Command\Commands\CmdMsg.cs" />
     <Compile Include="Groups\GroupUtils.cs" />
     <Compile Include="Groups\DefaultGroup.cs" />
+    <Compile Include="Command\Commands\CmdBan.cs" />
+    <Compile Include="Command\Commands\CmdUnban.cs" />
+    <Compile Include="Command\Commands\CmdVIPList.cs" />
+    <Compile Include="Command\Commands\CmdWhiteList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />

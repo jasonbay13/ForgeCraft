@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace SMP
 {
@@ -75,9 +76,39 @@ namespace SMP
                                 catch { Server.Log("max-players invalid! setting to default."); }
                                 break;
                             case "use-whitelist":
-                                Server.whitelist = (value.ToLower() == "true") ? true : false;
+                                Server.usewhitelist = (value.ToLower() == "true") ? true : false;
                                 break;
-                            
+							case "use-viplist":
+                                Server.useviplist = (value.ToLower() == "true") ? true : false;
+                                break;
+							case "defaultcolor":
+								if (value.Length == 2)
+								{
+									if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == "\x00A7")
+									{
+										if (Color.IsColorValid(Convert.ToChar(value.Substring(1,1))))
+									    {
+											Color.ServerDefaultColor = value;
+										}
+										else Server.ServerLogger.Log(LogLevel.Warning, "Invalid defaultcolor, setting to default.");
+									}
+								}
+								else Server.ServerLogger.Log(LogLevel.Warning, "Invalid defaultcolor, setting to default.");
+								break;
+							case "irc-color":
+								if (value.Length == 2)
+									{
+										if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == "\x00A7")
+										{
+											if (Color.IsColorValid(Convert.ToChar(value.Substring(1,1))))
+										    {
+												Color.IRCColor = value;
+											}
+											else Server.ServerLogger.Log(LogLevel.Warning, "Invalid irc-color, setting to default.");
+										}
+									}
+								else Server.ServerLogger.Log(LogLevel.Warning, "Invalid irc-color, setting to default.");
+								break;
                         }
 
                     }
@@ -123,9 +154,71 @@ namespace SMP
             w.WriteLine("motd = " + Server.Motd);
             w.WriteLine("port = " + Server.port.ToString());
             w.WriteLine("max-players = " + Server.MaxPlayers.ToString());
-            w.WriteLine("use-whitelist = " + Server.whitelist.ToString().ToLower());
-            w.WriteLine("defaultColor = " + Server.DefaultColor);
-            w.WriteLine("irc-color = " + Server.IRCColour);
+            w.WriteLine("use-whitelist = " + Server.usewhitelist.ToString().ToLower());
+			w.WriteLine("use-VIPlist = " + Server.useviplist.ToString().ToLower());
+            w.WriteLine("defaultColor = " + Color.ServerDefaultColor);
+            w.WriteLine("irc-color = " + Color.IRCColor);
+        }
+		
+		public static List<string> LoadList(string file)
+        {
+            if (!File.Exists(file))
+            {
+                StreamWriter fh = File.AppendText(file);
+                fh.Close();
+                fh.Dispose();
+            }
+
+            List<string> players = new List<string>();
+            FileStream fs = File.OpenRead(file);
+            StreamReader sr = new StreamReader(fs);
+            string line;
+
+            while (!sr.EndOfStream)
+            {
+                line = sr.ReadLine();
+                if (line == null || (line = line.Trim()).Length == 0)
+                    continue;
+
+                if (line.Length >= 2 && line[0] == '/' && line[1] == '/' || line[0] == '#')
+                    continue;
+
+                players.Add(line);
+            }
+
+            sr.Close();
+            sr.Dispose();
+            fs.Close();
+            fs.Dispose();
+
+            return players;
+        }
+
+		public static void WriteList(List<string> list, string file)
+        {
+            if (!Directory.Exists("properties"))
+                Directory.CreateDirectory("properties");
+
+            if (!File.Exists(file))
+            {
+                StreamWriter fh = File.AppendText(file);
+                fh.Close();
+                fh.Dispose();
+            }
+
+            FileStream fs = File.OpenWrite(file);
+            StreamWriter sw = new StreamWriter(fs);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] != "")
+                    sw.WriteLine(list[i]);   
+            }
+            sw.WriteLine();
+            sw.Close();
+            sw.Dispose();
+            fs.Close();
+            fs.Dispose();
+
         }
     }
 }

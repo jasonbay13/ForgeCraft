@@ -42,22 +42,42 @@ namespace SMP
 				if(p.username == this.username && p != this)
 					this.Kick("Someone is already logged in as you!");
 			}*/	
-			
-			if (Player.players.Count >= Server.MaxPlayers)
+			if (ip != "127.0.0.1")
 			{
-				//TODO: Add VIPList checking here
-				Kick("Server is Full");	
+				if (Player.players.Count >= Server.MaxPlayers)
+				{
+					if (Server.useviplist && Server.VIPList.Contains(username.ToLower()))
+					{
+						for(int i = players.Count - 1; i >= 0; i--) // kick the last joined non-vip
+						{
+							if (!Server.VIPList.Contains(username.ToLower()))
+							{
+								players[i].Kick("You have been kicked for a VIP");
+								break;
+							}
+						}
+					}
+					else if (Server.useviplist && !Server.VIPList.Contains(username.ToLower()))
+					{
+						Kick(Server.VIPListMessage);
+					}
+					else if (!Server.useviplist)
+						Kick("Server is Full");	
+				}
+				
+				if (Server.BanList.Contains(username.ToLower())) 
+					Kick(Server.BanMessage);
+				    
+	            if (Server.usewhitelist && !Server.WhiteList.Contains(username.ToLower()))
+					Kick(Server.WhiteListMessage);
 			}
 			
-			//TODO: Check ban list, and whitelist
-            
-			
 			//TODO: load Player attributes like group, and other settings
+			this.group = Group.DefaultGroup;
 			
 			LoggedIn = true;
 			SendLoginPass();
 			
-			this.group = Group.DefaultGroup;
 			UpdateShi(this);
 			
 			if (PlayerAuth != null)

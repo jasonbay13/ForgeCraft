@@ -60,7 +60,7 @@ namespace SMP
                     {
                         case "stop":
                             Server.ServerLogger.Log(LogLevel.Info, "Stopping Server...");
-							for(int i =Player.players.Count -1; i >= 0; i--)
+							for(int i = Player.players.Count -1; i >= 0; i--)
 							{
 								Player.players[i].Kick("Server Shutting Down!");
 							}

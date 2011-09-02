@@ -41,16 +41,21 @@ namespace SMP
 
         public static string salt = "";
         public static string KickMessage = "You've been kicked!!";
+		public static string WhiteListMessage = "Not on whitelist";
+		public static string VIPListMessage = "Server is full and you are not a VIP";
+		public static string BanMessage = "You are banned";
 		public static string Motd = "Powered By ForgeCraft.";
 		public static int MaxPlayers = 16;
         public static string name = "sc";
-        public static int port = 25566;
+        public static int port = 25565;
         public static string ConsoleName = "Console";
         //---------------//
-        public static bool whitelist = false;   //TODO
-        public static string DefaultColor = "%e"; //TODO
-        public static string IRCColour = "%5";   //TODO
+        public static bool usewhitelist = false;
+		public static bool useviplist = false;
         //---------------//
+		public static List<string> BanList = new List<string>();
+		public static List<string> WhiteList = new List<string>();
+		public static List<string> VIPList = new List<string>();
         #endregion
 
 
@@ -87,14 +92,20 @@ namespace SMP
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
-			//load groups
-			//load whitelist, banlist, VIPlist
-            loadCleanUp();
 			
+			//load groups
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
-			Group.DefaultGroup = new DefaultGroup(); //debuggin g
-            
+			Group.DefaultGroup = new DefaultGroup(); //debug
+			
+			BanList.AddRange(Properties.LoadList("properties/banned.txt"));
+            if (usewhitelist)
+                WhiteList.AddRange(Properties.LoadList("properties/whitelist.txt"));
+            if (useviplist)
+               VIPList.AddRange(Properties.LoadList("properties/viplist.txt"));
+
+            loadCleanUp();
+			
 			try
 			{
 				IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
@@ -125,7 +136,7 @@ namespace SMP
             if (!Directory.Exists("text")) Directory.CreateDirectory("text");
 
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
-            if (Server.whitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "ranks/whitelist.txt");
+            if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
 
             
         }
@@ -146,7 +157,7 @@ namespace SMP
 					listen.BeginAccept(new AsyncCallback(Accept), null);
 					begin = true;
 				}
-				catch (SocketException e)
+				catch (SocketException)
 				{
 					if (p != null)
 					p.Disconnect();
@@ -179,7 +190,14 @@ namespace SMP
 		public void Stop()
 		{
             Plugin.Unload();
-
+			
+			if ((File.Exists("properties/banned.txt")) || (!File.Exists("properties/banned.txt") && WhiteList.Count > 0))
+				Properties.WriteList(BanList, "properties/banned.txt");
+			if ((File.Exists("properties/whitelist.txt")) || (!File.Exists("properties/whitelist.txt") && WhiteList.Count > 0))
+				Properties.WriteList(WhiteList, "properties/whitelist.txt");
+			if ((File.Exists("properties/viplist.txt")) || (!File.Exists("properties/viplist.txt") && WhiteList.Count > 0))
+				Properties.WriteList(VIPList, "properties/viplist.txt");
+				
 			if (listen != null)
             {
                 listen.Close();
@@ -196,5 +214,6 @@ namespace SMP
         {
             if (OnSettingsUpdate != null) OnSettingsUpdate();
         }
+
 	}
 }

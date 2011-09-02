@@ -32,7 +32,7 @@ namespace SMP
             core.Add(new CmdAFK());
             core.Add(new CmdCheckPort());
             core.Add(new CmdCuboid());
-			//core.Add(new CmdBan());
+			core.Add(new CmdBan());
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
@@ -51,14 +51,14 @@ namespace SMP
 			core.Add(new CmdMsg());
 			core.Add(new NewLVL());
             core.Add(new CmdRain());
-            //core.Add(new CmdReserveList());
             core.Add(new CmdSay());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());
 			core.Add(new SetTime());
-            //core.Add(new CmdUnban());
+            core.Add(new CmdUnban());
 			core.Add(new CmdViewDistance());
+			core.Add(new CmdVIPList());
             //core.Add(new CmdWhiteList());
             all.commands = new List<Command>(core.commands);
             InitCommandTypes();
@@ -92,7 +92,7 @@ namespace SMP
         /// <returns>string</returns>
         public string MakeString(string[] args, int startindex, int stopindex)
         {
-            if (stopindex >= args.Length)
+            if (stopindex >= args.Length || stopindex == -1)
                 stopindex = args.Length - 1;
             StringBuilder message = new StringBuilder();
             for (int i = startindex; i <= stopindex; i++)
