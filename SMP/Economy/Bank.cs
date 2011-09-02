@@ -46,9 +46,8 @@ namespace SMP
 			{
 				if (b.Name.ToLower() == name.ToLower())	
 					return b;
-				
-				return null;
 			}
+			return null;
 		}
 	}
 }
