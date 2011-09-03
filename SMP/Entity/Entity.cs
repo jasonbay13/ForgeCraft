@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SMP
 {
@@ -96,29 +98,55 @@ namespace SMP
 				}
 				if (isPlayer && p.LoggedIn)
 				{
+					bool locked = false;
 					List<Point> templist = new List<Point>();
 
 					int sx = CurrentChunk.point.x - p.viewdistance; //StartX
 					int ex = CurrentChunk.point.x + p.viewdistance; //EndX
 					int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
 					int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
-					for (int x = sx; x <= ex; x++)
+
+					Parallel.For(sx, ex + 1, delegate(int x)
 					{
-						for (int z = sz; z <= ez; z++)
+						Parallel.For(sz, ez + 1, delegate(int z)
 						{
 							Point po = new Point(x, z);
-							templist.Add(po);
-							if (p.VisibleChunks.Contains(po) && !forcesend)
+							while (locked) Thread.Sleep(1);
+
+							lock (templist)
 							{
-								continue; //Continue if the player already has this chunk
+								templist.Add(po);
 							}
-							if (!p.level.chunkData.ContainsKey(po))
+							//templist.Add(po);
+
+							if (!p.VisibleChunks.Contains(po) || forcesend)
 							{
-								p.level.GenerateChunk(po.x, po.z);
+								if (!p.level.chunkData.ContainsKey(po))
+								{
+									p.level.GenerateChunk(po.x, po.z);
+								}
+								p.SendChunk(p.level.chunkData[po]);
 							}
-							p.SendChunk(p.level.chunkData[po]);
-						}
-					}
+						});
+					});
+
+					//for (int x = sx; x <= ex; x++)
+					//{
+					//    for (int z = sz; z <= ez; z++)
+					//    {
+					//        Point po = new Point(x, z);
+					//        templist.Add(po);
+					//        if (p.VisibleChunks.Contains(po) && !forcesend)
+					//        {
+					//            continue; //Continue if the player already has this chunk
+					//        }
+					//        if (!p.level.chunkData.ContainsKey(po))
+					//        {
+					//            p.level.GenerateChunk(po.x, po.z);
+					//        }
+					//        p.SendChunk(p.level.chunkData[po]);
+					//    }
+					//}
 
 					//UNLOAD CHUNKS THE PLAYER CANNOT SEE
 					foreach (Point point in p.VisibleChunks.ToArray())

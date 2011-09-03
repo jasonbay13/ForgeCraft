@@ -39,11 +39,21 @@ Global
 		{CCBB3BED-8094-4041-A8F6-C65698A78F66}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{CCBB3BED-8094-4041-A8F6-C65698A78F66}.Release|x86.ActiveCfg = Release|Any CPU
 		{CCBB3BED-8094-4041-A8F6-C65698A78F66}.Release|x86.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = SMP\SMP.csproj
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Debug|x86.ActiveCfg = Debug|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Debug|x86.Build.0 = Debug|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Release|Any CPU.ActiveCfg = Release|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Release|Mixed Platforms.Build.0 = Release|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Release|x86.ActiveCfg = Release|x86
+		{61343B35-B222-42E1-9591-E620DAA0FDB8}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = SMP\SMP.csproj
 	EndGlobalSection
 EndGlobal
