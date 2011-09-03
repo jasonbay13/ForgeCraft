@@ -365,7 +365,7 @@ namespace SMP
 			{
 				if (!(bool)BlockChange.RightClickedOn[rc].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
 				{
-					Console.WriteLine("Delegate for " + rc + " placed returned false");
+					Console.WriteLine("Delegate for " + rc + " RightClickedON returned false");
 					return;
 				}
 			}
@@ -438,8 +438,17 @@ namespace SMP
 			}
 
 			if (blockID >= 1 && blockID <= 127)
-			{				
+			{
+				if (BlockChange.Placed.ContainsKey(blockID))
+				{
+					if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
+					{
+						return;
+					}
+				}
 				level.BlockChange(blockX, (int)blockY, blockZ, (byte)blockID, (byte)damage);
+				inventory.Remove(inventory.current_index, 1);
+				return;
 			}
 			else
 			{

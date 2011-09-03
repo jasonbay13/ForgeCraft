@@ -20,6 +20,7 @@ namespace SMP
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
 		public GenStandard generator;
 		public Dictionary<Point, Chunk> chunkData;
+		public Dictionary<Point3, Windows> windows = new Dictionary<Point3,Windows>();
 		public List<Point> ToGenerate = new List<Point>();
         public bool Raining = false;
 		#region Custom Command / Plugin Events
@@ -51,9 +52,10 @@ namespace SMP
 		/// </param>
 		public World (double spawnx, double spawny, double spawnz, string name, int seed)
 		{
+			this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
-			generator = new GenStandard();
-			Server.Log("Generating...");
+			generator = new GenStandard(seed);
+			Console.WriteLine("Generating...");
 
 			/*for (int x = -3; x <= 3; x++)
 			{
@@ -64,9 +66,9 @@ namespace SMP
 			    Server.Log(x + " Row Generated.");
 			}*/
 
-			Parallel.For(-3, 3, delegate(int x)
+			Parallel.For(-3, 4, delegate(int x)
 			{
-				Parallel.For(-3, 3, delegate(int z)
+				Parallel.For(-3, 4, delegate(int z)
 				{
 					GenerateChunk(x, z);
 				});
@@ -122,16 +124,24 @@ namespace SMP
 		public void GenerateChunk(int x, int z)
 		{
 			Chunk c = new Chunk(x, z);
-			generator.Generate(this, c);
-			//generator.PerlinChunk(c);
-			//generator.RandMap(c, seed);
+			if (seed == 0)
+			{
+				//Console.WriteLine(x + " " + z + " generating");
+				FCGenerator.FlatChunk(this, c);
+				//Console.WriteLine("done generating");
+			}
+			else
+			{
+				generator.Generate(this, c);
+			}
 			c.RecalculateLight();
-            c.SpreadLight();
+			c.SpreadLight();
 			if (GeneratedChunk != null)
 				GeneratedChunk(this, c, x, z);
 			if (WorldGenerateChunk != null)
 				WorldGenerateChunk(this, c, x, z);
-			if(!chunkData.ContainsKey(new Point(x,z))) chunkData.Add(new Point(x,z), c);
+			if (!chunkData.ContainsKey(new Point(x, z))) chunkData.Add(new Point(x, z), c);
+			//Console.WriteLine("Chunk added");
 		}
 		public void BlockChange(int x, int y, int z, byte type, byte meta)
 		{

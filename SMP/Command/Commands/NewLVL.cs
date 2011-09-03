@@ -53,6 +53,18 @@ namespace SMP
 				World.worlds.Add(temp);
 				p.SendMessage("World " + args[0] + " MADE!");
 			}
+			else if (args.Length == 2)
+			{
+				int seed = Convert.ToInt32(args[1]);
+				p.SendMessage("Creating world with seed: " + seed);
+				double x = 0; double y = 127; double z = 0;
+				World temp = new World(x, y, z, args[0], seed);
+				//while (Chunk.GetChunk((int)x, (int)z, temp).GetBlock((int)x, (int)(y - 1), (int)z) == 0)
+				//	y--;
+				temp.SpawnY = y;
+				World.worlds.Add(temp);
+				p.SendMessage("World " + args[0] + " MADE!");
+			}
 		}
 		public override void Help (Player p)
 		{
