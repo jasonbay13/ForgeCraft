@@ -230,6 +230,7 @@ namespace SMP
 						case 0xFF: HandleDC(message); break; //DC
                         case 0x09: HandleRespawn(message); break; //when user presses respawn button
 						case 0x10: HandleHoldingChange(message); break; //Holding Change
+						case 0x12: HandleAnimation(message); break;
 						case 0x65: HandleWindowClose(message); break; //Window Closed
 						case 0x66: HandleWindowClick(message); break; //Window Click
 					}
@@ -557,6 +558,7 @@ namespace SMP
 			}
 			void SendHandshake()
 			{
+			
 				//Server.Log("Handshake out");
 				string st = "-";
 				byte[] bytes = new byte[(st.Length * 2) + 2];

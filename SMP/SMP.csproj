@@ -275,10 +275,14 @@
     <Compile Include="Economy\Bank.cs" />
     <Compile Include="Economy\Account.cs" />
     <Compile Include="Economy\Currency.cs" />
+    <Compile Include="util\ItemDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
     <None Include="Command\Commands\CMDBLANK.txt" />
+    <None Include="util\Items.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GUI\MainWindow.resx">

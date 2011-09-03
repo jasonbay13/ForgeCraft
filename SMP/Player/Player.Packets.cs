@@ -497,6 +497,12 @@ namespace SMP
 			}
 			catch { }
 		}
+		
+		public void HandleAnimation(byte[] message)
+		{
+			//TODO	
+		}
+		
 		public void HandleWindowClose(byte[] message)
 		{
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc

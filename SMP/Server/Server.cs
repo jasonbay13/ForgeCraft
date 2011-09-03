@@ -18,6 +18,7 @@ namespace SMP
 		public static World mainlevel;
 		public static int protocolversion = 14;
 		public static string Version = "0.1";
+		public static ItemDB ItemDB;
 		
 		public static bool unsafe_plugin = false;
 		public static Logger ServerLogger = new Logger();
@@ -87,9 +88,9 @@ namespace SMP
 		{
 		//TODO: (in order)
 
-			DatabaseReader db = new DatabaseReader();
             LoadFiles();
             Properties.Load("properties/server.properties");
+			ItemDB = new ItemDB("util/Items.csv");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
@@ -138,7 +139,6 @@ namespace SMP
 
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
             if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
-
             
         }
 		

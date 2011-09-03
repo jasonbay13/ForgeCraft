@@ -4,7 +4,7 @@
     <Files>
       <File FileName="SMP/Server/Properties.cs" Line="29" Column="40" />
       <File FileName="SMP/Constants/Color.cs" Line="37" Column="27" />
-      <File FileName="SMP/Server/Server.cs" Line="136" Column="110" />
+      <File FileName="SMP/Server/Server.cs" Line="136" Column="78" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
