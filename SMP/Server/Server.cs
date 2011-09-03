@@ -90,7 +90,7 @@ namespace SMP
 
             LoadFiles();
             Properties.Load("properties/server.properties");
-			ItemDB = new ItemDB("util/Items.csv");
+			ItemDB = new ItemDB("util/Items.dat");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
@@ -211,6 +211,7 @@ namespace SMP
 			ConsoleName = name;
 			consolePlayer.username = name;
 		}
+		
         internal void SettingsUpdate()
         {
             if (OnSettingsUpdate != null) OnSettingsUpdate();
