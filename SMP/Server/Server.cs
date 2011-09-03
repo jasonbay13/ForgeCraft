@@ -18,6 +18,7 @@ namespace SMP
 		public static World mainlevel;
 		public static int protocolversion = 14;
 		public static string Version = "0.1";
+		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 		
 		public static bool unsafe_plugin = false;
@@ -87,10 +88,12 @@ namespace SMP
 		public bool Setup()
 		{
 		//TODO: (in order)
-
+			ItemDB = new ItemDB("util/Items.dat"); //
+			SQLiteDB  = new SQLiteDatabase(); //
+			UpdateDB();
             LoadFiles();
             Properties.Load("properties/server.properties");
-			ItemDB = new ItemDB("util/Items.dat");
+			//ItemDB = new ItemDB("util/Items.dat");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
@@ -216,6 +219,10 @@ namespace SMP
         {
             if (OnSettingsUpdate != null) OnSettingsUpdate();
         }
+		
+		//Update db, i.e. new columns, tables etc
+		//right now irrelevant
+		private void UpdateDB(){}
 
 	}
 }

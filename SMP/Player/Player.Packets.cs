@@ -26,22 +26,16 @@ namespace SMP
 			Player.GlobalMessage(Color.Announce + username + " has joined the game!");
 			
 			if (version > Server.protocolversion)
-	            {
-	                Kick("Outdated server");
-	                return;
-	            }
-	            else if (version < Server.protocolversion)
-	            {
-	                Kick("Outdated client");
-	                return;
-	            }
+            {
+                Kick("Outdated server");
+                return;
+            }
+            else if (version < Server.protocolversion)
+            {
+                Kick("Outdated client");
+                return;
+            }
 			
-			/*//may cause issues :s
-			foreach(Player p in players)
-			{
-				if(p.username == this.username && p != this)
-					this.Kick("Someone is already logged in as you!");
-			}*/	
 			if (ip != "127.0.0.1")
 			{
 				if (Player.players.Count >= Server.MaxPlayers)
@@ -73,7 +67,7 @@ namespace SMP
 			}
 			
 			//TODO: load Player attributes like group, and other settings
-			this.group = Group.DefaultGroup;
+			LoadAttributes();
 			
 			LoggedIn = true;
 			SendLoginPass();

@@ -1160,6 +1160,25 @@ namespace SMP
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS
+		
+		private void LoadAttributes()
+		{
+			System.Data.DataTable DT = new System.Data.DataTable();
+			this.group = Group.DefaultGroup;
+			DT = Server.SQLiteDB.GetDataTable("SELECT * FROM Player WHERE Name = '" + username + "';");
+			
+			if(DT.Rows.Count > 0)
+			{
+				Server.Log("SUCCESS!!");
+				NickName = DT.Rows[0]["NickName"].ToString();
+				Server.Log("NICK = " + NickName);
+			}
+			else
+			{
+				Server.Log("DOH!");
+			}
+		}
+		
 		/// <summary>
         /// Finds a player by string or partial string
         /// </summary>
