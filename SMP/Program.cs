@@ -7,7 +7,6 @@ namespace SMP
     internal static class Program
     {
         private static Server Server;
-
         static Program()
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledException_Handler;
@@ -22,19 +21,6 @@ namespace SMP
         [MTAThread]
         public static void Main(string[] args)
         {
-            /*for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i])
-                {
-                    case "-port":
-                        Settings.Default.Port = Convert.ToInt32(args[++i]);
-                        break;
-                    case "-ip":
-                        Settings.Default.IPAddress = args[++i];
-                        break;
-                }
-            }*/
-
             StartServer();
             StartInput();
         }
@@ -74,12 +60,24 @@ namespace SMP
                     {
                         case "stop":
                             Server.ServerLogger.Log(LogLevel.Info, "Stopping Server...");
-							for(int i =Player.players.Count -1; i >= 0; i--)
+							for(int i = Player.players.Count -1; i >= 0; i--)
 							{
 								Player.players[i].Kick("Server Shutting Down!");
 							}
                             Exit();
                             return;
+                        case "gui":
+							if (!RunningInMono())
+							{
+	                            GUI.MainWindow window = new GUI.MainWindow();
+	                            
+	                            window.ShowDialog();
+							}
+							else
+						{
+							Server.ServerLogger.Log(LogLevel.Warning, "Can not use GUI on Mono!");		
+						}
+                            break;
                         default:
                             Command command = Command.all.Find(cmd);
                             if (command == null)

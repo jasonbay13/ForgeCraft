@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using MonoTorrent.Client;
 using System.Threading;
+using System.IO;
 
 namespace SMP
 {
@@ -17,27 +18,52 @@ namespace SMP
 		public static World mainlevel;
 		public static int protocolversion = 14;
 		public static string Version = "0.1";
-		public static string name = "sc";
-		public static int port = 25565; //DEBUGGING CHANGE BACK TO 25565
+		public static ItemDB ItemDB;
+		
 		public static bool unsafe_plugin = false;
 		public static Logger ServerLogger = new Logger();
 		internal ConsolePlayer consolePlayer;
-		public static string ConsoleName = "Console";
-		
-		public static string KickMessage = "You've been kicked!!";
+        #region ==EVENTS==
+        #region -DELEGATES-
+        public delegate void OnLog(string message);
+        public delegate void VoidHandler();
+        #endregion
+        #region -EVENT-
+        public static event OnLog ServerLog = null;
+        public event VoidHandler OnSettingsUpdate;
+        #endregion
+        
+        #endregion
+
+        public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
+		public static MainLoop ml;
+
+        #region ==SETTINGS==
+
+        public static string salt = "";
+        public static string KickMessage = "You've been kicked!!";
+		public static string WhiteListMessage = "Not on whitelist";
+		public static string VIPListMessage = "Server is full and you are not a VIP";
+		public static string BanMessage = "You are banned";
 		public static string Motd = "Powered By ForgeCraft.";
 		public static int MaxPlayers = 16;
-		
-		public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
-		public static MainLoop ml;
-		
-		public Server()
+        public static string name = "sc";
+        public static int port = 25565;
+        public static string ConsoleName = "Console";
+        //---------------//
+        public static bool usewhitelist = false;
+		public static bool useviplist = false;
+        //---------------//
+		public static List<string> BanList = new List<string>();
+		public static List<string> WhiteList = new List<string>();
+		public static List<string> VIPList = new List<string>();
+        #endregion
+
+
+        public Server()
 		{
 			Log("Starting Server");
 			s = this;
-			consolePlayer = new ConsolePlayer(s);
-			consolePlayer.SetUsername(ConsoleName);
-			//Group.DefaultGroup = new DefaultGroup(); //debugging
 			mainlevel = new World(0, 127, 0, "main", new Random().Next());
 			World.worlds.Add(mainlevel);
 			ml = new MainLoop("server");
@@ -53,21 +79,34 @@ namespace SMP
 			//TODO AI Update Timer
 
 			//Setup();
-			
-			Log("Server Started");
-
+            
+            
 			//new Creeper(new Point3(0, 0, 0), mainlevel);
 		}
 		
 		public bool Setup()
 		{
 		//TODO: (in order)
-			//load configuration
+
+            LoadFiles();
+            Properties.Load("properties/server.properties");
+			ItemDB = new ItemDB("util/Items.csv");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
+			
 			//load groups
-			//load whitelist, banlist, VIPlist
+			consolePlayer = new ConsolePlayer(s);
+			consolePlayer.SetUsername(ConsoleName);
+			Group.DefaultGroup = new DefaultGroup(); //debug
+			
+			BanList.AddRange(Properties.LoadList("properties/banned.txt"));
+            if (usewhitelist)
+                WhiteList.AddRange(Properties.LoadList("properties/whitelist.txt"));
+            if (useviplist)
+               VIPList.AddRange(Properties.LoadList("properties/viplist.txt"));
+
+            loadCleanUp();
 			
 			try
 			{
@@ -77,11 +116,31 @@ namespace SMP
 				listen.Listen((int)SocketOptionName.MaxConnections);
 				
 				listen.BeginAccept(new AsyncCallback(Accept), null);
-				return true;
+				
+                return true;
 			}
 			catch (SocketException e) { Log(e.Message + e.StackTrace); return false; }
 			catch (Exception e) { Log(e.Message + e.StackTrace); return false; }
+            
 		}
+
+        private void loadCleanUp()
+        {
+            //load any extra stuff, announce any thing after every things has been loaded
+
+            Log("Setting up on port: " + port);
+            Log("Server Started");
+        }
+
+        private void LoadFiles()
+        {
+            if (!Directory.Exists("properties")) Directory.CreateDirectory("properties");
+            if (!Directory.Exists("text")) Directory.CreateDirectory("text");
+
+            if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
+            if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
+            
+        }
 		
 		void Accept(IAsyncResult result)
 		{
@@ -99,7 +158,7 @@ namespace SMP
 					listen.BeginAccept(new AsyncCallback(Accept), null);
 					begin = true;
 				}
-				catch (SocketException e)
+				catch (SocketException)
 				{
 					if (p != null)
 					p.Disconnect();
@@ -131,6 +190,15 @@ namespace SMP
 		
 		public void Stop()
 		{
+            Plugin.Unload();
+			
+			if ((File.Exists("properties/banned.txt")) || (!File.Exists("properties/banned.txt") && WhiteList.Count > 0))
+				Properties.WriteList(BanList, "properties/banned.txt");
+			if ((File.Exists("properties/whitelist.txt")) || (!File.Exists("properties/whitelist.txt") && WhiteList.Count > 0))
+				Properties.WriteList(WhiteList, "properties/whitelist.txt");
+			if ((File.Exists("properties/viplist.txt")) || (!File.Exists("properties/viplist.txt") && WhiteList.Count > 0))
+				Properties.WriteList(VIPList, "properties/viplist.txt");
+				
 			if (listen != null)
             {
                 listen.Close();
@@ -143,5 +211,10 @@ namespace SMP
 			ConsoleName = name;
 			consolePlayer.username = name;
 		}
+        internal void SettingsUpdate()
+        {
+            if (OnSettingsUpdate != null) OnSettingsUpdate();
+        }
+
 	}
 }

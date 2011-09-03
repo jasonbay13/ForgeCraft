@@ -27,7 +27,6 @@ namespace SMP
         /// <returns></returns>
         public static bool CheckPermission(Player p, String perm)
         {
-
             if (p.AdditionalPermissions.Contains(perm))
             {
                 return true;

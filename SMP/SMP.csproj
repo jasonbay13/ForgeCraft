@@ -32,6 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
     <Reference Include="zlib.net, Version=1.0.3.0, Culture=neutral, PublicKeyToken=47d7877cb3620160">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>zlib.net.dll</HintPath>
@@ -44,17 +48,30 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Ionic.Zlib.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\bin\ManagedOnly\System.Data.SQLite.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\AI.cs" />
     <Compile Include="AI\Creeper.cs" />
+    <Compile Include="Command\Commands\CmdCheckPort.cs" />
+    <Compile Include="Command\Commands\CmdCuboid.cs" />
     <Compile Include="Command\Commands\CmdFly.cs" />
     <Compile Include="Command\Commands\CmdRain.cs" />
     <Compile Include="Command\Commands\CmdStrike.cs" />
     <Compile Include="Command\Commands\CmdViewDistance.cs" />
+    <Compile Include="GUI\MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\MainWindow.Designer.cs">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Objects\McObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Command\Commands\CmdFire.cs" />
+    <Compile Include="Server\Properties.cs" />
     <Compile Include="WebserverStuff\WebClient.cs" />
     <Compile Include="WebserverStuff\WebServer.cs" />
     <Compile Include="World\BlockChangeSystem.cs" />
@@ -251,10 +268,30 @@
     <Compile Include="Command\Commands\CmdMsg.cs" />
     <Compile Include="Groups\GroupUtils.cs" />
     <Compile Include="Groups\DefaultGroup.cs" />
+    <Compile Include="Command\Commands\CmdBan.cs" />
+    <Compile Include="Command\Commands\CmdUnban.cs" />
+    <Compile Include="Command\Commands\CmdVIPList.cs" />
+    <Compile Include="Command\Commands\CmdWhiteList.cs" />
+    <Compile Include="Economy\Bank.cs" />
+    <Compile Include="Economy\Account.cs" />
+    <Compile Include="Economy\Currency.cs" />
+    <Compile Include="util\ItemDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
     <None Include="Command\Commands\CMDBLANK.txt" />
+    <None Include="util\Items.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\MainWindow.resx">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Economy\" />
+    <Folder Include="Economy\Commands\" />
+  </ItemGroup>
 </Project>

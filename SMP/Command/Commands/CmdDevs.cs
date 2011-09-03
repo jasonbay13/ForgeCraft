@@ -5,7 +5,7 @@ namespace SMP
 {
     public class CmdDevs : Command
     {
-        List<string> devs = new List<string> { "Silentneeb", "BizarreCake", "GamezGalaxy (hypereddie10)", "Merlin33069", "jakeanator14", "headdetect", "The_Legacy", "Dmitchell" }; //add your names here
+        List<string> devs = new List<string> { "Silentneeb", "BizarreCake", "GamezGalaxy (hypereddie10)", "Merlin33069", "headdetect", "The_Legacy", "Dmitchell" }; //add your names here
 
         public override string Name { get { return "devs"; } }
         public override List<string> Shortcuts { get { return new List<string> {"developers", "authors"}; } }
@@ -34,7 +34,13 @@ namespace SMP
             p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist, WrapMethod.Chat);  //lol it was ForgetCraft
 			short slot = (short)p.inventory.FindEmptySlot();
 			if (slot == -1) return;
-			p.SendItem(slot, 278, 1, 3);
+			/*short[] pick = Server.ItemDB.FindItem("dpick");
+			if (pick != null)
+			p.SendItem(slot, pick[0], 1, 3);
+			if (pick == null)
+				p.inventory.Add(277, 1, 0);*/
+			if (devs.Contains(p.username) || p.username == "hypereddie10")
+				p.inventory.Add(278, 1, 0);
         }
 
         public override void Help(Player p)

@@ -9,7 +9,12 @@ namespace SMP
     /// Handles packets.
     /// </summary>
 	public partial class Player : System.IDisposable
-	{
+    {
+        #region blockchangehandler
+        public delegate void BlockChangeHandler(Player p, int x, int y, int z, short type);
+        public event BlockChangeHandler OnBlockChange;
+        public void ClearBlockChange() { OnBlockChange = null; }
+        #endregion
 		#region Login
 		private void HandleLogin(byte[] message)
 		{
@@ -18,7 +23,7 @@ namespace SMP
 			if (length > 32) { Kick("Username too long"); return; }
 			username = Encoding.BigEndianUnicode.GetString(message, 6, (length * 2));
 			Server.Log(ip + " Logged in as " + username);
-			Player.GlobalMessage(username + " has joined the game!");
+			Player.GlobalMessage(Color.Announce + username + " has joined the game!");
 			
 			if (version > Server.protocolversion)
 	            {
@@ -31,30 +36,50 @@ namespace SMP
 	                return;
 	            }
 			
-			//may cause issues :s
+			/*//may cause issues :s
 			foreach(Player p in players)
 			{
 				if(p.username == this.username && p != this)
 					this.Kick("Someone is already logged in as you!");
-			}	
-			
-			if (Player.players.Count >= Server.MaxPlayers)
+			}*/	
+			if (ip != "127.0.0.1")
 			{
-				//TODO: Add VIPList checking here
-				Kick("Server is Full");	
+				if (Player.players.Count >= Server.MaxPlayers)
+				{
+					if (Server.useviplist && Server.VIPList.Contains(username.ToLower()))
+					{
+						for(int i = players.Count - 1; i >= 0; i--) // kick the last joined non-vip
+						{
+							if (!Server.VIPList.Contains(username.ToLower()))
+							{
+								players[i].Kick("You have been kicked for a VIP");
+								break;
+							}
+						}
+					}
+					else if (Server.useviplist && !Server.VIPList.Contains(username.ToLower()))
+					{
+						Kick(Server.VIPListMessage);
+					}
+					else if (!Server.useviplist)
+						Kick("Server is Full");	
+				}
+				
+				if (Server.BanList.Contains(username.ToLower())) 
+					Kick(Server.BanMessage);
+				    
+	            if (Server.usewhitelist && !Server.WhiteList.Contains(username.ToLower()))
+					Kick(Server.WhiteListMessage);
 			}
 			
-			//TODO: Check ban list, and whitelist
-            
-			
 			//TODO: load Player attributes like group, and other settings
+			this.group = Group.DefaultGroup;
 			
 			LoggedIn = true;
 			SendLoginPass();
 			
-			this.group = new DefaultGroup();
-            UpdateShi(this);
-			//OnPlayerConnect Event
+			UpdateShi(this);
+			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
 		}
@@ -65,7 +90,7 @@ namespace SMP
 
             if (w.Israining)
             {
-                w.rain(true, p);
+                w.rain(true);
                // p.SendMessage("IS IT RAINING?"); for debugging :P
             }
             
@@ -134,7 +159,7 @@ namespace SMP
             //GlobalMessage(this.PlayerColor + "{1}§f: {2}", WrapMethod.Chat, this.Prefix, Username, message);
 			if (!DoNotDisturb)
 			{
-				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + group.GroupColor + "[" + group.Name + "] " + Color.White + username + ": " + m);
+				GlobalMessage(Color.DarkBlue + "<" + level.name + "> " + Color.Gray + "[" + group.GroupColor + group.Name + Color.Gray + "] " + this.GetColor() + GetName() + Color.White + ": " + m);
             	Server.ServerLogger.Log(LogLevel.Info, username + ": " + m);
 			}
         }
@@ -302,6 +327,9 @@ namespace SMP
                     if( p.level == level && p != this )
                         p.SendAnimation( id, 1 );
                 }
+
+                if (OnBlockChange != null)
+                    OnBlockChange(this, x, y, z, rc);
 			}
 			if (message[0] == 2)
 			{
@@ -430,6 +458,9 @@ namespace SMP
 				case 5: blockX++; break;				
 			}
 
+            if (OnBlockChange != null)
+                OnBlockChange(this, blockX, blockY, blockZ, blockID);
+
 			if (blockID == -1)
 			{
 				//Players hand is empty
@@ -475,6 +506,12 @@ namespace SMP
 			}
 			catch { }
 		}
+		
+		public void HandleAnimation(byte[] message)
+		{
+			//TODO	
+		}
+		
 		public void HandleWindowClose(byte[] message)
 		{
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc

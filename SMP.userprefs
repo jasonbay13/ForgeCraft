@@ -1,26 +1,25 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Player/Player.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Server/Properties.cs" ctype="Workbench">
     <Files>
-      <File FileName="SMP/Groups/Group.cs" Line="10" Column="68" />
-      <File FileName="SMP/Groups/GroupUtils.cs" Line="17" Column="14" />
-      <File FileName="SMP/Player/Player.cs" Line="1110" Column="1" />
-      <File FileName="SMP/Player/Player.Packets.cs" Line="56" Column="27" />
-      <File FileName="SMP/World/World.cs" Line="75" Column="7" />
-      <File FileName="SMP/Command/Command.cs" Line="57" Column="28" />
-      <File FileName="SMP/Command/Commands/CmdHackz.cs" Line="10" Column="103" />
-      <File FileName="SMP/Program.cs" Line="1" Column="1" />
+      <File FileName="SMP/Server/Properties.cs" Line="29" Column="40" />
+      <File FileName="SMP/Constants/Color.cs" Line="37" Column="27" />
+      <File FileName="SMP/Server/Server.cs" Line="136" Column="78" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
-          <Node name="SMP" expanded="True" selected="True">
-            <Node name="Command" expanded="True">
-              <Node name="Commands" expanded="True" />
+          <Node name="SMP" expanded="True">
+            <Node name="Constants" expanded="True" />
+            <Node name="GUI" expanded="True">
+              <Node name="MainWindow.cs" expanded="True" />
             </Node>
-            <Node name="Groups" expanded="True" />
+            <Node name="Inventory" expanded="True" />
             <Node name="Player" expanded="True" />
-            <Node name="Server" expanded="True" />
+            <Node name="Server" expanded="True">
+              <Node name="Properties.cs" selected="True" />
+            </Node>
+            <Node name="util" expanded="True" />
             <Node name="World" expanded="True" />
           </Node>
         </State>

@@ -29,6 +29,8 @@ namespace SMP
 				return;
 			}
 			
+			p.SendMessage(Color.Yellow + "There is currently " + Color.DarkRed + Player.players.Count + Color.Yellow + "/" + Color.DarkRed + Server.MaxPlayers + Color.Yellow + " players on line.");
+			
 			if (args.Length == 0)
 			{
 				StringBuilder sb = new StringBuilder();
@@ -36,13 +38,13 @@ namespace SMP
 				{
 					if(!Player.players[i].AFK)
 					{
-						//sb.Append(Player.players[i].Group.GroupColor + Player.players[i].username + Color.White); // uncomment when groups are finished
-						sb.Append(Player.players[i].username);
+						sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.White);
+						//sb.Append(Player.players[i].username);
 					}
 					else
 					{
-						//sb.Append(Player.players[i].Group.GroupColor + Player.players[i].username + Color.Gray + "[AFK]" + Color.White); // uncomment when groups are finished
-						sb.Append(Player.players[i].username + Color.Gray + "[AFK]");
+						sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.Gray + "[AFK]" + Color.White);
+						//sb.Append(Player.players[i].username + Color.Gray + "[AFK]");
 					}
 					
 					if (i != Player.players.Count - 1)
@@ -64,13 +66,13 @@ namespace SMP
 							{
 								if(!Player.players[i].AFK)
 								{
-									//sb.Append(Player.players[i].Group.GroupColor + Player.players[i].username + Color.White); // uncomment when groups are finished
-									sb.Append(Player.players[i].username);
+									sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.White);
+									//sb.Append(Player.players[i].username);
 								}
 								else
 								{
-									//sb.Append(Player.players[i].Group.GroupColor + Player.players[i].username + Color.Gray + "[AFK]" + Color.White); // uncomment when groups are finished
-									sb.Append(Player.players[i].username + Color.Gray + "[AFK]");
+									sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.Gray + "[AFK]" + Color.White);
+									//sb.Append(Player.players[i].username + Color.Gray + "[AFK]");
 								}
 								
 								if (i != Player.players.Count - 1)
@@ -85,7 +87,31 @@ namespace SMP
 				
 				if (args[0].ToLower() == "group")
 				{
-				 //TODO:	
+					foreach(Group g in Group.GroupList)
+					{
+						StringBuilder sb = new StringBuilder();
+						sb.Append(g.GroupColor + g.Name + Color.ServerDefaultColor + ": ");
+						for(int i = 0; i < Player.players.Count; i++)
+						{
+							if (Player.players[i].group == g)
+							{
+								if (!Player.players[i].AFK)
+								{
+									sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.White);
+								}
+								else
+								{
+									sb.Append(Player.players[i].GetColor() + Player.players[i].GetName() + Color.White);	
+								}
+								
+								if (i != Player.players.Count -1)
+									sb.Append(", ");
+							}
+						}
+						
+						p.SendMessage(sb.ToString(), WrapMethod.Chat);
+						
+					}
 					
 				}
 			}

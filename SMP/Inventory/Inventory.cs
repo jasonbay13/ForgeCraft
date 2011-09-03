@@ -158,8 +158,36 @@ namespace SMP
 		}
 		public byte isStackable(short id)
 		{
-			//TODO
-			return 64;
+			if(id >= 1 && id <= 96) //all blocks are stackable and there is no missing id's
+				return 64;
+			
+			// may be missing a few
+			List<short> stackable64 = new List<short> {
+				262, 263, 264, 265, 266, 280, 281, 287,	288, 
+				289, 295, 296, 318, 321, 331, 334, 336, 337,
+				338, 339, 340, 341, 348, 351, 352, 353, 356
+				
+			};
+			
+			if(stackable64.Contains(id))
+			{
+				return 64;	
+			}
+			
+			List<short> stackable16 = new List<short> {
+				332, 344 
+			};
+			
+			if( stackable16.Contains(id))
+			{
+				return 16;	
+			}
+			
+			if(id == 357) //cookies
+			{
+				return 8;	
+			}
+			return 1;
 		}
 	}
 }

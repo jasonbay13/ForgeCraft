@@ -42,7 +42,7 @@ namespace SMP
 					//do stuff ?
 
 				}
-				catch (SocketException e)
+				catch (SocketException)
 				{
 					if (p != null)
 						p.Disconnect();

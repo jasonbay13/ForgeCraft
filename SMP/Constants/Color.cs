@@ -34,6 +34,7 @@ namespace SMP
         public static string CommandResult = Teal;
         public static string CommandError = DarkRed;
         public static string ServerDefaultColor = White;
+		public static string IRCColor = Green;
 
 		/// <summary>
         /// Removes color codes from a string.

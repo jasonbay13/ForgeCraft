@@ -21,7 +21,7 @@ namespace SMP
                 return;
             }
 
-            Player.GlobalMessage(MakeString(args, 0, args.Length), WrapMethod.Chat);
+            Player.GlobalMessage(MakeString(args, 0, args.Length));
         }
 
         public override void Help(Player p)

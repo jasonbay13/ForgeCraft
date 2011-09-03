@@ -5,6 +5,121 @@ using System.Text;
 
 namespace SMP
 {
+    public class FindBlocks
+    {
+        public static short FindBlock(string type)
+        {
+            switch (type.ToLower())
+            {
+                case "air": return 0;
+                case "stone": return 1;
+                case "grass": return 2;
+                case "dirt": return 3;
+                case "cobblestone": return 4;
+                case "wood": return 5;
+                case "plant": return 6;
+                case "solid":
+                case "admintite":
+                case "blackrock":
+                case "adminium": return 7;
+                case "activewater":
+                case "active_water": return 8;
+                case "water": return 9;
+                case "activelava":
+                case "active_lava": return 10;
+                case "lava": return 11;
+                case "sand": return 12;
+                case "gravel": return 13;
+                case "gold_ore": return 14;
+                case "iron_ore": return 15;
+                case "coal": return 16;
+                case "tree": return 17;
+                case "leaves": return 18;
+                case "sponge": return 19;
+                case "glass": return 20;
+                case "red": return 21;
+                case "orange": return 22;
+                case "yellow": return 23;
+                case "greenyellow": return 24;
+                case "green": return 25;
+                case "springgreen": return 26;
+                case "cyan": return 27;
+                case "blue": return 28;
+                case "blueviolet": return 29;
+                case "indigo": return 30;
+                case "purple": return 31;
+                case "magenta": return 32;
+                case "pink": return 33;
+                case "black": return 34;
+                case "gray": return 35;
+                case "white": return 36;
+                case "yellow_flower": return 37;
+                case "red_flower": return 38;
+                case "brown_shroom": return 39;
+                case "red_shroom": return 40;
+                case "gold": return 41;
+                case "iron": return 42;
+                case "double_stair": return 43;
+                case "stair": return 44;
+                case "brick": return 45;
+                case "tnt": return 46;
+                case "bookcase": return 47;
+                case "mossy_cobblestone": return 48;
+                case "obsidian": return 49;
+                case "torch": return 50;
+                case "fire": return 51;
+                case "monsterspawner": return 52;
+                case "stairswooden": return 53;
+                case "chest": return 54;
+                case "redstonewire": return 55;
+                case "diamondore": return 56;
+                case "diamondblock": return 57;
+                case "craftingtable": return 58;
+                case "seeds": return 59;
+                case "farmland": return 60;
+                case "furnace": return 61;
+                case "furnaceon": return 62;
+                case "signpost": return 63;
+                case "doorwooden": return 64;
+                case "ladder": return 65;
+                case "rails": return 66;
+                case "stairscobblestone": return 67;
+                case "signwall": return 68;
+                case "lever": return 69;
+                case "pressureplatestone": return 70;
+                case "dooriron": return 71;
+                case "pressureplatewood": return 72;
+                case "restoneore": return 73;
+                case "redstoneoreglow": return 74;
+                case "redstonetorchoff": return 75;
+                case "redstonetorchon": return 76;
+                case "buttonstone": return 77;
+                case "snow": return 78;
+                case "ice": return 79;
+                case "snowblock": return 80;
+                case "cactus": return 81;
+                case "clayblock": return 82;
+                case "sugarcane": return 83;
+                case "jukebox": return 84;
+                case "fence": return 85;
+                case "pumpkin": return 86;
+                case "netherrack": return 87;
+                case "soulsand": return 88;
+                case "glowstone":
+                case "glowstoneblock": return 89;
+                case "portal": return 90;
+                case "jackolantern": return 91;
+                case "cake":
+                case "cakeblock": return 92;
+                case "redstonerepeateroff": return 93;
+                case "redstonerepeateron": return 94;
+                //case "lockedchest": return 95;
+                case "trapdoor": return 96;
+                default: return -1;
+            }
+        }
+    } 
+
 	public enum Blocks : byte
 	{
 		Air = 0,
