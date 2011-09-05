@@ -88,9 +88,9 @@ namespace SMP
 		public bool Setup()
 		{
 		//TODO: (in order)
-			ItemDB = new ItemDB("util/Items.dat"); //
 			SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
+			ItemDB = new ItemDB();
             LoadFiles();
             Properties.Load("properties/server.properties");
 			//ItemDB = new ItemDB("util/Items.dat");

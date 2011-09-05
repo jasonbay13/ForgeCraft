@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Data;
 using System.Collections.Generic;
 
 namespace SMP
@@ -9,33 +10,33 @@ namespace SMP
 		private Dictionary<string, short> Items = new Dictionary<string, short>();
         private Dictionary<string, short> Durability = new Dictionary<string, short>();
 
-		public ItemDB (string file)
+		public ItemDB ()
 		{
-			if (!File.Exists(file))
+			DataTable dt = new DataTable();
+			
+			dt = Server.SQLiteDB.GetDataTable("SELECT Value, Meta, Alias FROM Item");
+			
+			for(int i = 0; i < dt.Rows.Count; i++)
 			{
-				File.Create(file);
-			    return;
-			}
-			
-			List<string> itemlist = new List<string>(Properties.LoadList(file));
-			
-			foreach(string s in itemlist)
-			{
-			//Server.Log(s);
-			
-			string [] parts = s.Split(' ');
-			
-			short numeric;
-			                if (!short.TryParse(parts[1].Replace(",", ""), out numeric))
-			                    continue;
-			
-			                short durability;
-			                if (parts.Length < 3 || !short.TryParse(parts[2].Replace(",", ""), out durability))
-			                    durability = 0;
-			
-			                string item = parts[0].Replace(",", "").ToLower();
-			                Items.Add(item, numeric);
-			                Durability.Add(item, durability);
+				string alias = "";
+				short id;
+				short meta;
+				
+				alias = dt.Rows[i]["Alias"].ToString();
+				try
+				{
+					id = Convert.ToInt16(dt.Rows[i]["Value"]);
+					meta = Convert.ToInt16(dt.Rows[i]["Meta"]);
+				}
+				catch
+				{
+					Server.Log("SHIT!!");
+					continue;	
+				}
+				
+				Items.Add(alias, id);
+				Durability.Add(alias, meta);
+				
 			}
 		}
 		

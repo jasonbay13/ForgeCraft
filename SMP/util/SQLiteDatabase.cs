@@ -68,6 +68,7 @@ namespace SMP
 	 
 	    public string ExecuteScalar(string sql)
 	    {
+			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -338,9 +339,205 @@ namespace SMP
 			{
 				return false;
 			}
+			additems();
 			return true;
 		}
 		
-	}
-	
+		private void additems()
+		{
+			try{
+			#region BLOCKS
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(0, 0, 'air');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(1, 0, 'stone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2, 0, 'grass');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(3, 0, 'dirt');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(4, 0, 'cobblestone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(5, 0, 'woodenplank');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(6, 0, 'sapling');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(6, 1, 'pinesapling');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(6, 2, 'birchsapling');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(7, 0, 'bedrock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(8, 0, 'water');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(9, 0, 'stillwater');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(10, 0, 'lava');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(11, 0, 'stilllava');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(12, 0, 'sand');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(13, 0, 'gravel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(14, 0, 'goldore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(15, 0, 'ironore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(16, 0, 'coalore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(17, 0, 'wood');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(17, 1, 'pinewood');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(17, 2, 'birchwood');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(18, 0, 'leaves');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(19, 0, 'sponge');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(20, 0, 'glass');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(21, 0, 'lapisluzuliore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(22, 0, 'lapisluzuliblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(23, 0, 'dispenser');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(24, 0, 'sandstone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(25, 0, 'noteblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(26, 0, 'bedblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(27, 0, 'poweredrail');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(28, 0, 'detectorrail');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(29, 0, 'stickypiston');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(30, 0, 'cobweb');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(31, 0, 'tallgrass');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(32, 0, 'deadshrubs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(33, 0, 'piston');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(34, 0, 'pistonhead');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(34, 1, 'stickypistonhead');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 0, 'wool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 1, 'orangewool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 2, 'magentawool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 3, 'lightbluewool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 4, 'yellowwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 5, 'limewool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 6, 'pinkwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 7, 'graywool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 8, 'lightgraywool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 9, 'cyanwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 10, 'purplewool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 11, 'bluewool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 12, 'brownwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 13, 'greenwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 14, 'redwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(35, 15, 'blackwool');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(36, 0, 'movedblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(37, 0, 'dandelion');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(38, 0, 'rose');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(39, 0, 'brownmushroom');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(40, 0, 'redmushroom');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(41, 0, 'goldblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(42, 0, 'ironblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(43, 0, 'doubleslabs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(44, 0, 'slabs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(45, 0, 'brickblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(46, 0, 'tnt');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(47, 0, 'bookshelf');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(48, 0, 'mossstone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(49, 0, 'obsidian');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(50, 0, 'torch');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(51, 0, 'fire');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(52, 0, 'mobspawner');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(53, 0, 'woodenstiars');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(54, 0, 'chest');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(55, 0, 'redstonewire');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(56, 0, 'diamondore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(57, 0, 'diamondblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(58, 0, 'craftingtable');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(58, 0, 'workbench');");
+			//grown wheat??
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(60, 0, 'farmland');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(61, 0, 'furnace');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(62, 0, 'burningfurnace');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(63, 0, 'signpost');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(64, 0, 'wooddoorblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(65, 0, 'ladders');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(66, 0, 'rails');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(67, 0, 'cobblestonestairs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(68, 0, 'wallsign');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(69, 0, 'lever');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(70, 0, 'stonepressureplate' );");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(71, 0, 'irondoorblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(72, 0, 'woodenpressureplate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(73, 0, 'redstoneore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(74, 0, 'glowingredstoneore');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(75, 0, 'offredstonetorch');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(76, 0, 'redstonetorch');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(77, 0, 'stonebutton');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(78, 0, 'snow');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(79, 0, 'ice');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(80, 0, 'snowblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(81, 0, 'cactus');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(82, 0, 'clayblock');");
+			//grown sugar cane??
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(84, 0, 'jukebox');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(85, 0, 'fence');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(86, 0, 'pumpkin');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(87, 0, 'netherrack');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(88, 0, 'soulsand');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(89, 0, 'glowstoneblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(90, 0, 'portalblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(91, 0, 'jackolantern');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(92, 0, 'cakeblock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(93, 0, 'offredstonerepeater');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(94, 0, 'redstonerepeater');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(95, 0, 'lockedchest');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(96, 0, 'trapdoor');");
+			#endregion
+			
+			#region ITEMS
+			//this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES();");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(256, 0, 'ironshovel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(257, 0, 'ironpickaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(258, 0, 'ironaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(259, 0, 'flintandsteel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(260, 0, 'redapple');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(261, 0, 'bow');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(262, 0, 'arrow');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(263, 0, 'coal');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(263, 0, 'charcoal');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(264, 0, 'diamond');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(265, 0, 'ironingot');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(266, 0, 'goldingot');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(267, 0, 'ironsword');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(268, 0, 'woodensword');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(269, 0, 'woodenshovel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(270, 0, 'woodenpickaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(271, 0, 'woodenaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(272, 0, 'stonesword');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(273, 0, 'stoneshovel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(274, 0, 'stonepickaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(275, 0, 'stoneaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(276, 0, 'diamondsword');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(277, 0, 'diamondshovel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(278, 0, 'diamondpickaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(279, 0, 'diamondaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(280, 0, 'stick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(281, 0, 'bowl');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(282, 0, 'mushroomsoup');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(283, 0, 'goldsword');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(284, 0, 'goldshovel');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(285, 0, 'goldpickaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(286, 0, 'goldaxe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(287, 0, 'string');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(288, 0, 'feather');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(289, 0, 'gunpowder');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(290, 0, 'woodenhoe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(291, 0, 'stonehoe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(292, 0, 'ironhoe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(293, 0, 'diamondhoe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(294, 0, 'goldhoe');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(295, 0, 'seeds');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(296, 0, 'wheat');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(297, 0, 'bread');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(298, 0, 'leathercap');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(299, 0, 'leathertunic');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(300, 0, 'leatherpants');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(301, 0, 'leatherboots');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(302, 0, 'chainhelmet');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(303, 0, 'chainchestplate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(304, 0, 'chainleggings');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(305, 0, 'chainboots');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(306, 0, 'ironhelmet');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(307, 0, 'ironchestplate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(308, 0, 'ironleggings');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(309, 0, 'ironboots');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(310, 0, 'diamondhelmet');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(311, 0, 'diamondchestplate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(312, 0, 'diamondleggings');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(313, 0, 'diamondboots');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(314, 0, 'goldhelmet');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(315, 0, 'goldchestplate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(316, 0, 'goldleggings');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(317, 0, 'goldboots');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(318, 0, 'flint');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(319, 0, 'rawporkchop');");
+			#endregion
+		}
+		catch(Exception e){Server.Log(e.Message.ToString()); Server.Log(e.StackTrace.ToString());}
+		}
+		
+	}	
 }

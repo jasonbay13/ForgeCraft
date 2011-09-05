@@ -68,7 +68,6 @@ namespace SMP
 			
 			//TODO: load Player attributes like group, and other settings
 			LoadAttributes();
-			NickName = "balls";
 			
 			LoggedIn = true;
 			SendLoginPass();
