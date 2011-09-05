@@ -117,8 +117,8 @@ namespace SMP
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
-			//Group.DefaultGroup = new DefaultGroup(); //debug
-			Group.LoadGroups();
+			Group.DefaultGroup = new DefaultGroup(); //debug
+			//Group.LoadGroups();
 			
 			BanList.AddRange(Properties.LoadList("properties/banned.txt"));
             if (usewhitelist)

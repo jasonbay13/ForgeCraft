@@ -110,17 +110,23 @@ namespace SMP
 				else if (g.GroupColor.Length == 1 && Color.IsColorValid((char)g.GroupColor[0]))
 				 	g.GroupColor = "§" + g.GroupColor[1];
 				
+				//Server.Log("damn");
 				string[] perms = dt.Rows[i]["Permissions"].ToString().Replace(" ", "").Split(',');
 				foreach(string s in perms)
 				{
+					//Server.Log("??");
 					g.PermissionList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';"));
 				}
 				
+				/*Server.Log("balls");
 				string[] inheritance = dt.Rows[i]["Inheritance"].ToString().Split(',');
+				if (inheritance.Length >= 1)
 				foreach(string s in inheritance)
 				{
-					g.tempInheritanceList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Group WHERE ID = '" + s + "';"));	
-				}
+					Server.Log("??: " + s);
+					if (s != "" || s != null)
+						g.tempInheritanceList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Group WHERE ID = '" + Convert.ToInt32(s) + "';"));	
+				}*/
 				
 				Group.GroupList.Add(g);
 			}
