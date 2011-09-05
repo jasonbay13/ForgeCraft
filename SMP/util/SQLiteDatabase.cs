@@ -180,6 +180,7 @@ namespace SMP
 		{
 			try
 			{
+				#region CREATETABLES
 				this.ExecuteNonQuery(
 	                    "CREATE TABLE Track(" +
 	                    "ID 		INTEGER PRIMARY KEY, " +
@@ -278,61 +279,32 @@ namespace SMP
 				      	"Alias TEXT" +
 				      	");"
 				                     );
+				#endregion
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Track VALUES(1,'Default', '1,2,3,4');"
-				                     );
+				#region INSERTS
+				this.ExecuteNonQuery("INSERT INTO Track VALUES(1,'Default', '1,2,3,4');");
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Groups VALUES(1,'Guest',1,1,NULL,NULL,'%3', '2,3,4', NULL, 1);"
-				                     );
-				this.ExecuteNonQuery(
-				        "INSERT INTO Groups VALUES(2,'Builder',0,1,NULL,NULL,'%1', '7', '1', '1');"
-				                     );
-				this.ExecuteNonQuery(
-				        "INSERT INTO Groups VALUES(3,'Moderator',0,1,NULL,NULL,'%c', '4,5,6', '2', '1');"
-				                     );
-				this.ExecuteNonQuery(
-				        "INSERT INTO Groups VALUES(4,'Admin',0,1,NULL,NULL,'%7', '1', '3', '1');"
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(1,'Guest',1,1,NULL,NULL,'%3', '2,3,4', NULL, 1);");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(2,'Builder',0,1,NULL,NULL,'%1', '7', '1', '1');");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(3,'Moderator',0,1,NULL,NULL,'%c', '4,5,6', '2', '1');");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(4,'Admin',0,1,NULL,NULL,'%7', '1', '3', '1');");
 				
-				this.ExecuteNonQuery(
-						"INSERT INTO Currency VALUES(1,'Dollars','Dollars','Dollar','Cents','Cent');"                
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Currency VALUES(1,'Dollars','Dollars','Dollar','Cents','Cent');"                );
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Bank VALUES(1,'Forger''s Investors',1,0,0,0,0,1);"
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Bank VALUES(1,'Forger''s Investors',1,0,0,0,0,1);");
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Account VALUES(1,'Silentneeb',1,1000,1.1,1,1);"
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Account VALUES(1,'Silentneeb',1,1000,1.1,1,1);");
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Player VALUES(1,'Silentneeb',NULL,'Silent',1,NULL,NULL,'%4', 1, NULL, 1, NULL, 1, NULL, NULL);"
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Player VALUES(1,'Silentneeb',NULL,'Silent',1,NULL,NULL,'%4', 1, NULL, 1, NULL, 1, NULL, NULL);");
 				
-				this.ExecuteNonQuery(
-				        "INSERT INTO Permission VALUES(1,'*')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.info.*')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.general.*')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.cheat.hackz')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.other.*')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.mod.*')"
-				                     );
-				this.ExecuteNonQuery(
-				     	"INSERT INTO Permission(Node) VALUES('core.build.*')"
-				                     );
+				this.ExecuteNonQuery("INSERT INTO Permission VALUES(1,'*')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.info.*')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.general.*')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.cheat.hackz')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.other.*')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.mod.*')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.build.*')");
+				#endregion
 				
 			}
 			catch
@@ -468,7 +440,6 @@ namespace SMP
 			#endregion
 			
 			#region ITEMS
-			//this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES();");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(256, 0, 'ironshovel');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(257, 0, 'ironpickaxe');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(258, 0, 'ironaxe');");
