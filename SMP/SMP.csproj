@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -48,6 +48,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Ionic.Zlib.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Downloads\bin\ManagedOnly\System.Data.SQLite.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Plugins\Events.cs" />
@@ -69,6 +73,7 @@
     <Compile Include="Objects\McObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Command\Commands\CmdFire.cs" />
+    <Compile Include="Server\Properties.cs" />
     <Compile Include="WebserverStuff\WebClient.cs" />
     <Compile Include="WebserverStuff\WebServer.cs" />
     <Compile Include="World\BlockChangeSystem.cs" />
@@ -267,10 +272,24 @@
     <Compile Include="Command\Commands\CmdMsg.cs" />
     <Compile Include="Groups\GroupUtils.cs" />
     <Compile Include="Groups\DefaultGroup.cs" />
+    <Compile Include="Command\Commands\CmdBan.cs" />
+    <Compile Include="Command\Commands\CmdUnban.cs" />
+    <Compile Include="Command\Commands\CmdVIPList.cs" />
+    <Compile Include="Command\Commands\CmdWhiteList.cs" />
+    <Compile Include="Economy\Bank.cs" />
+    <Compile Include="Economy\Account.cs" />
+    <Compile Include="Economy\Currency.cs" />
+    <Compile Include="util\ItemDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NBToolkit\app.config" />
     <None Include="Command\Commands\CMDBLANK.txt" />
+    <None Include="util\Items.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="util\Recipes.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GUI\MainWindow.resx">
@@ -278,4 +297,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Economy\" />
+    <Folder Include="Economy\Commands\" />
+  </ItemGroup>
 </Project>

@@ -104,22 +104,22 @@ namespace SMP
 		    		Server.Log("Plugin: " + ((Plugin)instance).name + " was not loaded, you can load it with /pload");
                 	Server.Log(((Plugin)instance).welcome);
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 //Server.ErrorLog(e);
             }
-            catch (BadImageFormatException e)
+            catch (BadImageFormatException)
             {
                 //Server.ErrorLog(e);
             }
             catch (PathTooLongException)
             {
             }
-            catch (FileLoadException e)
+            catch (FileLoadException)
             {
                 //Server.ErrorLog(e);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //Server.ErrorLog(e);
 				Server.Log("The plugin " + pluginname + " failed to load!");

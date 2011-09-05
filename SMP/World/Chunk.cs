@@ -232,12 +232,20 @@ namespace SMP
 		}
 		public void PlaceBlock(int x, int y, int z, byte id, byte meta)
 		{
-			//if (BlockPlaced != null) { if (BlockPlaced(x, y, z, id)) return; }
 			if (InBound(x, y, z))
 			{
 				blocks[PosToInt(x, y, z)] = id;
-				//TODO SET METADATA
+				SetMetaData(x, y, z, meta);
 			}
+		}
+		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id)
+		{
+			UNCHECKEDPlaceBlock(x, y, z, id, 0);
+		}
+		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id, byte meta)
+		{
+			blocks[PosToInt(x, y, z)] = id;
+			if(meta != 0) SetMetaData(x, y, z, meta);
 		}
 
 		//DO NOT USE ANY FORM OF CHUNK.GETBLOCK UNLESS YOU REALLY KNOW YOU WANT TO, USE WORLD.GETBLOCK INSTEAD (TRUST ME, YOU WILL ONLY CAUSE ERRORS IF YOU USE THIS)
