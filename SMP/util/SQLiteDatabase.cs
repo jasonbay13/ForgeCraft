@@ -462,7 +462,7 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(91, 0, 'jackolantern');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(92, 0, 'cakeblock');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(93, 0, 'offredstonerepeater');");
-			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(94, 0, 'redstonerepeater');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(94, 0, 'onredstonerepeater');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(95, 0, 'lockedchest');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(96, 0, 'trapdoor');");
 			#endregion
@@ -534,6 +534,63 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(317, 0, 'goldboots');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(318, 0, 'flint');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(319, 0, 'rawporkchop');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(320, 0, 'cookedporkchop');");//
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(321, 0, 'painting');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(322, 0, 'goldenapple');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(323, 0, 'sign');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(324, 0, 'wodendoor');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(325, 0, 'bucket');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(326, 0, 'waterbucket');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(327, 0, 'lavabuket');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(328, 0, 'minecart');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(329, 0, 'saddle');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(330, 0, 'irondoor');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(331, 0, 'redstone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(332, 0, 'snowball');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(333, 0, 'boat');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(334, 0, 'leather');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(335, 0, 'milk');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(336, 0, 'claybrick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(337, 0, 'clay');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(338, 0, 'sugarcane');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(339, 0, 'paper');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(340, 0, 'book');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(341, 0, 'slimeball');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(342, 0, 'chestminecart');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(343, 0, 'furnaceminecart');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(344, 0, 'egg');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(345, 0, 'compass');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(346, 0, 'fishingrod');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(347, 0, 'clock');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(348, 0, 'glowstonedust');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(349, 0, 'rawfish');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(350, 0, 'cookedfish');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 0, 'blackdye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 1, 'reddye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 2, 'greendye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 3, 'browndye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 4, 'bluedye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 5, 'purpledye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 6, 'cyandye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 7, 'lightgraydye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 8, 'graydye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 9, 'pinkdye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 10, 'limedye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 11, 'yellowdye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 12, 'lightbluedye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 13, 'magentadye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 14, 'orangedye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(351, 15, 'whitedye');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(352, 0, 'bone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(353, 0, 'sugar');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(354, 0, 'cake');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(355, 0, 'bed');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(356, 0, 'redstonerepeater');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(357, 0, 'cookie');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(358, 0, 'map');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(359, 0, 'shears');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2256, 0, 'goldmusicdisc');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2557, 0, 'greenmusicdisc');");
 			#endregion
 		}
 		catch(Exception e){Server.Log(e.Message.ToString()); Server.Log(e.StackTrace.ToString());}
