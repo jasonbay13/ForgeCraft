@@ -30,7 +30,6 @@ namespace SMP
 				}
 				catch
 				{
-					Server.Log("SHIT!!");
 					continue;	
 				}
 				

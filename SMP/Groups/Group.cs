@@ -72,5 +72,72 @@ namespace SMP
             }
             return null;
         }
+		
+		#region LOADING/SAVING
+		public static void LoadGroups()
+		{
+			System.Data.DataTable dt = new System.Data.DataTable();
+			
+			try
+			{
+				dt = Server.SQLiteDB.GetDataTable("SELECT * FROM Groups;");
+			}
+			catch{Server.Log("Something went wrong loading groups");}
+			
+			for(int i = 0; i < dt.Rows.Count; i++)
+			{
+				Group g = new Group();
+				
+				g.Name = dt.Rows[i]["Name"].ToString();
+				
+				if (dt.Rows[i]["IsDefault"].ToString() == "1")
+				{
+					g.IsDefaultGroup = true;
+					Group.DefaultGroup = g;
+				}
+				
+				if (dt.Rows[i]["CanBuild"].ToString() == "1")
+					g.CanBuild = true;
+				
+				g.Prefix = dt.Rows[i]["Prefix"].ToString();
+				g.Suffix = dt.Rows[i]["Suffix"].ToString();
+				
+				g.GroupColor = dt.Rows[i]["Color"].ToString();
+				
+				if (g.GroupColor.Length == 2 && g.GroupColor[0] == '%' || g.GroupColor[0] == '§' || g.GroupColor[0] == '&')
+					if (Color.IsColorValid((char)g.GroupColor[1]))
+					    g.GroupColor = "§" + g.GroupColor[1];
+				else if (g.GroupColor.Length == 1 && Color.IsColorValid((char)g.GroupColor[0]))
+				 	g.GroupColor = "§" + g.GroupColor[1];
+				
+				string[] perms = dt.Rows[i]["Permissions"].ToString().Replace(" ", "").Split(',');
+				foreach(string s in perms)
+				{
+					g.PermissionList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';"));
+				}
+				
+				string[] inheritance = dt.Rows[i]["Inheritance"].ToString().Split(',');
+				foreach(string s in inheritance)
+				{
+					g.tempInheritanceList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Group WHERE ID = '" + s + "';"));	
+				}
+				
+				Group.GroupList.Add(g);
+			}
+			
+			foreach(Group g in Group.GroupList)
+			{
+				foreach(string s in g.tempInheritanceList)
+				{
+					Group gr = Group.FindGroup(s);
+					if (gr != null)
+					{
+						GroupUtils.AddGroupInheritance(g, gr);
+					}
+				}
+			}
+		}
+		
+		#endregion
     }
 }
