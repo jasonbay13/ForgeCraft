@@ -1,4 +1,21 @@
-﻿using System;
+﻿/*
+	Copyright 2011 ForgeCraft team
+	
+	Dual-licensed under the	Educational Community License, Version 2.0 and
+	the GNU General Public License, Version 3 (the "Licenses"); you may
+	not use this file except in compliance with the Licenses. You may
+	obtain a copy of the Licenses at
+	
+	http://www.opensource.org/licenses/ecl2.php
+	http://www.gnu.org/licenses/gpl-3.0.html
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licenses are distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the Licenses for the specific language governing
+	permissions and limitations under the Licenses.
+*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -345,7 +362,7 @@ namespace SMP
 	public enum Stairs : byte { South = 0x0, North = 0x1, West = 0x2, East = 0x3 };
 	public enum Levers : byte { WallSouth = 0x1, WallNorth = 0x2, WallWest = 0x3, WallEast = 0x4, GroundWest = 0x5, GroundSouth = 0x6, LeverOn = 0x8 };
 	public enum Doors : byte { NorthEast = 0x0, SouthEast = 0x1, SouthWest = 0x2, NorthWest = 0x3, TopHalf = 0x8, Open = 0x4 };
-	public enum Buttons : byte { Pressed = 0x8, North = 0x1, South = 0x2, East = 0x3, West = 0x4 };
+	public enum Buttons : byte { Pressed = 0x8, West = 0x1, East = 0x2, South = 0x3, North = 0x4 };
 	public enum SignPost : byte { West = 0x0, West_NorthWest = 0x1, NorthWest = 0x2, North_NorthWest = 0x3, North = 0x4, North_NorthEast = 0x5, NorthEast = 0x6, East_NorthEast = 0x7, East = 0x8, East_SouthEast = 0x9, SouthEast = 0xA, South_SouthEast = 0xB, South = 0xC, South_SouthWest = 0xD, SouthWest = 0xE, West_SouthWest = 0xF };
 	public enum WallSigns : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Furnace : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
@@ -360,7 +377,7 @@ namespace SMP
 	public enum Piston : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, On = 0x8 };
 	public enum PistonExtension : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, Sticky = 0x8 };
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
-
+	
 	public static class BlockData
 	{
 		/// <summary>
@@ -377,49 +394,51 @@ namespace SMP
 				case (9):
 				case (10):
 				case (11):
-				case (26):
+		        case (26):
 				case (27):
-				case (28):
-				case (30):
-				case (31):
-				case (32):
-				case (34):
-				case (36):
-				case (37):
-				case (38):
-				case (39):
-				case (40):
-				case (43):
-				case (44):
-				case (50):
-				case (51):
-				case (53):
-				case (55):
+		        case (28):
+		        case (30):
+		        case (31):
+		        case (32):
+		        case (34):
+		        case (36):
+		        case (37):
+		        case (38):
+		        case (39):
+		        case (40):
+		        case (43):
+		        case (44):
+		        case (50):
+		        case (51):
+		        case (53):
+		        case (55):
 				case (59):
 				case (63):
-				case (64):
-				case (65):
-				case (66):
-				case (67):
-				case (68):
-				case (69):
-				case (70):
-				case (71):
-				case (72):
-				case (75):
-				case (76):
-				case (77):
-				case (83):
-				case (85):
-				case (90):
-				case (92):
-				case (93):
-				case (94):
+		        case (64):
+		        case (65):
+		        case (66):
+		        case (67):
+		        case (68):
+		        case (69):
+		        case (70):
+		        case (71):
+		        case (72):
+		        case (75):
+		        case (76):
+		        case (77):
+		        case (83):
+		        case (85):
+		        case (90):
+		        case (92):
+		        case (93):
+		        case (94):
 				case (96):
 					return false;
+					
 			}
-			return true;
-		}
-	}
+				
+			return true;	
 
+		} 
+	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +52,13 @@ namespace SMP
 		public event OnPlayerAuth PlayerAuth;
 		public delegate void OnPlayerChat(string message, Player p);
 		public delegate void OnPlayerCommand(string cmd, string message, Player p);
+		//Other things for plugins ----------
+        public bool cancelBlock = false;
+        public bool cancelchat = false;
+        public bool cancelcommand = false;
+        public bool cancelmove = false;
+        public bool canceldig = false;
+        //Other things for plugins ----------
 		//Events for Custom Command and Plugins -------------------------------------
 		#endregion
 

@@ -1,4 +1,21 @@
-﻿using System;
+﻿/*
+	Copyright 2011 ForgeCraft team
+	
+	Dual-licensed under the	Educational Community License, Version 2.0 and
+	the GNU General Public License, Version 3 (the "Licenses"); you may
+	not use this file except in compliance with the Licenses. You may
+	obtain a copy of the Licenses at
+	
+	http://www.opensource.org/licenses/ecl2.php
+	http://www.gnu.org/licenses/gpl-3.0.html
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licenses are distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the Licenses for the specific language governing
+	permissions and limitations under the Licenses.
+*/
+using System;
 using System.Collections.Generic;
 
 namespace SMP
@@ -34,11 +51,6 @@ namespace SMP
             p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist, WrapMethod.Chat);  //lol it was ForgetCraft
 			short slot = (short)p.inventory.FindEmptySlot();
 			if (slot == -1) return;
-			/*short[] pick = Server.ItemDB.FindItem("dpick");
-			if (pick != null)
-			p.SendItem(slot, pick[0], 1, 3);
-			if (pick == null)
-				p.inventory.Add(277, 1, 0);*/
 			if (devs.Contains(p.username) || p.username == "hypereddie10")
 				p.inventory.Add(278, 1, 0);
         }
