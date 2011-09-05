@@ -50,8 +50,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AI\AI.cs" />
-    <Compile Include="AI\Creeper.cs" />
+    <Compile Include="Plugins\Events.cs" />
+    <Compile Include="Plugins\Plugin.Events.cs" />
+    <Compile Include="World\AI\AI.cs" />
+    <Compile Include="World\AI\Creeper.cs" />
     <Compile Include="Command\Commands\CmdCheckPort.cs" />
     <Compile Include="Command\Commands\CmdCuboid.cs" />
     <Compile Include="Command\Commands\CmdFly.cs" />
@@ -70,6 +72,8 @@
     <Compile Include="WebserverStuff\WebClient.cs" />
     <Compile Include="WebserverStuff\WebServer.cs" />
     <Compile Include="World\BlockChangeSystem.cs" />
+    <Compile Include="World\Physics\Physics.cs" />
+    <Compile Include="World\Physics\Physics_Setting.cs" />
     <Compile Include="World\Weather.cs" />
     <Compile Include="World\World.cs" />
     <Compile Include="World\Noise.cs" />

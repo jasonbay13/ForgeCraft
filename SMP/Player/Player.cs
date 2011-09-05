@@ -71,6 +71,13 @@ namespace SMP
 		public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public delegate void OnPlayerRespawn(Player p);
         public delegate void OnPlayerDig(Player p, ushort x, ushort y, ushort z, byte block);
+        //Other things for plugins ----------
+        public bool cancelBlock = false;
+        public bool cancelchat = false;
+        public bool cancelcommand = false;
+        public bool cancelmove = false;
+        public bool canceldig = false;
+        //Other things for plugins ----------
 		//Events for Custom Command and Plugins -------------------------------------
 		#endregion
 
