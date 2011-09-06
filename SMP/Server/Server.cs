@@ -1,3 +1,20 @@
+/*
+	Copyright 2011 ForgeCraft team
+	
+	Dual-licensed under the	Educational Community License, Version 2.0 and
+	the GNU General Public License, Version 3 (the "Licenses"); you may
+	not use this file except in compliance with the Licenses. You may
+	obtain a copy of the Licenses at
+	
+	http://www.opensource.org/licenses/ecl2.php
+	http://www.gnu.org/licenses/gpl-3.0.html
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licenses are distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the Licenses for the specific language governing
+	permissions and limitations under the Licenses.
+*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +35,7 @@ namespace SMP
 		public static World mainlevel;
 		public static int protocolversion = 14;
 		public static string Version = "0.1";
+		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 		
 		public static bool unsafe_plugin = false;
@@ -86,10 +104,11 @@ namespace SMP
 		public bool Setup()
 		{
 		//TODO: (in order)
-
+			SQLiteDB  = new SQLiteDatabase(); //
+			UpdateDB();
+			ItemDB = new ItemDB();
             LoadFiles();
             Properties.Load("properties/server.properties");
-			ItemDB = new ItemDB("util/Items.csv");
 			Command.InitCore();
 			BlockChange.InitAll();
 			Plugin.Load();
@@ -98,6 +117,7 @@ namespace SMP
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
 			Group.DefaultGroup = new DefaultGroup(); //debug
+			//Group.LoadGroups();
 			
 			BanList.AddRange(Properties.LoadList("properties/banned.txt"));
             if (usewhitelist)
@@ -210,10 +230,15 @@ namespace SMP
 			ConsoleName = name;
 			consolePlayer.username = name;
 		}
+		
         internal void SettingsUpdate()
         {
             if (OnSettingsUpdate != null) OnSettingsUpdate();
         }
+		
+		//Update db, i.e. new columns, tables etc
+		//right now irrelevant
+		private void UpdateDB(){}
 
 	}
 }

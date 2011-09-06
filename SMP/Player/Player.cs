@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +52,13 @@ namespace SMP
 		public event OnPlayerAuth PlayerAuth;
 		public delegate void OnPlayerChat(string message, Player p);
 		public delegate void OnPlayerCommand(string cmd, string message, Player p);
+		//Other things for plugins ----------
+        public bool cancelBlock = false;
+        public bool cancelchat = false;
+        public bool cancelcommand = false;
+        public bool cancelmove = false;
+        public bool canceldig = false;
+        //Other things for plugins ----------
 		//Events for Custom Command and Plugins -------------------------------------
 		#endregion
 
@@ -1109,6 +1116,7 @@ namespace SMP
 		}
 		public void Dispose()
 		{
+			SaveAttributes();
 			players.Remove(this);
 			e.CurrentChunk.Entities.Remove(e);
 			Entity.Entities.Remove(id);
@@ -1170,6 +1178,94 @@ namespace SMP
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS
+		
+		private void SaveAttributes()
+		{
+			Dictionary<string, string> data = new Dictionary<string, string>();
+			
+			try
+			{
+				//data.Add("Name", username);
+				data.Add("ip", ip);
+				data.Add("NickName", NickName);
+				
+				if (CanBuild)
+					data.Add("CanBuild", "1");
+				else
+					data.Add("CanBuild", "0");
+				
+				data.Add("Prefix", Prefix);
+				data.Add("Suffix", Suffix);
+				data.Add("Color", color);
+				
+				if (DoNotDisturb)
+					data.Add("DND", "1");
+				else
+					data.Add("DND", "0");
+				
+				//TODO accouts
+				
+				//TODO groups and perms
+				
+				Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
+				
+			}
+			catch
+			{
+				Server.Log("Could not save " + username + "'s data");	
+			}
+		}
+		private void LoadAttributes()
+		{
+			System.Data.DataTable DT = new System.Data.DataTable();
+			this.group = Group.DefaultGroup;
+			DT = Server.SQLiteDB.GetDataTable("SELECT * FROM Player WHERE Name = '" + username + "';");
+			
+			if(DT.Rows.Count > 0)
+			{
+				Server.Log("SUCCESS!!");
+				NickName = DT.Rows[0]["NickName"].ToString();
+				
+				if (DT.Rows[0]["CanBuild"].ToString() == "1")
+					CanBuild = true;
+				else
+					CanBuild = false;
+				
+				Prefix = DT.Rows[0]["Prefix"].ToString();
+				Suffix = DT.Rows[0]["Suffix"].ToString();
+				
+				color = DT.Rows[0]["Color"].ToString();
+				
+				if (color.Length == 2 && color[0] == '%' || color[0] == '§' || color[0] == '&')
+					if (Color.IsColorValid((char)color[1]))
+					    color = "§" + color[1];
+				else if (color.Length == 1 && Color.IsColorValid((char)color[0]))
+				 	color = "§" + color[1];
+				
+				if (DT.Rows[0]["DND"].ToString() == "1")
+					DoNotDisturb = true;
+				else
+					DoNotDisturb = false;
+				
+				if (DT.Rows[0]["GodMode"].ToString() == "1")
+					GodMode = true;
+				else
+					GodMode = false;
+				
+				//TODO Accounts
+				
+				//TODO Group
+				
+			}
+			else
+			{
+				Server.Log("DOH!");
+				
+				//TODO Set Default to default group, setup accounts etc
+				//save them right away
+			}
+		}
+		
 		/// <summary>
         /// Finds a player by string or partial string
         /// </summary>
@@ -1219,7 +1315,7 @@ namespace SMP
 		
 		public string GetColor()
 		{
-			if(this.color == "")
+			if(this.color == "" || this.color == null)
 				return this.group.GroupColor;
 			else
 				return this.color;
@@ -1238,7 +1334,7 @@ namespace SMP
 		/// </summary>
 		public string GetName()
 		{
-			if(this.NickName == "")
+			if(this.NickName == "" || this.NickName == null)
 				return this.username;
 			else
 				return "~" + this.NickName;

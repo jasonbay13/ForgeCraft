@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright 2011 ForgeCraft team
+	Copyright 2010 MCSharp team (Modified for use with MCZall/MCLawl/MCForge)
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and
 	the GNU General Public License, Version 3 (the "Licenses"); you may
@@ -20,9 +20,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP.WebserverStuff
+namespace SMP.Plugins
 {
-	class WebClient
-	{
-	}
+    public enum Events
+    {
+        PlayerCommand,
+        PlayerChat,
+        BlockChange,
+        PlayerMove,
+        PlayerDig
+    }
 }
