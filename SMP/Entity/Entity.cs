@@ -233,14 +233,14 @@ namespace SMP
 				if (e.isAI)
 				{
 					Point3 sendme = e.pos * 32;
-					byte[] bytes = new byte[0x22];
+					byte[] bytes = new byte[18];
 					util.EndianBitConverter.Big.GetBytes(e.id).CopyTo(bytes, 0);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 8);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 12);
 					bytes[16] = (byte)(e.ai.yaw / 1.40625);
 					bytes[17] = (byte)(e.ai.pitch / 1.40625);
-					
+
 					if (!p.VisibleEntities.Contains(i)) continue;
 					if (!p.MapLoaded) continue;
 					p.SendRaw(0x22, bytes);

@@ -265,6 +265,8 @@ namespace SMP
 			/// </param>
 			public void SendRaw(byte id, byte[] send)
 			{
+				//if (id != 0 && id != 4 && id != 50 && id != 51 && id != 22) LogPacket(id, send);
+				//Console.WriteLine(id);
 				if (socket == null || !socket.Connected)
 					return;
 				byte[] buffer = new byte[send.Length + 1];
@@ -356,7 +358,7 @@ namespace SMP
 				else
 				{
 					Point3 sendme = pos * 32;
-					byte[] bytes = new byte[0x22];
+					byte[] bytes = new byte[18];
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 8);
@@ -945,6 +947,7 @@ namespace SMP
         {
             //once again please check			
             message = MessageAdditions(message);
+			Server.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
@@ -1146,17 +1149,24 @@ namespace SMP
 				return;
 			}
 
-			byte[] bytes = new byte[20 + e.ai.meta.Length];
+			byte[] metaarray = GetMetaByteArray(e);
+			byte[] bytes = new byte[20 + metaarray.Length];
+			//byte[] bytes = new byte[20];
 
             util.EndianBitConverter.Big.GetBytes(e.id).CopyTo(bytes, 0);
+			//bytes[4] = 51;
             bytes[4] = e.ai.type;
-            util.EndianBitConverter.Big.GetBytes((int)e.ai.pos.x).CopyTo(bytes, 5);
-			util.EndianBitConverter.Big.GetBytes((int)e.ai.pos.y).CopyTo(bytes, 9);
-			util.EndianBitConverter.Big.GetBytes((int)e.ai.pos.z).CopyTo(bytes, 13);
+            util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.x*32)).CopyTo(bytes, 5);
+			util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.y*32)).CopyTo(bytes, 9);
+			util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.z*32)).CopyTo(bytes, 13);
 			bytes[17] = (byte)(e.ai.yaw / 1.40625);
 			bytes[18] = (byte)(e.ai.pitch / 1.40625);
-			e.ai.meta.CopyTo(bytes, 19);
 
+			//Add in the metadata
+			metaarray.CopyTo(bytes, 19);
+			bytes[bytes.Length - 1] = 127;
+
+			LogPacket(0x18, bytes);
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS
@@ -1235,5 +1245,105 @@ namespace SMP
 		}
 		#endregion
 
+
+		#region META DATA HANDLER
+		byte[] GetMetaByteArray(Entity e)
+		{
+			switch (e.ai.type)
+			{
+				case 50: //Creeper
+					byte[] bytes = new byte[0];
+					bytes = AddVar(e, bytes, (byte)0, 16);
+					bytes = AddVar(e, bytes, (byte)0, 17);
+					return bytes;
+				case 51: //Skeleton
+					break;
+				case 52: //Spider
+					break;
+				case 53: //Giant Zombie
+					break;
+				case 54: //Zombie
+					break;
+				case 55: //Slime
+					break;
+				case 56: //Ghast
+					break;
+				case 57: //Zombie Pigman
+					break;
+				case 90: //Pig
+					break;
+				case 91: //Sheep
+					break;
+				case 92: //Cow
+					break;
+				case 93: //Hen
+					break;
+				case 94: //Squid
+					break;
+				case 95: //Wolf
+					break;
+			}
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, byte a, byte index)
+		{
+			int i = (0 << 5 | index & 0x1f) & 0xff;
+			
+			byte[] NewArray = new byte[Array.Length + 2];
+			Array.CopyTo(NewArray, 0);
+			NewArray[NewArray.Length-2] = (byte)i;
+			NewArray[NewArray.Length-1] = a;
+
+			return NewArray;
+		}
+		byte[] AddVar(Entity e, byte[] Array, short a, byte index)
+		{
+			int i = (1 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, int a, byte index)
+		{
+			int i = (2 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, float a, byte index)
+		{
+			int i = (3 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, string a, byte index)
+		{
+			int i = (4 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, Item a, byte index) //Item Stack
+		{
+			int i = (5 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		byte[] AddVar(Entity e, byte[] Array, Point3 a, byte index) //CHUNK Coordinates
+		{
+			int i = (6 << 5 | index & 0x1f) & 0xff;
+			return null;
+		}
+		#endregion
+
+		void LogPacket(byte id, byte[] packet)
+		{
+			string s = "";
+
+			if (packet.Length >= 1)
+			{
+				foreach (byte b in packet)
+				{
+					s += b + ", ";
+				}
+				Console.WriteLine("Packet " + id + " { " + s + "}");
+			}
+			else
+			{
+				Console.WriteLine("Packet " + id + " had no DATA!");
+			}
+		}
 	}
 }

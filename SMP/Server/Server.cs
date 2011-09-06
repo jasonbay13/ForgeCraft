@@ -80,8 +80,7 @@ namespace SMP
 
 			//Setup();
             
-            
-			//new Creeper(new Point3(0, 0, 0), mainlevel);
+            new Creeper(new Point3(0, 72, 0), mainlevel);
 		}
 		
 		public bool Setup()

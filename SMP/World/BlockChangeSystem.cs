@@ -419,6 +419,7 @@ namespace SMP
 			{
 				case (0):
 				case (1):
+					Console.WriteLine(DirectionByRotFlat(a, b) + "");
 					return false;
 
 				case ((byte)Directions.South):
@@ -674,7 +675,9 @@ namespace SMP
 
 		public static byte DirectionByRotFlat(Player p, BCS a)
 		{
-			return 255;
+			byte direction = (byte)Math.Floor((double)((p.rot[0] * 4F) / 360F) + 0.5D);
+			direction = (byte)(direction % 4);
+			return direction;
 		}
 		public static byte DirectionByRotNOTFlat(Player p, BCS a)
 		{

@@ -85,11 +85,13 @@ namespace SMP
 			mypos = pos;
 
 			e.UpdateChunks(false, false);
+
+			Console.WriteLine("Creeper spawned (EID " + mye.id + ")");
 		}
 
 		public void Update()
 		{
-			//TODO move this entity, you dont need to send movement, thats done in the player class... i think
+			//TODO move this entity, you dont need to send movement, thats done in the player class
 		}
 	}
 }
