@@ -528,61 +528,15 @@ namespace SMP
 
 		public void HandleWindowClick(byte[] message)
 		{
-			byte id = message[0];
-			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
-			ClickType click = (ClickType)message[3];
-			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
-			bool Shift = (message[6] == 1);
-			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
-			byte Count = 1;
-			short Meta = 0;
-			if (ItemID != -1)
+			if (OpenWindow)
 			{
-				Count = message[9];
-				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
-			}
-
-			//TODO see if the player has anything in their mouseslot, if so then put that in the slot/switch if possible/add if needed)
-			if (OnMouse != Item.Nothing)
-			{
-				if (OpenWindow)
-				{
-
-				}
-				else
-				{
-					if (inventory.items[slot] != Item.Nothing)
-					{
-
-					}
-					else
-					{
-						inventory.items[slot] = OnMouse;
-						OnMouse = Item.Nothing;
-					}
-				}
+				window.HandleClick(message);
 			}
 			else
 			{
-				if (OpenWindow)
-				{
-
-				}
-				else
-				{
-					if (inventory.items[slot] != Item.Nothing)
-					{
-						OnMouse = inventory.items[slot];
-						inventory.Remove(slot);
-					}
-					else
-					{
-
-					}
-				}
+				inventory.HandleClick(message);
 			}
-			
-			
+
 			//TODO if crafting, then check the current positioning
 		}
 
@@ -660,7 +614,6 @@ namespace SMP
 					return id;
 			}
 		}
-
-		enum ClickType { LeftClick = 0, RightClick = 1 };
 	}
+	public enum ClickType { LeftClick = 0, RightClick = 1 };
 }

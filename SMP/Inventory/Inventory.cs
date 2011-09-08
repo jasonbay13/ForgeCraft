@@ -67,6 +67,11 @@ namespace SMP
 			{
 				if (c == 0) return;
 				if (items[i].item == item)
+				{
+					if (item < 255)
+					{
+						if (items[i].meta != meta) continue;
+					}
 					if (items[i].count < stackable)
 					{
 						items[i].count += c;
@@ -78,12 +83,18 @@ namespace SMP
 						}
 						p.SendItem((short)i, item, items[i].count, meta);
 					}
+				}
 			}
 			//Console.WriteLine("add3");
 			for (int i = 9; i <= 35; i++)
 			{
 				if (c == 0) return;
 				if (items[i].item == item)
+				{
+					if (item < 255)
+					{
+						if (items[i].meta != meta) continue;
+					}
 					if (items[i].count < stackable)
 					{
 						items[i].count += c;
@@ -95,6 +106,7 @@ namespace SMP
 						}
 						p.SendItem((short)i, item, items[i].count, meta);
 					}
+				}
 			}
 			//Console.WriteLine("add4");
 			Add(item, c, meta, FindEmptySlot());
@@ -134,26 +146,408 @@ namespace SMP
 			p.SendItem((short)slot, items[slot].item, items[slot].count, items[slot].meta);
 		}
 
-		public int Right_Click(int slot)
+		public void HandleClick(byte[] message)
+		{
+			byte id = message[0];
+			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
+			ClickType click = (ClickType)message[3];
+			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
+			bool Shift = (message[6] == 1);
+			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
+			byte Count = 1;
+			short Meta = 0;
+			if (ItemID != -1)
+			{
+				Count = message[9];
+				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
+			}
+
+			if (slot == -999)
+			{
+				//TODO throw item
+				p.OnMouse = Item.Nothing;
+				return;
+			}
+
+			if (Shift)
+			{
+				if (slot >= 36)
+				{
+					for (int i = 9; i <= 35; i++)
+					{
+						Item item = items[i];
+						if (item.item == items[slot].item)
+						{
+							if (item.item < 255)
+							{
+								if (item.meta != items[slot].meta)
+								{
+									continue;
+								}
+							}
+							byte stacking = isStackable(item.item);
+							byte available = (byte)(stacking - item.count);
+							if (available == 0) return;
+							if (items[slot].count <= available)
+							{
+								item.count += items[slot].count;
+								items[slot] = Item.Nothing;
+								return;
+							}
+							else
+							{
+								item.count = stacking;
+								items[slot].count -= available;
+							}
+						}
+					}
+					for (int i = 9; i <= 35; i++)
+						if (items[i].item == (short)Items.Nothing)
+						{
+							items[i] = items[slot];
+							items[slot] = Item.Nothing;
+						}
+					return;
+				}
+				if (slot < 36)
+				{
+					for (int i = 36; i < 45; i++)
+					{
+						Item item = items[i];
+						if (item.item == items[slot].item)
+						{
+							if (item.item < 255)
+							{
+								if (item.meta != items[slot].meta) continue;
+							}
+							byte stacking = isStackable(item.item);
+							byte available = (byte)(stacking - item.count);
+							if (available == 0) return;
+							if (items[slot].count <= available)
+							{
+								item.count += items[slot].count;
+								items[slot] = Item.Nothing;
+								return;
+							}
+							else
+							{
+								item.count = stacking;
+								items[slot].count -= available;
+							}
+						}
+					}
+					for (int i = 36; i < 45; i++)
+						if (items[i].item == (short)Items.Nothing)
+						{
+							items[i] = items[slot];
+							items[slot] = Item.Nothing;
+						}
+					return;
+				}
+				return;
+			}
+
+			if (p.OnMouse != Item.Nothing)
+			{
+				if (items[slot] != Item.Nothing)
+				{
+					#region Crafting Slot Done
+					if (slot == 0)
+					{
+						if (p.OnMouse.item == items[slot].item)
+						{
+							if (p.OnMouse.item < 255)
+							{
+								if (p.OnMouse.meta == items[slot].meta)
+								{
+									byte stacking = isStackable(p.OnMouse.item);
+									byte availible = (byte)(stacking - p.OnMouse.count);
+									if (items[slot].count <= availible)
+									{
+										p.OnMouse.count += items[slot].count;
+									}
+								}
+								else
+								{
+									Item temp = items[slot];
+									items[slot] = p.OnMouse;
+									p.OnMouse = temp;
+								}
+							}
+							else
+							{
+								byte stacking = isStackable(p.OnMouse.item);
+								byte availible = (byte)(stacking - p.OnMouse.count);
+								if (items[slot].count <= availible)
+								{
+									p.OnMouse.count += items[slot].count;
+								}
+							}
+						}
+						else
+						{
+							return;
+						}
+					}
+					#endregion
+					#region Armor Slots Done
+					else if (slot == 5 || slot == 6 || slot == 7 || slot == 8)
+					{
+						if (items[slot].item == p.OnMouse.item) return;
+						switch (slot)
+						{
+							case 5:
+								if (p.OnMouse.item == 298 || p.OnMouse.item == 302 || p.OnMouse.item == 306 || p.OnMouse.item == 310)
+								{
+									Item temp = items[slot];
+									items[slot] = p.OnMouse;
+									p.OnMouse = temp;
+								}
+								break;
+							case 6:
+								if (p.OnMouse.item == 299 || p.OnMouse.item == 303 || p.OnMouse.item == 307 || p.OnMouse.item == 311)
+								{
+									Item temp = items[slot];
+									items[slot] = p.OnMouse;
+									p.OnMouse = temp;
+								}
+								break;
+							case 7:
+								if (p.OnMouse.item == 300 || p.OnMouse.item == 304 || p.OnMouse.item == 308 || p.OnMouse.item == 312)
+								{
+									Item temp = items[slot];
+									items[slot] = p.OnMouse;
+									p.OnMouse = temp;
+								}
+								break;
+							case 8:
+								if (p.OnMouse.item == 301 || p.OnMouse.item == 305 || p.OnMouse.item == 309 || p.OnMouse.item == 313)
+								{
+									Item temp = items[slot];
+									items[slot] = p.OnMouse;
+									p.OnMouse = temp;
+								}
+								break;
+						}
+					}
+					#endregion
+					else
+					{
+						if (click == ClickType.RightClick)
+						{
+							if (p.OnMouse.item == items[slot].item)
+							{
+								if (p.OnMouse.item < 255)
+								{
+									if (p.OnMouse.meta == items[slot].meta)
+									{
+										byte stacking = isStackable(p.OnMouse.item);
+										if (items[slot].count < stacking)
+										{
+											items[slot].count += 1;
+											if (p.OnMouse.count == 1)
+											{
+												p.OnMouse = Item.Nothing;
+											}
+											else
+											{
+												p.OnMouse.count -= 1;
+											}
+										}
+									}
+									else
+									{
+										Item temp = items[slot];
+										items[slot] = p.OnMouse;
+										p.OnMouse = temp;
+									}
+								}
+								else
+								{
+									byte stacking = isStackable(p.OnMouse.item);
+									if (items[slot].count < stacking)
+									{
+										items[slot].count += 1;
+										if (p.OnMouse.count == 1)
+										{
+											p.OnMouse = Item.Nothing;
+										}
+										else
+										{
+											p.OnMouse.count -= 1;
+										}
+									}
+								}
+							}
+						}
+						else
+						{
+							if (p.OnMouse.item == items[slot].item)
+							{
+								if (p.OnMouse.item < 255)
+								{
+									if (p.OnMouse.meta == items[slot].meta)
+									{
+										byte stacking = isStackable(p.OnMouse.item);
+										byte available = (byte)(stacking - items[slot].count);
+										if (available == 0) return;
+										if (p.OnMouse.count <= available)
+										{
+											items[slot].count += p.OnMouse.count;
+											p.OnMouse = Item.Nothing;
+										}
+										else
+										{
+											items[slot].count = stacking;
+											p.OnMouse.count -= available;
+										}
+									}
+									else
+									{
+										Item temp = items[slot];
+										items[slot] = p.OnMouse;
+										p.OnMouse = temp;
+									}
+								}
+								else
+								{
+									byte stacking = isStackable(p.OnMouse.item);
+									byte available = (byte)(stacking - items[slot].count);
+									if (available == 0) return;
+									if (p.OnMouse.count <= available)
+									{
+										items[slot].count += p.OnMouse.count;
+										p.OnMouse = Item.Nothing;
+									}
+									else
+									{
+										items[slot].count = stacking;
+										p.OnMouse.count -= available;
+									}
+								}
+							}
+							else
+							{
+								Item temp = items[slot];
+								items[slot] = p.OnMouse;
+								p.OnMouse = temp;
+							}
+						}
+					}
+				}
+				#region Empty Slot Done
+				else
+				{
+					if (slot == 0) return; //Crafting output slot
+					#region Armor slots Done
+					if (slot == 5 || slot == 6 || slot == 7 || slot == 8)
+					{
+						switch (slot)
+						{
+							case 5:
+								if (p.OnMouse.item == 298 || p.OnMouse.item == 302 || p.OnMouse.item == 306 || p.OnMouse.item == 310)
+								{
+									items[slot] = p.OnMouse;
+									p.OnMouse = Item.Nothing;
+								}
+								break;
+							case 6:
+								if (p.OnMouse.item == 299 || p.OnMouse.item == 303 || p.OnMouse.item == 307 || p.OnMouse.item == 311)
+								{
+									items[slot] = p.OnMouse;
+									p.OnMouse = Item.Nothing;
+								}
+								break;
+							case 7:
+								if (p.OnMouse.item == 300 || p.OnMouse.item == 304 || p.OnMouse.item == 308 || p.OnMouse.item == 312)
+								{
+									items[slot] = p.OnMouse;
+									p.OnMouse = Item.Nothing;
+								}
+								break;
+							case 8:
+								if (p.OnMouse.item == 301 || p.OnMouse.item == 305 || p.OnMouse.item == 309 || p.OnMouse.item == 313)
+								{
+									items[slot] = p.OnMouse;
+									p.OnMouse = Item.Nothing;
+								}
+								break;
+						}
+					}
+					#endregion
+					else
+					{
+						if (click == ClickType.RightClick)
+						{
+							if (p.OnMouse.count == 1)
+							{
+								items[slot] = p.OnMouse;
+								p.OnMouse = Item.Nothing;
+							}
+							else
+							{
+								p.OnMouse.count -= 1;
+								items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level);
+							}
+						}
+						else
+						{
+							items[slot] = p.OnMouse;
+							p.OnMouse = Item.Nothing;
+						}
+					}
+				}
+				#endregion
+			}
+			#region Empty Mouse done
+			else //Player has NOTHING on the mouse
+			{
+				if (items[slot] != Item.Nothing)
+				{
+					if (click == ClickType.RightClick)
+					{
+						p.OnMouse = Right_Click(slot);
+					}
+					else //Player left-clicked
+					{
+						p.OnMouse = items[slot];
+						Remove(slot);
+					}
+				}
+				else
+				{
+					return;
+				}
+			}
+			#endregion
+		}
+		public Item Right_Click(int slot)
 		{
 			try
 			{
-				int temp;
-				if (items.Length % 2 == 0)
+				Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level);
+				if (items[slot].count == 1)
 				{
-					temp = items.Length / 2;
+					temp = items[slot];
+					items[slot] = Item.Nothing;
+					return temp;
+				}
+				if (items[slot].count % 2 == 0) //this makes no FUCKING SENSE
+				{
+					temp.count = (byte)(items[slot].count / 2);
 					items[slot].count = (byte)(items[slot].count / 2);
 				}
 				else
 				{
-					temp = items.Length / 2;
-					items[slot].count = (byte)(items[slot].count - temp);
+					byte a = items[slot].count;
+					items[slot].count = (byte)(a / 2);
+					temp.count = (byte)(a - items[slot].count);
 				}
 				return temp;
 			}
 			catch
 			{
-				return 0;
+				return Item.Nothing;
 			}
 		}
 		
