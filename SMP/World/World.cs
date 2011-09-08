@@ -37,6 +37,7 @@ namespace SMP
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
 		public GenStandard generator;
 		public Dictionary<Point, Chunk> chunkData;
+		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
 		public List<Point> ToGenerate = new List<Point>();
         public bool Raining = false;
 		#region Custom Command / Plugin Events
@@ -176,6 +177,12 @@ namespace SMP
 			int cx = x >> 4, cz = z >> 4;
 			Chunk chunk = Chunk.GetChunk(cx, cz, this);
 			return chunk.GetMetaData(x & 0xf, y, z & 0xf);
+		}
+		public void SetMeta(int x, int y, int z, byte data)
+		{
+			int cx = x >> 4, cz = z >> 4;
+			Chunk chunk = Chunk.GetChunk(cx, cz, this);
+			chunk.SetMetaData(x & 0xf, y, z & 0xf, data);
 		}
 	}
 	public struct Point : IEquatable<Point>

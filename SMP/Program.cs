@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading;
+
 /*
 	Copyright 2011 ForgeCraft team
 	
@@ -82,6 +83,9 @@ namespace SMP
 							}
                             Exit();
                             return;
+						case "id":
+							new Thread(new ThreadStart(InventoryDebug)).Start();
+							break;
                         default:
                             Command command = Command.all.Find(cmd);
                             if (command == null)
@@ -139,10 +143,18 @@ namespace SMP
                 }
             }
         }
-
         private static void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
         {
             Server.ServerLogger.LogError((Exception)e.ExceptionObject);
         }
+
+
+
+		static void InventoryDebug()
+		{
+			
+			GUI.InventoryDebug dbg = new GUI.InventoryDebug();
+			dbg.ShowDialog();
+		}
     }
 }

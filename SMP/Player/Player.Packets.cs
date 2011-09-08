@@ -318,6 +318,16 @@ namespace SMP
 		#region BlockChanges
 		private void HandleDigging(byte[] message)
 		{
+			//Send Animation, this shouldn't only be sent when digging
+			foreach (int i in VisibleEntities)
+			{
+				Entity e = Entity.Entities[i];
+				if (!e.isPlayer) continue;
+				Player p = e.p;
+				if (p.level == level && p != this)
+					p.SendAnimation(id, 1);
+			}
+
 			if (message[0] == 0)
 			{
 				int x = util.EndianBitConverter.Big.ToInt32(message, 1);
@@ -329,15 +339,6 @@ namespace SMP
 				{
 					BlockChange.LeftClicked[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0));
 				}
-
-				// Send an animation to all nearby players.
-                foreach( int i in VisibleEntities ) {
-					Entity e = Entity.Entities[i];
-					if (!e.isPlayer) continue;
-					Player p = e.p;
-                    if( p.level == level && p != this )
-                        p.SendAnimation( id, 1 );
-                }
 
                 if (OnBlockChange != null)
                     OnBlockChange(this, x, y, z, rc);
@@ -373,7 +374,7 @@ namespace SMP
 			}
 			if (message[0] == 4)
 			{
-				//Player dropped item in hand
+				//TODO drop one of the item the player is holding!
 			}
 		}
 		private void HandleBlockPlacementPacket(byte[] message)
@@ -500,8 +501,6 @@ namespace SMP
 				}
 				return;
 			}
-
-			inventory.Remove(inventory.current_index, 1);
 		}
 		#endregion
 
@@ -514,6 +513,13 @@ namespace SMP
 				inventory.current_index = current_slot_holding;
 				inventory.current_item = inventory.items[current_slot_holding];
 				current_block_holding = inventory.current_item;
+
+				foreach (int i in VisibleEntities.ToArray())
+				{
+					Entity e = Entity.Entities[i];
+					if (!e.isPlayer) continue;
+					e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
+				}
 			}
 			catch { }
 		}
@@ -527,18 +533,101 @@ namespace SMP
 		{
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
+
 		public void HandleWindowClick(byte[] message)
 		{
-			//TODO handle this, AND this is where crafting goes
+			if (OpenWindow)
+			{
+				window.HandleClick(message);
+			}
+			else
+			{
+				inventory.HandleClick(message);
+			}
+
+			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
+			if (!OpenWindow)
+			{
+				if (slot == 5)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 4, inventory.items[5].item, 0);
+					}
+				}
+				else if (slot == 6)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 3, inventory.items[6].item, 0);
+					}
+				}
+				else if (slot == 7)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 2, inventory.items[7].item, 0);
+					}
+				}
+				else if (slot == 8)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 1, inventory.items[8].item, 0);
+					}
+				}
+				else if (slot == inventory.current_index)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
+					}
+				}
+			}
+			else
+			{
+				byte currentc = (byte)((current_slot_holding - 9) + window.items.Length);
+				if (slot == currentc)
+				{
+					foreach (int i in VisibleEntities.ToArray())
+					{
+						Entity e = Entity.Entities[i];
+						if (!e.isPlayer) continue;
+						e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
+					}
+				}
+			}
+
+			//TODO if crafting, then check the current positioning
 		}
 
 		private void HandleDC(byte[] message)
 		{
 			Server.Log(username + " Disconnected.");
 			GlobalMessage(username + " Left.");
+			socket.Close();
 			Disconnect();
-			//TODO completely delete player.
+			foreach (int i in VisibleEntities.ToArray())
+			{
+				try
+				{
+					Entity e = Entity.Entities[i];
+					e.p.SendDespawn(id);
+				}
+				catch { /* Ignore Me */ }
+			}
 		}
+
         public void HandleRespawn(byte[] message)
         {
             SendRespawn(message[0]);
@@ -607,4 +696,5 @@ namespace SMP
 			}
 		}
 	}
+	public enum ClickType { LeftClick = 0, RightClick = 1 };
 }

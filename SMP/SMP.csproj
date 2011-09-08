@@ -54,8 +54,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\InventoryDebug.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\InventoryDebug.Designer.cs">
+      <DependentUpon>InventoryDebug.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inventory\Crafting.cs" />
     <Compile Include="Plugins\Events.cs" />
     <Compile Include="Plugins\Plugin.Events.cs" />
+    <Compile Include="PreLoadedData\PreLoaded.cs" />
     <Compile Include="World\AI\AI.cs" />
     <Compile Include="World\AI\Creeper.cs" />
     <Compile Include="Command\Commands\CmdCheckPort.cs" />
@@ -288,6 +296,9 @@
     <None Include="Command\Commands\CMDBLANK.txt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GUI\InventoryDebug.resx">
+      <DependentUpon>InventoryDebug.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>

@@ -88,12 +88,12 @@ namespace SMP {
                     for (int z = 0; z < 128; ++z)
                     {
                         for (int y = 0; y < 1; ++y)
-                            c.PlaceBlock(x, y, z, 0x07);
+							c.UNCHECKEDPlaceBlock(x, y, z, 0x07);
                         for (int y = 1; y < 50; ++y)
-                            c.PlaceBlock(x, y, z, 0x01);
+							c.UNCHECKEDPlaceBlock(x, y, z, 0x01);
                         for (int y = 50; y < 65; ++y)
-                            c.PlaceBlock(x, y, z, 0x03);
-                        c.PlaceBlock(x, 65, z, 0x02);
+							c.UNCHECKEDPlaceBlock(x, y, z, 0x03);
+						c.UNCHECKEDPlaceBlock(x, 65, z, 0x02);
                     }
             }
             else
@@ -108,24 +108,24 @@ namespace SMP {
                         // Bedrock
                         int bedrockHeight = random.Next(1, 6);
                         for (int y = 0; y < bedrockHeight; y++)
-                            c.PlaceBlock(x, y, z, 0x07);
+							c.UNCHECKEDPlaceBlock(x, y, z, 0x07);
 
                         // Stone
                         for (int y = bedrockHeight; y < v - 5; y++)
-                            c.PlaceBlock(x, y, z, 0x01);
+							c.UNCHECKEDPlaceBlock(x, y, z, 0x01);
 
                         // Dirt
                         for (int y = v - 5; y < v; y++)
-                            c.PlaceBlock(x, y, z, (byte)(desertSelector.GetValue(cx + x, y, cz + z) > 0.4 ? 0x0C : 0x03));
+							c.UNCHECKEDPlaceBlock(x, y, z, (byte)(desertSelector.GetValue(cx + x, y, cz + z) > 0.4 ? 0x0C : 0x03));
 
 
                         if (v <= waterLevel)
                         {
-                            c.PlaceBlock(x, v, z, 0x0C); // Send
+							c.UNCHECKEDPlaceBlock(x, v, z, 0x0C); // Send
                         }
                         else
                         {
-                            c.PlaceBlock(x, v, z, (byte)(desertSelector.GetValue(cx + x, v, cz + z) > 0.35 ? 0x0C : 0x02));
+							c.UNCHECKEDPlaceBlock(x, v, z, (byte)(desertSelector.GetValue(cx + x, v, cz + z) > 0.35 ? 0x0C : 0x02));
                         }
                     }
                 }
@@ -153,11 +153,11 @@ namespace SMP {
                                 bool desert = desertSelector.GetValue(cx + x, y, cz + z) > 0.4;
                                 //if( mv > 0.4 ) {
                                 if (lvl == 0)
-                                    c.PlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x02));
+									c.UNCHECKEDPlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x02));
                                 else if (lvl < 5)
-                                    c.PlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x03));
+									c.UNCHECKEDPlaceBlock(x, y, z, (byte)(desert ? 0x0C : 0x03));
                                 else
-                                    c.PlaceBlock(x, y, z, 0x01);
+									c.UNCHECKEDPlaceBlock(x, y, z, 0x01);
 
                                 ++lvl;
                                 //}
@@ -176,14 +176,14 @@ namespace SMP {
                         {
                             if (caves.GetValue(cx + x, y, cz + z) > (128 - y) * 0.0132)
                             {
-                                c.PlaceBlock(x, y, z, 0x00);
+								c.UNCHECKEDPlaceBlock(x, y, z, 0x00);
                                 if (c.SGB(x, y - 1, z) == 0x03)
-                                    c.PlaceBlock(x, y - 1, z, 0x02);
+									c.UNCHECKEDPlaceBlock(x, y - 1, z, 0x02);
                             }
 
                             if (y <= waterLevel && c.SGB(x, y, z) == 0x00)
                             {
-                                c.PlaceBlock(x, y, z, 0x08);
+								c.UNCHECKEDPlaceBlock(x, y, z, 0x08);
                             }
                         }
                     }

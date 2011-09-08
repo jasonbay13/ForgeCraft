@@ -16,66 +16,98 @@
 	permissions and limitations under the Licenses.
 */
 using System;
+using System.Collections.Generic;
 
 namespace SMP
 {
 	public class Windows
 	{
-		byte type; //This holds type information, used in deciding which kind of window we need to send.
-		Point3 pos; //The pos of the block that this window is attached to
-		World level;
-		Item[] items = new Item[0]; //Hold all the items this window has inside it.
+		public byte type; //This holds type information, used in deciding which kind of window we need to send.
+		public string name = "Chest";
+		public Point3 pos; //The pos of the block that this window is attached to
+		public World level;
+		public Item[] items; //Hold all the items this window has inside it.
 
-		Windows(byte Type, Point3 Pos, World Level)
+		public Windows(byte Type, Point3 Pos, World Level)
 		{
+			Console.WriteLine("Window Creating.");
+
 			type = Type;
 			pos = Pos;
 			level = Level;
 
-			
-			//Create a new window class based on the type
+			switch (type)
+			{
+				case 0:
+					name = "Chest"; //We change this to "Large Chest" Later if it needs it :3
+					items = new Item[27];
+					break;
+				case 1:
+					name = "Workbench";
+					items = new Item[10];
+					break;
+				case 2:
+					name = "Furnace";
+					items = new Item[3];
+					break;
+				case 3:
+					name = "Dispenser";
+					items = new Item[9];
+					break;
+				default:
+					name = "Chest";
+					items = new Item[27];
+					break;
+			}
+			Console.WriteLine("Window adding.");
+			level.windows.Add(pos, this);
+			Console.WriteLine("Window done.");
 		}
 
-		bool AddItem(Item item)
+		public bool AddItem(Item item)
 		{
 			byte slot = FindEmptySlot();
 			if (slot == 255) return false;
 
 			return AddItem(item, slot);
 		}
-		bool AddItem(Item item, byte slot)
+		public bool AddItem(Item item, byte slot)
 		{
 			return false;
 		}
 
-		void RemoveItem(short id)
+		public void RemoveItem(short id)
 		{
 			RemoveItem(id, 1);
 		}
-		void RemoveItem(short id, byte count)
+		public void RemoveItem(short id, byte count)
 		{
 
 		}
 
-		byte FindEmptySlot()
+		public byte FindEmptySlot()
 		{
 			return 255;
 		}
-	}
 
-	public enum WindowSlots
-	{
-		Chest = 63,
-		LargeChest = 90,
-		Crafting = 46,
-		Dispenser = 45
-	}
-	public enum WindowID
-	{
-		Chest = 0,
-		WorkBench = 1,
-		Furnace = 2,
-		Dispenser = 3
+		public void HandleClick(byte[] message)
+		{
+			byte id = message[0];
+			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
+			ClickType click = (ClickType)message[3];
+			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
+			bool Shift = (message[6] == 1);
+			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
+			byte Count = 1;
+			short Meta = 0;
+			if (ItemID != -1)
+			{
+				Count = message[9];
+				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
+			}
+
+			//HANDLE CLICK
+		}
 	}
 }
 
