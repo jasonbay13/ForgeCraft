@@ -24,11 +24,20 @@ namespace SMP
 	{
 		public Item[] items;
 		public Player p;
-		public Item current_item;
+		public Item Mycurrent_item;
+		public Item current_item
+		{
+			get
+			{
+				return Mycurrent_item;
+			}
+			set
+			{
+				Mycurrent_item = value;
+				UpdateVisibleItemInHand(Mycurrent_item.item);
+			}
+		}
 		public int current_index;
-
-		bool ActiveWindow;
-		Windows window; //The type of window that is currently open
 
 		public Inventory (Player pl)
 		{
@@ -54,12 +63,6 @@ namespace SMP
 		public void Add(short item, byte count, short meta)
 		{
 			//Console.WriteLine("add1");
-			if (ActiveWindow)
-			{
-				//TODO pass action to the window
-				//SUDO window.Add(item, count, meta, slot);
-				return;
-			}
 			byte stackable = isStackable(item);
 			byte c = count;
 			//Console.WriteLine("add2");
@@ -113,14 +116,11 @@ namespace SMP
 		}
 		public void Add(short item, byte count, short meta, int slot)
 		{
-			Console.WriteLine("d1");
+			if (items[slot] == Item.Nothing)
+				if (slot == current_index)
+					UpdateVisibleItemInHand(item);
+
 			if (count == 0) return;
-			if (ActiveWindow)
-			{
-				//TODO pass action to the window
-				//SUDO window.Add(item, count, meta, slot);
-				return;
-			}
 
 			Item I = new Item(item, count, meta, p.level);
 			if (slot > 44 || slot < 0) return;
@@ -551,6 +551,16 @@ namespace SMP
 			}
 		}
 		
+		public void UpdateVisibleItemInHand(short id)
+		{
+			foreach (int i in p.VisibleEntities.ToArray())
+			{
+				Entity e = Entity.Entities[i];
+				if (!e.isPlayer) continue;
+				e.p.SendEntityEquipment(p.id, 0, id, 0);
+			}
+		}
+
 		public int FindEmptySlot()
 		{			
 			for (int i = 36; i < 45; i++)

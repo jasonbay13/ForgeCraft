@@ -70,8 +70,14 @@ namespace SMP
 		public Item(short item, byte count, short meta, World l, double[] pos, byte[] rot)
 		{
 			this.item = item;
+			this.count = count;
+			this.meta = meta;
+			this.level = l;
+			this.pos = pos;
+			this.rot = rot;
 			OnGround = true;
 			e = new Entity(this, l);
+			e.UpdateChunks(false, false);
 		}
 
 		public void CheckDamage()

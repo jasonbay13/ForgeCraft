@@ -153,10 +153,11 @@ namespace SMP
 			}
 			catch (ObjectDisposedException)
 			{
-				
+				p.Disconnect();
 			}
 			catch (Exception e)
 			{
+				p.Disconnect();
 				Server.Log(e.Message);
 				Server.Log(e.StackTrace);
 			}
@@ -744,7 +745,7 @@ namespace SMP
 					SendRaw(0x14, bytes);
 
 					CheckOnFire();
-					//SendEntityEquipment(p.id, -1, -1, -1, -1, -1);
+					SendEntityEquipment(p);
 				}
 				catch (Exception e)
 				{
@@ -788,36 +789,22 @@ namespace SMP
 			{
 				if (!MapLoaded) return;
 			}
-			public void SendEntityEquipment(int id, short hand, short a1, short a2, short a3, short a4)
+
+			public void SendEntityEquipment(Player p)
 			{
-				if (!MapLoaded) return;
-
+				SendEntityEquipment(p.id, 4, p.inventory.items[5].item, 0);
+				SendEntityEquipment(p.id, 3, p.inventory.items[6].item, 0);
+				SendEntityEquipment(p.id, 2, p.inventory.items[7].item, 0);
+				SendEntityEquipment(p.id, 1, p.inventory.items[8].item, 0);
+				SendEntityEquipment(p.id, 0, p.current_block_holding.item, 0); //for some reason, this one seems to work when send elsewhere, but not here...
+			}
+			public void SendEntityEquipment(int id, short slot, short ItemId, short a)
+			{
 				byte[] bytes = new byte[10];
-
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(hand).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 8);
-				SendRaw(0x05, bytes);
-
-				util.EndianBitConverter.Big.GetBytes((short)1).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(a1).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 8);
-				SendRaw(0x05, bytes);
-
-				util.EndianBitConverter.Big.GetBytes((short)2).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(a2).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 8);
-				SendRaw(0x05, bytes);
-
-				util.EndianBitConverter.Big.GetBytes((short)3).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(a3).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 8);
-				SendRaw(0x05, bytes);
-
-				util.EndianBitConverter.Big.GetBytes((short)4).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(a4).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 8);
+				util.EndianBitConverter.Big.GetBytes(slot).CopyTo(bytes, 4);
+				util.EndianBitConverter.Big.GetBytes(ItemId).CopyTo(bytes, 6);
+				util.EndianBitConverter.Big.GetBytes(a).CopyTo(bytes, 8);
 				SendRaw(0x05, bytes);
 			}
 
