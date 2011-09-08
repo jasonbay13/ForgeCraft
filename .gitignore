@@ -203,3 +203,5 @@ SMP/obj/Debug/GenerateResource.write.1.tlog
 /RemoteConsole/bin/Debug/RemoteConsole.vshost.exe.manifest
 /RemoteConsole/obj/x86/Debug/ResolveAssemblyReference.cache
 /SMP/AI/AI.cs
+/SMP/bin/Debug/System.Data.SQLite.xml
+/SMP/obj/Debug/SMP.GUI.InventoryDebug.resources
