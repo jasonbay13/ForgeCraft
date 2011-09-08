@@ -51,7 +51,7 @@ namespace SMP
             p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist, WrapMethod.Chat);  //lol it was ForgetCraft
 			short slot = (short)p.inventory.FindEmptySlot();
 			if (slot == -1) return;
-			if (devs.Contains(p.username) || p.username == "hypereddie10")
+			if (devs.Contains(p.username) || p.username == "hypereddie10") //lolwut is this? -EricKilla
 				p.inventory.Add(278, 1, 0);
         }
 
