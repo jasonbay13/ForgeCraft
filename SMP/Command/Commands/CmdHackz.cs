@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 
 // for LULZ
+//Epic Win, we should have the MCLawl /hacks message for teh lulz. 
 namespace SMP
 {
 	public class CmdHackz : Command
@@ -32,7 +33,7 @@ namespace SMP
 
         public override void Use(Player p, params string[] args)
 		{
-			p.Kick(HelpBot + Color.DarkRed + "YOU FAIL!");
+			p.Kick(HelpBot + Color.DarkRed + "YOU FAIL!"); 
 		}
 		
 		public override void Help(Player p)
