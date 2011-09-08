@@ -500,8 +500,6 @@ namespace SMP
 				}
 				return;
 			}
-
-			inventory.Remove(inventory.current_index, 1);
 		}
 		#endregion
 
@@ -527,9 +525,65 @@ namespace SMP
 		{
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
+
 		public void HandleWindowClick(byte[] message)
 		{
-			//TODO handle this, AND this is where crafting goes
+			byte id = message[0];
+			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
+			ClickType click = (ClickType)message[3];
+			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
+			bool Shift = (message[6] == 1);
+			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
+			byte Count = 1;
+			short Meta = 0;
+			if (ItemID != -1)
+			{
+				Count = message[9];
+				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
+			}
+
+			//TODO see if the player has anything in their mouseslot, if so then put that in the slot/switch if possible/add if needed)
+			if (OnMouse != Item.Nothing)
+			{
+				if (OpenWindow)
+				{
+
+				}
+				else
+				{
+					if (inventory.items[slot] != Item.Nothing)
+					{
+
+					}
+					else
+					{
+						inventory.items[slot] = OnMouse;
+						OnMouse = Item.Nothing;
+					}
+				}
+			}
+			else
+			{
+				if (OpenWindow)
+				{
+
+				}
+				else
+				{
+					if (inventory.items[slot] != Item.Nothing)
+					{
+						OnMouse = inventory.items[slot];
+						inventory.Remove(slot);
+					}
+					else
+					{
+
+					}
+				}
+			}
+			
+			
+			//TODO if crafting, then check the current positioning
 		}
 
 		private void HandleDC(byte[] message)
@@ -606,5 +660,7 @@ namespace SMP
 					return id;
 			}
 		}
+
+		enum ClickType { LeftClick = 0, RightClick = 1 };
 	}
 }

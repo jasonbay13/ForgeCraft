@@ -39,6 +39,9 @@ namespace SMP
         public Chunk chunknew { get { return e.c; } }
 
 		public Inventory inventory;
+		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
+		public Windows window; //The window that is currently open (this isnt used for player inventory)
+		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
@@ -954,7 +957,7 @@ namespace SMP
         {
             //once again please check			
             message = MessageAdditions(message);
-			Server.Log(message);
+			//Server.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
@@ -1174,7 +1177,7 @@ namespace SMP
 			metaarray.CopyTo(bytes, 19);
 			bytes[bytes.Length - 1] = 127;
 
-			LogPacket(0x18, bytes);
+			//LogPacket(0x18, bytes);
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS

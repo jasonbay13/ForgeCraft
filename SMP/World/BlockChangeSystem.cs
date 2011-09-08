@@ -42,10 +42,6 @@ namespace SMP
 			//Right Clicked ON Delegates (Holds delegates for when blocks are right clicked)
 			RightClickedOn.Add((short)Blocks.Grass, new BCD(Till));
 			RightClickedOn.Add((short)Blocks.Dirt, new BCD(Till));
-			//RightClickedOn.Add(8, new BCD(BucketWater)); //These are handled in the "right clicked with an item" part
-			//RightClickedOn.Add(9, new BCD(BucketWater));
-			//RightClickedOn.Add(10, new BCD(BucketLava));
-			//RightClickedOn.Add(11, new BCD(BucketLava));
 			RightClickedOn.Add((short)Blocks.Dispenser, new BCD(OpenDispenser));
 			RightClickedOn.Add((short)Blocks.NoteBlock, new BCD(ChangeNoteblock));
 			RightClickedOn.Add((short)Blocks.Bed, new BCD(GetInBed));
@@ -167,34 +163,33 @@ namespace SMP
 				}
 			return true;
 		}
-		public static bool BucketWater(Player a, BCS b)
-		{
-			return false;
-		}
-		public static bool BucketLava(Player a, BCS b)
-		{
-			return false;
-		}
 		public static bool OpenDispenser(Player a, BCS b)
 		{
-			Server.Log("Dispenser start");
-
-			string name = "Dispenser";
-			short length = (short)name.Length;
+			if(!a.level.windows.ContainsKey(b.pos))
+			{
+				new Windows(3, b.pos, a.level);
+			}
+			
+			Windows window = a.level.windows[b.pos];
+			short length = (short)window.name.Length;
 			byte[] bytes = new byte[5 + (length)];
-			bytes[0] = 25;
-			bytes[1] = 0;
+
+			bytes[0] = 1; //CHANGE THIS! (idk what the byte referances, i dont really see a use for it if its just a byte)
+			bytes[1] = window.type;
 			util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
-			UTF8Encoding.UTF8.GetBytes(name).CopyTo(bytes, 4);
-			bytes[4 + (length)] = 9; //number of slots
+			UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
+			bytes[4 + (length)] = (byte)window.items.Length; //number of slots
+
 			a.SendRaw(0x64, bytes);
-
-			Server.Log("Send dispenser");
-
 			return false;
 		}
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
+			//Change Metadata
+			
+
+			//Send NoteSound
+
 			return false;
 		}
 		public static bool GetInBed(Player a, BCS b)
@@ -703,6 +698,7 @@ namespace SMP
 
 			return DirectionByRotFlat(p, a);
 		}
+
 		/// <summary>
 		/// this one reverses the direction offset and returns the block id that was clicked
 		/// this does not always need to be used, only if the direction offset has already been applied

@@ -14,7 +14,9 @@ namespace SMP
 		{
 			
 			dbConnection = "Data Source=properties/ForgeCraft.db";
-			
+			if (!Directory.Exists("properties"))
+				Directory.CreateDirectory("properties");
+
 			if (!File.Exists("properties/ForgeCraft.db"))
 			{
 				SQLiteConnection.CreateFile("properties/ForgeCraft.db");

@@ -56,8 +56,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Inventory\Crafting.cs" />
     <Compile Include="Plugins\Events.cs" />
     <Compile Include="Plugins\Plugin.Events.cs" />
+    <Compile Include="PreLoadedData\PreLoaded.cs" />
     <Compile Include="World\AI\AI.cs" />
     <Compile Include="World\AI\Creeper.cs" />
     <Compile Include="Command\Commands\CmdCheckPort.cs" />

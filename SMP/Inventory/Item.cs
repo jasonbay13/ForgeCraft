@@ -26,7 +26,19 @@ namespace SMP
 
 		public short item = -1;
 		public byte count = 1;
-		public short meta = 0;
+		private short Mymeta = 0;
+		public short meta
+		{
+			get
+			{
+				return Mymeta;
+			}
+			set
+			{
+				Mymeta = value;
+				CheckDamage();
+			}
+		}
 		public bool OnGround; //This is used to tell the server that this item is on the ground.
 
 		public static Item Nothing = new Item();
@@ -60,6 +72,17 @@ namespace SMP
 			this.item = item;
 			OnGround = true;
 			e = new Entity(this, l);
+		}
+
+		public void CheckDamage()
+		{
+			/*
+			 * SUDO CODE: 
+			 * 
+			 * if(!tool) return;
+			 * if(damage > MaxDamage(id))
+			 *	DeleteThisItem();
+			*/
 		}
 	}
 }

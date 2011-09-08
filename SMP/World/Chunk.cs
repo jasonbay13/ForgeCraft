@@ -294,10 +294,11 @@ namespace SMP
         {
 			return (x * Depth + z) * Height + y;
         }
-		public static Chunk GetChunk(int x, int z)
-		{
-				return Server.mainlevel.chunkData[new Point(x, z)];
-		}
+		//We should never default
+		//public static Chunk GetChunk(int x, int z)
+		//{
+		//        return Server.mainlevel.chunkData[new Point(x, z)];
+		//}
 		public static Chunk GetChunk(int x, int z, World world)
 		{
 			return world.chunkData[new Point(x, z)];
