@@ -33,6 +33,7 @@ namespace SMP
         public string Suffix = "";
         public string GroupColor = Color.Gray;
         public List<string> PermissionList = new List<string>();
+		public List<string> DeniedPermissionList = new List<string>();
         public List<Group> InheritanceList = new List<Group>();
         public List<string> tempInheritanceList = new List<string>();
 
@@ -44,6 +45,27 @@ namespace SMP
         /// <returns></returns>
         public static bool CheckPermission(Player p, String perm)
         {
+			List<string> nodes = new List<string>();
+			nodes.AddRange(GetParentNodes(perm));
+			
+			foreach(string node in nodes)
+			{
+				if (p.AdditionalPermissions.Contains(node))
+	            {
+	                return true;
+	            }
+	            else if (p.group.PermissionList.Contains(node))
+	            {
+	                return true;
+	            }
+	            else
+	            {
+	                return false;
+	            }	
+			}
+			
+			return true;
+			/*
             if (p.AdditionalPermissions.Contains(perm))
             {
                 return true;
@@ -55,7 +77,7 @@ namespace SMP
             else
             {
                 return false;
-            }
+            }*/
         }
 
         /// <summary>
@@ -72,6 +94,11 @@ namespace SMP
             }
             return null;
         }
+		
+		private static List<string> GetParentNodes(string perm)
+		{
+			return new List<string>{"core.info.*"};
+		}
 		
 		#region LOADING/SAVING
 		public static void LoadGroups()
@@ -110,23 +137,22 @@ namespace SMP
 				else if (g.GroupColor.Length == 1 && Color.IsColorValid((char)g.GroupColor[0]))
 				 	g.GroupColor = "§" + g.GroupColor[1];
 				
-				//Server.Log("damn");
 				string[] perms = dt.Rows[i]["Permissions"].ToString().Replace(" ", "").Split(',');
 				foreach(string s in perms)
 				{
-					//Server.Log("??");
 					g.PermissionList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';"));
 				}
 				
-				/*Server.Log("balls");
-				string[] inheritance = dt.Rows[i]["Inheritance"].ToString().Split(',');
+				string temp = dt.Rows[i]["Inheritance"].ToString().Replace(" ", "");
+				string[] inheritance = temp.Split(',');
 				if (inheritance.Length >= 1)
-				foreach(string s in inheritance)
 				{
-					Server.Log("??: " + s);
-					if (s != "" || s != null)
-						g.tempInheritanceList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Group WHERE ID = '" + Convert.ToInt32(s) + "';"));	
-				}*/
+					foreach(string s in inheritance)
+					{
+						if (!String.IsNullOrEmpty(s))
+							g.tempInheritanceList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + s + "';"));	
+					}
+				}
 				
 				Group.GroupList.Add(g);
 			}

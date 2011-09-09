@@ -19,9 +19,10 @@ namespace SMP
 
 			if (!File.Exists("properties/ForgeCraft.db"))
 			{
+				Server.Log("Writing new Database");
 				SQLiteConnection.CreateFile("properties/ForgeCraft.db");
 				if (!WriteDefault())
-					Server.Log("Couldn't write default DataBase");
+					Server.Log("Couldn't write default Database");
 			}
 			
 		}
@@ -57,20 +58,17 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			//Console.WriteLine("sql nonquery: " + sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
 	        mycommand.CommandText = sql;
 	        int rowsUpdated = mycommand.ExecuteNonQuery();
 	        cnn.Close();
-			//Console.WriteLine("rowsupdated: " + rowsUpdated);
 	        return rowsUpdated;
 	    }
 	 
 	    public string ExecuteScalar(string sql)
 	    {
-			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
