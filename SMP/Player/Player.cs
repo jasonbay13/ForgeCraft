@@ -203,6 +203,7 @@ namespace SMP
 					case 0xFF: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //DC
 
 					default:
+                        if (msg == 254) { Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers); return new byte[0]; }
 						Server.Log("unhandled message id " + msg);
 					    Kick("Unknown Packet id: " + msg);
 						return new byte[0];
