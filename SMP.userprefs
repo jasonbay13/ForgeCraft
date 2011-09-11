@@ -1,14 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Entity/Entity.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/World/Chunk.cs" ctype="Workbench">
     <Files>
       <File FileName="SMP/util/SQLiteDatabase.cs" Line="25" Column="46" />
       <File FileName="SMP/Groups/Group.cs" Line="74" Column="14" />
       <File FileName="SMP/Server/Server.cs" Line="137" Column="45" />
       <File FileName="SMP/Groups/GroupUtils.cs" Line="1" Column="1" />
       <File FileName="SMP/Command/Commands/CmdHelp.cs" Line="1" Column="1" />
-      <File FileName="SMP/Player/Player.cs" Line="104" Column="1" />
-      <File FileName="SMP/Entity/Entity.cs" Line="24" Column="1" />
+      <File FileName="SMP/Player/Player.cs" Line="260" Column="4" />
+      <File FileName="RemoteConsole/Program.cs" Line="220" Column="12" />
+      <File FileName="SMP/World/Chunk.cs" Line="239" Column="5" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -17,9 +18,7 @@
           <Node name="SMP" expanded="True">
             <Node name="References" expanded="True" />
             <Node name="Constants" expanded="True" />
-            <Node name="Entity" expanded="True">
-              <Node name="Entity.cs" selected="True" />
-            </Node>
+            <Node name="Entity" expanded="True" />
             <Node name="Groups" expanded="True" />
             <Node name="GUI" expanded="True">
               <Node name="MainWindow.cs" expanded="True" />
@@ -32,6 +31,7 @@
             <Node name="WebserverStuff" expanded="True" />
             <Node name="World" expanded="True">
               <Node name="Generator" expanded="True" />
+              <Node name="Chunk.cs" selected="True" />
             </Node>
           </Node>
         </State>
