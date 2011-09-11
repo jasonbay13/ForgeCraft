@@ -106,8 +106,38 @@ namespace SMP
 
 		public void Update()
 		{
+            Player nearest = GetNearestPlayer();
 			//TODO move this entity, you dont need to send movement, thats done in the player class... i think
 		}
+        public bool IsNear(Player p)
+        {
+            if (p.pos.diff(pos).x <= 5 && p.pos.diff(pos).y <= 1 && p.pos.diff(pos).z <= 5)
+                return true;
+            return false;
+        }
+        //If the Player and Creeper are staring at each other, then the creeper will explode (If there close enough)
+        //If the creeper sees the player but the player doesnt see the creeper, the creeper will "creep" behind him
+        public bool IsStaring(Player p)
+        {
+            return false;
+        }
+        public bool IsInView(Player p)
+        {
+            return true;
+        }
+        public Player GetNearestPlayer()
+        {
+            Player p1 = null;
+            foreach (Player p in Player.players.ToArray())
+            {
+                if (IsNear(p) && IsInView(p))
+                {
+                    if ((p1.pos.diff(pos).x > p.pos.diff(pos).x || p1.pos.diff(pos).z > p.pos.diff(pos).z) && p1.pos.diff(pos).y >= p.pos.diff(pos).y)
+                        p1 = p;
+                }
+            }
+            return p1;
+        }
 
 
 	}
