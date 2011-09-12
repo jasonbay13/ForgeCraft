@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace SMP
 {
@@ -33,7 +34,7 @@ namespace SMP
         public string Suffix = "";
         public string GroupColor = Color.Gray;
         public List<string> PermissionList = new List<string>();
-		public List<string> DeniedPermissionList = new List<string>();
+		public List<string> InheritedPermissionList = new List<string>();
         public List<Group> InheritanceList = new List<Group>();
         public List<string> tempInheritanceList = new List<string>();
 
@@ -50,21 +51,22 @@ namespace SMP
 			
 			foreach(string node in nodes)
 			{
-				if (p.AdditionalPermissions.Contains(node))
-	            {
-	                return true;
-	            }
-	            else if (p.group.PermissionList.Contains(node))
-	            {
-	                return true;
-	            }
-	            else
-	            {
-	                return false;
-	            }	
+				if(p.group.PermissionList.Contains("-" + node))
+				   return false;
+				else if(p.AdditionalPermissions.Contains("-" + node))
+				   return false;
+				else if(p.AdditionalPermissions.Contains(node) || p.group.PermissionList.Contains(node))
+				   return true;
+				else if(p.group.InheritedPermissionList.Contains("-" + node))
+				   return false;
+				else if(p.group.InheritedPermissionList.Contains(node))
+				   return true;
 			}
 			
-			return true;
+			if(p.group.PermissionList.Contains("*") || p.AdditionalPermissions.Contains("*") || p.group.InheritedPermissionList.Contains("*"))
+				return true;
+			
+			return false;
 			/*
             if (p.AdditionalPermissions.Contains(perm))
             {
@@ -97,7 +99,25 @@ namespace SMP
 		
 		private static List<string> GetParentNodes(string perm)
 		{
-			return new List<string>{"core.info.*"};
+			string[] nodearray = perm.Split('.');
+			List<string> nodeList = new List<string>();
+			
+			for(int i = 0; i < nodearray.Length; i++)
+			{
+				StringBuilder sb = new StringBuilder("");
+				
+				for(int ix = 0; ix <= i; ix ++)
+				{
+					sb.Append(nodearray[ix] + ".");
+				}
+				
+				sb.Append("*");
+				nodeList.Add(sb.ToString());
+			}
+			
+			nodeList.Reverse();
+			return nodeList;
+			
 		}
 		
 		#region LOADING/SAVING
