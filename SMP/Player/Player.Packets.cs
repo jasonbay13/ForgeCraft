@@ -340,6 +340,8 @@ namespace SMP
 
                 if (OnBlockChange != null)
                     OnBlockChange(this, x, y, z, rc);
+
+                if (Server.mode == 1) level.BlockChange(x, y, z, 0, 0);
 			}
 			if (message[0] == 2)
 			{
@@ -488,7 +490,7 @@ namespace SMP
 					}
 				}
 				level.BlockChange(blockX, (int)blockY, blockZ, (byte)blockID, (byte)damage);
-				inventory.Remove(inventory.current_index, 1);
+                if (Server.mode == 0) inventory.Remove(inventory.current_index, 1);
 				return;
 			}
 			else
@@ -521,6 +523,11 @@ namespace SMP
 			}
 			catch { }
 		}
+
+        private void HandleCreativeInventoryAction(byte[] message)
+        {
+            inventory.Add(util.EndianBitConverter.Big.ToInt16(message, 2), (byte)util.EndianBitConverter.Big.ToInt16(message, 4), util.EndianBitConverter.Big.ToInt16(message, 6), util.EndianBitConverter.Big.ToInt16(message, 0));
+        }
 		
 		public void HandleAnimation(byte[] message)
 		{
