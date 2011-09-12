@@ -1166,7 +1166,7 @@ namespace SMP
 		}
 		public void Dispose()
 		{
-			SaveAttributes();
+			SaveAttributes(false);
 			players.Remove(this);
 			e.CurrentChunk.Entities.Remove(e);
 			Entity.Entities.Remove(id);
@@ -1229,13 +1229,15 @@ namespace SMP
         }
 		#region TOOLS
 		
-		private void SaveAttributes()
+		private void SaveAttributes(bool newplayer)
 		{
 			Dictionary<string, string> data = new Dictionary<string, string>();
 			
 			try
 			{
-				//data.Add("Name", username);
+				if (newplayer)
+					data.Add("Name", username);
+				
 				data.Add("ip", ip);
 				data.Add("NickName", NickName);
 				
@@ -1255,9 +1257,22 @@ namespace SMP
 				
 				//TODO accouts
 				
-				//TODO groups and perms
+				//TODO subgroups and perms
+				string gid = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + this.group.Name + "';");
+				if(!String.IsNullOrEmpty(gid))
+				{
+					data.Add("GroupID", gid);
+				}
+				else
+				{
+					gid = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + Group.DefaultGroup.Name + "';");
+					data.Add("GroupID", gid);
+				}
 				
-				Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
+				if(!newplayer)
+					Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
+				else
+					Server.SQLiteDB.Insert("Player", data);
 				
 			}
 			catch
@@ -1273,7 +1288,6 @@ namespace SMP
 			
 			if(DT.Rows.Count > 0)
 			{
-				Server.Log("SUCCESS!!");
 				NickName = DT.Rows[0]["NickName"].ToString();
 				
 				if (DT.Rows[0]["CanBuild"].ToString() == "1")
@@ -1284,13 +1298,16 @@ namespace SMP
 				Prefix = DT.Rows[0]["Prefix"].ToString();
 				Suffix = DT.Rows[0]["Suffix"].ToString();
 				
-				color = DT.Rows[0]["Color"].ToString();
+				string tcolor = DT.Rows[0]["Color"].ToString();
 				
-				if (color.Length == 2 && color[0] == '%' || color[0] == '§' || color[0] == '&')
-					if (Color.IsColorValid((char)color[1]))
-					    color = "§" + color[1];
-				else if (color.Length == 1 && Color.IsColorValid((char)color[0]))
-				 	color = "§" + color[1];
+				if (!String.IsNullOrEmpty(tcolor))
+				    {
+				if (tcolor.Length == 2 && tcolor[0] == '%' || tcolor[0] == '§' || tcolor[0] == '&')
+					if (Color.IsColorValid((char)tcolor[1]))
+					    color = "§" + tcolor[1];
+				else if (tcolor.Length == 1 && Color.IsColorValid((char)tcolor[0]))
+				 	color = "§" + tcolor[1];
+				}
 				
 				if (DT.Rows[0]["DND"].ToString() == "1")
 					DoNotDisturb = true;
@@ -1306,13 +1323,16 @@ namespace SMP
 				
 				//TODO Group
 				
+				Server.Log(String.Format("Succesfully loaded {0} from the database.", this.username));
+				
 			}
 			else
 			{
-				Server.Log("DOH!");
+				Server.Log(String.Format("Creating new Database entry for {0}.", this.username));
 				
+				this.group = Group.DefaultGroup;
 				//TODO Set Default to default group, setup accounts etc
-				//save them right away
+				SaveAttributes(true);
 			}
 		}
 		

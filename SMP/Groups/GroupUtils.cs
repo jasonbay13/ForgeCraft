@@ -136,7 +136,7 @@ namespace SMP
 		
 		public static void ChangeCanBuild(Group g, bool cb)
 		{
-			g.CanBuild = cb;			
+			g.CanBuild = cb;
 		}
 		
 		public static bool ChangeGroupColor(Group g, char color)

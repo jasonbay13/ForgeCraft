@@ -10,7 +10,7 @@ namespace SMP
 	{
 		private string dbConnection;
 		
-		public SQLiteDatabase ()
+		internal SQLiteDatabase ()
 		{
 			
 			dbConnection = "Data Source=properties/ForgeCraft.db";
@@ -19,9 +19,10 @@ namespace SMP
 
 			if (!File.Exists("properties/ForgeCraft.db"))
 			{
+				Server.Log("Writing new Database");
 				SQLiteConnection.CreateFile("properties/ForgeCraft.db");
 				if (!WriteDefault())
-					Server.Log("Couldn't write default DataBase");
+					Server.Log("Couldn't write default Database");
 			}
 			
 		}
@@ -57,20 +58,17 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			//Console.WriteLine("sql nonquery: " + sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
 	        mycommand.CommandText = sql;
 	        int rowsUpdated = mycommand.ExecuteNonQuery();
 	        cnn.Close();
-			//Console.WriteLine("rowsupdated: " + rowsUpdated);
 	        return rowsUpdated;
 	    }
 	 
 	    public string ExecuteScalar(string sql)
 	    {
-			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -302,7 +300,7 @@ namespace SMP
 				this.ExecuteNonQuery("INSERT INTO Permission VALUES(1,'*')");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.info.*')");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.general.*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.cheat.hackz')");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.cheat.hacks')");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.other.*')");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.mod.*')");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.build.*')");
@@ -439,6 +437,20 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(94, 0, 'onredstonerepeater');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(95, 0, 'lockedchest');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(96, 0, 'trapdoor');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(97, 0, 'silverfishstone');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(98, 0, 'stonebrick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(98, 1, 'mossystonebrick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(98, 2, 'crackedstonebrick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(99, 0, 'hugebrownmushroom');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(100, 0, 'hugeredmushroom');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(101, 0, 'ironbars');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(102, 0, 'glasspane');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(103, 0, 'melon');");
+			//melon and pumpkin stem??
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(106, 0, 'vines');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(107, 0, 'fencegate');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(108, 0, 'brickstairs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(109, 0, 'stonebrickstairs');");
 			#endregion
 			
 			#region ITEMS
@@ -562,6 +574,14 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(357, 0, 'cookie');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(358, 0, 'map');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(359, 0, 'shears');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(360, 0, 'melonslice');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(361, 0, 'pumpkinseeds');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(362, 0, 'melonseeds');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(363, 0, 'rawsteak');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(364, 0, 'cookedsteak');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(365, 0, 'rawchicken');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(366, 0, 'cookedchicken');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(367, 0, 'rottenflesh');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2256, 0, 'goldmusicdisc');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2557, 0, 'greenmusicdisc');");
 			#endregion
