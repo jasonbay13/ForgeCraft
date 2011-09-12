@@ -39,8 +39,8 @@ namespace SMP
             int y = (int)Math.Round(q.pos.Y, 0, MidpointRounding.AwayFromZero);
             int z = (int)Math.Round(q.pos.Z, 0, MidpointRounding.AwayFromZero);
             World w = World.Find(p.level.name);
-            w.SendLightning(x, y, z, 10, p);
-            
+            w.Lightning(x, y, z);
+
             q.hurt(6);
         }
 

@@ -98,6 +98,10 @@ namespace SMP
 
 			Entities.Add(id, this);
 		}
+		public Entity(bool lightning) //Stand in entity for lightning
+		{
+			id = FreeId();
+		}
 
 		public void UpdateChunks(bool force, bool forcesend)
 		{

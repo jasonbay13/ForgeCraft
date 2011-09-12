@@ -36,62 +36,6 @@ namespace SMP
         //{
         //}
 
-        public void SendLightning(int x, int y, int z, int EntityId, Player p)
-        {
-            byte[] bytes = new byte[17];
-            util.EndianBitConverter.Big.GetBytes(EntityId).CopyTo(bytes, 0);
-            util.EndianBitConverter.Big.GetBytes(true).CopyTo(bytes, 4);
-            util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 5);
-            util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 9);
-            util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 13);
-            p.SendRaw(0x47, bytes);
-        }
-        public void rain(bool on)
-        {
-
-            if (on)
-            {
-
-                byte[] bytes = new byte[1];
-                byte thisin = 1;
-                bytes[0] = thisin;
-                foreach (Player p in Player.players)
-                {
-                    p.SendRaw(0x46, bytes);
-                }
-                Israining = true;
-                // p.SendMessage("Weather is: " + Israining.ToString());
-                return;
-
-            }
-            if (!on)
-            {
-                byte[] bytes = new byte[1];
-                bytes[0] = 2;
-                foreach (Player p in Player.players)
-                {
-                    p.SendRaw(0x46, bytes);
-                }
-                Israining = false;
-                return;
-                // p.SendMessage("Weather is: " + Israining.ToString());
-            }
-            //
-            //{
-
-            //    Israining = false;
-            //}
-            //else
-            //{
-            //    Israining = true;
-            //}
-
-
-
-
-        }
-
-
         public System.Timers.Timer weatherTimer = new System.Timers.Timer();
         public System.Timers.Timer lightningTimer = new System.Timers.Timer();
         public void InitializeTimers()
@@ -108,12 +52,12 @@ namespace SMP
 
         public void WeatherTimer(Object Source, ElapsedEventArgs e)
         {
-            rain(true);
+            Rain(true);
             lightningTimer.Start();
 
             System.Threading.Thread.Sleep(1200000); //lasts for 20 mins
 
-            rain(false);
+			Rain(false);
             lightningTimer.Stop();
 
         }
@@ -122,12 +66,8 @@ namespace SMP
 
             if (Israining && weatherTimer.Enabled)
             {
-                foreach (Player p in Player.players)
-                {
-                    Random rnd = new Random();
-                    SendLightning(rnd.Next(3000), rnd.Next(3000), rnd.Next(3000), 10, p);
-                }
-
+                Random rnd = new Random();
+                Lightning(rnd.Next(3000), rnd.Next(3000), rnd.Next(3000));
             }
 
         }

@@ -101,10 +101,8 @@ namespace SMP
 
             if (w.Israining)
             {
-                w.rain(true);
-               // p.SendMessage("IS IT RAINING?"); for debugging :P
+                w.Rain(true);
             }
-            
         }
 		private void HandleHandshake(byte[] message)
 		{
@@ -627,10 +625,28 @@ namespace SMP
 				catch { /* Ignore Me */ }
 			}
 		}
-
+		public void HandleEntityAction(byte[] message)
+		{
+			if (message[5] == 1)
+			{
+				crouch(true);
+			}
+			else if (message[5] == 2)
+			{
+				crouch(false);
+			}
+			else if (message[5] == 4)
+			{
+				//Start Sprinting
+			}
+			else if (message[5] == 5)
+			{
+				//Stop Sprinting
+			}
+		}
         public void HandleRespawn(byte[] message)
         {
-            SendRespawn(message[0]);
+            SendRespawn();
         }
 		public short BlockDropSwitch(short id)
 		{

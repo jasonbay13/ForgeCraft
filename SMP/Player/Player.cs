@@ -15,6 +15,7 @@ namespace SMP
 		public Socket socket;
 		public World level { get { return e.level; } set { e.level = value; } }
 		public int viewdistance = 3;
+		byte mode = Server.mode;
 
 		public short current_slot_holding;
 		public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendInventory(); } }
@@ -22,11 +23,15 @@ namespace SMP
 		byte[] buffer = new byte[0];
 		byte[] tempbuffer = new byte[0xFF];
 
-		bool disconnected = false;
+		public bool disconnected = false;
         public bool LoggedIn { get; protected set; }
 		bool MapSent = false;
 		public bool MapLoaded = false;
+		//Health Stuff
         public short health = 20;
+		public short food = 20;
+		public float Saturation = 5.0f;
+		//END Health Stuff
 		public double Stance;
 		public Point3 pos;
 		public Point3 oldpos = Point3.Zero;
@@ -170,12 +175,12 @@ namespace SMP
 				// Get the length of the message by checking the first byte
 				switch (msg)
 				{
-					case 0x00: length = 0; break; //Keep alive
-					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 15); break; //Login Request
+					case 0x00: length = 4; break; //Keep alive
+					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 21); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
-					case 0x09: length = 1; break; //respawn
+					case 0x09: length = 12; break; //respawn
 					
 					case 0x0A: length = 1; break; //OnGround incoming
 					case 0x0B: length = 33; break; //Pos incoming
@@ -186,7 +191,7 @@ namespace SMP
 					case 0x0F: if (util.EndianBitConverter.Big.ToInt16(buffer, 11) >= 0) length = 15; else length = 12; break; //Block Placement
 					case 0x10: length = 2; break; //Holding Change
 					case 0x12: length = 5; break; //Animation Change
-                    case 0x13: length = 5; crouch(); break; //Entity Action
+                    case 0x13: length = 5; break; //Entity Action
 
 					case 0x65: length = 1; break; //Close Window
 					case 0x66:
@@ -243,6 +248,7 @@ namespace SMP
                         case 0x09: HandleRespawn(message); break; //when user presses respawn button
 						case 0x10: HandleHoldingChange(message); break; //Holding Change
 						case 0x12: HandleAnimation(message); break;
+						case 0x13: HandleEntityAction(message); break;
 						case 0x65: HandleWindowClose(message); break; //Window Closed
 						case 0x66: HandleWindowClick(message); break; //Window Click
 					}
@@ -305,24 +311,28 @@ namespace SMP
 			{
 				if (!LoggedIn) return;
 
-				byte[] tosend = new byte[9];
+				byte[] tosend = new byte[8];
 				util.EndianBitConverter.Big.GetBytes(level.time).CopyTo(tosend, 0);
 				SendRaw(0x04, tosend);
 			}
-
 			public static void GlobalUpdate()
 			{
 				players.ForEach(delegate(Player p)
 				{
-					p.SendRaw(0);
+					p.SendKeepAlive();
 					if (!p.LoggedIn) return;
-					p.SendRaw(0);
 					p.SendTime();
 					if (!p.hidden)
 					{
 						p.UpdatePosition();
 					}
 				});
+			}
+			void SendKeepAlive()
+			{
+				byte[] bytes = new byte[4];
+				util.EndianBitConverter.Big.GetBytes(Entity.random.Next()).CopyTo(bytes, 0);
+				SendRaw(0, bytes);
 			}
 			void UpdatePosition()
 			{
@@ -407,8 +417,10 @@ namespace SMP
 			/// </summary>
 			public void SendHealth()
 			{
-				byte[] tosend = new byte[3];
+				byte[] tosend = new byte[8];
 				util.EndianBitConverter.Big.GetBytes(health).CopyTo(tosend, 0);
+				util.EndianBitConverter.Big.GetBytes(food).CopyTo(tosend, 2);
+				util.EndianBitConverter.Big.GetBytes(Saturation).CopyTo(tosend, 4);
 				SendRaw(0x08, tosend);
 			}
 			void CheckOnFire()
@@ -427,19 +439,23 @@ namespace SMP
 					}
 				}
 			}
-			void crouch()
+			void crouch(bool crouching)
 			{
 				if (!MapLoaded) return;
 
-				Crouching = Crouching ? false : true;
-				if (!Crouching && IsOnFire) { SetFire(true); return; }
+				Crouching = crouching;
+
+				if (!Crouching && IsOnFire) { SetFire(true); }
+				
 				byte[] bytes2 = new byte[7];
+				
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes2, 0);
 				bytes2[4] = 0x00;
 				if (Crouching && !IsOnFire) bytes2[5] = 0x02;
 				else if (Crouching) bytes2[5] = 0x03;
 				else bytes2[5] = 0x00;
 				bytes2[6] = 0x7F;
+				
 				for (int i = 0; i < players.Count; i++)
 				{
 					if (players[i] != this && players[i].LoggedIn)
@@ -553,13 +569,16 @@ namespace SMP
 				{
 					long seed = 0;
 					short length = (short)Server.name.Length;
-					byte[] bytes = new byte[(length * 2) + 15];
+					byte[] bytes = new byte[(length * 2) + 21];
 
-					util.EndianBitConverter.Big.GetBytes(Server.protocolversion).CopyTo(bytes, 0);
-					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4);
-					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6);
-					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 9);
-					bytes[bytes.Length - 1] = dimension;
+					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
+					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4); //String
+					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
+					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 15); 
+					bytes[bytes.Length - 4] = Server.mode;
+					bytes[bytes.Length - 3] = dimension;
+					bytes[bytes.Length - 2] = level.height;
+					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
 					SendRaw(1, bytes);
 				}
@@ -821,17 +840,57 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
 				SendRaw(0x1D, bytes);
 			}
-            public void SendRespawn(byte world)
+            public void SendRespawn()
             {
-                byte[] bytes = new byte[1];
-                bytes[0] = world;
+                byte[] bytes = new byte[12];
+
+                bytes[0] = dimension;
+				bytes[1] = mode;
+				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 2);
+				util.BigEndianBitConverter.Big.GetBytes((long)0).CopyTo(bytes, 4);
 
                 SendRaw(0x09, bytes);
             }
 			#endregion
+			#region Weather
+			public void SendLightning(int x, int y, int z, int EntityId)
+			{
+				byte[] bytes = new byte[17];
+				util.EndianBitConverter.Big.GetBytes(EntityId).CopyTo(bytes, 0);
+				util.EndianBitConverter.Big.GetBytes(true).CopyTo(bytes, 4);
+				util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 5);
+				util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 9);
+				util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 13);
+				SendRaw(0x47, bytes);
+			}
+			public void SendRain(bool on)
+			{
+				if (on)
+				{
+					byte[] bytes = new byte[1];
+					byte thisin = 1;
+					bytes[0] = thisin;
+					foreach (Player p in Player.players)
+					{
+						p.SendRaw(0x46, bytes);
+					}
+					return;
+				}
+				if (!on)
+				{
+					byte[] bytes = new byte[1];
+					bytes[0] = 2;
+					foreach (Player p in Player.players)
+					{
+						p.SendRaw(0x46, bytes);
+					}
+					return;
+				}
+			}
+			#endregion
 		#endregion
 		#region INCOMING
-		void HandleCommand(string cmd, string message)
+			void HandleCommand(string cmd, string message)
 		{
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
@@ -1331,7 +1390,6 @@ namespace SMP
 				return "~" + this.NickName;
 		}
 		#endregion
-
 
 		#region META DATA HANDLER
 		byte[] GetMetaByteArray(Entity e)

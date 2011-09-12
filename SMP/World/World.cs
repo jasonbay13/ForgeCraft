@@ -40,6 +40,8 @@ namespace SMP
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
 		public List<Point> ToGenerate = new List<Point>();
         public bool Raining = false;
+		public byte height = 128;
+		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
 		#region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
@@ -136,6 +138,42 @@ namespace SMP
 			if (OnSave != null)
 				OnSave(this);
 			//TODO Save files
+		}
+
+		public void Rain(bool rain)
+		{
+			if (rain)
+			{
+				foreach (Player p in Player.players.ToArray())
+				{
+					if (p.MapLoaded && !p.disconnected)
+					{
+						p.SendRain(true);
+					}
+				}
+			}
+			else
+			{
+				foreach (Player p in Player.players.ToArray())
+				{
+					if (p.MapLoaded && !p.disconnected)
+					{
+						p.SendRain(false);
+					}
+				}
+			}
+		}
+		public void Lightning(int x, int y, int z)
+		{
+			Entity e = new Entity(true);
+			int distance = 16 * LightningRange;
+
+			foreach (Player p in Player.players.ToArray())
+				if (p.MapLoaded && !p.disconnected)
+					if (p.pos.mdiff(new Point3(x, y, z)) <= distance)
+						p.SendLightning(x, y, z, e.id);
+
+			//Not sure if lightning needs depsawned, seems to not require it.
 		}
 
 		public void GenerateChunk(int x, int z)

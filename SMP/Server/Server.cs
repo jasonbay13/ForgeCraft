@@ -33,7 +33,7 @@ namespace SMP
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static int protocolversion = 14;
+		public static int protocolversion = 15;
 		public static string Version = "0.1";
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
@@ -55,6 +55,7 @@ namespace SMP
 
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
 		public static MainLoop ml;
+		public static byte mode = 1; //0=survival, 1=creative
 
         #region ==SETTINGS==
 
@@ -64,7 +65,7 @@ namespace SMP
 		public static string VIPListMessage = "Server is full and you are not a VIP";
 		public static string BanMessage = "You are banned";
 		public static string Motd = "Powered By ForgeCraft.";
-		public static int MaxPlayers = 16;
+		public static byte MaxPlayers = 16;
         public static string name = "sc";
         public static int port = 25565;
         public static string ConsoleName = "Console";
@@ -82,7 +83,7 @@ namespace SMP
 		{
 			Log("Starting Server");
 			s = this;
-			mainlevel = new World(0, 127, 0, "main", new Random().Next());
+			mainlevel = new World(0, 127, 0, "main", 0); //changed to seed 0 for now
 			World.worlds.Add(mainlevel);
 			ml = new MainLoop("server");
 			#region updatetimer
