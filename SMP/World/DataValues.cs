@@ -235,7 +235,20 @@ namespace SMP
 		RedstoneRepeaterOff = 93,
 		RedstoneRepeaterOn = 94,
 		//LockedChest = 95,
-		Trapdoor = 96
+		Trapdoor = 96,
+		SilverFishStone = 97,
+		StoneBrick = 98,
+		HugeBrownMushroom = 99,
+		HugeRedMushroom = 100,
+		IronBars = 101,
+		GlassPane = 102,
+		Melon = 103,
+		PumpkinStem = 104,
+		MelonStem = 105,
+		Vines = 106,
+		FenceGate = 107,
+		BrickStairs = 108,
+		StoneBrickStairs = 109
 	};
 	public enum Items : short
 	{
@@ -345,6 +358,14 @@ namespace SMP
 		Cookie = 357,
 		Map = 358,
 		Shears = 359,
+		MelonSlice = 360,
+		PumpkinSeeds = 361,
+		MelonSeeds = 362,
+		SteakRaw = 363,
+		SteakCooked = 364,
+		ChickenRaw = 365,
+		ChickenCooked = 366,
+		RottenFlesh = 367,
 		GoldMusicDisc = 2256,
 		GreenMusicDisc = 2257
 	};
@@ -376,6 +397,10 @@ namespace SMP
 	public enum TrapDoors : byte { West = 0x0, East = 0x1, South = 0x2, North = 0x3, Open = 0x4 };
 	public enum Piston : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, On = 0x8 };
 	public enum PistonExtension : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, Sticky = 0x8 };
+	public enum StoneBrick : byte {Normal = 0x0, Mossy = 0x2, Cracked = 0x3}
+	//public enum HugeMushroom : byte {Fleshy = 0x0, Corner = 0x1, Side = 0x2 ??? }
+	public enum Vines : byte {Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8}
+	public enum FenceGate : byte {West = 0x0, North = 0x1, East = 0x2, South = 0x3}
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
 	
 	public static class BlockData

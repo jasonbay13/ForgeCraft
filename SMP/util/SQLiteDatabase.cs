@@ -10,7 +10,7 @@ namespace SMP
 	{
 		private string dbConnection;
 		
-		public SQLiteDatabase ()
+		internal SQLiteDatabase ()
 		{
 			
 			dbConnection = "Data Source=properties/ForgeCraft.db";
