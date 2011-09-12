@@ -67,19 +67,6 @@ namespace SMP
 				return true;
 			
 			return false;
-			/*
-            if (p.AdditionalPermissions.Contains(perm))
-            {
-                return true;
-            }
-            else if (p.group.PermissionList.Contains(perm))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }*/
         }
 
         /// <summary>
