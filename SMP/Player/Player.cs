@@ -198,6 +198,7 @@ namespace SMP
 						length = 9;
 						if (util.EndianBitConverter.Big.ToInt16(buffer, 8) != -1) length += 3;
 						break; //Clicked window
+                    case 0x6B: length = 8; break; 
 					case 0x82:
 						short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 10) * 2);
 						short b = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 12 + (a/2)) * 2);
@@ -251,6 +252,7 @@ namespace SMP
 						case 0x13: HandleEntityAction(message); break;
 						case 0x65: HandleWindowClose(message); break; //Window Closed
 						case 0x66: HandleWindowClick(message); break; //Window Click
+                        case 0x6B: HandleCreativeInventoryAction(message); break;
 					}
 					if (buffer.Length > 0)
 						buffer = HandleMessage(buffer);
