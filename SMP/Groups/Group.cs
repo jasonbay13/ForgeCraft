@@ -19,6 +19,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+/*TODO
+ * tracks
+ * inheritance
+ * grouputils
+ * Saving everything :p
+ * Commands
+*/
+
 namespace SMP
 {
     public class Group
@@ -147,7 +155,21 @@ namespace SMP
 				string[] perms = dt.Rows[i]["Permissions"].ToString().Replace(" ", "").Split(',');
 				foreach(string s in perms)
 				{
-					g.PermissionList.Add(Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';"));
+					Server.Log("S: " + s);
+					
+					string perm;
+					if (s[0] == '-')
+						perm = "-" + Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s.Substring(1) + "';");
+					else
+						perm = Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';");
+					
+					
+					Server.Log("Perm: " + perm);
+					
+					if (perm.Substring(0,1) == "-" && !g.PermissionList.Contains(perm.Substring(1)))
+						g.PermissionList.Add(perm);
+					else if (perm.Substring(0,1) != "-" && !g.PermissionList.Contains("-" + perm))
+						g.PermissionList.Add(perm);
 				}
 				
 				string temp = dt.Rows[i]["Inheritance"].ToString().Replace(" ", "");
@@ -171,7 +193,7 @@ namespace SMP
 					Group gr = Group.FindGroup(s);
 					if (gr != null)
 					{
-						GroupUtils.AddGroupInheritance(g, gr);
+						g.InheritanceList.Add(gr);
 					}
 				}
 			}

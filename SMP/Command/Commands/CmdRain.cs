@@ -31,60 +31,30 @@ namespace SMP
 
         public override void Use(Player p, params string[] args)
         {
-            World w = World.Find(p.level.name);
-
-
-
-
-
-
-            //if (args.Length == 1)
-            //{
-
-            //    if (args[0] == "off")
-            //    {
             try
             {
-                if (args[0] == "status") { p.SendMessage(Color.Purple + "Rain is: " + w.Israining); return; }
+                if (args[0] == "status") { p.SendMessage(Color.Purple + "Rain is: " + p.level.Israining); return; }
             }
             catch { }
 
-            if (w.Israining)
+            if (p.level.Israining)
             {
-
-                w.rain(false);
+				
+                p.level.rain(false);
 
                 p.SendMessage(Color.Red + "Stopping rain..");
-                w.Israining = false;
+                p.level.Israining = false;
 
             }
-
-                   // p.SendMessage("rain is: " + w.isRain().ToString());
-
-              //  }
-            //if (args[0] == "on")
-            //{
-
             else
-            {
+			{
+                p.level.SendLightning(1, 1, 100, 2, p);
+                p.level.rain(true);
 
-                w.SendLightning(1, 1, 100, 2, p);
-                w.rain(true);
-
-                w.Israining = true;
-                //  p.SendMessage("rain is: " + w.isRain().ToString());
+                p.level.Israining = true;
 
                 p.SendMessage(Color.Green + "Starting rain...");
-
-
-
-                //  }
             }
-
-
-            // }
-            //  else { Help(p); return; }
-
         }
 
         public override void Help(Player p)

@@ -1240,7 +1240,7 @@ namespace SMP
 				Suffix = DT.Rows[0]["Suffix"].ToString();
 				
 				string tcolor = DT.Rows[0]["Color"].ToString();
-				Server.Log("HERE??");
+				
 				if (!String.IsNullOrEmpty(tcolor))
 				    {
 				if (tcolor.Length == 2 && tcolor[0] == '%' || tcolor[0] == '§' || tcolor[0] == '&')
