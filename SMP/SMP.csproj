@@ -61,6 +61,7 @@
       <DependentUpon>InventoryDebug.cs</DependentUpon>
     </Compile>
     <Compile Include="Inventory\Crafting.cs" />
+    <Compile Include="Player\Experience.cs" />
     <Compile Include="Plugins\Events.cs" />
     <Compile Include="Plugins\Plugin.Events.cs" />
     <Compile Include="PreLoadedData\PreLoaded.cs" />
