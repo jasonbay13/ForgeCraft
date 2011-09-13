@@ -69,6 +69,7 @@ namespace SMP
 			core.Add(new NewLVL());
             core.Add(new CmdRain());
             core.Add(new CmdSay());
+			core.Add(new CmdSetRank()); //DEBUG!!
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());
