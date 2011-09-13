@@ -54,6 +54,7 @@ namespace SMP
         #endregion
 
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
+        public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;
 		public static byte mode = 1; //0=survival, 1=creative
 
@@ -94,6 +95,13 @@ namespace SMP
 				Player.GlobalUpdate();
 				}; updateTimer.Start();
 			});
+            ml.Queue(delegate
+            {
+                playerlisttimer.Elapsed += delegate
+                {
+                    Player.PlayerlistUpdate();
+                }; playerlisttimer.Start();
+            });
 			#endregion
 			//TODO AI Update Timer
 
