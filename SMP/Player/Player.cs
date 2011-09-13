@@ -49,6 +49,7 @@ namespace SMP
 		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
+        Experience Experience = new Experience();
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
