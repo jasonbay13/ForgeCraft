@@ -1,4 +1,4 @@
-﻿/*
+﻿/*COPYRIGHT
 	Copyright 2011 ForgeCraft team
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and
@@ -96,17 +96,14 @@ namespace SMP
         /// </summary>
         public void LogToFile(string log)
         {
-          
                 if (!Directory.Exists(Environment.CurrentDirectory + "/logs"))
                 {
                     Directory.CreateDirectory(Environment.CurrentDirectory + "/logs");
                 }
-                StreamWriter fh;
-                fh = File.AppendText(LogFile);
-                fh.WriteLine(FormatTime() + ":  " + log);
-                fh.Close();
-                fh.Dispose();
-            
+                using (StreamWriter fh = File.AppendText(LogFile))
+                {
+                    fh.WriteLine(FormatTime() + ":  " + log);
+                }
         }
 
         /// <summary>
@@ -118,14 +115,14 @@ namespace SMP
             if (!Directory.Exists(Environment.CurrentDirectory + "/logs/errors"))
                 Directory.CreateDirectory(Environment.CurrentDirectory + "/logs/errors");
 
-            StreamWriter fh;
-            fh = File.AppendText(ErrorFile);
+            using(StreamWriter fh = File.AppendText(ErrorFile))
+            {
             fh.WriteLine(FormatTime() + "  " + e.Message);
             fh.WriteLine(e.StackTrace);
             fh.Write(e.StackTrace);
             fh.WriteLine();
-            fh.Close();
-            fh.Dispose();
+            }
+          
         }
         
         /// <summary>

@@ -24,6 +24,7 @@ namespace SMP
     internal static class Program
     {
         private static Server Server;
+        public static WebServer webServer;
         static Program()
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledException_Handler;
@@ -39,6 +40,7 @@ namespace SMP
         public static void Main(string[] args)
         {
             StartServer();
+            
             StartInput();
         }
 
@@ -57,6 +59,7 @@ namespace SMP
         private static void StartServer()
         {
         	(Server = new Server()).Setup();
+            (webServer = new WebServer()).Start();
         }
 
         private static void StartInput()

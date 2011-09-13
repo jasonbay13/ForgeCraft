@@ -24,58 +24,72 @@ using System.Threading;
 
 namespace SMP
 {
-	class WebServer
-	{
-		public static Socket listen;
-		private int port = 5050;  // Select any free port you wish 
+    class WebServer
+    {
+        public static Socket listen;
+        private int port = 5050;  // Select any free port you wish 
 
-		public void Start()
-		{
-			try
-			{
-				IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
-				listen = new Socket(endpoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-				listen.Bind(endpoint);
-				listen.Listen((int)SocketOptionName.MaxConnections);
+        static bool shutdown = false;
+       
+        
 
-				listen.BeginAccept(new AsyncCallback(Accept), null);
-			}
-			catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
-			catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
-		}
+        public void Start()
+        {
+            try
+            {
+                IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
+                listen = new Socket(endpoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                listen.Bind(endpoint);
+                listen.Listen((int)SocketOptionName.MaxConnections);
 
-		void Accept(IAsyncResult result)
-		{
-			if (Server.s.shuttingDown == false)
-			{
-				Player p = null;
-				bool begin = false;
-				try
-				{
-					Socket s = listen.EndAccept(result);
-					listen.BeginAccept(new AsyncCallback(Accept), null);
-					begin = true;
+                listen.BeginAccept(new AsyncCallback(Accept), null);
+            }
+            catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
+            catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
+        }
 
-					//do stuff ?
+        void Accept(IAsyncResult result)
+        {
+            if (Server.s.shuttingDown == false)
+            {
+                Remote p = null;
+                bool begin = false;
+                try
+                {
+                    p = new Remote();
 
-				}
-				catch (SocketException)
-				{
-					if (p != null)
-						p.Disconnect();
-					if (!begin)
-						listen.BeginAccept(new AsyncCallback(Accept), null);
-				}
-				catch (Exception e)
-				{
-					Server.Log(e.Message);
-					Server.Log(e.StackTrace);
-					if (p != null)
-						p.Disconnect();
-					if (!begin)
-						listen.BeginAccept(new AsyncCallback(Accept), null);
-				}
-			}
-		}
-	}
+                    p.socket = listen.EndAccept(result);
+                    new Thread(new ThreadStart(p.Start)).Start();
+
+                    listen.BeginAccept(new AsyncCallback(Accept), null);
+                    begin = true;
+
+                    //do stuff ?
+
+                }
+                catch (SocketException)
+                {
+                    if (p != null)
+                        p.Disconnect();
+                    if (!begin)
+                        listen.BeginAccept(new AsyncCallback(Accept), null);
+                }
+                catch (Exception e)
+                {
+                    Server.Log(e.Message);
+                    Server.Log(e.StackTrace);
+                    if (p != null)
+                        p.Disconnect();
+                    if (!begin)
+                        listen.BeginAccept(new AsyncCallback(Accept), null);
+                }
+            }
+        }
+        
+        
+        static void Close()
+        {
+            shutdown = true;
+        }
+    }
 }
