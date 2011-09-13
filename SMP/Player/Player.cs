@@ -889,9 +889,10 @@ namespace SMP
 			{
 				if (on)
 				{
-					byte[] bytes = new byte[1];
+					byte[] bytes = new byte[2];
 					byte thisin = 1;
 					bytes[0] = thisin;
+                    bytes[1] = Server.mode;
 					foreach (Player p in Player.players)
 					{
 						p.SendRaw(0x46, bytes);
@@ -900,8 +901,9 @@ namespace SMP
 				}
 				if (!on)
 				{
-					byte[] bytes = new byte[1];
+					byte[] bytes = new byte[2];
 					bytes[0] = 2;
+                    bytes[1] = Server.mode;
 					foreach (Player p in Player.players)
 					{
 						p.SendRaw(0x46, bytes);
