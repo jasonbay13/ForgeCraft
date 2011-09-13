@@ -39,6 +39,8 @@ namespace SMP
 		byte onground;
 		public int id { get { return e.id; } }
 		byte dimension = 0;
+        private DateTime pingdate = new DateTime();
+        public short Ping = 500;
 
 		public Chunk chunk { get { return e.CurrentChunk; } }
         public Chunk chunknew { get { return e.c; } }
@@ -175,7 +177,7 @@ namespace SMP
 				// Get the length of the message by checking the first byte
 				switch (msg)
 				{
-					case 0x00: length = 4; break; //Keep alive
+                    case 0x00: length = 4; if (util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
 					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 21); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
@@ -317,6 +319,12 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(level.time).CopyTo(tosend, 0);
 				SendRaw(0x04, tosend);
 			}
+            public void ping()
+            {
+                Ping = 500;
+                Ping = (short)((DateTime.Now - pingdate).Milliseconds);
+                UpdatePList(true);
+            }
 			public static void GlobalUpdate()
 			{
 				players.ForEach(delegate(Player p)
@@ -330,6 +338,15 @@ namespace SMP
 					}
 				});
 			}
+            public static void PlayerlistUpdate()
+            {
+                players.ForEach(delegate(Player p)
+                {
+                    if (!p.LoggedIn) return;
+                    p.pingdate = DateTime.Now;
+                    p.SendRaw(0, util.EndianBitConverter.Big.GetBytes(1337));
+                });
+            } 
 			void SendKeepAlive()
 			{
 				byte[] bytes = new byte[4];
@@ -1169,6 +1186,7 @@ namespace SMP
 		public void Dispose()
 		{
 			SaveAttributes(false);
+            if (LoggedIn) UpdatePList(false);
 			players.Remove(this);
 			e.CurrentChunk.Entities.Remove(e);
 			Entity.Entities.Remove(id);
@@ -1180,6 +1198,17 @@ namespace SMP
                 socket = null;
             }
 		}
+
+        private void UpdatePList(bool keep)
+        {
+            byte[] bytes = new byte[5 + (username.Length * 2)];
+            util.EndianBitConverter.Big.GetBytes((short)username.Length).CopyTo(bytes, 0);
+            Encoding.BigEndianUnicode.GetBytes(username).CopyTo(bytes, 2);
+            util.EndianBitConverter.Big.GetBytes(keep).CopyTo(bytes, bytes.Length - 3);
+            util.EndianBitConverter.Big.GetBytes(Ping).CopyTo(bytes, bytes.Length - 2);
+            players.ForEach((p) => p.SendRaw(0xC9, bytes));
+            //Server.Log(Ping.ToString());
+        } 
         
         public void hurt(short Amount)
         {
