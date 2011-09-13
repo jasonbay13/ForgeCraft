@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -64,6 +64,7 @@
     <Compile Include="Plugins\Events.cs" />
     <Compile Include="Plugins\Plugin.Events.cs" />
     <Compile Include="PreLoadedData\PreLoaded.cs" />
+    <Compile Include="WebserverStuff\Remote.cs" />
     <Compile Include="World\AI\AI.cs" />
     <Compile Include="World\AI\Creeper.cs" />
     <Compile Include="Command\Commands\CmdCheckPort.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Command\Commands\CmdFire.cs" />
     <Compile Include="Server\Properties.cs" />
-    <Compile Include="WebserverStuff\WebClient.cs" />
     <Compile Include="WebserverStuff\WebServer.cs" />
     <Compile Include="World\BlockChangeSystem.cs" />
     <Compile Include="World\Physics\Physics.cs" />
@@ -307,6 +307,5 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Economy\Commands\" />
-    <Folder Include="Command\Commands\Permissions\" />
   </ItemGroup>
 </Project>
