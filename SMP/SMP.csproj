@@ -260,9 +260,6 @@
     <Compile Include="Constants\Color.cs" />
     <Compile Include="Command\CommandList.cs" />
     <Compile Include="Command\Command.cs" />
-    <Compile Include="Command\Commands\SetTime.cs" />
-    <Compile Include="Command\Commands\NewLVL.cs" />
-    <Compile Include="Command\Commands\gotoLVL.cs" />
     <Compile Include="Command\Commands\CmdTeleport.cs" />
     <Compile Include="Command\Commands\CmdSpawn.cs" />
     <Compile Include="Command\Commands\CmdSay.cs" />
@@ -291,6 +288,10 @@
     <Compile Include="util\ItemDB.cs" />
     <Compile Include="util\SQLiteDatabase.cs" />
     <Compile Include="Command\Commands\Permissions\CmdSetRank.cs" />
+    <Compile Include="Command\Commands\CmdSetTime.cs" />
+    <Compile Include="Command\Commands\CmdNewLVL.cs" />
+    <Compile Include="Command\Commands\CmdGotoLVL.cs" />
+    <Compile Include="Command\Commands\Permissions\CmdPromote.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -19,7 +19,7 @@ using System;
 
 namespace SMP
 {
-	public class NewLVL : Command
+	public class CmdNewLVL : Command
 	{
 		public override string Category { get { return "Mod"; } }
 		public override bool ConsoleUseable { get { return true; } }

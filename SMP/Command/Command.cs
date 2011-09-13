@@ -56,7 +56,7 @@ namespace SMP
             core.Add(new CmdFly());
             core.Add(new CmdGive());
 			core.Add(new CmdGod());
-			core.Add(new gotoLVL());
+			core.Add(new CmdGotoLVL());
             core.Add(new CmdHelp());
 			core.Add(new CmdHackz());
             core.Add(new CmdKick());
@@ -66,14 +66,15 @@ namespace SMP
             core.Add(new CmdMe());
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
-			core.Add(new NewLVL());
+			core.Add(new CmdNewLVL());
+			core.Add(new CmdPromote()); //currently in DEBUG!!
             core.Add(new CmdRain());
             core.Add(new CmdSay());
-			core.Add(new CmdSetRank()); //DEBUG!!
+			core.Add(new CmdSetRank()); //currently in DEBUG!!
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());
-			core.Add(new SetTime());
+			core.Add(new CmdSetTime());
             core.Add(new CmdUnban());
 			core.Add(new CmdViewDistance());
 			core.Add(new CmdVIPList());
