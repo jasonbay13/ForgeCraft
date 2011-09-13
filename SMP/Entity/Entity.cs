@@ -248,6 +248,7 @@ namespace SMP
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
 						e.CurrentChunk.Entities.Remove(e);
+						Server.Log("picking up entity");
 						p.inventory.Add(e.I);
 					}
 				}

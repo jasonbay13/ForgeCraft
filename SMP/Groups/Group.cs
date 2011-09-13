@@ -106,7 +106,9 @@ namespace SMP
 					sb.Append(nodearray[ix] + ".");
 				}
 				
-				sb.Append("*");
+				sb.Remove(sb.Length - 1, 1);
+				nodeList.Add(sb.ToString());
+				sb.Append(".*");
 				nodeList.Add(sb.ToString());
 			}
 			
