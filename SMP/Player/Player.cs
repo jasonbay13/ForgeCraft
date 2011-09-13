@@ -177,7 +177,7 @@ namespace SMP
 				switch (msg)
 				{
                     case 0x00: length = 4; if (util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 21); break; //Login Request
+					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
@@ -591,16 +591,17 @@ namespace SMP
 				{
 					long seed = 0;
 					short length = (short)Server.name.Length;
-					byte[] bytes = new byte[(length * 2) + 21];
+					byte[] bytes = new byte[(length * 2) + 22];
 
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
 					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4); //String
 					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
-					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 15); 
-					bytes[bytes.Length - 4] = Server.mode;
-					bytes[bytes.Length - 3] = dimension;
-					bytes[bytes.Length - 2] = level.height;
-					bytes[bytes.Length - 1] = Server.MaxPlayers;
+					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 16); 
+					bytes[bytes.Length - 5] = Server.mode;
+					bytes[bytes.Length - 4] = dimension;
+					bytes[bytes.Length - 3] = level.height;
+					bytes[bytes.Length - 2] = Server.MaxPlayers;
+                    //bytes[bytes.Length - 1] = unklnown;
 
 					SendRaw(1, bytes);
 				}

@@ -33,7 +33,7 @@ namespace SMP
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static int protocolversion = 15;
+		public static int protocolversion = 16;
 		public static string Version = "0.1";
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
