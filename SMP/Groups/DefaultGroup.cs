@@ -30,11 +30,8 @@ namespace SMP
 			Prefix = "";
 			Suffix = "";
 			GroupColor = Color.Gray;
-			// temp till a better permission node system is in place
-            foreach (Command c in Command.all.All())
-			{
-				this.PermissionList.Add(c.PermissionNode);
-			}
+			
+			this.PermissionList.Add("*");
 			GroupList.Add(this);
 			Group.DefaultGroup = this;
 		}

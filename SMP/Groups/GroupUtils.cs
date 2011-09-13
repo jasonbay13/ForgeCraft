@@ -41,7 +41,7 @@ namespace SMP
 			if (!g.InheritanceList.Contains(addg))
 			{
 				g.InheritanceList.Add(addg);  //TODO: add inherited permissions
-				//UpdateGroupPermissions(g);
+				UpdateGroupPermissions(g);
 				return true;
 			}
 			return false;
@@ -52,7 +52,7 @@ namespace SMP
 			if (!g.InheritanceList.Contains(delg))
 			{
 				g.InheritanceList.Remove(delg);
-				//UpdateGroupPermissions(g);
+				UpdateGroupPermissions(g);
 				return true;
 			}				
 			return false;
@@ -346,7 +346,28 @@ namespace SMP
 		
 		public static void UpdateGroupPermissions(Group g)
 		{
-			//TODO
+			g.InheritedPermissionList.Clear();
+			
+			foreach(Group gr in g.InheritanceList)
+			{
+				foreach(string s in gr.PermissionList)
+				{
+					bool denied = false;
+					if(s.Contains("-"))
+					{
+					   	s.Remove(0, 1);
+						denied = true;
+					}
+					   
+					if(!g.PermissionList.Contains(s) && !g.PermissionList.Contains("-" + s) && !g.InheritedPermissionList.Contains(s) && !g.InheritedPermissionList.Contains("-" + s))
+					{	
+						if (denied)
+							g.InheritedPermissionList.Add("-" + s);
+						else
+							g.InheritedPermissionList.Add(s);
+					}
+				}
+			}
 			
 		}
 		

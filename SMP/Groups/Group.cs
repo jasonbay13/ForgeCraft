@@ -44,7 +44,7 @@ namespace SMP
         public List<string> PermissionList = new List<string>();
 		public List<string> InheritedPermissionList = new List<string>();
         public List<Group> InheritanceList = new List<Group>();
-        public List<string> tempInheritanceList = new List<string>();
+        private List<string> tempInheritanceList = new List<string>();
 
         /// <summary>
         /// Checks if a player has permission to use a command
@@ -195,10 +195,15 @@ namespace SMP
 					Group gr = Group.FindGroup(s);
 					if (gr != null)
 					{
-						g.InheritanceList.Add(gr);
+						GroupUtils.AddGroupInheritance(g, gr);
 					}
 				}
 			}
+		}
+		
+		public static void SaveGroups()
+		{
+			
 		}
 		
 		#endregion

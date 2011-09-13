@@ -925,31 +925,7 @@ namespace SMP
                 SendMessage(Command.HelpBot + "Command /" + cmd + " not recognized");
                 return;
             }
-				//TO BE REMOVED WHEN PERMMISSIONS ARE ADDED
-				/*List<string> args = new List<string>();
-				while (true)
-	            {
-	                if (message.IndexOf(' ') != -1)
-	                {
-	                    message = message.Substring(message.IndexOf(' ') + 1);
-	                    if (message.IndexOf(' ') != -1)
-	                    args.Add(message.Substring(0, message.IndexOf(' ')));
-	                    else
-	                    {
-	                        args.Add(message);
-	                        break;
-	                    }
-	                }
-	                else if (message.IndexOf(' ') == -1)
-	                    break;
-	            }
 				
-				command.Use(this, args.ToArray());
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
-				*/
-				
-				//will uncomment when group system is added for now everybody can use every command ;)
-				//Player p = FindPlayer(this.username);
 	            if (Group.CheckPermission(this, command.PermissionNode))
 	            {
 	            List<string> args = new List<string>();
@@ -1026,8 +1002,7 @@ namespace SMP
 		#endregion
 		#region TARGETED
         protected virtual void SendMessageInternal(string message)
-        {
-            //once again please check			
+        {		
             message = MessageAdditions(message);
 			//Server.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
@@ -1180,8 +1155,6 @@ namespace SMP
 			if (disconnected) return;
 			disconnected = true;
 			
-			//Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
-            //	LoggedIn ? "" : "/", LoggedIn ? username : ip);
             if (LoggedIn)
                 GlobalMessage("§5" + username + " §fhas disconnected.");
             LoggedIn = false;
