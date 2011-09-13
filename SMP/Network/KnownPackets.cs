@@ -89,4 +89,8 @@ namespace SMP
         IncrementStatistic = 0xC8,
         Disconnect = 0xFF
     }
+      public enum RemotePacketTypes : byte
+    {
+        SendStatus = 0xFF
+    }
 }
