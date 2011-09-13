@@ -490,7 +490,7 @@ namespace SMP
 					}
 				}
 				level.BlockChange(blockX, (int)blockY, blockZ, (byte)blockID, (byte)damage);
-                if (Server.mode == 0) inventory.Remove(inventory.current_index, 1);
+                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
 				return;
 			}
 			else
