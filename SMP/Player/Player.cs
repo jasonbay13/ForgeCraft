@@ -1298,7 +1298,6 @@ namespace SMP
 		private void LoadAttributes()
 		{
 			System.Data.DataTable DT = new System.Data.DataTable();
-			this.group = Group.DefaultGroup;
 			DT = Server.SQLiteDB.GetDataTable("SELECT * FROM Player WHERE Name = '" + username + "';");
 			
 			if(DT.Rows.Count > 0)
@@ -1336,7 +1335,47 @@ namespace SMP
 				
 				//TODO Accounts
 				
-				//TODO Group
+				//TODO Group, subgroups, and all that
+				string groupid = DT.Rows[0]["GroupID"].ToString();
+				
+				Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + groupid + "';"));
+				
+				if (gr != null)
+					this.group = gr;
+				else
+					this.group = Group.DefaultGroup;
+				
+				string temp = DT.Rows[0]["SubGroups"].ToString().Replace(" ", "");
+				string[] subgroups = temp.Split(',');
+				if (subgroups.Length >= 1)
+				{
+					foreach(string s in subgroups)
+					{
+						if (!String.IsNullOrEmpty(s))
+						{
+							Group g = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELCT Name FROM Groups WHERE ID = '" + s + "';"));
+							
+							if (g != null)
+								this.SubGroups.Add(g);
+						}
+					}
+				}
+				
+				string[] perms = DT.Rows[0]["ExtraPerms"].ToString().Replace(" ", "").Split(',');
+				foreach(string s in perms)
+				{
+					string perm;
+					if (s[0] == '-')
+						perm = "-" + Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s.Substring(1) + "';");
+					else
+						perm = Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';");
+					
+					if (perm.Substring(0,1) == "-" && !this.AdditionalPermissions.Contains(perm.Substring(1)))
+						this.AdditionalPermissions.Add(perm);
+					else if (perm.Substring(0,1) != "-" && !this.AdditionalPermissions.Contains("-" + perm))
+						this.AdditionalPermissions.Add(perm);
+				}
+				
 				
 				Server.Log(String.Format("Succesfully loaded {0} from the database.", this.username));
 				

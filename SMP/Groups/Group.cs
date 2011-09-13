@@ -20,8 +20,8 @@ using System.Collections.Generic;
 using System.Text;
 
 /*TODO
- * tracks
- * inheritance
+ * inheritance semi-done
+ * check permissions still has some bugs
  * grouputils
  * Saving everything :p
  * Commands
@@ -157,16 +157,11 @@ namespace SMP
 				string[] perms = dt.Rows[i]["Permissions"].ToString().Replace(" ", "").Split(',');
 				foreach(string s in perms)
 				{
-					Server.Log("S: " + s);
-					
 					string perm;
 					if (s[0] == '-')
 						perm = "-" + Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s.Substring(1) + "';");
 					else
 						perm = Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';");
-					
-					
-					Server.Log("Perm: " + perm);
 					
 					if (perm.Substring(0,1) == "-" && !g.PermissionList.Contains(perm.Substring(1)))
 						g.PermissionList.Add(perm);
@@ -199,6 +194,35 @@ namespace SMP
 					}
 				}
 			}
+			
+			#region Tracks
+			System.Data.DataTable tracksdt = new System.Data.DataTable();
+			try
+			{
+				dt = Server.SQLiteDB.GetDataTable("SELECT * FROM Track;");
+			}
+			catch{Server.Log("Something went wrong loading tracks");}
+			
+			for (int i = 0; i < tracksdt.Rows.Count; i++)
+			{
+				string name = tracksdt.Rows[i]["Name"].ToString();
+				string[] groups = tracksdt.Rows[i]["Groups"].ToString().Replace(" ", "").Split(',');
+				List<Group> grouplist = new List<Group>();
+				
+				foreach(string s in groups)
+				{
+					Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + s + "';"));
+					
+					if (gr != null)
+					{
+						grouplist.Add(gr);
+						gr.Tracks.Add(name);
+					}
+				}
+				if (grouplist.Count > 0)
+					TracksDictionary.Add(name, grouplist);
+			}
+			#endregion
 		}
 		
 		public static void SaveGroups()
