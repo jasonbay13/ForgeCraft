@@ -206,11 +206,15 @@ namespace SMP
 						short d = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 16 + (a/2) + (b/2) + (c/2)) * 2);
 						length = 18 + a + b + c + d;
 						break;
+					case 0xFE: length = 0;
+						Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers);
+						//socket.Close();
+						Disconnect();
+						return new byte[0];
 					case 0xFF: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //DC
 
 					default:
-                        if (msg == 254) { Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers); return new byte[0]; }
-						Server.Log("unhandled message id " + msg);
+                        Server.Log("unhandled message id " + msg);
 					    Kick("Unknown Packet id: " + msg);
 						return new byte[0];
 				}

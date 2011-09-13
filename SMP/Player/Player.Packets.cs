@@ -634,19 +634,19 @@ namespace SMP
 		}
 		public void HandleEntityAction(byte[] message)
 		{
-			if (message[5] == 1)
+			if (message[4] == 1)
 			{
 				crouch(true);
 			}
-			else if (message[5] == 2)
+			else if (message[4] == 2)
 			{
 				crouch(false);
 			}
-			else if (message[5] == 4)
+			else if (message[4] == 4)
 			{
 				//Start Sprinting
 			}
-			else if (message[5] == 5)
+			else if (message[4] == 5)
 			{
 				//Stop Sprinting
 			}
