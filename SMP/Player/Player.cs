@@ -120,7 +120,6 @@ namespace SMP
 				e = new Entity(this, Server.mainlevel);
 				
 				ip = socket.RemoteEndPoint.ToString().Split(':')[0];
-				Server.Log(ip + " connected to the server.");
 				
 				inventory = new Inventory(this);
 				players.Add(this);
@@ -333,8 +332,8 @@ namespace SMP
 			{
 				players.ForEach(delegate(Player p)
 				{
-					p.SendKeepAlive();
 					if (!p.LoggedIn) return;
+					p.SendKeepAlive();
 					p.SendTime();
 					if (!p.hidden)
 					{
@@ -982,7 +981,7 @@ namespace SMP
 		#region GLOBAL
         public static void GlobalMessage(string message)
         {
-            foreach (Player p in players)
+            foreach (Player p in players.ToArray())
             {
                 p.SendMessage(message);
             }
@@ -1189,18 +1188,23 @@ namespace SMP
 		}
 		public void Dispose()
 		{
-			SaveAttributes(false);
-            if (LoggedIn) UpdatePList(false);
 			players.Remove(this);
-			e.CurrentChunk.Entities.Remove(e);
-			Entity.Entities.Remove(id);
+			if (LoggedIn)
+			{
+				SaveAttributes(false);
+				if (LoggedIn) UpdatePList(false);
+				players.Remove(this);
+				e.CurrentChunk.Entities.Remove(e);
+				Entity.Entities.Remove(id);
 
-            // Close stuff
-            if( socket != null && socket.Connected ) {
-                try { socket.Close(); }
-                catch { }
-                socket = null;
-            }
+				// Close stuff
+				if (socket != null && socket.Connected)
+				{
+					try { socket.Close(); }
+					catch { }
+					socket = null;
+				}
+			}
 		}
 
         private void UpdatePList(bool keep)

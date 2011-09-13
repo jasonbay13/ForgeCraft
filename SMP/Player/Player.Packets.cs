@@ -317,7 +317,7 @@ namespace SMP
 		private void HandleDigging(byte[] message)
 		{
 			//Send Animation, this shouldn't only be sent when digging
-			foreach (int i in VisibleEntities)
+			foreach (int i in VisibleEntities.ToArray())
 			{
 				Entity e = Entity.Entities[i];
 				if (!e.isPlayer) continue;
