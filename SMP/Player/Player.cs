@@ -600,9 +600,9 @@ namespace SMP
 					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 16); 
 					bytes[bytes.Length - 5] = Server.mode;
 					bytes[bytes.Length - 4] = dimension;
-					bytes[bytes.Length - 3] = level.height;
-					bytes[bytes.Length - 2] = Server.MaxPlayers;
-                    //bytes[bytes.Length - 1] = unklnown;
+                    bytes[bytes.Length - 3] = 1;
+					bytes[bytes.Length - 2] = level.height;
+					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
 					SendRaw(1, bytes);
 				}
