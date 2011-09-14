@@ -446,6 +446,19 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(Saturation).CopyTo(tosend, 4);
 				SendRaw(0x08, tosend);
 			}
+            /// <summary>
+            /// Adds effect to player
+            /// </summary>
+            /// <param name="effect">See http://mc.kev009.com/Protocol#Entity_Effect_.280x29.29 for values</param>
+            public void SendEntityEffect(byte effect, byte amplifier, short duration)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                bytes[4] = effect;
+                bytes[5] = amplifier;
+                util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
+                SendRaw(0x29, bytes);
+            }
 			void CheckOnFire()
 			{
 				// check for players on fire before join map.
@@ -1364,6 +1377,7 @@ namespace SMP
 				string[] perms = DT.Rows[0]["ExtraPerms"].ToString().Replace(" ", "").Split(',');
 				foreach(string s in perms)
 				{
+                    if (String.IsNullOrEmpty(s)) continue;
 					string perm;
 					if (s[0] == '-')
 						perm = "-" + Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s.Substring(1) + "';");
