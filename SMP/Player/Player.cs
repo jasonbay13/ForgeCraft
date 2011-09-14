@@ -93,6 +93,8 @@ namespace SMP
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
+        public CmdCuboid.Pos cuboidpos;
+        public string cuboidtype = "solid";
 		
 		Entity e;
 		public string ip;

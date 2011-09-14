@@ -28,69 +28,68 @@ namespace SMP
         public override bool ConsoleUseable { get { return false; } }
         public override string Description { get { return "Cuboid"; } }
         public override string PermissionNode { get { return "core.build.cuboid"; } }
-        Pos pos;
-        string cuboidtype = "solid";
+        
         public override void Use(Player p, params string[] args)
         {
             if (args.Length != 0)
             {
-                if (args[0] == "help") Help(p);
+                if (args[0] == "help") { Help(p); return; }
 
                 try
                 {
-                    pos.type = short.Parse(args[0]);
+                    p.cuboidpos.type = short.Parse(args[0]);
                 }
                 catch
                 {
-                    pos.type = FindBlocks.FindBlock(args[0]);
+                    p.cuboidpos.type = FindBlocks.FindBlock(args[0]);
                 }
-                if (pos.type == -1)
+                if (p.cuboidpos.type == -1)
                 {
                     switch (args[0])
                     {
                         case "hollow":
-                            cuboidtype = "hollow";
+                            p.cuboidtype = "hollow";
                             break;
                         case "walls":
-                            cuboidtype = "walls";
+                            p.cuboidtype = "walls";
                             break;
                         case "holes":
-                            cuboidtype = "holes";
+                            p.cuboidtype = "holes";
                             break;
                         //case "wire":
                         //cuboidtype = "wire";
                         //break;
                         case "random":
-                            cuboidtype = "random";
+                            p.cuboidtype = "random";
                             break;
                         default:
-                            cuboidtype = "solid";
+                            p.cuboidtype = "solid";
                             break;
                     }
                 }
             }
-            else { pos.type = -1; }
+            else { p.cuboidpos.type = -1; }
             if (args.Length == 2)
             {
                 switch (args[1])
                 {
                     case "hollow":
-                        cuboidtype = "hollow";
+                        p.cuboidtype = "hollow";
                         break;
                     case "walls":
-                        cuboidtype = "walls";
+                        p.cuboidtype = "walls";
                         break;
                     case "holes":
-                        cuboidtype = "holes";
+                        p.cuboidtype = "holes";
                         break;
                     //case "wire":
                     //cuboidtype = "wire";
                     //break;
                     case "random":
-                        cuboidtype = "random";
+                        p.cuboidtype = "random";
                         break;
                     default:
-                        cuboidtype = "solid";
+                        p.cuboidtype = "solid";
                         break;
                 }
             }
@@ -103,8 +102,8 @@ namespace SMP
             p.ClearBlockChange();
             //p.SendMessage("tile: " + x + " " + y + " " + z + " " + type);
             p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), (byte)0);
-            type = pos.type;
-            pos = new Pos { x = x, y = y, z = z, type = type };
+            type = p.cuboidpos.type;
+            p.cuboidpos = new Pos { x = x, y = y, z = z, type = type };
             p.OnBlockChange += Blockchange2;
         }
 
@@ -113,19 +112,19 @@ namespace SMP
             p.ClearBlockChange();
             //p.SendMessage("tile: " + x + " " + y + " " + z + " " + type);
             p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), (byte)0);
-            if (pos.type != -1) type = pos.type;
+            if (p.cuboidpos.type != -1) type = p.cuboidpos.type;
             int xx1, zz1, x2, z2;
             byte y2, yy1;
-            xx1 = Math.Min(pos.x, x);
-            x2 = Math.Max(pos.x, x);
-            yy1 = (byte)Math.Min(pos.y, y);
-            y2 = (byte)Math.Max(pos.y, y);
-            zz1 = Math.Min(pos.z, z);
-            z2 = Math.Max(pos.z, z);
+            xx1 = Math.Min(p.cuboidpos.x, x);
+            x2 = Math.Max(p.cuboidpos.x, x);
+            yy1 = (byte)Math.Min(p.cuboidpos.y, y);
+            y2 = (byte)Math.Max(p.cuboidpos.y, y);
+            zz1 = Math.Min(p.cuboidpos.z, z);
+            z2 = Math.Max(p.cuboidpos.z, z);
             if (type == 255 || type == -1) type = 20;
             //int total = Math.Abs(pos.x - x + 1) * Math.Abs(pos.z - z + 1) * Math.Abs(pos.y - y + 1);
-            p.SendMessage("Cuboiding " + total(xx1, x2, yy1, y2, zz1, z2) + " Blocks.");
-            if (cuboidtype == "solid")
+            p.SendMessage("Cuboiding " + total(p.cuboidtype, xx1, x2, yy1, y2, zz1, z2) + " Blocks.");
+            if (p.cuboidtype == "solid")
             {
                 for (int x1 = xx1; x1 <= x2; ++x1)
                     for (byte y1 = yy1; y1 <= y2; ++y1)
@@ -134,7 +133,7 @@ namespace SMP
                 return;
             }
 
-            if (cuboidtype == "hollow")
+            if (p.cuboidtype == "hollow")
             {
                 for (int x1 = xx1; x1 <= x2; ++x1)
                     for (int z1 = zz1; z1 <= z2; ++z1)
@@ -157,7 +156,7 @@ namespace SMP
                 }
                 return;
             }
-            if (cuboidtype == "walls")
+            if (p.cuboidtype == "walls")
             {
                 for (int y1 = yy1; y1 <= y2; ++y1)
                 {
@@ -174,7 +173,7 @@ namespace SMP
                 }
                 return;
             }
-            if (cuboidtype == "holes")
+            if (p.cuboidtype == "holes")
             {
                 for (int x1 = xx1; x1 <= x2; x1 += 2)
                     for (byte y1 = yy1; y1 <= y2; y1 += 2)
@@ -182,7 +181,7 @@ namespace SMP
                             p.level.BlockChange(x1, y1, z1, (byte)type, 0);
                 return;
             }
-            if (cuboidtype == "random")
+            if (p.cuboidtype == "random")
             {
                 Random rand = new Random();
                 for (int x1 = xx1; x1 <= x2; ++x1)
@@ -194,7 +193,7 @@ namespace SMP
             //if (p.level.GetBlock(x1, y1, z1) != type)
             //p.SendBlockChange(x1, y1, z1, type, 0);
         }
-        int total(int xx1, int x2, byte yy1, int y2, int zz1, int z2)
+        int total(string cuboidtype, int xx1, int x2, byte yy1, int y2, int zz1, int z2)
         {
             int total = 0;
             if (cuboidtype == "solid")
