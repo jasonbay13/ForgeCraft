@@ -1136,7 +1136,6 @@ namespace SMP
 			}
             if (LoggedIn)
                 GlobalMessage("§5" + username +" §fhas been kicked from the server!");
-            LoggedIn = false;
 			
 			try
 			{
@@ -1158,21 +1157,20 @@ namespace SMP
 			
             if (LoggedIn)
                 GlobalMessage("§5" + username + " §fhas disconnected.");
-            LoggedIn = false;
 			
 			//TODO: Despawn
 			this.Dispose();
 		}
 		public void Dispose()
 		{
-			players.Remove(this);
 			if (LoggedIn)
 			{
 				SaveAttributes(false);
-				if (LoggedIn) UpdatePList(false);
+				UpdatePList(false);
 				players.Remove(this);
 				e.CurrentChunk.Entities.Remove(e);
 				Entity.Entities.Remove(id);
+                LoggedIn = false;
 
 				// Close stuff
 				if (socket != null && socket.Connected)
@@ -1182,6 +1180,7 @@ namespace SMP
 					socket = null;
 				}
 			}
+			players.Remove(this);
 		}
 
         private void UpdatePList(bool keep)
