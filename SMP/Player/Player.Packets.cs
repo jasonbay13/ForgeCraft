@@ -526,6 +526,7 @@ namespace SMP
 
         private void HandleCreativeInventoryAction(byte[] message)
         {
+            if (util.EndianBitConverter.Big.ToInt16(message, 0) == -1) return;
             inventory.Add(util.EndianBitConverter.Big.ToInt16(message, 2), (byte)util.EndianBitConverter.Big.ToInt16(message, 4), util.EndianBitConverter.Big.ToInt16(message, 6), util.EndianBitConverter.Big.ToInt16(message, 0));
         }
 		

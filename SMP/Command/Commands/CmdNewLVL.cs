@@ -45,13 +45,13 @@ namespace SMP
 				World.worlds.Add(temp);
 				p.SendMessage("World " + args[0] + " MADE!");
 			}
-			else if (args.Length == 2)
+			else if (args.Length == 2 || args.Length == 3)
 			{
 				int seed = Convert.ToInt32(args[1]);
 				p.SendMessage("Creating world with seed: " + seed);
 				double x = 0; double y = 127; double z = 0;
 				World temp = new World(x, y, z, args[0], seed);
-				temp.SpawnY = y;
+                if (args.Length == 3) temp.Limit = Convert.ToInt32(args[2]);
 				World.worlds.Add(temp);
 				p.SendMessage("World " + args[0] + " MADE!");
 			}
@@ -59,7 +59,8 @@ namespace SMP
 		public override void Help (Player p)
 		{
 			p.SendMessage("Create a new level");
-            p.SendMessage("/newlvl [name] [seed] (optional, 0 for flatworld)");
+            p.SendMessage("/newlvl [name] (seed (maxchunks))");
+            p.SendMessage("maxchunks of 4 is a 128x128x128 map. Minimum is 3");
 		}
 	}
 }

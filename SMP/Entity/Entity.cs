@@ -105,6 +105,8 @@ namespace SMP
 
 		public void UpdateChunks(bool force, bool forcesend)
 		{
+            try { if (p.level.Limit != 0 && (Math.Abs(c.x) > p.level.Limit || Math.Abs(c.z) > p.level.Limit)) return; }
+            catch { return; }
 			if (c != CurrentChunk || force)
 			{
 				try
@@ -142,11 +144,14 @@ namespace SMP
 
 							if (!p.VisibleChunks.Contains(po) || forcesend)
 							{
-								if (!p.level.chunkData.ContainsKey(po))
-								{
-									p.level.GenerateChunk(po.x, po.z);
-								}
-								p.SendChunk(p.level.chunkData[po]);
+                                if (p.level.Limit > Math.Abs(po.x) && p.level.Limit > Math.Abs(po.z))
+                                {
+                                    if (!p.level.chunkData.ContainsKey(po))
+                                    {
+                                        p.level.GenerateChunk(po.x, po.z);
+                                    }
+                                    p.SendChunk(p.level.chunkData[po]);
+                                }
 							}
 						});
 					});

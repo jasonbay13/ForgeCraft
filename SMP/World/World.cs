@@ -42,6 +42,7 @@ namespace SMP
         public bool Raining = false;
 		public byte height = 128;
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
+        public int Limit = int.MaxValue;
 		#region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
@@ -178,6 +179,7 @@ namespace SMP
 
 		public void GenerateChunk(int x, int z)
 		{
+            if (Limit < x || Limit < z) return;
 			Chunk c = new Chunk(x, z);
 			generator.Generate(this, c);
 			//generator.PerlinChunk(c);
@@ -192,17 +194,20 @@ namespace SMP
 		}
 		public void BlockChange(int x, int y, int z, byte type, byte meta)
 		{
-			int cx = x >> 4, cz = z >> 4;
-			Chunk chunk = Chunk.GetChunk(cx, cz, this);
-			chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
-			if (BlockChanged != null)
-				BlockChanged(x, y, z, type, meta);
-			foreach (Player p in Player.players.ToArray())
-			{
-				if (!p.VisibleChunks.Contains(chunk.point)) continue;
-				if (p.level == this)
-					p.SendBlockChange(x, (byte)y, z, type, meta);
-			}
+            try
+            {
+                int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
+                if (BlockChanged != null)
+                    BlockChanged(x, y, z, type, meta);
+                foreach (Player p in Player.players.ToArray())
+                {
+                    if (!p.VisibleChunks.Contains(chunk.point)) continue;
+                    if (p.level == this)
+                        p.SendBlockChange(x, (byte)y, z, type, meta);
+                }
+            }
+            catch { return; }
 		}
 		public byte GetBlock(int x, int y, int z)
 		{
