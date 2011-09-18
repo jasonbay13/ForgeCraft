@@ -299,10 +299,13 @@ namespace SMP
 		//{
 		//        return Server.mainlevel.chunkData[new Point(x, z)];
 		//}
-		public static Chunk GetChunk(int x, int z, World world)
-		{
-			return world.chunkData[new Point(x, z)];
-		}
+        public static Chunk GetChunk(int x, int z, World world)
+        {
+            Point po = new Point(x, z);
+            if (world.chunkData.ContainsKey(po))
+                return world.chunkData[po];
+            return null;
+        }
 	}
 }
 
