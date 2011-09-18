@@ -56,7 +56,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;
-		public static byte mode = 1; //0=survival, 1=creative
+		public static byte mode = 0; //0=survival, 1=creative
 
         #region ==SETTINGS==
 
@@ -84,7 +84,7 @@ namespace SMP
 		{
 			Log("Starting Server");
 			s = this;
-            mainlevel = new World(0, 127, 0, "main", 0) { Limit = 4 }; //changed to seed 0 for now
+            mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = 4 }; //changed to seed 0 for now
 			World.worlds.Add(mainlevel);
 			ml = new MainLoop("server");
 			#region updatetimer

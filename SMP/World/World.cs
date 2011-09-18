@@ -42,7 +42,7 @@ namespace SMP
         public bool Raining = false;
 		public byte height = 128;
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
-        public int Limit = int.MaxValue;
+        public int ChunkLimit = int.MaxValue;
 		#region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
@@ -179,7 +179,6 @@ namespace SMP
 
 		public void GenerateChunk(int x, int z)
 		{
-            if (Limit < x || Limit < z) return;
 			Chunk c = new Chunk(x, z);
 			generator.Generate(this, c);
 			//generator.PerlinChunk(c);
