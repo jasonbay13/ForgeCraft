@@ -17,8 +17,9 @@
 */
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
 using System.Threading.Tasks;
+using zlib;
 
 namespace SMP
 {
@@ -43,7 +44,7 @@ namespace SMP
 		public byte height = 128;
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
         public int ChunkLimit = int.MaxValue;
-		#region Custom Command / Plugin Events
+        #region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
 		public static event OnWorldLoad WorldLoad;
@@ -57,7 +58,8 @@ namespace SMP
 		public event OnBlockChange BlockChanged;
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		#endregion
-		
+
+        public World() { }
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.World"/> class and generates 49 chunks.
 		/// </summary>
@@ -125,21 +127,137 @@ namespace SMP
             if (tempLevel != null) return tempLevel;
             return null;
 		}
-		public static World LoadLVL(string filename)
-		{
-			//TODO Load files
-			//if (WorldLoad != null)
-			//	WorldLoad(this);
-			return null;
-		}
-		public void SaveLVL(World  w)
-		{
-			if (Save != null)
-				Save(this);
-			if (OnSave != null)
-				OnSave(this);
-			//TODO Save files
-		}
+        public static World LoadLVL(string filename)
+        {
+            //TODO make loading/saving better.
+            //if (WorldLoad != null)
+            //	WorldLoad(this);
+            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard() };
+            Server.Log("Loading...");
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (FileStream fs = new FileStream(filename + "/" + filename + ".blocks", FileMode.Open))
+                {
+                    byte[] comp;
+                    ms.SetLength(fs.Length);
+                    fs.Read(ms.GetBuffer(), 0, (int)fs.Length);
+                    DecompressData(ms.GetBuffer(), out comp);
+                    ms.Write(comp, 0, comp.Length);
+                }
+                byte[] bytes = ms.ToArray();
+                long chunkcount = ms.Length / 32776;
+                Parallel.For(0, chunkcount, i =>
+                {
+                    try
+                    {
+                        int block = (int)i * 32776;
+                        int x = BitConverter.ToInt32(bytes, 0 + block);
+                        int z = BitConverter.ToInt32(bytes, 4 + block);
+                        Chunk c = new Chunk(x, z);
+                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
+                        c.RecalculateLight();
+                        c.SpreadLight();
+                        if (!w.chunkData.ContainsKey(new Point(x, z)))
+                            w.chunkData.Add(new Point(x, z), c);
+                    }
+                    catch (Exception ex)
+                    {
+                        Server.Log(ex.ToString());
+                    }
+                });
+                World.worlds.Add(w);
+                Server.Log(filename + " Loaded.");
+            }
+
+            using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
+            {
+                w.seed = int.Parse(sw.ReadLine());
+                w.SpawnX = int.Parse(sw.ReadLine());
+                w.SpawnY = int.Parse(sw.ReadLine());
+                w.SpawnZ = int.Parse(sw.ReadLine());
+                w.ChunkLimit = int.Parse(sw.ReadLine());
+            }
+            Console.WriteLine("Look distance = 3");
+            w.timeupdate.Elapsed += delegate
+            {
+                w.time += 10;
+                if (w.time > 24000)
+                    w.time = 0;
+                Player.players.ForEach(delegate(Player p) { if (p.level == w) p.SendTime(); });
+            };
+            w.timeupdate.Start();
+            w.name = filename;
+            return w;
+        }
+        public static void SaveLVL(World w)
+        {
+            if (w.Save != null)
+                w.Save(w);
+            if (World.OnSave != null)
+                World.OnSave(w);
+            //TODO Save files
+            if (!Directory.Exists(w.name)) Directory.CreateDirectory(w.name);
+            using (StreamWriter sw = new StreamWriter(w.name + "/" + w.name + ".ini"))
+            {
+                sw.WriteLine(w.seed);
+                sw.WriteLine(w.SpawnX);
+                sw.WriteLine(w.SpawnY);
+                sw.WriteLine(w.SpawnZ);
+                sw.WriteLine(w.ChunkLimit);
+            }
+            using (MemoryStream blocks = new MemoryStream())
+            {
+                foreach (Chunk ch in w.chunkData.Values)
+                {
+                    //File.WriteAllBytes(w.name + "/" + ch.x + " " + ch.z, ch.blocks);
+                    blocks.Write(BitConverter.GetBytes(ch.x), 0, 4);
+                    blocks.Write(BitConverter.GetBytes(ch.z), 0, 4);
+                    blocks.Write(ch.blocks, 0, ch.blocks.Length);
+                }
+                byte[] bytes;
+                CompressData(blocks.ToArray(), out bytes);
+                using (FileStream fs = new FileStream(w.name + "/" + w.name + ".blocks", FileMode.Create))
+                {
+                    fs.Write(bytes, 0, (int)bytes.Length);
+                }
+            }
+            Server.Log(w.name + " Saved.");
+        }
+        public static void CompressData(byte[] inData, out byte[] outData)
+        {
+            using (MemoryStream outMemoryStream = new MemoryStream())
+            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION))
+            using (Stream inMemoryStream = new MemoryStream(inData))
+            {
+                CopyStream(inMemoryStream, outZStream);
+                outZStream.finish();
+                outData = outMemoryStream.ToArray();
+            }
+        }
+
+        public static void DecompressData(byte[] inData, out byte[] outData)
+        {
+            using (MemoryStream outMemoryStream = new MemoryStream())
+            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream))
+            using (Stream inMemoryStream = new MemoryStream(inData))
+            {
+                CopyStream(inMemoryStream, outZStream);
+                outZStream.finish();
+                outData = outMemoryStream.ToArray();
+            }
+        }
+
+        public static void CopyStream(System.IO.Stream input, System.IO.Stream output)
+        {
+            byte[] buffer = new byte[2000];
+            int len;
+            while ((len = input.Read(buffer, 0, 2000)) > 0)
+            {
+                output.Write(buffer, 0, len);
+            }
+            output.Flush();
+        }   
 
 		public void Rain(bool rain)
 		{
