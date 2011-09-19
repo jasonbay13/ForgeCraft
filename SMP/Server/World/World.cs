@@ -189,7 +189,8 @@ namespace SMP
 				GeneratedChunk(this, c, x, z);
 			if (WorldGenerateChunk != null)
 				WorldGenerateChunk(this, c, x, z);
-			if(!chunkData.ContainsKey(new Point(x,z))) chunkData.Add(new Point(x,z), c);
+			if(!chunkData.ContainsKey(new Point(x,z))) 
+				chunkData.Add(new Point(x,z), c);
 		}
 		public void BlockChange(int x, int y, int z, byte type, byte meta)
 		{

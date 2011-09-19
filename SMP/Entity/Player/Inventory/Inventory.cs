@@ -162,6 +162,10 @@ namespace SMP
 				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
 			}
 
+			ClickHandler(slot, click, ActionID, Shift, ItemID, Count, Meta);
+		}
+		public void ClickHandler(short slot, ClickType click, short ActionID, bool Shift, short ItemID, byte Count, short Meta)
+		{
 			if (slot == -999)
 			{
 				//TODO throw item
@@ -184,20 +188,40 @@ namespace SMP
 								{
 									continue;
 								}
-							}
-							byte stacking = isStackable(item.item);
-							byte available = (byte)(stacking - item.count);
-							if (available == 0) return;
-							if (items[slot].count <= available)
-							{
-								item.count += items[slot].count;
-								items[slot] = Item.Nothing;
-								return;
+								else
+								{
+									byte stacking = isStackable(item.item);
+									byte available = (byte)(stacking - item.count);
+									if (available == 0) return;
+									if (items[slot].count <= available)
+									{
+										item.count += items[slot].count;
+										items[slot] = Item.Nothing;
+										return;
+									}
+									else
+									{
+										item.count = stacking;
+										items[slot].count -= available;
+									}
+								}
 							}
 							else
 							{
-								item.count = stacking;
-								items[slot].count -= available;
+								byte stacking = isStackable(item.item);
+								byte available = (byte)(stacking - item.count);
+								if (available == 0) return;
+								if (items[slot].count <= available)
+								{
+									item.count += items[slot].count;
+									items[slot] = Item.Nothing;
+									return;
+								}
+								else
+								{
+									item.count = stacking;
+									items[slot].count -= available;
+								}
 							}
 						}
 					}
@@ -219,20 +243,40 @@ namespace SMP
 							if (item.item < 255)
 							{
 								if (item.meta != items[slot].meta) continue;
-							}
-							byte stacking = isStackable(item.item);
-							byte available = (byte)(stacking - item.count);
-							if (available == 0) return;
-							if (items[slot].count <= available)
-							{
-								item.count += items[slot].count;
-								items[slot] = Item.Nothing;
-								return;
+								else
+								{
+									byte stacking = isStackable(item.item);
+									byte available = (byte)(stacking - item.count);
+									if (available == 0) return;
+									if (items[slot].count <= available)
+									{
+										item.count += items[slot].count;
+										items[slot] = Item.Nothing;
+										return;
+									}
+									else
+									{
+										item.count = stacking;
+										items[slot].count -= available;
+									}
+								}
 							}
 							else
 							{
-								item.count = stacking;
-								items[slot].count -= available;
+								byte stacking = isStackable(item.item);
+								byte available = (byte)(stacking - item.count);
+								if (available == 0) return;
+								if (items[slot].count <= available)
+								{
+									item.count += items[slot].count;
+									items[slot] = Item.Nothing;
+									return;
+								}
+								else
+								{
+									item.count = stacking;
+									items[slot].count -= available;
+								}
 							}
 						}
 					}
@@ -521,6 +565,7 @@ namespace SMP
 			}
 			#endregion
 		}
+
 		public Item Right_Click(int slot)
 		{
 			try
@@ -577,7 +622,7 @@ namespace SMP
 			
 			return -1;
 		}
-		public byte isStackable(short id)
+		public static byte isStackable(short id)
 		{
 			if(id >= 1 && id <= 96) //all blocks are stackable and there is no missing id's
 				return 64;
