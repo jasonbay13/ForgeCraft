@@ -84,7 +84,8 @@ namespace SMP
 		{
 			Log("Starting Server");
 			s = this;
-			mainlevel = new World(0, 127, 0, "main", 0); //changed to seed 0 for now
+			mainlevel = new World(0, 127, 0, "main", new Random().Next());
+			//mainlevel = new World(0, 127, 0, "main", 0);
 			World.worlds.Add(mainlevel);
 			ml = new MainLoop("server");
 			#region updatetimer

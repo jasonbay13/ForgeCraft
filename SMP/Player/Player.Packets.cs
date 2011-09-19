@@ -543,7 +543,7 @@ namespace SMP
 		{
 			if (OpenWindow)
 			{
-				window.HandleClick(message);
+				window.HandleClick(this, message);
 			}
 			else
 			{
@@ -601,7 +601,7 @@ namespace SMP
 			}
 			else
 			{
-				byte currentc = (byte)((current_slot_holding - 9) + window.items.Length);
+				byte currentc = (byte)((current_slot_holding - 9) + window.items.Length); //TODO TEST
 				if (slot == currentc)
 				{
 					foreach (int i in VisibleEntities.ToArray())
@@ -613,7 +613,20 @@ namespace SMP
 				}
 			}
 
-			//TODO if crafting, then check the current positioning
+			if (!OpenWindow)
+			{
+				if (slot < 5)
+				{
+					//UPDATE CRAFTING
+				}
+			}
+			else if (window.type == 1)
+			{
+				if (slot < 10)
+				{
+					//UPDATE CRAFTING
+				}
+			}
 		}
 
 		private void HandleDC(byte[] message)
