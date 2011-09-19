@@ -46,7 +46,7 @@ namespace SMP
 			else
 			{
 				p.AFK = true;
-				Player.GlobalMessage(p.username + " is away, " + MakeString(args, 0, args.Length));
+				Player.GlobalMessage(p.username + " is away, " + String.Join(" ", args));
 				return;
 			}
 		}
@@ -54,7 +54,7 @@ namespace SMP
 		public override void Help(Player p)
 		{
 			p.SendMessage(HelpBot + Description, WrapMethod.Chat);
-			p.SendMessage("/afk");
+			p.SendMessage("/afk (message)");
 		}
 	}
 }

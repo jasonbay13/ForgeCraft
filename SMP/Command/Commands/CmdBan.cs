@@ -26,7 +26,7 @@ namespace SMP
 			{
 				if (args.Length >= 2)
 				{
-					banplayer.Kick("You were banned: " + MakeString(args, 1, -1));
+					banplayer.Kick("You were banned: " + String.Join(" ", args, 1, args.Length - 1));
 					Server.BanList.Add(banplayer.username.ToLower());
 				}
 				else
