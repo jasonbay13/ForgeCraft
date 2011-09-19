@@ -54,6 +54,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\CmdSaveLVL.cs" />
+    <Compile Include="Command\Commands\CmdLoadLVL.cs" />
+    <Compile Include="Command\Commands\CmdUnloadLVL.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>

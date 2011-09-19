@@ -84,8 +84,15 @@ namespace SMP
 		{
 			Log("Starting Server");
 			s = this;
-            mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = 4 }; //changed to seed 0 for now
-			World.worlds.Add(mainlevel);
+            if (Directory.Exists("main"))
+            {
+                mainlevel = World.LoadLVL("main");
+            }
+            else
+            {
+                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = 4 };
+                World.worlds.Add(mainlevel);
+            } //changed to seed 0 for now
 			ml = new MainLoop("server");
 			#region updatetimer
 			ml.Queue(delegate

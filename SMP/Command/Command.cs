@@ -62,6 +62,7 @@ namespace SMP
             core.Add(new CmdKick());
 			core.Add(new CmdKill());  
             core.Add(new CmdList());
+            core.Add(new CmdLoadLVL());
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());
 			core.Add(new CmdMotd());
@@ -74,8 +75,10 @@ namespace SMP
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());
+            core.Add(new CmdSaveLVL());
 			core.Add(new CmdSetTime());
             core.Add(new CmdUnban());
+            core.Add(new CmdUnloadLVL());
 			core.Add(new CmdViewDistance());
 			core.Add(new CmdVIPList());
             core.Add(new CmdWhiteList());
