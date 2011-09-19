@@ -6,15 +6,13 @@ Minecraft Beta Custom Server Software
 About ForgeCraft
 ---------------------
 
-ForgeCraft is a Minecraft Beta server software built from the ground up.  It has been released under an open-source license to allow the community to help us develop it further.  We welcome all pull requests and will merge them in at our own discretion.  For more information, visit [our wiki][1].
-
-The official website for MCForge is [mcforge.net][2]
+ForgeCraft is a Minecraft Beta server software built from the ground up.  It has been released under an open-source license to allow the community to help us develop it further.  We welcome all pull requests and will merge them in at our own discretion.  For more information, visit [the official site][1].
 
 Copyright/License
 -----------------
 
 Unless otherwise noted, this software and its source code is
-Copyright 2011 MCForge. Dual-licensed under the [GNU General Public License, Version 3][3] and the [Educational Community License, Version 2.0][4]
+Copyright 2011 MCForge. Dual-licensed under the [GNU General Public License, Version 3][2] and the [Educational Community License, Version 2.0][3]
 
 In an effort to add copyright notices to the source code, we utilized automated methods to insert these.
 Some copyright attributions may be incorrect.  If you identify any such cases, please notify us immediately so we may correct it.
@@ -32,7 +30,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-[1]: http://wiki.mcforge.net/index.php?title=Development
-[2]: http://www.mcforge.net
-[3]: http://www.gnu.org/licenses/gpl-3.0.html
-[4]: http://www.opensource.org/licenses/ecl2.php
+[1]: http://www.mcforge.net
+[2]: http://www.gnu.org/licenses/gpl-3.0.html
+[3]: http://www.opensource.org/licenses/ecl2.php
