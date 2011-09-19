@@ -49,6 +49,7 @@ namespace SMP
 		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
+        Experience Experience = new Experience();
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
@@ -92,6 +93,8 @@ namespace SMP
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
+        public CmdCuboid.Pos cuboidpos;
+        public string cuboidtype = "solid";
 		
 		Entity e;
 		public string ip;
@@ -177,7 +180,7 @@ namespace SMP
 				switch (msg)
 				{
                     case 0x00: length = 4; if (util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 21); break; //Login Request
+					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
@@ -445,6 +448,19 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(Saturation).CopyTo(tosend, 4);
 				SendRaw(0x08, tosend);
 			}
+            /// <summary>
+            /// Adds effect to player
+            /// </summary>
+            /// <param name="effect">See http://mc.kev009.com/Protocol#Entity_Effect_.280x29.29 for values</param>
+            public void SendEntityEffect(byte effect, byte amplifier, short duration)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                bytes[4] = effect;
+                bytes[5] = amplifier;
+                util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
+                SendRaw(0x29, bytes);
+            }
 			void CheckOnFire()
 			{
 				// check for players on fire before join map.
@@ -591,14 +607,15 @@ namespace SMP
 				{
 					long seed = 0;
 					short length = (short)Server.name.Length;
-					byte[] bytes = new byte[(length * 2) + 21];
+					byte[] bytes = new byte[(length * 2) + 22];
 
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
 					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4); //String
 					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
-					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 15); 
-					bytes[bytes.Length - 4] = Server.mode;
-					bytes[bytes.Length - 3] = dimension;
+					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 16); 
+					bytes[bytes.Length - 5] = Server.mode;
+					bytes[bytes.Length - 4] = dimension;
+                    bytes[bytes.Length - 3] = 1;
 					bytes[bytes.Length - 2] = level.height;
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
@@ -924,31 +941,7 @@ namespace SMP
                 SendMessage(Command.HelpBot + "Command /" + cmd + " not recognized");
                 return;
             }
-				//TO BE REMOVED WHEN PERMMISSIONS ARE ADDED
-				/*List<string> args = new List<string>();
-				while (true)
-	            {
-	                if (message.IndexOf(' ') != -1)
-	                {
-	                    message = message.Substring(message.IndexOf(' ') + 1);
-	                    if (message.IndexOf(' ') != -1)
-	                    args.Add(message.Substring(0, message.IndexOf(' ')));
-	                    else
-	                    {
-	                        args.Add(message);
-	                        break;
-	                    }
-	                }
-	                else if (message.IndexOf(' ') == -1)
-	                    break;
-	            }
 				
-				command.Use(this, args.ToArray());
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
-				*/
-				
-				//will uncomment when group system is added for now everybody can use every command ;)
-				//Player p = FindPlayer(this.username);
 	            if (Group.CheckPermission(this, command.PermissionNode))
 	            {
 	            List<string> args = new List<string>();
@@ -1025,8 +1018,7 @@ namespace SMP
 		#endregion
 		#region TARGETED
         protected virtual void SendMessageInternal(string message)
-        {
-            //once again please check			
+        {		
             message = MessageAdditions(message);
 			//Server.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
@@ -1159,7 +1151,6 @@ namespace SMP
 			}
             if (LoggedIn)
                 GlobalMessage("§5" + username +" §fhas been kicked from the server!");
-            LoggedIn = false;
 			
 			try
 			{
@@ -1179,25 +1170,22 @@ namespace SMP
 			if (disconnected) return;
 			disconnected = true;
 			
-			//Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
-            //	LoggedIn ? "" : "/", LoggedIn ? username : ip);
             if (LoggedIn)
                 GlobalMessage("§5" + username + " §fhas disconnected.");
-            LoggedIn = false;
 			
 			//TODO: Despawn
 			this.Dispose();
 		}
 		public void Dispose()
 		{
-			players.Remove(this);
 			if (LoggedIn)
 			{
 				SaveAttributes(false);
-				if (LoggedIn) UpdatePList(false);
+				UpdatePList(false);
 				players.Remove(this);
 				e.CurrentChunk.Entities.Remove(e);
 				Entity.Entities.Remove(id);
+                LoggedIn = false;
 
 				// Close stuff
 				if (socket != null && socket.Connected)
@@ -1207,6 +1195,7 @@ namespace SMP
 					socket = null;
 				}
 			}
+			players.Remove(this);
 		}
 
         private void UpdatePList(bool keep)
@@ -1324,7 +1313,6 @@ namespace SMP
 		private void LoadAttributes()
 		{
 			System.Data.DataTable DT = new System.Data.DataTable();
-			this.group = Group.DefaultGroup;
 			DT = Server.SQLiteDB.GetDataTable("SELECT * FROM Player WHERE Name = '" + username + "';");
 			
 			if(DT.Rows.Count > 0)
@@ -1362,7 +1350,48 @@ namespace SMP
 				
 				//TODO Accounts
 				
-				//TODO Group
+				//TODO Group, subgroups, and all that
+				string groupid = DT.Rows[0]["GroupID"].ToString();
+				
+				Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + groupid + "';"));
+				
+				if (gr != null)
+					this.group = gr;
+				else
+					this.group = Group.DefaultGroup;
+				
+				string temp = DT.Rows[0]["SubGroups"].ToString().Replace(" ", "");
+				string[] subgroups = temp.Split(',');
+				if (subgroups.Length >= 1)
+				{
+					foreach(string s in subgroups)
+					{
+						if (!String.IsNullOrEmpty(s))
+						{
+							Group g = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELCT Name FROM Groups WHERE ID = '" + s + "';"));
+							
+							if (g != null)
+								this.SubGroups.Add(g);
+						}
+					}
+				}
+				
+				string[] perms = DT.Rows[0]["ExtraPerms"].ToString().Replace(" ", "").Split(',');
+				foreach(string s in perms)
+				{
+                    if (String.IsNullOrEmpty(s)) continue;
+					string perm;
+					if (s[0] == '-')
+						perm = "-" + Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s.Substring(1) + "';");
+					else
+						perm = Server.SQLiteDB.ExecuteScalar("SELECT Node FROM Permission WHERE ID = '" + s + "';");
+					
+					if (perm.Substring(0,1) == "-" && !this.AdditionalPermissions.Contains(perm.Substring(1)))
+						this.AdditionalPermissions.Add(perm);
+					else if (perm.Substring(0,1) != "-" && !this.AdditionalPermissions.Contains("-" + perm))
+						this.AdditionalPermissions.Add(perm);
+				}
+				
 				
 				Server.Log(String.Format("Succesfully loaded {0} from the database.", this.username));
 				

@@ -88,12 +88,12 @@ namespace SMP {
                     for (int z = 0; z < 16; ++z)
                     {
                         for (int y = 0; y < 1; ++y)
-							c.UNCHECKEDPlaceBlock(x, y, z, 0x07);
+                            c.UNCHECKEDPlaceBlock(x, y, z, 0x07);
                         for (int y = 1; y < 50; ++y)
-							c.UNCHECKEDPlaceBlock(x, y, z, 0x01);
+                            c.UNCHECKEDPlaceBlock(x, y, z, 0x01);
                         for (int y = 50; y < 65; ++y)
-							c.UNCHECKEDPlaceBlock(x, y, z, 0x03);
-						c.UNCHECKEDPlaceBlock(x, 65, z, 0x02);
+                            c.UNCHECKEDPlaceBlock(x, y, z, 0x03);
+                        c.UNCHECKEDPlaceBlock(x, 65, z, 0x02);
                     }
             }
             else

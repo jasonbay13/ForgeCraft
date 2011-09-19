@@ -103,84 +103,84 @@ namespace SMP
 			id = FreeId();
 		}
 
-		public void UpdateChunks(bool force, bool forcesend)
-		{
-			if (c != CurrentChunk || force)
-			{
-				try
-				{
-					if(CurrentChunk != null) CurrentChunk.Entities.Remove(this);
-					c.Entities.Add(this);
-					CurrentChunk = c;
-				}
-				catch
-				{
-					Server.Log("Error Updating chunk for " + isPlayer.ToString() + " " + isItem.ToString() + " " + isAI.ToString() + " " + id);
-				}
-				if (isPlayer && p.LoggedIn)
-				{
-					bool locked = false;
-					List<Point> templist = new List<Point>();
+        public void UpdateChunks(bool force, bool forcesend)
+        {
+            if (c == null || (c == CurrentChunk && !force))
+                return;
 
-					int sx = CurrentChunk.point.x - p.viewdistance; //StartX
-					int ex = CurrentChunk.point.x + p.viewdistance; //EndX
-					int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
-					int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
+            try
+            {
+                if (CurrentChunk != null) CurrentChunk.Entities.Remove(this);
+                c.Entities.Add(this);
+                CurrentChunk = c;
+            }
+            catch
+            {
+                Server.Log("Error Updating chunk for " + isPlayer.ToString() + " " + isItem.ToString() + " " + isAI.ToString() + " " + id);
+            }
+            if (isPlayer && p.LoggedIn)
+            {
+                bool locked = false;
+                List<Point> templist = new List<Point>();
 
-					Parallel.For(sx, ex + 1, delegate(int x)
-					{
-						Parallel.For(sz, ez + 1, delegate(int z)
-						{
-							Point po = new Point(x, z);
-							while (locked) Thread.Sleep(1);
+                int sx = CurrentChunk.point.x - p.viewdistance; //StartX
+                int ex = CurrentChunk.point.x + p.viewdistance; //EndX
+                int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
+                int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
 
-							lock (templist)
-							{
-								templist.Add(po);
-							}
-							//templist.Add(po);
+                Parallel.For(sx, ex + 1, delegate(int x)
+                {
+                    Parallel.For(sz, ez + 1, delegate(int z)
+                    {
+                        Point po = new Point(x, z);
+                        while (locked) Thread.Sleep(1);
 
-							if (!p.VisibleChunks.Contains(po) || forcesend)
-							{
-								if (!p.level.chunkData.ContainsKey(po))
-								{
-									p.level.GenerateChunk(po.x, po.z);
-								}
-								p.SendChunk(p.level.chunkData[po]);
-							}
-						});
-					});
+                        lock (templist)
+                        {
+                            templist.Add(po);
+                        }
+                        //templist.Add(po);
 
-					//for (int x = sx; x <= ex; x++)
-					//{
-					//    for (int z = sz; z <= ez; z++)
-					//    {
-					//        Point po = new Point(x, z);
-					//        templist.Add(po);
-					//        if (p.VisibleChunks.Contains(po) && !forcesend)
-					//        {
-					//            continue; //Continue if the player already has this chunk
-					//        }
-					//        if (!p.level.chunkData.ContainsKey(po))
-					//        {
-					//            p.level.GenerateChunk(po.x, po.z);
-					//        }
-					//        p.SendChunk(p.level.chunkData[po]);
-					//    }
-					//}
+                        if ((!p.VisibleChunks.Contains(po) || forcesend) && (Math.Abs(po.x) < p.level.ChunkLimit && Math.Abs(po.z) < p.level.ChunkLimit))
+                        {
+                            if (!p.level.chunkData.ContainsKey(po))
+                            {
+                                p.level.GenerateChunk(po.x, po.z);
+                            }
+                            p.SendChunk(p.level.chunkData[po]);
+                        }
+                    });
+                });
 
-					//UNLOAD CHUNKS THE PLAYER CANNOT SEE
-					foreach (Point point in p.VisibleChunks.ToArray())
-					{
-						if (!templist.Contains(point))
-						{
-							p.SendPreChunk(p.level.chunkData[point], 0);
-							p.VisibleChunks.Remove(point);
-						}
-					}
-				}
-			}
-		}
+                //for (int x = sx; x <= ex; x++)
+                //{
+                //    for (int z = sz; z <= ez; z++)
+                //    {
+                //        Point po = new Point(x, z);
+                //        templist.Add(po);
+                //        if (p.VisibleChunks.Contains(po) && !forcesend)
+                //        {
+                //            continue; //Continue if the player already has this chunk
+                //        }
+                //        if (!p.level.chunkData.ContainsKey(po))
+                //        {
+                //            p.level.GenerateChunk(po.x, po.z);
+                //        }
+                //        p.SendChunk(p.level.chunkData[po]);
+                //    }
+                //}
+
+                //UNLOAD CHUNKS THE PLAYER CANNOT SEE
+                foreach (Point point in p.VisibleChunks.ToArray())
+                {
+                    if (!templist.Contains(point))
+                    {
+                        p.SendPreChunk(p.level.chunkData[point], 0);
+                        p.VisibleChunks.Remove(point);
+                    }
+                }
+            }
+        }
 		public void UpdateEntities()
 		{
 			List<int> tempelist = new List<int>();
@@ -248,6 +248,7 @@ namespace SMP
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
 						e.CurrentChunk.Entities.Remove(e);
+						Server.Log("picking up entity");
 						p.inventory.Add(e.I);
 					}
 				}

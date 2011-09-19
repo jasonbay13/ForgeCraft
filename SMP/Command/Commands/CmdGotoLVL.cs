@@ -18,11 +18,8 @@
 using System;
 namespace SMP
 {
-	public class gotoLVL : Command
+	public class CmdGotoLVL : Command
 	{
-		public gotoLVL()
-		{
-		}
 		public override string Category {
 			get {
 				return "Mod";

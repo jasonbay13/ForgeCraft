@@ -19,9 +19,8 @@ using System;
 
 namespace SMP
 {
-	public class SetTime : Command
+	public class CmdSetTime : Command
 	{
-		public SetTime() { }
 		public override string Category {
 			get {
 				return "Mod";

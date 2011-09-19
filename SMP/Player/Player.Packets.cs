@@ -490,7 +490,7 @@ namespace SMP
 					}
 				}
 				level.BlockChange(blockX, (int)blockY, blockZ, (byte)blockID, (byte)damage);
-                if (Server.mode == 0) inventory.Remove(inventory.current_index, 1);
+                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
 				return;
 			}
 			else
@@ -526,6 +526,7 @@ namespace SMP
 
         private void HandleCreativeInventoryAction(byte[] message)
         {
+            if (util.EndianBitConverter.Big.ToInt16(message, 0) == -1) return;
             inventory.Add(util.EndianBitConverter.Big.ToInt16(message, 2), (byte)util.EndianBitConverter.Big.ToInt16(message, 4), util.EndianBitConverter.Big.ToInt16(message, 6), util.EndianBitConverter.Big.ToInt16(message, 0));
         }
 		
