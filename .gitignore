@@ -1,12 +1,14 @@
-*.log
-SMP/bin/*
-SMP/obj/*
-RemoteConsole/bin/
-RemoteConsole/obj/
-SMP/SMP.pidb
-SMP/SMP.csproj.user
-/SMP.suo
-/SMP/Player/.DS_Store
-/SMP/Entity/Player/.DS_Store
-/SMP/Player/.DS_Store
-/.DS_Store
+.metadata/*
+
+#Visual Studio files
+bin/
+obj/
+*.suo
+*.user
+*.[Cc]ache
+*.bak
+
+#OS garbage
+[Tt]humbs.db
+*.DS_Store
+/SMP/obj/Debug/DesignTimeResolveAssemblyReferences.cache
