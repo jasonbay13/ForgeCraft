@@ -12,3 +12,4 @@ obj/
 [Tt]humbs.db
 *.DS_Store
 /SMP/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+/SMP/.DS_Store
