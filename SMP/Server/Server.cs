@@ -79,7 +79,6 @@ namespace SMP
 		public static List<string> VIPList = new List<string>();
         #endregion
 
-
         public Server()
 		{
 			Log("Starting Server");

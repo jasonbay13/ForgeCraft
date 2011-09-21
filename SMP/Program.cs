@@ -39,6 +39,9 @@ namespace SMP
         [MTAThread]
         public static void Main(string[] args)
         {
+			if(RunningInMono())
+				Console.WriteLine("Mono Framework detected!");
+			
             StartServer();
             
             StartInput();
