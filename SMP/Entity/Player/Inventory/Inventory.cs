@@ -125,6 +125,7 @@ namespace SMP
 			Item I = new Item(item, count, meta, p.level);
 			if (slot > 44 || slot < 0) return;
 			items[slot] = I;
+            //if (slot == current_index) p.current_block_holding = I;
 
 			p.SendItem((short)slot, item, count, meta);
 		}

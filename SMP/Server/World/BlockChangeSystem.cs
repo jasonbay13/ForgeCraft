@@ -565,11 +565,17 @@ namespace SMP
 		{
 			return true;
 		}
-		public static bool PlaceSlabs(Player a, BCS b)
-		{
-
-			return false;
-		}
+        public static bool PlaceSlabs(Player a, BCS b)
+        {
+            if (a.level.GetMeta((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z) == (byte)a.inventory.current_item.meta && a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z) == 44)
+            {
+                a.SendBlockChange(b.pos, 0);
+                a.level.BlockChange((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z, 43, (byte)a.inventory.current_item.meta);
+                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); a.Experience.Add(a, 1); }
+                return false;
+            }
+            return true;
+        }
 		public static bool PlaceStairsCobblestone(Player a, BCS b)
 		{
 			return false;
