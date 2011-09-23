@@ -55,23 +55,35 @@ namespace SMP
 		public List<int> VisibleEntities = new List<int>();
 		public List<Point3> FlyList = new List<Point3>();
 
-		#region Custom Command / Plugin Event
-		//Events for Custom Command and Plugins ------------------------------------
-		public delegate void OnPlayerConnect(Player p);
-		public delegate void OnPlayerAuth(Player p);
-		public event OnPlayerConnect PlayerConnect;
-		public event OnPlayerAuth PlayerAuth;
-		public delegate void OnPlayerChat(string message, Player p);
-		public delegate void OnPlayerCommand(string cmd, string message, Player p);
-		//Other things for plugins ----------
+        #region Custom Command / Plugin Event
+        //Events for Custom Command and Plugins ------------------------------------
+        public delegate void OnPlayerConnect(Player p);
+        public delegate void OnPlayerAuth(Player p);
+        public static event OnPlayerConnect PlayerConnect;
+        public event OnPlayerAuth OnAuth;
+        public static event OnPlayerAuth PlayerAuth;
+        public delegate void OnPlayerChat(string message, Player p);
+        public event OnPlayerChat OnChat;
+        public static event OnPlayerChat PlayerChat;
+        public delegate void OnPlayerCommand(string cmd, string message, Player p);
+        public event OnPlayerCommand OnCommand;
+        public static event OnPlayerCommand PlayerCommand;
+        public delegate void OnPlayerDisconnect(Player p, string reason);
+        public static event OnPlayerDisconnect PlayerDisconnect;
+        public event OnPlayerDisconnect OnDisconnect;
+        public delegate void OnPlayerRespawn(Player p);
+        public static event OnPlayerRespawn PlayerRespawn;
+        public event OnPlayerRespawn OnRespawn;
+        //Other things for plugins ----------
         public bool cancelBlock = false;
         public bool cancelchat = false;
         public bool cancelcommand = false;
         public bool cancelmove = false;
         public bool canceldig = false;
         //Other things for plugins ----------
-		//Events for Custom Command and Plugins -------------------------------------
-		#endregion
+        //Events for Custom Command and Plugins -------------------------------------
+        #endregion
+
 
 		//Groups and Permissions
 		public Group group;
