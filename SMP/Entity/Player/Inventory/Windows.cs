@@ -30,7 +30,7 @@ namespace SMP
 
 		public Windows(byte Type, Point3 Pos, World Level)
 		{
-			Console.WriteLine("Window Creating.");
+			Server.Log("Window Creating.");
 
 			type = Type;
 			pos = Pos;
@@ -59,9 +59,9 @@ namespace SMP
 					items = new Item[27];
 					break;
 			}
-			Console.WriteLine("Window adding.");
+			Server.Log("Window adding.");
 			level.windows.Add(pos, this);
-			Console.WriteLine("Window done.");
+			Server.Log("Window done.");
 		}
 
 		//public bool AddItem(Item item)

@@ -431,7 +431,7 @@ namespace SMP
 			{
 				case (0):
 				case (1):
-					Console.WriteLine(DirectionByRotFlat(a, b) + "");
+                    Server.Log(DirectionByRotFlat(a, b) + "");
 					return false;
 
 				case ((byte)Directions.South):

@@ -1573,11 +1573,11 @@ namespace SMP
 				{
 					s += b + ", ";
 				}
-				Console.WriteLine("Packet " + id + " { " + s + "}");
+                Server.Log("Packet " + id + " { " + s + "}");
 			}
 			else
 			{
-				Console.WriteLine("Packet " + id + " had no DATA!");
+                Server.Log("Packet " + id + " had no DATA!");
 			}
 		}
 	}

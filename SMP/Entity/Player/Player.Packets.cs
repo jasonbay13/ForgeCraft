@@ -357,7 +357,7 @@ namespace SMP
 				{
 					if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
 					{
-						Console.WriteLine("Delegate for " + id + " Destroyed returned false");
+                        Server.Log("Delegate for " + id + " Destroyed returned false");
 						return;
 					}
 				}
@@ -405,7 +405,7 @@ namespace SMP
 			{
 				if (!(bool)BlockChange.RightClickedOn[rc].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
 				{
-					Console.WriteLine("Delegate for " + rc + " RightClickedON returned false");
+                    Server.Log("Delegate for " + rc + " RightClickedON returned false");
 					return;
 				}
 			}
