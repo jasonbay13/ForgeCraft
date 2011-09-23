@@ -45,27 +45,28 @@ namespace SMP
         }
         private void CalcPhysics()
         {
+            Chunk c = null;
             foreach (Data d in Checks)
             {
-                Chunk c = w.chunkData[new Point(d.x, d.z)]; 
+                c = w.chunkData[new Point(d.x, d.z)];
                 switch (d.Block)
                 {
                     case (byte)Blocks.SLava:
                         if (setting == PSetting.Normal)
                         {
                             //Magma flow
-                            if (c.blocks[Chunk.PosToInt(d.x, d.y - 1, d.z)] == 0)
+                            if (w.GetBlock(d.x, d.y - 1, d.z) == 0)
                             {
                                 c.PlaceBlock(d.x, d.y - 1, d.z, (byte)Blocks.ALava);
                                 break;
                             }
-                            if (c.blocks[Chunk.PosToInt(d.x + 1, d.y, d.z)] == 0)
+                            if (w.GetBlock(d.x + 1, d.y, d.z) == 0)
                                 c.PlaceBlock(d.x + 1, d.y, d.z, (byte)Blocks.ALava);
-                            if (c.blocks[Chunk.PosToInt(d.x - 1, d.y, d.z)] == 0)
+                            if (w.GetBlock(d.x - 1, d.y, d.z) == 0)
                                 c.PlaceBlock(d.x - 1, d.y, d.z, (byte)Blocks.ALava);
-                            if (c.blocks[Chunk.PosToInt(d.x, d.y, d.z + 1)] == 0)
+                            if (w.GetBlock(d.x, d.y, d.z + 1) == 0)
                                 c.PlaceBlock(d.x, d.y, d.z + 1, (byte)Blocks.ALava);
-                            if (c.blocks[Chunk.PosToInt(d.x, d.y, d.z - 1)] == 0)
+                            if (w.GetBlock(d.x, d.y, d.z - 1) == 0)
                                 c.PlaceBlock(d.x, d.y, d.z - 1, (byte)Blocks.ALava);
                         }
                         break;
