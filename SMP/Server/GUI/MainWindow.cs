@@ -11,17 +11,32 @@ namespace SMP.GUI
 {
     public partial class MainWindow : Form
     {
+        public static MainWindow This = new MainWindow();
+        delegate void LogDelegate(string message);
         public MainWindow()
         {
             InitializeComponent();
-            Server.ServerLog += new Server.OnLog(Server_ServerLog);
+            Server.ServerLog += new Server.OnLog(Log);
         }
 
-        void Server_ServerLog(string message)
+        public static void Log(string message)
         {
-            log.Text += message;
+            This.log(message);
         }
-
+        public void log(string message)
+        {
+            
+            if (this.InvokeRequired)
+            {
+                LogDelegate d = new LogDelegate(log);
+                this.Invoke(d, new object[] { message });
+            }
+            else
+            {
+                txtLog.AppendText(Environment.NewLine + message);
+                
+            }
+        }
         private void MainWindow_Load(object sender, EventArgs e)
         {
 
