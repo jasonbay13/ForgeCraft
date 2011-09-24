@@ -29,8 +29,10 @@ using System.IO;
 
 namespace SMP
 {
+    
     public class Logger
     {
+        public static Logger log = new Logger();
         string LogFile = Environment.CurrentDirectory + "/logs/" + DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss") + "_server.log";
         string ErrorFile = Environment.CurrentDirectory + "/logs/errors/" + DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss") + "_error.log";
 
@@ -41,7 +43,8 @@ namespace SMP
         /// <param name="log"></param>
         public void Log(string log)
         {
-            Console.WriteLine(FormatTime() + "  " + log);
+            if (!Server.useGUI) { Console.WriteLine(FormatTime() + "  " + log); }
+            else { GUI.MainWindow.Log(FormatTime() + "  " + log); }
             LogToFile(log);
         }
 
@@ -52,7 +55,8 @@ namespace SMP
         /// <param name="log"></param>
         public void Log(LogLevel level, string log)
         {
-            Console.WriteLine(FormatTime() + "  " + log);
+            if (!Server.useGUI) { Console.WriteLine(FormatTime() + "  " + log); }
+            else { GUI.MainWindow.Log(FormatTime() + "  " + log); }
             LogToFile(log);
 
         }
@@ -74,7 +78,8 @@ namespace SMP
         /// <param name="e"></param>
         public void LogError(Exception e)
         {
-            Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)");
+            if (!Server.useGUI) { Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
+            else { GUI.MainWindow.Log(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
             LogErrorToFile(e);
         }
 
@@ -86,7 +91,8 @@ namespace SMP
 
         public void LogError(LogLevel level, Exception e)
         {
-            Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)");
+            if (!Server.useGUI) { Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
+            else { GUI.MainWindow.Log(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
             LogErrorToFile(e);
         
         }

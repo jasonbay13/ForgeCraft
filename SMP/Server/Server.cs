@@ -30,6 +30,7 @@ namespace SMP
 	public class Server
 	{
 		public static Server s;
+        public static bool useGUI = false;          //not a setting to choose whether using a gui or not, its a reference 
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
@@ -56,7 +57,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;
-		public static byte mode = 0; //0=survival, 1=creative
+		public static byte mode = 1; //0=survival, 1=creative
 
         #region ==SETTINGS==
 
@@ -77,6 +78,7 @@ namespace SMP
 		public static List<string> BanList = new List<string>();
 		public static List<string> WhiteList = new List<string>();
 		public static List<string> VIPList = new List<string>();
+        
         #endregion
 
         public Server()

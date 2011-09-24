@@ -20,58 +20,79 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP.Plugins
+namespace SMP
 {
+    /// <summary>
+    /// This class will allow plugin / custom command devs to cancel events
+    /// To cancel an event you would call
+    /// Plugin.CancelEvent
+    /// And depending on what type of event you want to cancel, fill in the ( )
+    /// </summary>
 	public partial class Plugin
 	{
-
+        public static bool IsEventCancled(LevelEvent e, World w)
+        {
+            return true;
+        }
+        public static bool IsEventCancled(ServerEvent e)
+        {
+            return true;
+        }
         /// <summary>
-        /// Check to see if an event is stopped
+        /// Check to see if a Player event is stopped
         /// </summary>
         /// <param name="e">The event to check</param>
-        /// <param name="p">The Player that event is related to (null if not dealing with player event)</param>
+        /// <param name="p">The Player that event is related to</param>
         /// <returns>This returns true or false, true means its stopped, false means its not</returns>
-        public static bool IsEventCancled(Events e, Player p)
+        public static bool IsEventCancled(PlayerEvents e, Player p)
         {
             switch (e)
             {
-                case Events.BlockChange:
+                case PlayerEvents.PlayerBlockChange:
                     return p.cancelBlock;
-                case Events.PlayerChat:
+                case PlayerEvents.PlayerChat:
                     return p.cancelchat;
-                case Events.PlayerCommand:
+                case PlayerEvents.PlayerCommand:
                     return p.cancelcommand;
-                case Events.PlayerMove:
+                case PlayerEvents.PlayerMove:
                     return p.cancelmove;
-                case Events.PlayerDig:
+                case PlayerEvents.PlayerDig:
                     return p.canceldig;
                 default:
                     return false;
             }
         }
+        public static void CancelEvent(LevelEvent e, World w)
+        {
+
+        }
+        public static void CancelEvent(ServerEvent e)
+        {
+
+        }
         /// <summary>
-        /// Cancel a server event
+        /// Cancel a Player event
         /// </summary>
         /// <param name="e">The event that you want to cancel</param>
         /// <param name="p">The Player that event is related to (null if not dealing with player event)</param>
-        public static void CancelEvent(Events e, Player p) {
+        public static void CancelEvent(PlayerEvents e, Player p) {
             //TODO
             //Add some more events to be canceled
             switch (e)
             {
-                case Events.BlockChange:
+                case PlayerEvents.PlayerBlockChange:
                     p.cancelBlock = true;
                     break;
-                case Events.PlayerChat:
+                case PlayerEvents.PlayerChat:
                     p.cancelchat = true;
                     break;
-                case Events.PlayerCommand:
+                case PlayerEvents.PlayerCommand:
                     p.cancelcommand = true;
                     break;
-                case Events.PlayerMove:
+                case PlayerEvents.PlayerMove:
                     p.cancelmove = true;
                     break;
-                case Events.PlayerDig:
+                case PlayerEvents.PlayerDig:
                     p.canceldig = true;
                     break;
             }

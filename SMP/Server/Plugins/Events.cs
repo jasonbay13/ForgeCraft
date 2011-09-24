@@ -20,14 +20,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP.Plugins
+namespace SMP
 {
-    public enum Events
+    public enum PlayerEvents
     {
         PlayerCommand,
         PlayerChat,
-        BlockChange,
+        PlayerBlockChange,
         PlayerMove,
         PlayerDig
+    }
+    public enum LevelEvent
+    {
+        LevelBlockChange,
+        LevelLoad,
+        LevelSave,
+        LevelUnload
+    }
+    public enum ServerEvent
+    {
+        ServerLog,
+        ServerErrorLog,
     }
 }

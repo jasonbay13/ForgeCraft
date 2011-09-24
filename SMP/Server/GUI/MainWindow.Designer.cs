@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.log = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,19 +39,10 @@
             this.label4 = new System.Windows.Forms.Label();
             this.playergrid = new System.Windows.Forms.DataGridView();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.txtLog = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.playergrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
-            // 
-            // log
-            // 
-            this.log.Enabled = false;
-            this.log.Location = new System.Drawing.Point(12, 31);
-            this.log.Multiline = true;
-            this.log.Name = "log";
-            this.log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.log.Size = new System.Drawing.Size(413, 276);
-            this.log.TabIndex = 0;
             // 
             // label1
             // 
@@ -154,11 +144,20 @@
             this.dataGridView2.Size = new System.Drawing.Size(217, 118);
             this.dataGridView2.TabIndex = 13;
             // 
+            // txtLog
+            // 
+            this.txtLog.Location = new System.Drawing.Point(12, 31);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.Size = new System.Drawing.Size(413, 273);
+            this.txtLog.TabIndex = 14;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(663, 351);
+            this.Controls.Add(this.txtLog);
             this.Controls.Add(this.dataGridView2);
             this.Controls.Add(this.playergrid);
             this.Controls.Add(this.label4);
@@ -170,7 +169,6 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.log);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "MainWindow";
             this.Text = "MainWindow";
@@ -184,7 +182,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox log;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
@@ -196,6 +193,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.DataGridView playergrid;
         private System.Windows.Forms.DataGridView dataGridView2;
+        private System.Windows.Forms.TextBox txtLog;
 
     }
 }

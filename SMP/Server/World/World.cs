@@ -94,10 +94,10 @@ namespace SMP
 				{
 					GenerateChunk(x, z);
 				});
-				Console.WriteLine(x + " Row Generated.");
+                Server.Log(x + " Row Generated.");
                 
 			});
-            Console.WriteLine("Look distance = 3");
+            Server.Log("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
 			timeupdate.Elapsed += delegate {
 				time += 10;
@@ -203,7 +203,7 @@ namespace SMP
                 w.SpawnZ = int.Parse(sw.ReadLine());
                 w.ChunkLimit = int.Parse(sw.ReadLine());
             }
-            Console.WriteLine("Look distance = 3");
+            Server.Log("Look distance = 3");
             w.timeupdate.Elapsed += delegate
             {
                 w.time += 10;
