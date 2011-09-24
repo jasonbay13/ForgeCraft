@@ -147,7 +147,8 @@ namespace SMP
                 }
                 byte[] bytes = ms.ToArray();
                 long chunkcount = ms.Length / 32776;
-                if(!Program.RunningInMono())
+                
+				if(!Program.RunningInMono()) //mono doesn't have Parallel.For(long, long, Syatem.Action<long>) implemented
 				{
 					Parallel.For(0, chunkcount, i =>
 	                {
