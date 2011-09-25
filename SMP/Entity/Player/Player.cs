@@ -677,7 +677,7 @@ namespace SMP
 			void SendInventory()
 			{
 			
-			//is there a packet for sending inventory??
+			//is there a packet for sending inventory?? 0x68
 			
 				for (short i = 0; i <= 44; i++)
 				{
@@ -1337,7 +1337,7 @@ namespace SMP
 						dict.Add("ID", invid.ToString());
 						for (short i = 0; i <= 44; i++)
 						{
-							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].item, this.inventory.items[i].meta, this.inventory.items[i].count));	
+							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].item, this.inventory.items[i].meta, this.inventory.items[i].count));
 						}
 						
 						Server.SQLiteDB.Update("Inventory", dict, "ID = '" + invid.ToString() + "'");
@@ -1452,7 +1452,7 @@ namespace SMP
 				{
 					System.Data.DataTable invDT = new System.Data.DataTable();
 					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");  //for some reason it is not pulling the whole string
-					Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
+					//Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
 					if (invDT.Rows.Count == 0) CreateInventory();
 					
 					for (int i = 0; i <= 44; i++)
@@ -1463,7 +1463,7 @@ namespace SMP
 						short meta = 0;
 						byte count = 1;
 						
-						Server.Log("data: " + data);
+						//Server.Log("data: " + data);
 						
 						if (!Int16.TryParse(item[0], out id))
 						{

@@ -68,7 +68,8 @@ namespace SMP
 	        }
 	        catch (Exception e)
 	        {
-	            throw new Exception(e.Message);
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
 	        }
 	        return dt;
 	    }
@@ -115,10 +116,10 @@ namespace SMP
 	        {
 	            this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	        }
-	        catch
+	        catch (Exception e)
 	        {
-				//Server.Log(e.Message);
-				//Server.Log(e.StackTrace.ToString());
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
 	            returnCode = false;
 	        }
 	        return returnCode;
@@ -155,9 +156,10 @@ namespace SMP
    	        {
    	            this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	        }
-   	        catch(Exception e)
-   	        {
-	            Server.ServerLogger.LogError(e);
+   	        catch (Exception e)
+	        {
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
    	            returnCode = false;
    	        }
    	        return returnCode;
