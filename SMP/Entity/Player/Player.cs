@@ -676,7 +676,16 @@ namespace SMP
 			#region Inventory stuff
 			void SendInventory()
 			{
-				//TODO
+			
+			//is there a packet for sending inventory??
+			
+				for (short i = 0; i <= 44; i++)
+				{
+					if(inventory.items[i].item != -1 && inventory.items[i].item != 0)
+					{
+						this.SendItem(i, inventory.items[i].item, inventory.items[i].count, inventory.items[i].meta);	
+					}
+				}
 			}
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
@@ -714,6 +723,7 @@ namespace SMP
 				e.UpdateChunks(true, false);
 				SendSpawnPoint();
 				SendLoginDone();
+				SendInventory();
 				MapLoaded = true;
 				
 			}
@@ -1311,6 +1321,32 @@ namespace SMP
 					data.Add("GroupID", gid);
 				}
 				
+				#region INVENTORY
+				if (newplayer)
+				{
+					int invid = CreateInventory();
+					data.Add("InventoryID", invid.ToString());
+				}
+				else
+				{
+					int invid = 0;
+					if (!Int32.TryParse(Server.SQLiteDB.ExecuteScalar("SELECT InventoryID FROM Player WHERE Name = '" + username +"';"), out invid)) invid = CreateInventory();
+					else
+					{
+						Dictionary<string, string> dict = new Dictionary<string, string>();
+						dict.Add("ID", invid.ToString());
+						for (short i = 0; i <= 44; i++)
+						{
+							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].item, this.inventory.items[i].meta, this.inventory.items[i].count));	
+						}
+						
+						Server.SQLiteDB.Update("Inventory", dict, "ID = '" + invid.ToString() + "'");
+					}
+					
+					data.Add("InventoryID", invid.ToString());
+				}
+				#endregion
+				
 				if(!newplayer)
 					Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
 				else
@@ -1361,8 +1397,12 @@ namespace SMP
 					GodMode = false;
 				
 				//TODO Accounts
+				#region ECONOMY
+				//TODO
+				#endregion
 				
 				//TODO Group, subgroups, and all that
+				#region GROUPS
 				string groupid = DT.Rows[0]["GroupID"].ToString();
 				
 				Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + groupid + "';"));
@@ -1403,7 +1443,58 @@ namespace SMP
 					else if (perm.Substring(0,1) != "-" && !this.AdditionalPermissions.Contains("-" + perm))
 						this.AdditionalPermissions.Add(perm);
 				}
+				#endregion
 				
+				#region INVENTORY
+				string invid = DT.Rows[0]["InventoryID"].ToString();
+				
+				if(!String.IsNullOrEmpty(invid))
+				{
+					System.Data.DataTable invDT = new System.Data.DataTable();
+					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");  //for some reason it is not pulling the whole string
+					Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
+					if (invDT.Rows.Count == 0) CreateInventory();
+					
+					for (int i = 0; i <= 44; i++)
+					{
+						string data = invDT.Rows[0]["slot" + i].ToString(); //for some reason it is not pulling the whole string
+						string[] item = data.Split(':');
+						short id = -1;
+						short meta = 0;
+						byte count = 1;
+						
+						Server.Log("data: " + data);
+						
+						if (!Int16.TryParse(item[0], out id))
+						{
+							continue;
+						}
+						if (item.Length >= 2)
+						{
+							if(!Int16.TryParse(item[1], out meta))
+							{
+								meta = 0;
+							}
+						}
+						if (item.Length >= 3)
+						{
+							if(!Byte.TryParse(item[2], out count))
+							{
+								count = 1;	
+							}
+						}
+						//Server.Log("count: " + count);
+						if (count > 64) count = 64;
+						
+						if (id > 0 && count > 0)
+						{
+							this.inventory.Add(id, count, meta, i); 	
+						}
+					}
+				}
+				else CreateInventory();
+				
+				#endregion
 				
 				Server.Log(String.Format("Succesfully loaded {0} from the database.", this.username));
 				
@@ -1591,6 +1682,22 @@ namespace SMP
 			{
                 Server.Log("Packet " + id + " had no DATA!");
 			}
+		}
+		
+		//untested
+		private int CreateInventory()
+		{
+			int id = Int32.Parse(Server.SQLiteDB.ExecuteScalar("SELECT MAX(ID) FROM Inventory;"));
+			id++;
+			Dictionary<string, string> dict = new Dictionary<string, string>();
+			dict.Add("ID", id.ToString());
+			for (short i = 0; i <= 44; i++)
+			{
+				dict.Add("slot" + i, String.Format("{0}:{1}:{2}", inventory.items[i].item, inventory.items[i].meta, inventory.items[0].count));	
+			}
+			Server.SQLiteDB.Insert("Inventory", dict);
+			
+			return id;		
 		}
 	}
 }

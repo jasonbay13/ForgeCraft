@@ -93,6 +93,8 @@ namespace SMP
 			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
+				
+			SendInventory();
 		}
 
         private void UpdateShi(Player p)

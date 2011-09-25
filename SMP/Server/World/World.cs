@@ -215,6 +215,12 @@ namespace SMP
             w.name = filename;
             return w;
         }
+		
+		public void SaveLVL()
+		{
+			World.SaveLVL(this);	
+		}
+		
         public static void SaveLVL(World w)
         {
             if (w.Save != null)

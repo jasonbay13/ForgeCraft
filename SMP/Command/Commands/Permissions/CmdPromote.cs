@@ -43,6 +43,10 @@ namespace SMP
 				p.SendMessage(HelpBot + "Could not find player.");
 				return;
 			}
+			if (pr == p)
+			{
+				p.SendMessage(HelpBot + "You can't promote yourself.");	
+			}
 			
 			if (GroupUtils.PromotePlayer(p))
 			{

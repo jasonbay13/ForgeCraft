@@ -40,6 +40,11 @@ namespace SMP
 			Player pr = Player.FindPlayer(args[0]);
 			Group gr = Group.FindGroup(args[1]);
 			
+			if (pr == p)
+			{
+				p.SendMessage(HelpBot + "You can't change your own rank.");	
+			}
+			
 			if (gr != null && pr != null)
 				pr.group = gr;
 			

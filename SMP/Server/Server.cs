@@ -57,7 +57,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;
-		public static byte mode = 1; //0=survival, 1=creative
+		public static byte mode = 0; //0=survival, 1=creative
 
         #region ==SETTINGS==
 
@@ -123,7 +123,7 @@ namespace SMP
 		//TODO: (in order)
 			SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
-			ItemDB = new ItemDB();
+			//ItemDB = new ItemDB();
             LoadFiles();
             Properties.Load("properties/server.properties");
 			Command.InitCore();
@@ -226,6 +226,11 @@ namespace SMP
 		
 		public void Stop()
 		{
+			foreach(World w in World.worlds)
+			{
+				w.SaveLVL();
+			}
+			
             Plugin.Unload();
 			
 			if ((File.Exists("properties/banned.txt")) || (!File.Exists("properties/banned.txt") && WhiteList.Count > 0))
