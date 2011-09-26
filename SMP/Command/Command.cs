@@ -104,26 +104,5 @@ namespace SMP
             //TODO: add types when plugins are added
                 //might just have it done in the plugin initialization
         }
-
-        /// <summary>
-        /// Concatenates a string array to a singel string. If stopindex is >= args.length, stopindex will become args.length - 1.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <param name="startindex"></param>
-        /// <param name="stopindex"></param>
-        /// <returns>string</returns>
-        public string MakeString(string[] args, int startindex, int stopindex)
-        {
-            if (stopindex >= args.Length || stopindex == -1)
-                stopindex = args.Length - 1;
-            StringBuilder message = new StringBuilder();
-            for (int i = startindex; i <= stopindex; i++)
-            {
-                message.Append(args[i] + " ");
-            }
-
-            message.Remove(message.Length - 1, 1);
-            return message.ToString();
-        }
     }
 }

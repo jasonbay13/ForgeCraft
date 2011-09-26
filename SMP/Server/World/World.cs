@@ -147,25 +147,50 @@ namespace SMP
                 }
                 byte[] bytes = ms.ToArray();
                 long chunkcount = ms.Length / 32776;
-                Parallel.For(0, chunkcount, i =>
-                {
-                    try
-                    {
-                        int block = (int)i * 32776;
-                        int x = BitConverter.ToInt32(bytes, 0 + block);
-                        int z = BitConverter.ToInt32(bytes, 4 + block);
-                        Chunk c = new Chunk(x, z);
-                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
-                        c.RecalculateLight();
-                        c.SpreadLight();
-                        if (!w.chunkData.ContainsKey(new Point(x, z)))
-                            w.chunkData.Add(new Point(x, z), c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Server.Log(ex.ToString());
-                    }
-                });
+                
+				if(!Program.RunningInMono()) //mono doesn't have Parallel.For(long, long, Syatem.Action<long>) implemented
+				{
+					Parallel.For(0, chunkcount, i =>
+	                {
+	                    try
+	                    {
+	                        int block = (int)i * 32776;
+	                        int x = BitConverter.ToInt32(bytes, 0 + block);
+	                        int z = BitConverter.ToInt32(bytes, 4 + block);
+	                        Chunk c = new Chunk(x, z);
+	                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
+	                        c.RecalculateLight();
+	                        c.SpreadLight();
+	                        if (!w.chunkData.ContainsKey(new Point(x, z)))
+	                            w.chunkData.Add(new Point(x, z), c);
+	                    }
+	                    catch (Exception ex)
+	                    {
+	                        Server.Log(ex.ToString());
+	                    }
+	                });
+				}
+				else{
+					for (int i = 0; i < chunkcount; i++)
+	                {
+	                    try
+	                    {
+	                        int block = (int)i * 32776;
+	                        int x = BitConverter.ToInt32(bytes, 0 + block);
+	                        int z = BitConverter.ToInt32(bytes, 4 + block);
+	                        Chunk c = new Chunk(x, z);
+	                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
+	                        c.RecalculateLight();
+	                        c.SpreadLight();
+	                        if (!w.chunkData.ContainsKey(new Point(x, z)))
+	                            w.chunkData.Add(new Point(x, z), c);
+	                    }
+	                    catch (Exception ex)
+	                    {
+	                        Server.Log(ex.ToString());
+	                    }
+	                }
+				}
                 World.worlds.Add(w);
                 Server.Log(filename + " Loaded.");
             }
@@ -190,6 +215,12 @@ namespace SMP
             w.name = filename;
             return w;
         }
+		
+		public void SaveLVL()
+		{
+			World.SaveLVL(this);	
+		}
+		
         public static void SaveLVL(World w)
         {
             if (w.Save != null)

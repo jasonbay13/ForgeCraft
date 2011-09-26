@@ -286,6 +286,7 @@ namespace SMP
 				}
 			}
 			
+			//TODO change to last entry ??
 			if(p.group.InheritanceList.Count == 1)
 			{
 				p.group = p.group.InheritanceList[0];

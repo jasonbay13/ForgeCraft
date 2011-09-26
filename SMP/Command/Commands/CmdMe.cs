@@ -39,7 +39,7 @@ namespace SMP
                 return;
             }
             
-            Player.GlobalMessage(p.username + " " + MakeString(args, 0, args.Length));
+            Player.GlobalMessage(p.username + " " + String.Join(" ", args));
         }
 
         public override void Help(Player p)

@@ -38,7 +38,7 @@ namespace SMP
                 return;
             }
 
-            Player.GlobalMessage(MakeString(args, 0, args.Length));
+            Player.GlobalMessage(String.Join(" ", args));
         }
 
         public override void Help(Player p)

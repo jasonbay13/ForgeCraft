@@ -40,7 +40,7 @@ namespace SMP
 			Player targetP = Player.FindPlayer(args[0]);
 			if (targetP != null)
 			{
-				targetP.SendMessage(Color.DarkRed + "[" + p.username + ">>> Me]" + Color.White + MakeString(args, 1, args.Length));
+				targetP.SendMessage(Color.DarkRed + "[" + p.username + ">>> Me]" + Color.White + String.Join(" ", args, 1, args.Length - 1));
 				p.SendMessage(HelpBot + "Message Sent.");
 			}
 			else

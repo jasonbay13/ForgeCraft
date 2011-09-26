@@ -1,3 +1,20 @@
+/*
+	Copyright 2011 ForgeCraft team
+	
+	Dual-licensed under the	Educational Community License, Version 2.0 and
+	the GNU General Public License, Version 3 (the "Licenses"); you may
+	not use this file except in compliance with the Licenses. You may
+	obtain a copy of the Licenses at
+	
+	http://www.opensource.org/licenses/ecl2.php
+	http://www.gnu.org/licenses/gpl-3.0.html
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licenses are distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the Licenses for the specific language governing
+	permissions and limitations under the Licenses.
+*/
 using System;
 using System.IO;
 using System.Data;
@@ -51,7 +68,8 @@ namespace SMP
 	        }
 	        catch (Exception e)
 	        {
-	            throw new Exception(e.Message);
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
 	        }
 	        return dt;
 	    }
@@ -98,8 +116,10 @@ namespace SMP
 	        {
 	            this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	        }
-	        catch
+	        catch (Exception e)
 	        {
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
 	            returnCode = false;
 	        }
 	        return returnCode;
@@ -136,9 +156,10 @@ namespace SMP
    	        {
    	            this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	        }
-   	        catch(Exception e)
-   	        {
-	            Server.ServerLogger.LogError(e);
+   	        catch (Exception e)
+	        {
+				Server.Log(e.Message);
+				Server.Log(e.StackTrace.ToString());
    	            returnCode = false;
    	        }
    	        return returnCode;
@@ -181,6 +202,57 @@ namespace SMP
 			try
 			{
 				#region CREATETABLES
+				this.ExecuteNonQuery(
+				    	"CREATE TABLE Inventory(" +
+						"ID INTEGER PRIMARY KEY, " +
+				        "slot0 			TEXT, " +
+						"slot1 			TEXT, " +
+						"slot2 			TEXT, " +
+						"slot3 			TEXT, " +
+						"slot4 			TEXT, " +
+						"slot5 			TEXT, " +
+						"slot6			TEXT, " +
+						"slot7			TEXT, " +
+						"slot8			TEXT, " +
+						"slot9			TEXT, " +
+						"slot10			TEXT, " +
+						"slot11			TEXT, " +
+						"slot12			TEXT, " +
+						"slot13			TEXT, " +
+						"slot14			TEXT, " +
+						"slot15			TEXT, " +
+						"slot16			TEXT, " +
+						"slot17			TEXT, " +
+						"slot18			TEXT, " +
+						"slot19			TEXT, " +
+						"slot20			TEXT, " +
+						"slot21			TEXT, " +
+						"slot22			TEXT, " +
+						"slot23			TEXT, " +
+						"slot24			TEXT, " +
+						"slot25			TEXT, " +
+						"slot26			TEXT, " +
+						"slot27			TEXT, " +
+						"slot28			TEXT, " +
+						"slot29			TEXT, " +
+						"slot30			TEXT, " +
+						"slot31			TEXT, " +
+						"slot32			TEXT, " +
+						"slot33			TEXT, " +
+						"slot34			TEXT, " +
+						"slot35			TEXT, " +
+						"slot36			TEXT, " +
+						"slot37			TEXT, " +
+						"slot38			TEXT, " +
+						"slot39			TEXT, " +
+						"slot40			TEXT, " +
+						"slot41			TEXT, " +
+						"slot42			TEXT, " +
+						"slot43			TEXT, " +
+						"slot44			TEXT" +
+				        ");"
+				                     );
+				
 				this.ExecuteNonQuery(
 	                    "CREATE TABLE Track(" +
 	                    "ID 		INTEGER PRIMARY KEY, " +
@@ -247,6 +319,7 @@ namespace SMP
 						"ID 		INTEGER PRIMARY KEY, " +
 						"Name 		TEXT, " +
 						"ip 		TEXT, " +
+				        "InventoryID	INTEGER, " +
 						"NickName 	TEXT, " +
 						"CanBuild 	INTEGER, " +
 						"Prefix 	TEXT, " +
@@ -260,7 +333,8 @@ namespace SMP
 						"SubGroups 	TEXT, " +
 						"ExtraPerms TEXT, " +
 						"FOREIGN KEY(DefAccount) REFERENCES Account(ID), " +
-						"FOREIGN KEY(GroupID) REFERENCES Groups(ID)" +
+						"FOREIGN KEY(GroupID) REFERENCES Groups(ID), " +
+				        "FOREIGN KEY(InventoryID) REFERENCES Inventory(ID)" +
 						");"
 				                     );
 				
@@ -295,20 +369,31 @@ namespace SMP
 				
 				this.ExecuteNonQuery("INSERT INTO Account VALUES(1,'Silentneeb',1,1000,1.1,1,1);");
 				
-				this.ExecuteNonQuery("INSERT INTO Player VALUES(1,'Silentneeb',NULL,'Silent',1,NULL,NULL,'%4', 1, NULL, 1, NULL, 1, NULL, NULL);");
+				//add whoever is missing, or change anything
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, InventoryID, NickName, CanBuild, Color, DefAccount, GroupID) VALUES(1, 'Silentneeb', 1, 'Silent', 1, '%4', 1, 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(2, 'EricKilla', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(3, 'edh649', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(4, 'Merlin33069', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(5, 'hypereddie10', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(6, 'Soccer101nic', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(7, 'quaisaq', 4);");
+				this.ExecuteNonQuery("INSERT INTO Player(ID, Name, GroupID) VALUES(8, 'headdetect', 4);");
 				
-				this.ExecuteNonQuery("INSERT INTO Permission VALUES(1,'*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.info.*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.general.*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.cheat.hacks')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.other.*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.mod.*')");
-				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.build.*')");
+				this.ExecuteNonQuery("INSERT INTO Permission VALUES(1,'*');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.info.*');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.general.*');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.cheat.hacks');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.other.*');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.mod.*');");
+				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.build.*');");
+				
+				this.ExecuteNonQuery("INSERT INTO Inventory(ID, slot36) VALUES(1, 278);");
 				#endregion
-				
 			}
-			catch
+			catch (Exception e)
 			{
+				Server.Log(e.Message.ToString());
+				Server.Log(e.StackTrace.ToString());
 				return false;
 			}
 			additems();
@@ -317,6 +402,8 @@ namespace SMP
 		
 		private void additems()
 		{
+			//this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES();");
+			
 			try{
 			#region BLOCKS
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(0, 0, 'air');");
@@ -451,6 +538,12 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(107, 0, 'fencegate');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(108, 0, 'brickstairs');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(109, 0, 'stonebrickstairs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(110, 0, 'mycelium');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(111, 0, 'lillypad');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(112, 0, 'netherbrick');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(113, 0, 'netherbrickfence');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(114, 0, 'netherbrickstairs');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(115, 0, 'netherwart');");
 			#endregion
 			
 			#region ITEMS
@@ -582,6 +675,12 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(365, 0, 'rawchicken');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(366, 0, 'cookedchicken');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(367, 0, 'rottenflesh');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(368, 0, 'enderpearl');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(369, 0, 'blazerod');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(370, 0, 'ghasttear');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(371, 0, 'goldnugget');");
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(372, 0, 'netherwart');");				
+				
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2256, 0, 'goldmusicdisc');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2557, 0, 'greenmusicdisc');");
 			#endregion

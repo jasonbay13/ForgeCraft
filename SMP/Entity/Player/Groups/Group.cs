@@ -206,14 +206,14 @@ namespace SMP
 			for (int i = 0; i < tracksdt.Rows.Count; i++)
 			{
 				string name = tracksdt.Rows[i]["Name"].ToString();
-				Server.Log("name: " + name);
+				//Server.Log("name: " + name);
 				string[] groups = tracksdt.Rows[i]["Groups"].ToString().Replace(" ", "").Split(',');
 				List<Group> grouplist = new List<Group>();
 				
 				foreach(string s in groups)
 				{
 					Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + s + "';"));
-					Server.Log("gr: " + gr.Name);
+					//Server.Log("gr: " + gr.Name);
 					
 					if (gr != null)
 					{
@@ -229,7 +229,7 @@ namespace SMP
 		
 		public static void SaveGroups()
 		{
-			
+			//TODO
 		}
 		
 		#endregion

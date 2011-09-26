@@ -42,7 +42,7 @@ namespace SMP
 			Server.Log(ip + " Logged in as " + username);
 			Player.GlobalMessage(Color.Announce + username + " has joined the game!");
 			
-			if (version > Server.protocolversion)
+			/*if (version > Server.protocolversion)  //left commented during development
             {
                 Kick("Outdated server");
                 return;
@@ -51,7 +51,7 @@ namespace SMP
             {
                 Kick("Outdated client");
                 return;
-            }
+            }*/
 			
 			if (ip != "127.0.0.1")
 			{
