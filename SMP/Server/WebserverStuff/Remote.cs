@@ -23,8 +23,8 @@ using System.Net.Sockets;
 
 namespace SMP
 {
-	public class Remote
-	{
+    public class Remote
+    {
         public string ip;
         public string username;
 
@@ -39,19 +39,19 @@ namespace SMP
         public int version = 1;
 
         public Remote()
-		{
-			
-		}
+        {
+
+        }
         public void Start()
         {
             try
             {
-                
+
                 ip = socket.RemoteEndPoint.ToString().Split(':')[0];
                 Player.GlobalMessage(Color.Announce + "A Remote has connected to the server");
                 Server.Log("[REMOTE] " + ip + " connected to the server.");
 
-                
+
                 socket.BeginReceive(tempbuffer, 0, tempbuffer.Length, SocketFlags.None, new AsyncCallback(Receive), this);
             }
             catch (Exception e)
@@ -82,10 +82,7 @@ namespace SMP
             {
                 p.Disconnect();
             }
-            catch (ObjectDisposedException)
-            {
-                p.Disconnect();
-            }
+           
             catch (Exception e)
             {
                 p.Disconnect();
@@ -113,8 +110,9 @@ namespace SMP
                     //case 0x07: length = 33; break; //Pos incoming
                     //case 0x08: length = 9; break; //???
                     case 10: length = ((BitConverter.ToInt16(buffer, 1) * 2) + 2); break; //DC
+                    case 11: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2 )); break; //DC
 
-                    
+
 
 
                     default:
@@ -137,14 +135,11 @@ namespace SMP
                         case 1: HandleInfo(message); break;
                         case 0x02: HandleRemoteLogin(message); break;
                         case 0x03: HandleRemoteHandshake(message); break;
-                        case 0x04: HandleRemoteChatMessagePacket(message);break;   
-                        //case 0x04: HandlePlayerPacket(message); break; //Player onground Incoming
-                        //case 0x05: HandlePlayerPositionPacket(message); break; //Pos incoming
-                        //case 0x06: HandlePlayerLookPacket(message); break; //Look incoming
-                        //case 0x07: HandlePlayerPositionAndLookPacket(message); break; //Pos and look incoming
-                        //case 0x08: HandleDigging(message); break; //Digging
-                        case 10: HandleRemoteDCPacket(message); break; //DC
+                        case 0x04: HandleRemoteChatMessagePacket(message); break;
                        
+                        case 10: HandleRemoteDCPacket(message); break; //DC
+                        case 11: HandleMobileLogin(message);  break;
+
                     }
                     if (buffer.Length > 0)
                         buffer = HandleMessage(buffer);
@@ -160,6 +155,22 @@ namespace SMP
             return buffer;
         }
 
+        private void HandleMobileLogin(byte[] message)
+        {
+            short length = util.EndianBitConverter.Big.ToInt16(message, 0);
+            string msg = Encoding.UTF8.GetString(message, 2, length);
+            Server.Log("MOBILE: " + msg);
+
+            byte[] bytes = new byte[(length *2) + 2];
+            util.EndianBitConverter.Big.GetBytes((short)msg.Length).CopyTo(bytes, 0);
+            Encoding.BigEndianUnicode.GetBytes(msg).CopyTo(bytes, 2);
+            System.Threading.Thread.Sleep(4000);
+            SendData(0x03, bytes);
+        }
+        private void wtf(byte[] message)
+        {
+            
+        }
         private void HandleInfo(byte[] message)
         {
             short type = BitConverter.ToInt16(message, 0);
@@ -167,7 +178,7 @@ namespace SMP
 
             switch (type)
             {
-                case 1: Server.Log("Desktop remote has joined");break;
+                case 1: Server.Log("Desktop remote has joined"); break;
                 case 2: Server.Log("Mobile Remote has joined"); break;
                 default: Server.Log("Unknown type of remote has attempted to join"); Kick("Unknown type"); return;
             }
@@ -191,7 +202,7 @@ namespace SMP
 
         private void HandleRemoteLogin(byte[] message)
         {
-          
+
             short length = BitConverter.ToInt16(message, 0);
             if (length > 32) { Kick("Username too long"); return; }
             string Info = Encoding.BigEndianUnicode.GetString(message, 2, (length * 2));
@@ -201,7 +212,7 @@ namespace SMP
             username = seperate[0];
 
 
-            
+
 
 
             if (username != "admin")
@@ -223,14 +234,14 @@ namespace SMP
                 Server.Log("[REMOTE] " + username + " has joined the server");
             }
 
-            
+
         }
 
         private void HandleRemoteJoin(byte[] message)
         {
             Server.Log("Remote Has Joined");
         }
-        
+
         public void Kick(string message)
         {
             if (disconnected) return;
@@ -254,7 +265,7 @@ namespace SMP
             try
             {
                 //send kick
-                
+
             }
             catch { }
 
@@ -273,12 +284,13 @@ namespace SMP
             LoggedIn = false;
 
             //TODO: Despawn
+            
             this.Dispose();
         }
         public void Dispose()
         {
             //SaveAttributes();
-            
+
             // Close stuff
             if (socket != null && socket.Connected)
             {
@@ -309,7 +321,25 @@ namespace SMP
                 Disconnect();
             }
         }
-        
 
-	}
+
+
+        void LogPacket(byte id, byte[] packet)
+        {
+            string s = "";
+
+            if (packet.Length >= 1)
+            {
+                foreach (byte b in packet)
+                {
+                    s += b + ", ";
+                }
+                Server.Log("Packet " + id + " { " + s + "}");
+            }
+            else
+            {
+                Server.Log("Packet " + id + " had no DATA!");
+            }
+        }
+    }
 }
