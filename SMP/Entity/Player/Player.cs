@@ -676,59 +676,21 @@ namespace SMP
 			#region Inventory stuff
 			void SendInventory()
 			{
-			
-			/*List<byte> data = new List<byte>();
-			data.Add(0);
-			data.AddRange(util.EndianBitConverter.Big.GetBytes(45));
-			
-			LogPacket(0x68, data.ToArray());
-			
-			for(int i = 0; i <= 44; i++)
-			{
-				data.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].item));
-					
-					if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
-					{
-						data.Add(this.inventory.items[i].count);
-						data.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].meta));
-					}		
-			}
-			LogPacket(0x68, data.ToArray());
-			SendRaw(0x68, data.ToArray());*/
-			
-				/*List<byte> payload = new List<byte>();
-				for (int i = 0; i <= 44; i++)
+				List<byte> data = new List<byte>();
+				data.Add(0);
+				data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)45));
+				
+				for(int i = 0; i <= 44; i++)
 				{
-					payload.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].item));
-					
-					if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
-					{
-						payload.Add(this.inventory.items[i].count);
-						payload.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].meta));
-					}
+					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].item));
+						
+						if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
+						{
+							data.Add(this.inventory.items[i].count);
+							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
+						}		
 				}
-			Console.Write("Payload: ");
-			LogPacket(0x68, payload.ToArray());
-			
-				byte[] data = new byte[3 + payload.Count];
-				data[0] = 0;
-				//util.EndianBitConverter.Big.GetBytes(45).CopyTo(data, 1);
-				data[1] = 45;
-			LogPacket(0x68, data);
-				Array.Copy(payload.ToArray(), 0, data, 5, payload.Count);
-			Server.Log(data.Length + ":" + payload.Count);
-				SendRaw(0x68, data);
-			
-			LogPacket(0x68, data);*/
-			//is there a packet for sending inventory?? 0x68
-			
-				for (short i = 0; i <= 44; i++)
-				{
-					if(inventory.items[i].item != -1 && inventory.items[i].item != 0)
-					{
-						this.SendItem(i, inventory.items[i].item, inventory.items[i].count, inventory.items[i].meta);	
-					}
-				}
+				SendRaw(0x68, data.ToArray());
 			}
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
