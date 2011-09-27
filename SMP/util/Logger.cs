@@ -102,14 +102,22 @@ namespace SMP
         /// </summary>
         public void LogToFile(string log)
         {
+            retry:
+            int retred = 0;
+            try
+            {
+                if (retred == 5) return;
                 if (!Directory.Exists(Environment.CurrentDirectory + "/logs"))
                 {
                     Directory.CreateDirectory(Environment.CurrentDirectory + "/logs");
                 }
+            
                 using (StreamWriter fh = File.AppendText(LogFile))
                 {
                     fh.WriteLine(FormatTime() + ":  " + log);
                 }
+            }
+            catch (System.IO.IOException) { retred++; goto retry; }
         }
 
         /// <summary>
