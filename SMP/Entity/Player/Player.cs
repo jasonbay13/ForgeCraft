@@ -677,6 +677,49 @@ namespace SMP
 			void SendInventory()
 			{
 			
+			/*List<byte> data = new List<byte>();
+			data.Add(0);
+			data.AddRange(util.EndianBitConverter.Big.GetBytes(45));
+			
+			LogPacket(0x68, data.ToArray());
+			
+			for(int i = 0; i <= 44; i++)
+			{
+				data.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].item));
+					
+					if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
+					{
+						data.Add(this.inventory.items[i].count);
+						data.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].meta));
+					}		
+			}
+			LogPacket(0x68, data.ToArray());
+			SendRaw(0x68, data.ToArray());*/
+			
+				/*List<byte> payload = new List<byte>();
+				for (int i = 0; i <= 44; i++)
+				{
+					payload.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].item));
+					
+					if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
+					{
+						payload.Add(this.inventory.items[i].count);
+						payload.AddRange(util.EndianBitConverter.Big.GetBytes(this.inventory.items[i].meta));
+					}
+				}
+			Console.Write("Payload: ");
+			LogPacket(0x68, payload.ToArray());
+			
+				byte[] data = new byte[3 + payload.Count];
+				data[0] = 0;
+				//util.EndianBitConverter.Big.GetBytes(45).CopyTo(data, 1);
+				data[1] = 45;
+			LogPacket(0x68, data);
+				Array.Copy(payload.ToArray(), 0, data, 5, payload.Count);
+			Server.Log(data.Length + ":" + payload.Count);
+				SendRaw(0x68, data);
+			
+			LogPacket(0x68, data);*/
 			//is there a packet for sending inventory?? 0x68
 			
 				for (short i = 0; i <= 44; i++)
@@ -1451,13 +1494,13 @@ namespace SMP
 				if(!String.IsNullOrEmpty(invid))
 				{
 					System.Data.DataTable invDT = new System.Data.DataTable();
-					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");  //for some reason it is not pulling the whole string
+					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");
 					//Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
 					if (invDT.Rows.Count == 0) CreateInventory();
 					
 					for (int i = 0; i <= 44; i++)
 					{
-						string data = invDT.Rows[0]["slot" + i].ToString(); //for some reason it is not pulling the whole string
+						string data = invDT.Rows[0]["slot" + i].ToString();
 						string[] item = data.Split(':');
 						short id = -1;
 						short meta = 0;
