@@ -712,6 +712,14 @@ namespace SMP
 				}
 				SendRaw(0x67, tosend);
 			}
+			void SendWindow(byte windowID, short count, byte[] items)
+			{
+				byte[] data = new byte[3 + items.Length];
+				data[0] = windowID;
+				util.BigEndianBitConverter.Big.GetBytes(count).CopyTo(data, 1);
+				items.CopyTo(data, 3);
+				SendRaw(0x68, data);
+			}
 			#endregion
 			#region Map Stuff
 			void SendMap()

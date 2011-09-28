@@ -363,7 +363,7 @@ namespace SMP
 				this.ExecuteNonQuery("INSERT INTO Groups VALUES(3,'Moderator',0,1,NULL,NULL,'%c', '4,5,6', '2', '1');");
 				this.ExecuteNonQuery("INSERT INTO Groups VALUES(4,'Admin',0,1,NULL,NULL,'%7', '1', '3', '1');");
 				
-				this.ExecuteNonQuery("INSERT INTO Currency VALUES(1,'Dollars','Dollars','Dollar','Cents','Cent');"                );
+				this.ExecuteNonQuery("INSERT INTO Currency VALUES(1,'Dollars','Dollars','Dollar','Cents','Cent');");
 				
 				this.ExecuteNonQuery("INSERT INTO Bank VALUES(1,'Forger''s Investors',1,0,0,0,0,1);");
 				
