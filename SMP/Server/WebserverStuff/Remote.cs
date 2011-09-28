@@ -1,19 +1,19 @@
 ﻿/*
-	Copyright 2011 ForgeCraft team
+    Copyright 2011 ForgeCraft team
 	
-	Dual-licensed under the	Educational Community License, Version 2.0 and
-	the GNU General Public License, Version 3 (the "Licenses"); you may
-	not use this file except in compliance with the Licenses. You may
-	obtain a copy of the Licenses at
+    Dual-licensed under the	Educational Community License, Version 2.0 and
+    the GNU General Public License, Version 3 (the "Licenses"); you may
+    not use this file except in compliance with the Licenses. You may
+    obtain a copy of the Licenses at
 	
-	http://www.opensource.org/licenses/ecl2.php
-	http://www.gnu.org/licenses/gpl-3.0.html
+    http://www.opensource.org/licenses/ecl2.php
+    http://www.gnu.org/licenses/gpl-3.0.html
 	
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the Licenses are distributed on an "AS IS"
-	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-	or implied. See the Licenses for the specific language governing
-	permissions and limitations under the Licenses.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the Licenses are distributed on an "AS IS"
+    BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    or implied. See the Licenses for the specific language governing
+    permissions and limitations under the Licenses.
 */
 using System;
 using System.Collections.Generic;
@@ -23,11 +23,11 @@ using System.Net.Sockets;
 
 namespace SMP
 {
-    public class Remote
+    public partial class Remote
     {
         public string ip;
         public string username;
-
+        public static Remote remote = new Remote();
         byte[] buffer = new byte[0];
         byte[] tempbuffer = new byte[0xFF];
 
@@ -35,8 +35,8 @@ namespace SMP
         public bool LoggedIn { get; protected set; }
 
         public Socket socket;
-
-        public int version = 1;
+        public static List<Remote> remotes = new List<Remote>();
+        public string version = "1.1";
 
         public Remote()
         {
@@ -82,7 +82,7 @@ namespace SMP
             {
                 p.Disconnect();
             }
-           
+
             catch (Exception e)
             {
                 p.Disconnect();
@@ -110,7 +110,7 @@ namespace SMP
                     //case 0x07: length = 33; break; //Pos incoming
                     //case 0x08: length = 9; break; //???
                     case 10: length = ((BitConverter.ToInt16(buffer, 1) * 2) + 2); break; //DC
-                    case 11: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2 )); break; //DC
+                    case 11: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2)); break; //DC
 
 
 
@@ -136,9 +136,9 @@ namespace SMP
                         case 0x02: HandleRemoteLogin(message); break;
                         case 0x03: HandleRemoteHandshake(message); break;
                         case 0x04: HandleRemoteChatMessagePacket(message); break;
-                       
-                        case 10: HandleRemoteDCPacket(message); break; //DC
-                        case 11: HandleMobileLogin(message);  break;
+
+                        case 11: HandleMobileVersion(message); break; //DC
+                        case 12: HandleMobileLogin(message); break;
 
                     }
                     if (buffer.Length > 0)
@@ -155,21 +155,62 @@ namespace SMP
             return buffer;
         }
 
+        private void HandleMobileVersion(byte[] message)
+        {
+            string msg = Encoding.UTF8.GetString(message);
+            if (msg != version)
+            {
+                string accepted = "VERSION";
+                byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                Server.Log("[Remote] A Remote tried to join with a version mismatch");
+                sendData(bytes);
+            }
+        }
+
         private void HandleMobileLogin(byte[] message)
         {
+
             short length = util.EndianBitConverter.Big.ToInt16(message, 0);
             string msg = Encoding.UTF8.GetString(message, 2, length);
-            Server.Log("MOBILE: " + msg);
+            
+            if (msg.StartsWith("LOGIN: "))
+            {
+                msg = msg.Replace("LOGIN: ", "");
+                
+            }
 
-            byte[] bytes = new byte[(length *2) + 2];
-            util.EndianBitConverter.Big.GetBytes((short)msg.Length).CopyTo(bytes, 0);
-            Encoding.BigEndianUnicode.GetBytes(msg).CopyTo(bytes, 2);
             System.Threading.Thread.Sleep(4000);
-            SendData(0x03, bytes);
+            if (HandleLogin(msg))
+            {
+                 string accepted = "ACCEPTED";
+                 byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                 util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                 Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                 Server.Log("[Remote] Remote Verified, passing controls to it!");
+                 sendData(bytes);
+            }
+            else
+            {
+                string accepted = "FAIL";
+                byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                sendData(bytes);
+                Server.Log("[Remote] A Remote attempted to join, but got the information incorrect");
+            }
+
+
+
         }
+
+
+
+
         private void wtf(byte[] message)
         {
-            
+
         }
         private void HandleInfo(byte[] message)
         {
@@ -182,8 +223,8 @@ namespace SMP
                 case 2: Server.Log("Mobile Remote has joined"); break;
                 default: Server.Log("Unknown type of remote has attempted to join"); Kick("Unknown type"); return;
             }
-            if (version != this.version)
-                Kick("You have a different version");
+            //if (version != this.version)
+                //Kick("You have a different version");
         }
         private void HandleRemoteDCPacket(byte[] message)
         {
@@ -215,24 +256,7 @@ namespace SMP
 
 
 
-            if (username != "admin")
-            {
-                byte[] bytes = new byte[1];
-                bytes[0] = 1;
-                SendData(RemotePacketTypes.SendStatus, bytes);
-            }
-            if (password != "lol")
-            {
-                byte[] bytes = new byte[1];
-                bytes[0] = 2;
-                SendData(0xFF, bytes);
-                Server.Log("A Remote Attempted to login but got the password incorrect");
-            }
-            else
-            {
-                Player.GlobalMessage("[REMOTE] " + username + " has joined the server");
-                Server.Log("[REMOTE] " + username + " has joined the server");
-            }
+
 
 
         }
@@ -246,30 +270,27 @@ namespace SMP
         {
             if (disconnected) return;
 
+            
             disconnected = true;
-
-            if (message != null)
-            {
-                //	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
-                //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, message);
-            }
-            else
-            {
-                //	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
-                //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
-            }
-            if (LoggedIn)
-                Player.GlobalMessage("§5" + username + " §fhas been kicked from the server! (REMOTE)");
+            if (LoggedIn){
+                Player.GlobalMessage("§5[Remote] §fhas been kicked from the server!");
             LoggedIn = false;
+            }
 
             try
             {
-                //send kick
+
+                string accepted = message;
+                byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                Server.Log("[Remote] has been kicked from the server!");
+                SendData(0x03, bytes);
 
             }
             catch { }
 
-            //TODO: Despawn
+    
             this.Dispose();
         }
         public void Disconnect()
@@ -277,21 +298,19 @@ namespace SMP
             if (disconnected) return;
             disconnected = true;
 
-            //Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
-            //	LoggedIn ? "" : "/", LoggedIn ? username : ip);
+            
             if (LoggedIn)
-                Player.GlobalMessage("§5" + username + " §fhas disconnected. (REMOTE)");
+                Player.GlobalMessage("§5[Remote] §fhas disconnected. (REMOTE)");
             LoggedIn = false;
 
-            //TODO: Despawn
-            
+ 
+
             this.Dispose();
         }
         public void Dispose()
         {
             //SaveAttributes();
 
-            // Close stuff
             if (socket != null && socket.Connected)
             {
                 try { socket.Close(); }
@@ -299,8 +318,7 @@ namespace SMP
                 socket = null;
             }
         }
-        public void SendData(RemotePacketTypes id, byte[] send) { SendData((byte)id, send); }
-        public void SendData(RemotePacketTypes id) { SendData((byte)id, new byte[0]); }
+
         public void SendData(int id) { SendData(id, new byte[0]); }
         public void SendData(int id, byte[] send)
         {
@@ -321,9 +339,21 @@ namespace SMP
                 Disconnect();
             }
         }
+        public void sendData(byte[] send)
+        {
+            if (socket == null || !socket.Connected) return;
+            try
+            {
+                socket.Send(send);
+                send = null;
+            }
+            catch (SocketException)
+            {
+                send = null;
+                Disconnect();
+            }
 
-
-
+        }
         void LogPacket(byte id, byte[] packet)
         {
             string s = "";
