@@ -387,7 +387,7 @@ namespace SMP
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.mod.*');");
 				this.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES('core.build.*');");
 				
-				this.ExecuteNonQuery("INSERT INTO Inventory(ID, slot36) VALUES(1, 278);");
+				this.ExecuteNonQuery("INSERT INTO Inventory(ID, slot36) VALUES(1, '278:0:1');");
 				#endregion
 			}
 			catch (Exception e)

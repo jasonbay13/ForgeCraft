@@ -50,8 +50,15 @@ namespace SMP
 					continue;	
 				}
 				
+				Server.Log(alias + ": " + id + ": " + meta);
+				try{
 				Items.Add(alias, id);
 				Durability.Add(alias, meta);
+				}
+				catch (ArgumentException)
+				{
+					Server.Log(alias + "already exsists in the item table, please rename " + alias + ".");
+				}
 				
 			}
 		}

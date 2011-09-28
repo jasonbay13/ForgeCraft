@@ -676,16 +676,21 @@ namespace SMP
 			#region Inventory stuff
 			void SendInventory()
 			{
-			
-			//is there a packet for sending inventory?? 0x68
-			
-				for (short i = 0; i <= 44; i++)
+				List<byte> data = new List<byte>();
+				data.Add(0);
+				data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)45));
+				
+				for(int i = 0; i <= 44; i++)
 				{
-					if(inventory.items[i].item != -1 && inventory.items[i].item != 0)
-					{
-						this.SendItem(i, inventory.items[i].item, inventory.items[i].count, inventory.items[i].meta);	
-					}
+					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].item));
+						
+						if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
+						{
+							data.Add(this.inventory.items[i].count);
+							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
+						}		
 				}
+				SendRaw(0x68, data.ToArray());
 			}
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
@@ -1451,13 +1456,13 @@ namespace SMP
 				if(!String.IsNullOrEmpty(invid))
 				{
 					System.Data.DataTable invDT = new System.Data.DataTable();
-					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");  //for some reason it is not pulling the whole string
+					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");
 					//Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
 					if (invDT.Rows.Count == 0) CreateInventory();
 					
 					for (int i = 0; i <= 44; i++)
 					{
-						string data = invDT.Rows[0]["slot" + i].ToString(); //for some reason it is not pulling the whole string
+						string data = invDT.Rows[0]["slot" + i].ToString();
 						string[] item = data.Split(':');
 						short id = -1;
 						short meta = 0;
