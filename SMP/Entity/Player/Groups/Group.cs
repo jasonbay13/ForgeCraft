@@ -36,6 +36,7 @@ namespace SMP
 		public static Dictionary<string, List<Group>> TracksDictionary = new Dictionary<string, List<Group>>(); //holds the all the tracks
 		public List<string> Tracks = new List<string>(); //holds whatever track(s) it is a part of, used to reference Dictionary id
         public string Name;
+		public int PermLevel = 0;  //temporary system
         public bool IsDefaultGroup = false;
         public bool CanBuild = false;
         public string Prefix = "";
@@ -46,8 +47,57 @@ namespace SMP
         public List<Group> InheritanceList = new List<Group>();
         private List<string> tempInheritanceList = new List<string>();
 
+		/// <summary>
+		/// Saves the basics of the group to db. Returns the id of the group.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.Int32"/>
+		/// </returns>
+		public int Save()
+		{
+			Dictionary<string, string> data = new Dictionary<string, string>();
+			
+			data.Add("Name", this.Name);
+			data.Add("PermLevel", this.PermLevel.ToString());
+			
+			if (this.IsDefaultGroup)
+				data.Add("IsDefault", "'1'");
+			else
+				data.Add("IsDefault", "'0'");
+			
+			if (this.CanBuild)
+				data.Add("CanBuild", "'1'");
+			else
+				data.Add("CanBuild", "'0'");
+			
+			data.Add("Prefix", this.Prefix);
+			data.Add("Suffix", this.Suffix);
+			data.Add("Color", this.GroupColor);
+			
+			
+			StringBuilder sb = new StringBuilder("");
+			foreach(String s in this.PermissionList)
+			{
+				string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+				if (String.IsNullOrEmpty(id))
+				{
+					Server.SQLiteDB.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES ('" + s + "');");	
+					id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+				}
+				
+				sb.Append(id + ",");
+			}
+			sb.Remove(sb.Length - 1, 1);
+			data.Add("Permissions", sb.ToString());
+			
+			sb.Clear();
+			
+			Server.SQLiteDB.Insert("Groups", data);
+			
+			return int.Parse(Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + this.Name + "';").ToString());
+		}
         /// <summary>
-        /// Checks if a player has permission to use a command
+        /// Checks if a player has permission to use a command or whatever.
         /// </summary>
         /// <param name="p"></param>
         /// <param name="c"></param>
@@ -134,6 +184,8 @@ namespace SMP
 				
 				g.Name = dt.Rows[i]["Name"].ToString();
 				
+				g.PermLevel = int.Parse(dt.Rows[i]["PermLevel"].ToString());
+				
 				if (dt.Rows[i]["IsDefault"].ToString() == "1")
 				{
 					g.IsDefaultGroup = true;
@@ -195,7 +247,95 @@ namespace SMP
 				}
 			}
 			
-			#region Tracks
+			LoadTracks();
+		}
+		
+		public static void SaveGroups()
+		{
+			foreach(Group g in GroupList)
+			{
+				Dictionary<string, string> data = new Dictionary<string, string>();
+				
+				data.Add("Name", g.Name);
+				data.Add("PermLevel", g.PermLevel.ToString());
+				
+				if (g.IsDefaultGroup)
+					data.Add("IsDefault", "1");
+				else
+					data.Add("IsDefault", "0");
+				
+				if (g.CanBuild)
+					data.Add("CanBuild", "1");
+				else
+					data.Add("CanBuild", "0");
+				
+				data.Add("Prefix", g.Prefix);
+				data.Add("Suffix", g.Suffix);
+				data.Add("Color", g.GroupColor);
+				
+				
+				StringBuilder sb = new StringBuilder("");
+				foreach(String s in g.PermissionList)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+					if (String.IsNullOrEmpty(id))
+					{
+						Server.SQLiteDB.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES ('" + s + "');");	
+						id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+					}
+					
+					sb.Append(id + ",");
+				}
+				
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("Permissions", sb.ToString());				
+				sb.Clear();
+				
+				foreach(Group gr in g.InheritanceList)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + gr.Name + "';");
+					if(String.IsNullOrEmpty(id))
+					{
+						id = gr.Save().ToString();
+					}
+					
+					sb.Append(id + ",");
+				}
+				
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("Inheritance", sb.ToString());
+				sb.Clear();
+				
+				//TODO SAVE TRACKS
+				foreach(string s in g.Tracks)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Track WHERE Name = '" + s + "';");
+					if(String.IsNullOrEmpty(id))
+					{
+						Server.SQLiteDB.ExecuteNonQuery("INSERT INTO Track(Name) VALUES ('" + s + "');");
+						id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Track WHERE Name = '" + s + "';");
+					}
+					sb.Append(id + ",");
+				}
+				
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("Tracks", sb.ToString());
+				sb.Clear();
+				
+				Server.SQLiteDB.Update("Groups", data, "Name = '" + g.Name + "';");
+			}
+			
+			SaveTracks();
+		}
+		
+		private static void LoadTracks()
+		{
 			System.Data.DataTable tracksdt = new System.Data.DataTable();
 			try
 			{
@@ -206,14 +346,12 @@ namespace SMP
 			for (int i = 0; i < tracksdt.Rows.Count; i++)
 			{
 				string name = tracksdt.Rows[i]["Name"].ToString();
-				//Server.Log("name: " + name);
 				string[] groups = tracksdt.Rows[i]["Groups"].ToString().Replace(" ", "").Split(',');
 				List<Group> grouplist = new List<Group>();
 				
 				foreach(string s in groups)
 				{
 					Group gr = Group.FindGroup(Server.SQLiteDB.ExecuteScalar("SELECT Name FROM Groups WHERE ID = '" + s + "';"));
-					//Server.Log("gr: " + gr.Name);
 					
 					if (gr != null)
 					{
@@ -222,16 +360,38 @@ namespace SMP
 					}
 				}
 				if (grouplist.Count > 0)
-					TracksDictionary.Add(name, grouplist);
-			}
-			#endregion
+					TracksDictionary.Add(name, grouplist);				
+			}	
 		}
 		
-		public static void SaveGroups()
+		private static void SaveTracks()
 		{
-			//TODO
+			Dictionary<string, string> data = new Dictionary<string, string>();
+			
+			foreach(KeyValuePair<string, List<Group>> kvp in TracksDictionary)
+			{
+				StringBuilder sb = new StringBuilder("");
+				data.Add("Name", kvp.Key);
+				
+				foreach(Group g in kvp.Value)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + g.Name + "';");
+					if(String.IsNullOrEmpty(id))
+					{
+						id = g.Save().ToString();
+					}
+					
+					sb.Append(id + ",");
+				}
+				
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("Groups", sb.ToString());
+				sb.Clear();
+				Server.SQLiteDB.Update("Track", data, "Name = '" + kvp.Key + "';");
+			}
 		}
-		
 		#endregion
     }
 }

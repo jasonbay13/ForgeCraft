@@ -226,7 +226,7 @@ namespace SMP
 						{
 							if(p.group == tempList[ind])
 							{
-								if(ind + 1 > tempList.Count)
+								if(ind + 1 < tempList.Count)
 								{
 									p.group = tempList[ind + 1];
 									return true;
@@ -238,14 +238,22 @@ namespace SMP
 				}
 			}
 			
-			//maybe add checks to make sure there isn't multiple inheritance
+			Group gr = null;
 			foreach(Group g in Group.GroupList)
 			{
-				if(g.InheritanceList.Contains(p.group))
+				if(g.InheritanceList.Contains(p.group) && gr == null)
 				{
-					p.group = g;
-					return true;
+					gr = g;
 				}
+				else if(g.InheritanceList.Contains(p.group) && gr != null)
+				{
+					return false;	
+				}
+			}
+			if (gr != null)
+			{
+				p.group = gr;
+				return true;
 			}
 			return false;
 		}
@@ -261,6 +269,7 @@ namespace SMP
 		/// </returns>
 		public static bool DemotePlayer(Player p)
 		{
+			Server.Log("trackcount: " + p.group.Tracks.Count);
 			for (int i = 0; i < p.group.Tracks.Count; i++)
 			{
 				if(Group.TracksDictionary.ContainsKey(p.group.Tracks[i]))
@@ -376,6 +385,27 @@ namespace SMP
 		public static void UpdatePlayerPermissions(Player p)
 		{
 			//TODO
+		}
+		
+		/// <summary>
+		/// Finds if GroupA is higher rank than GroupB, will return false if they are equal.
+		/// </summary>
+		/// <param name="groupA">
+		/// A <see cref="Group"/>
+		/// </param>
+		/// <param name="groupB">
+		/// A <see cref="Group"/>
+		/// </param>
+		/// <returns>
+		/// A <see cref="System.Boolean"/>
+		/// </returns>
+		public static bool IsHigherRank(Group groupA, Group groupB)
+		{
+			//TODO: add a better system, that doesn't require any user input
+			if (groupA.PermLevel > groupB.PermLevel)
+				return true;
+			
+			return false;
 		}
 		#endregion
 	}

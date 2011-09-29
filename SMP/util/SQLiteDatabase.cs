@@ -76,6 +76,7 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
+			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -87,6 +88,7 @@ namespace SMP
 	 
 	    public string ExecuteScalar(string sql)
 	    {
+			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -114,6 +116,7 @@ namespace SMP
 	        }
 	        try
 	        {
+				Server.Log(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	            this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	        }
 	        catch (Exception e)
@@ -154,6 +157,7 @@ namespace SMP
    	        values = values.Substring(0, values.Length - 1);
    	        try
    	        {
+				Server.Log(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	            this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	        }
    	        catch (Exception e)
@@ -265,6 +269,7 @@ namespace SMP
 						"CREATE TABLE Groups(" +
 						"ID 		INTEGER PRIMARY KEY, " +
 						"Name 		TEXT, " +
+				        "PermLevel	INTEGER, " +
 						"IsDefault 	INTEGER, " +
 						"CanBuild 	INTEGER, " +
 						"Prefix 	TEXT, " +
@@ -320,6 +325,7 @@ namespace SMP
 						"Name 		TEXT, " +
 						"ip 		TEXT, " +
 				        "InventoryID	INTEGER, " +
+				        "Exp		INTEGER, " +
 						"NickName 	TEXT, " +
 						"CanBuild 	INTEGER, " +
 						"Prefix 	TEXT, " +
@@ -358,10 +364,10 @@ namespace SMP
 				#region INSERTS
 				this.ExecuteNonQuery("INSERT INTO Track VALUES(1,'Default', '1,2,3,4');");
 				
-				this.ExecuteNonQuery("INSERT INTO Groups VALUES(1,'Guest',1,1,NULL,NULL,'%3', '2,3,4', NULL, 1);");
-				this.ExecuteNonQuery("INSERT INTO Groups VALUES(2,'Builder',0,1,NULL,NULL,'%1', '7', '1', '1');");
-				this.ExecuteNonQuery("INSERT INTO Groups VALUES(3,'Moderator',0,1,NULL,NULL,'%c', '4,5,6', '2', '1');");
-				this.ExecuteNonQuery("INSERT INTO Groups VALUES(4,'Admin',0,1,NULL,NULL,'%7', '1', '3', '1');");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(1,'Guest',10,1,1,NULL,NULL,'%3', '2,3,4', NULL, 1);");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(2,'Builder',20,0,1,NULL,NULL,'%1', '7', '1', '1');");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(3,'Moderator',30,0,1,NULL,NULL,'%c', '4,5,6', '2', '1');");
+				this.ExecuteNonQuery("INSERT INTO Groups VALUES(4,'Admin',40,0,1,NULL,NULL,'%7', '1', '3', '1');");
 				
 				this.ExecuteNonQuery("INSERT INTO Currency VALUES(1,'Dollars','Dollars','Dollar','Cents','Cent');");
 				

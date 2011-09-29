@@ -233,6 +233,8 @@ namespace SMP
 			
             Plugin.Unload();
 			
+			Group.SaveGroups();
+			
 			if ((File.Exists("properties/banned.txt")) || (!File.Exists("properties/banned.txt") && WhiteList.Count > 0))
 				Properties.WriteList(BanList, "properties/banned.txt");
 			if ((File.Exists("properties/whitelist.txt")) || (!File.Exists("properties/whitelist.txt") && WhiteList.Count > 0))

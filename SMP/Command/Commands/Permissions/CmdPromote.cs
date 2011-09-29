@@ -26,7 +26,7 @@ namespace SMP
         public override List<string> Shortcuts { get { return new List<string> {"pr"}; } }
         public override string Category { get { return "mod"; } }
         public override bool ConsoleUseable { get { return true; } }
-        public override string Description { get { return "Promote a player. (Debug)"; } }
+        public override string Description { get { return "Promote a player."; } }
 		public override string PermissionNode { get { return "core.mod.promote"; } }
 
         public override void Use(Player p, params string[] args)
@@ -45,12 +45,13 @@ namespace SMP
 			}
 			if (pr == p)
 			{
-				p.SendMessage(HelpBot + "You can't promote yourself.");	
+				p.SendMessage(HelpBot + "You can't promote yourself.");
+				return;
 			}
-			
-			if (GroupUtils.PromotePlayer(p))
+			if (GroupUtils.PromotePlayer(pr))
 			{
 				p.SendMessage(HelpBot + "Player promoted.");
+				pr.SendMessage(HelpBot + p.username + " promoted you. Congratulations!");
 			}
 			else
 				p.SendMessage(HelpBot + "Could not promote player");
@@ -58,7 +59,8 @@ namespace SMP
 		
 		public override void Help(Player p)
 		{
-			p.SendMessage(":P");
+			p.SendMessage(Description);
+			p.SendMessage("/promote (Player)");
 		}
 	}
 }
