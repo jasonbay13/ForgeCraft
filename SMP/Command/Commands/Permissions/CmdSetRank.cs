@@ -26,7 +26,7 @@ namespace SMP
         public override List<string> Shortcuts { get { return new List<string> {}; } }
         public override string Category { get { return "mod"; } }
         public override bool ConsoleUseable { get { return true; } }
-        public override string Description { get { return "Set a player's rank (debug)."; } }
+        public override string Description { get { return "Set a player's rank."; } }
 		public override string PermissionNode { get { return "core.mod.setrank"; } }
 
         public override void Use(Player p, params string[] args)
@@ -42,18 +42,27 @@ namespace SMP
 			
 			if (pr == p)
 			{
-				p.SendMessage(HelpBot + "You can't change your own rank.");	
+				p.SendMessage(HelpBot + "You can't change your own rank.");
+				return;
 			}
 			
+			if (!GroupUtils.IsHigherRank(p.group, gr))
+			{
+				p.SendMessage(HelpBot + "You can't rank someone higher than your own rank.");
+				return;
+			}
 			if (gr != null && pr != null)
+			{
 				pr.group = gr;
-			
-			p.SendMessage("There have a nice day!");
+				p.SendMessage("There have a nice day!");
+				pr.SendMessage(HelpBot + p.username + " set your rank to " + gr.Name + ". Congratulations!");
+			}
 		}
 		
 		public override void Help(Player p)
 		{
-			
+			p.SendMessage(Description);
+			p.SendMessage("/setrank (Player) (Group)");
 		}
 	}
 }

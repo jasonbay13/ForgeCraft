@@ -68,10 +68,10 @@ namespace SMP
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());
-			core.Add(new CmdPromote()); //currently in DEBUG!!
+			core.Add(new CmdPromote());
             core.Add(new CmdRain());
             core.Add(new CmdSay());
-			core.Add(new CmdSetRank()); //currently in DEBUG!!
+			core.Add(new CmdSetRank());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());

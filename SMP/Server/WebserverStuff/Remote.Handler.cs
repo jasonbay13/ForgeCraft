@@ -10,9 +10,11 @@ namespace SMP
        public bool HandleLogin(string message)
        {
            string[] splitted = message.Split(':');
+
            if (splitted[0] == "head" && splitted[1] == "lols")
            { username = splitted[0]; password = splitted[1];  return true; }
            else
+
            return false;
        }
     }

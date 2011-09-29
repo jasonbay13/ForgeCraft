@@ -25,6 +25,7 @@ namespace SMP
         public ConsoleGroup()
         {
 			this.PermissionList.Add("*");
+			this.PermLevel = 2000000000;
         }
     }
 }

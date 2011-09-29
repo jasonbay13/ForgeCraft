@@ -712,6 +712,14 @@ namespace SMP
 				}
 				SendRaw(0x67, tosend);
 			}
+			void SendWindow(byte windowID, short count, byte[] items)
+			{
+				byte[] data = new byte[3 + items.Length];
+				data[0] = windowID;
+				util.BigEndianBitConverter.Big.GetBytes(count).CopyTo(data, 1);
+				items.CopyTo(data, 3);
+				SendRaw(0x68, data);
+			}
 			#endregion
 			#region Map Stuff
 			void SendMap()
@@ -1296,6 +1304,7 @@ namespace SMP
 					data.Add("Name", username);
 				
 				data.Add("ip", ip);
+				data.Add("Exp", Experience.Total.ToString());
 				data.Add("NickName", NickName);
 				
 				if (CanBuild)
@@ -1312,9 +1321,9 @@ namespace SMP
 				else
 					data.Add("DND", "0");
 				
-				//TODO accouts
+				//TODO accounts
 				
-				//TODO subgroups and perms
+				#region Groups
 				string gid = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + this.group.Name + "';");
 				if(!String.IsNullOrEmpty(gid))
 				{
@@ -1325,6 +1334,41 @@ namespace SMP
 					gid = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Groups WHERE Name = '" + Group.DefaultGroup.Name + "';");
 					data.Add("GroupID", gid);
 				}
+				
+				StringBuilder sb = new StringBuilder("");
+				foreach(Group sg in this.SubGroups)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM groups WHERE Name = '" + sg.Name + "';");
+					if(String.IsNullOrEmpty(id))
+					{
+						id = sg.Save().ToString();	
+					}
+					sb.Append(id + ",");
+				}
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("SubGroups", sb.ToString());
+				sb.Clear();
+				
+				foreach(string s in this.AdditionalPermissions)
+				{
+					string id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+					if (String.IsNullOrEmpty(id))
+					{
+						Server.SQLiteDB.ExecuteNonQuery("INSERT INTO Permission(Node) VALUES ('" + s + "');");	
+						id = Server.SQLiteDB.ExecuteScalar("SELECT ID FROM Permission WHERE Node = '" + s + "';").ToString();
+					}
+					
+					sb.Append(id + ",");
+				}
+				
+				if (sb.Length > 1)
+					sb.Remove(sb.Length - 1, 1);
+				
+				data.Add("ExtraPerms", sb.ToString());
+				sb.Clear();
+				#endregion
 				
 				#region INVENTORY
 				if (newplayer)
@@ -1344,7 +1388,6 @@ namespace SMP
 						{
 							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].item, this.inventory.items[i].meta, this.inventory.items[i].count));
 						}
-						
 						Server.SQLiteDB.Update("Inventory", dict, "ID = '" + invid.ToString() + "'");
 					}
 					
@@ -1371,6 +1414,10 @@ namespace SMP
 			if(DT.Rows.Count > 0)
 			{
 				NickName = DT.Rows[0]["NickName"].ToString();
+				
+				//short sout = 0;
+				//if(Int16.TryParse(DT.Rows[0]["Exp"].ToString(), out sout));
+				//	this.Experience.Add(this, sout);
 				
 				if (DT.Rows[0]["CanBuild"].ToString() == "1")
 					CanBuild = true;
@@ -1406,7 +1453,6 @@ namespace SMP
 				//TODO
 				#endregion
 				
-				//TODO Group, subgroups, and all that
 				#region GROUPS
 				string groupid = DT.Rows[0]["GroupID"].ToString();
 				
@@ -1457,7 +1503,6 @@ namespace SMP
 				{
 					System.Data.DataTable invDT = new System.Data.DataTable();
 					invDT = Server.SQLiteDB.GetDataTable("Select * FROM Inventory WHERE ID = '" + invid + "';");
-					//Server.Log("Slot37: " + Server.SQLiteDB.ExecuteScalar("SELECT slot37 FROM Inventory WHERE ID = '1'"));
 					if (invDT.Rows.Count == 0) CreateInventory();
 					
 					for (int i = 0; i <= 44; i++)
@@ -1467,8 +1512,6 @@ namespace SMP
 						short id = -1;
 						short meta = 0;
 						byte count = 1;
-						
-						//Server.Log("data: " + data);
 						
 						if (!Int16.TryParse(item[0], out id))
 						{
@@ -1488,7 +1531,6 @@ namespace SMP
 								count = 1;	
 							}
 						}
-						//Server.Log("count: " + count);
 						if (count > 64) count = 64;
 						
 						if (id > 0 && count > 0)
@@ -1501,7 +1543,6 @@ namespace SMP
 				
 				#endregion
 				
-				Server.Log(String.Format("Succesfully loaded {0} from the database.", this.username));
 				
 			}
 			else
@@ -1512,6 +1553,8 @@ namespace SMP
 				//TODO Set Default to default group, setup accounts etc
 				SaveAttributes(true);
 			}
+			
+			Server.Log("COUNT: " + this.group.Tracks.Count);
 		}
 		
 		/// <summary>
