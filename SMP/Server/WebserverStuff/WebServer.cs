@@ -43,6 +43,7 @@ namespace SMP
                 listen.Listen((int)SocketOptionName.MaxConnections);
 
                 listen.BeginAccept(new AsyncCallback(Accept), null);
+                Server.Log("Remote Server Started on port: " + port.ToString());
             }
             catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
             catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
@@ -64,7 +65,7 @@ namespace SMP
                     listen.BeginAccept(new AsyncCallback(Accept), null);
                     begin = true;
 
-                    //do stuff ?
+                   
 
                 }
                 catch (SocketException)

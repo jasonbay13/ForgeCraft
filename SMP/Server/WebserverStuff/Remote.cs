@@ -27,6 +27,7 @@ namespace SMP
     {
         public string ip;
         public string username;
+        public string password;
         public static Remote remote = new Remote();
         byte[] buffer = new byte[0];
         byte[] tempbuffer = new byte[0xFF];
@@ -49,7 +50,7 @@ namespace SMP
 
                 ip = socket.RemoteEndPoint.ToString().Split(':')[0];
                 Player.GlobalMessage(Color.Announce + "A Remote has connected to the server");
-                Server.Log("[REMOTE] " + ip + " connected to the server.");
+                Server.Log("[Remote] " + ip + " connected to the server.");
 
 
                 socket.BeginReceive(tempbuffer, 0, tempbuffer.Length, SocketFlags.None, new AsyncCallback(Receive), this);
@@ -132,13 +133,13 @@ namespace SMP
 
                     switch (msg)
                     {
-                        case 1: HandleInfo(message); break;
+                        case 1: HandleInfo(message); break;    //2 - 5
                         case 0x02: HandleRemoteLogin(message); break;
                         case 0x03: HandleRemoteHandshake(message); break;
                         case 0x04: HandleRemoteChatMessagePacket(message); break;
 
-                        case 11: HandleMobileVersion(message); break; //DC
-                        case 12: HandleMobileLogin(message); break;
+                        
+                        case 11: HandleMobileLogin(message); break;  //12 - 16
 
                     }
                     if (buffer.Length > 0)
@@ -155,30 +156,27 @@ namespace SMP
             return buffer;
         }
 
-        private void HandleMobileVersion(byte[] message)
-        {
-            string msg = Encoding.UTF8.GetString(message);
-            if (msg != version)
-            {
-                string accepted = "VERSION";
-                byte[] bytes = new byte[(accepted.Length * 2) + 2];
-                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
-                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
-                Server.Log("[Remote] A Remote tried to join with a version mismatch");
-                sendData(bytes);
-            }
-        }
+       
 
         private void HandleMobileLogin(byte[] message)
         {
 
             short length = util.EndianBitConverter.Big.ToInt16(message, 0);
             string msg = Encoding.UTF8.GetString(message, 2, length);
-            
-            if (msg.StartsWith("LOGIN: "))
+            //Server.Log(msg);
+            if (msg.StartsWith("2.3: "))  //TODO: make a better checker
             {
-                msg = msg.Replace("LOGIN: ", "");
-                
+                msg = msg.Replace("2.3: ", "");
+
+            }
+            else
+            {
+                string accepted = "VERSION";
+                byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                Server.Log("[Remote] A remote tried to connect with a different version.");
+                SendData(bytes);
             }
 
             System.Threading.Thread.Sleep(4000);
@@ -189,7 +187,10 @@ namespace SMP
                  util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
                  Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
                  Server.Log("[Remote] Remote Verified, passing controls to it!");
-                 sendData(bytes);
+                 SendData(bytes);
+                 System.Threading.Thread.Sleep(5000);
+                 Server.Log("SENDING MESSAGE");
+                 SendData(0x03, bytes);
             }
             else
             {
@@ -197,8 +198,8 @@ namespace SMP
                 byte[] bytes = new byte[(accepted.Length * 2) + 2];
                 util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
                 Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
-                sendData(bytes);
-                Server.Log("[Remote] A Remote attempted to join, but got the information incorrect");
+                SendData(bytes);
+                Server.Log("[Remote] A Remote with incorrect information attempted to join.");
             }
 
 
@@ -339,7 +340,7 @@ namespace SMP
                 Disconnect();
             }
         }
-        public void sendData(byte[] send)
+        public void SendData(byte[] send)
         {
             if (socket == null || !socket.Connected) return;
             try
