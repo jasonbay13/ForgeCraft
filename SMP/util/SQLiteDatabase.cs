@@ -76,7 +76,7 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			Server.Log(sql);
+			//Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -88,7 +88,7 @@ namespace SMP
 	 
 	    public string ExecuteScalar(string sql)
 	    {
-			Server.Log(sql);
+			//Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -116,7 +116,7 @@ namespace SMP
 	        }
 	        try
 	        {
-				Server.Log(String.Format("update {0} set {1} where {2};", tableName, vals, where));
+				//Server.Log(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	            this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	        }
 	        catch (Exception e)
@@ -157,7 +157,7 @@ namespace SMP
    	        values = values.Substring(0, values.Length - 1);
    	        try
    	        {
-				Server.Log(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
+				//Server.Log(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	            this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	        }
    	        catch (Exception e)
