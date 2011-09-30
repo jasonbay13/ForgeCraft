@@ -1,10 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/util/SQLiteDatabase.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Entity/Player/Player.cs" ctype="Workbench">
     <Files>
-      <File FileName="SMP/util/SQLiteDatabase.cs" Line="79" Column="6" />
-      <File FileName="SMP/Entity/Player/Player.cs" Line="1314" Column="5" />
-      <File FileName="SMP/Entity/Player/Experience.cs" Line="63" Column="56" />
+      <File FileName="SMP/util/SQLiteDatabase.cs" Line="76" Column="7" />
+      <File FileName="SMP/Entity/Player/Player.cs" Line="309" Column="29" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
