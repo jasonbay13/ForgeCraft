@@ -242,7 +242,7 @@ namespace SMP
 				{
 					Point3 diff = pos.RD() - e.pos.RD();
 
-                    Console.WriteLine(diff.x + " " + diff.z);
+                    //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1 && diff.y <= 0 && diff.y >= -1 && Math.Abs(diff.z) <= 1)
 					{
 						if (!e.I.OnGround) continue;
