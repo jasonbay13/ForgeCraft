@@ -28,6 +28,7 @@ namespace SMP
         public string ip;
         public string username;
         public string password;
+        internal RemotePlayer remotePlayer;
         public static Remote remote = new Remote();
         byte[] buffer = new byte[0];
         byte[] tempbuffer = new byte[0xFF];
@@ -111,14 +112,17 @@ namespace SMP
                     //case 0x07: length = 33; break; //Pos incoming
                     //case 0x08: length = 9; break; //???
                     case 10: length = ((BitConverter.ToInt16(buffer, 1) * 2) + 2); break; //DC
-                    case 11: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2)); break; //DC
+                        
+                    case 11: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2)); break;   
+                    case 12: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) + 2)); break;
+                    case 25: length = 1; break;
 
 
 
 
                     default:
                         Server.Log("unhandled message id " + msg);
-                        Kick("Unknown Packet id: " + msg);
+                        Kick();
                         return new byte[0];
                 }
                 if (buffer.Length > length)
@@ -139,7 +143,9 @@ namespace SMP
                         case 0x04: HandleRemoteChatMessagePacket(message); break;
 
                         
-                        case 11: HandleMobileLogin(message); break;  //12 - 16
+                        case 11: HandleMobileLogin(message); break;   //Login 
+                        case 12: HandleMobileChat(message); break;
+                        case 25: HandleMobileDC(); break;
 
                     }
                     if (buffer.Length > 0)
@@ -154,6 +160,39 @@ namespace SMP
                 Server.Log(e.StackTrace);
             }
             return buffer;
+        }
+
+        private void HandleMobileChat(byte[] message)
+        {
+            short length = util.EndianBitConverter.Big.ToInt16(message, 0);
+            string m = Encoding.UTF8.GetString(message, 2, length);
+
+            if (m.Length > 119)
+            {
+                Server.Log("Y");
+                Kick();
+                return;
+            }
+            foreach (char ch in m)
+            {
+                if (ch < 32 || ch >= 127)
+                {
+                    Kick();
+                    Server.Log("Remote kicked");
+                    return;
+                }
+            }
+            RemoteChat(m);
+ 
+        }
+
+        private void HandleMobileDC()
+        {
+            
+                Server.Log("[Remote] Disconnected.");
+                Disconnect();
+                
+            
         }
 
        
@@ -179,7 +218,7 @@ namespace SMP
                 SendData(bytes);
             }
 
-            System.Threading.Thread.Sleep(4000);
+            
             if (HandleLogin(msg))
             {
                  string accepted = "ACCEPTED";
@@ -188,9 +227,7 @@ namespace SMP
                  Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
                  Server.Log("[Remote] Remote Verified, passing controls to it!");
                  SendData(bytes);
-                 System.Threading.Thread.Sleep(5000);
-                 Server.Log("SENDING MESSAGE");
-                 SendData(0x03, bytes);
+                 LoggedIn = true;
             }
             else
             {
@@ -201,18 +238,8 @@ namespace SMP
                 SendData(bytes);
                 Server.Log("[Remote] A Remote with incorrect information attempted to join.");
             }
-
-
-
         }
 
-
-
-
-        private void wtf(byte[] message)
-        {
-
-        }
         private void HandleInfo(byte[] message)
         {
             short type = BitConverter.ToInt16(message, 0);
@@ -222,7 +249,7 @@ namespace SMP
             {
                 case 1: Server.Log("Desktop remote has joined"); break;
                 case 2: Server.Log("Mobile Remote has joined"); break;
-                default: Server.Log("Unknown type of remote has attempted to join"); Kick("Unknown type"); return;
+                default: Server.Log("Unknown type of remote has attempted to join"); Kick(); return;
             }
             //if (version != this.version)
                 //Kick("You have a different version");
@@ -246,7 +273,7 @@ namespace SMP
         {
 
             short length = BitConverter.ToInt16(message, 0);
-            if (length > 32) { Kick("Username too long"); return; }
+            if (length > 32) { Kick(); return; }
             string Info = Encoding.BigEndianUnicode.GetString(message, 2, (length * 2));
 
             string[] seperate = Info.Split(':');  //need a better way of sending and getting passwords
@@ -267,7 +294,7 @@ namespace SMP
             Server.Log("Remote Has Joined");
         }
 
-        public void Kick(string message)
+        public void Kick()
         {
             if (disconnected) return;
 
@@ -281,12 +308,13 @@ namespace SMP
             try
             {
 
-                string accepted = message;
-                byte[] bytes = new byte[(accepted.Length * 2) + 2];
-                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
-                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                //string accepted = message;
+                //byte[] bytes = new byte[(accepted.Length * 2) + 2];
+                //util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
+                //Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
+                SendData(0x03);
                 Server.Log("[Remote] has been kicked from the server!");
-                SendData(0x03, bytes);
+                
 
             }
             catch { }
@@ -371,6 +399,14 @@ namespace SMP
             {
                 Server.Log("Packet " + id + " had no DATA!");
             }
+        }
+        public static string getUsername()
+        {
+            return Remote.remote.username;
+        }
+        public static string getIp()
+        {
+            return Remote.remote.ip;
         }
     }
 }

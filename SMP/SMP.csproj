@@ -65,6 +65,7 @@
     <Compile Include="Server\Plugins\Events.cs" />
     <Compile Include="Server\Plugins\Plugin.Events.cs" />
     <Compile Include="Server\WebserverStuff\Remote.Handler.cs" />
+    <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
     <Compile Include="util\PreLoaded.cs" />
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />
