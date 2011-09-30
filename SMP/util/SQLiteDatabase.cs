@@ -76,7 +76,7 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			Server.Log(sql);
+			//Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);

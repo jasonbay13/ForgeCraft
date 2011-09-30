@@ -677,8 +677,6 @@ namespace SMP
 			void SendInventory()
 			{
 				List<byte> data = new List<byte>();
-				data.Add(0);
-				data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)45));
 				
 				for(int i = 0; i <= 44; i++)
 				{
@@ -690,7 +688,7 @@ namespace SMP
 							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
 						}		
 				}
-				SendRaw(0x68, data.ToArray());
+				SendWindow(0, 45, data.ToArray());
 			}
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
@@ -1556,8 +1554,6 @@ namespace SMP
 				//TODO Set Default to default group, setup accounts etc
 				SaveAttributes(true);
 			}
-			
-			Server.Log("COUNT: " + this.group.Tracks.Count);
 		}
 		
 		/// <summary>
