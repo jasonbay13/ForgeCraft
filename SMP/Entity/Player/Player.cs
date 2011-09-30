@@ -583,6 +583,28 @@ namespace SMP
 			{
 				SendBlockChange(a, type, 0);
 			}
+            public void SendSoundEffect(int x, byte y, int z, int type, int data)
+            {
+                byte[] bytes = new byte[17];
+                util.EndianBitConverter.Big.GetBytes(type).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 4);
+                bytes[8] = y;
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 9);
+                util.EndianBitConverter.Big.GetBytes(data).CopyTo(bytes, 13);
+                SendRaw(0x3D, bytes);
+            }
+            public void SendSoundEffect(int x, byte y, int z, int type)
+            {
+                SendSoundEffect(x, y, z, type, 0);
+            }
+            public void SendSoundEffect(Point3 a, int type, int data)
+            {
+                SendSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data);
+            }
+            public void SendSoundEffect(Point3 a, int type)
+            {
+                SendSoundEffect(a, type, 0);
+            }
 			#endregion
 			#region Teleport Player
 			public void Teleport_Player(double x, double y, double z)
@@ -878,6 +900,17 @@ namespace SMP
 				bytes[23] = e1.I.rot[2];
 				SendRaw(0x15, bytes);
 			}
+            public void SendPickupAnimation(Entity e1)
+            {
+                SendPickupAnimation(e1, this);
+            }
+            public void SendPickupAnimation(Entity e1, Player p1)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(p1.id).CopyTo(bytes, 4);
+                SendRaw(0x16, bytes);
+            }
 
 			public void SendEntityPosVelocity()
 			{
@@ -1221,6 +1254,11 @@ namespace SMP
 				e.CurrentChunk.Entities.Remove(e);
 				Entity.Entities.Remove(id);
                 LoggedIn = false;
+
+                // Despawn the player
+                foreach (Player p in players)
+                    if (p.VisibleEntities.Contains(id))
+                        p.SendDespawn(id);
 
 				// Close stuff
 				if (socket != null && socket.Connected)

@@ -242,11 +242,17 @@ namespace SMP
 				{
 					Point3 diff = pos.RD() - e.pos.RD();
 
-					if (diff.x == 0 && diff.y == 0 && diff.z == 0)
+                    Console.WriteLine(diff.x + " " + diff.z);
+                    if (Math.Abs(diff.x) <= 1 && diff.y <= 0 && diff.y >= -1 && Math.Abs(diff.z) <= 1)
 					{
-						//TODO SendPickupAnimation
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
+
+                        p.SendPickupAnimation(e);
+                        foreach (Player p1 in Player.players)
+                            if (p1 != p && p1.VisibleEntities.Contains(p.id))
+                                p1.SendPickupAnimation(e, p);
+
 						e.CurrentChunk.Entities.Remove(e);
 						p.inventory.Add(e.I);
 					}

@@ -351,6 +351,7 @@ namespace SMP
 				int z = util.EndianBitConverter.Big.ToInt32(message, 6);
 
 				short id = e.level.GetBlock(x, y, z);
+                short storeId = id;
 				byte count = 1;
 
 				if (BlockChange.Destroyed.ContainsKey(id))
@@ -371,6 +372,10 @@ namespace SMP
                 }
 				
 				level.BlockChange(x, y, z, 0, 0);
+
+                foreach (Player p1 in Player.players)
+                    if (p1 != this)
+                        p1.SendSoundEffect(x, y, z, 2001, storeId);
 			}
 			if (message[0] == 4)
 			{
