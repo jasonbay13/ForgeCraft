@@ -148,6 +148,15 @@ namespace SMP
 		}
 		public void SendItem(Player p, short item, byte count, short meta)
 		{
+            foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
+                if ((short)blk == item)
+                    goto addIt;
+            foreach (Items itm in Enum.GetValues(typeof(Items)))
+                if ((short)itm == item)
+                    goto addIt;
+            return;
+
+            addIt:
 			p.inventory.Add(item, count, meta);
 			p.SendMessage(HelpBot + "Enjoy!");
 		}
