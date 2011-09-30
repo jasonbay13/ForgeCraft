@@ -19,10 +19,7 @@ using System;
 using System.Collections.Generic;
 
 /* Notes to self (Keith)
- * load groups, load group tracks
- * try to promote along a track  //done??
- * if no track is found than try to find a group with inheritance //done??
- * if multiple groups inherit or no inheritance is found then throw a error  //done
+ * if no track is found than try to find a group with inheritance //untested
  * methods (groups) to add/remove inheritance add/remove permissions, change attributes
  * methods (players) change color, canbuild, suffix/prefix, etc, etc, etc
  */
@@ -356,6 +353,7 @@ namespace SMP
 		
 		public static void UpdateGroupPermissions(Group g)
 		{
+			//TODO: Fix
 			g.InheritedPermissionList.Clear();
 			
 			foreach(Group gr in g.InheritanceList)

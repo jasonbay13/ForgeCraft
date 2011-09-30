@@ -23,7 +23,6 @@ using System.Text;
  * inheritance semi-done
  * check permissions still has some bugs
  * grouputils
- * Saving everything :p
  * Commands
 */
 

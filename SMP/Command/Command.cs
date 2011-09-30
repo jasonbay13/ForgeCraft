@@ -81,6 +81,7 @@ namespace SMP
             core.Add(new CmdUnloadLVL());
 			core.Add(new CmdViewDistance());
 			core.Add(new CmdVIPList());
+			core.Add(new CmdWarp());
             core.Add(new CmdWhiteList());
             all.commands = new List<Command>(core.commands);
             InitCommandTypes();

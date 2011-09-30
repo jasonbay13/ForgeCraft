@@ -76,7 +76,7 @@ namespace SMP
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			//Server.Log(sql);
+			Server.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -358,6 +358,17 @@ namespace SMP
 				      	"Meta 		INTEGER, " +
 				      	"Alias TEXT" +
 				      	");"
+				                     );
+				
+				this.ExecuteNonQuery(
+				        "CREATE TABLE Warp(" +
+				        "ID			INTEGER PRIMARY KEY, " +
+				        "Name		TEXT, " +
+				        "X			INTEGER, " +
+				        "Y			INTEGER, " +
+				        "Z			INTEGER," +
+				        "World  	TEXT" +
+				        ");"
 				                     );
 				#endregion
 				

@@ -62,7 +62,7 @@ namespace SMP
 		public override void Help(Player p)
 		{
 			p.SendMessage(Description);
-			p.SendMessage("/setrank (Player) (Group)");
+			p.SendMessage("/setrank [Player] [Group]");
 		}
 	}
 }

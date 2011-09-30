@@ -135,6 +135,23 @@ namespace SMP
                 default: return -1;
             }
         }
+		
+		public static bool ValidItem(short id)
+		{
+			bool validitem = false;
+			foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
+        		if ((short)blk == id)
+             		validitem = true;
+			
+			if(!validitem)
+			{
+     		foreach (Items item in Enum.GetValues(typeof(Items)))
+         		if ((short)item == id)
+					 validitem = true;
+			}
+			
+			return validitem;
+		}
     } 
 
 	public enum Blocks : byte

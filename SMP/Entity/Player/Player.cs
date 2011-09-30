@@ -695,6 +695,9 @@ namespace SMP
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
 			{
+				if (!FindBlocks.ValidItem(Item))
+					return;
+			
 				if (!MapLoaded) return;
 
 				byte[] tosend;

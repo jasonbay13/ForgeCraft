@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -296,6 +296,7 @@
     <Compile Include="Command\Commands\CmdNewLVL.cs" />
     <Compile Include="Command\Commands\CmdGotoLVL.cs" />
     <Compile Include="Command\Commands\Permissions\CmdPromote.cs" />
+    <Compile Include="Command\Commands\CmdWarp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
