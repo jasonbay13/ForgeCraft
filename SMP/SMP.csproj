@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -302,8 +302,8 @@
     <None Include="app.config" />
     <None Include="UsefulStuff\NBToolkit\app.config" />
     <None Include="Command\Commands\CMDBLANK.txt" />
-    <None Include="Command\Commands\Other\CmdClearInventory.cs" />
-    <None Include="Command\Commands\Other\CmdGameMode.cs" />
+    <Compile Include="Command\Commands\Other\CmdClearInventory.cs" />
+    <Compile Include="Command\Commands\Other\CmdGameMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Server\GUI\InventoryDebug.resx">
