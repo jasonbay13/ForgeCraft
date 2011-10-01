@@ -317,14 +317,15 @@ namespace SMP
 		private void HandleDigging(byte[] message)
 		{
 			//Send Animation, this shouldn't only be sent when digging
-			foreach (int i in VisibleEntities.ToArray())
+            //Now handled in HandleAnimation(), this code isn't needed
+			/*foreach (int i in VisibleEntities.ToArray())
 			{
 				Entity e = Entity.Entities[i];
 				if (!e.isPlayer) continue;
 				Player p = e.p;
 				if (p.level == level && p != this)
 					p.SendAnimation(id, 1);
-			}
+			}*/
 
 			if (message[0] == 0)
 			{
@@ -341,8 +342,30 @@ namespace SMP
                 if (OnBlockChange != null)
                     OnBlockChange(this, x, y, z, rc);
 
-                if (Server.mode == 1) level.BlockChange(x, y, z, 0, 0);
-			}
+                if (Server.mode == 1)
+                {
+                    level.BlockChange(x, y, z, 0, 0);
+                    goto doSound;
+                }
+                else if (BlockData.CanInstantBreak(rc))
+                {
+                    short dropId = BlockDropSwitch(rc);
+                    if (dropId != 0)
+                    {
+                        Item item = new Item(dropId, level) { count = 1, meta = level.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        item.e.UpdateChunks(false, false);
+                    }
+
+                    level.BlockChange(x, y, z, 0, 0);
+                    goto doSound;
+                }
+                return;
+
+                doSound:
+                foreach (Player p1 in Player.players)
+                    if ((p1 != this || Server.mode == 1) && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                        p1.SendSoundEffect(x, y, z, 2001, rc);
+		    }
 			if (message[0] == 2)
 			{
 				//Player is done digging
@@ -374,7 +397,7 @@ namespace SMP
 				level.BlockChange(x, y, z, 0, 0);
 
                 foreach (Player p1 in Player.players)
-                    if (p1 != this)
+                    if (p1 != this && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
                         p1.SendSoundEffect(x, y, z, 2001, storeId);
 			}
 			if (message[0] == 4)
@@ -395,15 +418,18 @@ namespace SMP
 				return;
 			}
 
-			short blockID = util.EndianBitConverter.Big.ToInt16(message, 10);
+			//short blockID = util.EndianBitConverter.Big.ToInt16(message, 10);
+            short blockID = inventory.current_item.item;
 
-			byte amount = 0;
-			short damage = 0;
-			if (message.Length == 15)  //incase it is the secondary packet size
-			{
-				amount = message[11];
-				damage = util.EndianBitConverter.Big.ToInt16(message, 12);
-			}
+            byte amount = inventory.current_item.count;
+            short damage = inventory.current_item.meta;
+            /*if (message.Length == 15)  //incase it is the secondary packet size (THIS LIES, DO NOT USE!!!)
+            {
+                amount = message[11];
+                damage = util.EndianBitConverter.Big.ToInt16(message, 12);
+            }*/
+
+            //Console.WriteLine(blockID + " " + amount + " " + damage);
 
 			byte rc = level.GetBlock(blockX, blockY, blockZ);
 			if (BlockChange.RightClickedOn.ContainsKey(rc))
@@ -537,7 +563,14 @@ namespace SMP
 		
 		public void HandleAnimation(byte[] message)
 		{
-			//TODO	
+            int pid = util.EndianBitConverter.Big.ToInt32(message, 0);
+            byte type = message[4];
+
+            //Console.WriteLine(pid + " " + type);
+            if (!Entity.Entities.ContainsKey(pid) && Entity.Entities[pid].p == null) return;
+            foreach (Player p1 in Player.players)
+                if (p1 != this && p1.VisibleEntities.Contains(pid))
+                    p1.SendAnimation(pid, type);
 		}
 		
 		public void HandleWindowClose(byte[] message)

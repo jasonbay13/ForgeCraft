@@ -54,6 +54,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\CmdClearInventory.cs" />
+    <Compile Include="Command\Commands\CmdGameMode.cs" />
     <Compile Include="Command\Commands\CmdSaveLVL.cs" />
     <Compile Include="Command\Commands\CmdLoadLVL.cs" />
     <Compile Include="Command\Commands\CmdUnloadLVL.cs" />

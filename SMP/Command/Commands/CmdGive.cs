@@ -148,6 +148,7 @@ namespace SMP
 		}
 		public void SendItem(Player p, short item, byte count, short meta)
 		{
+            if (item < 1) return;
             foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
                 if ((short)blk == item)
                     goto addIt;

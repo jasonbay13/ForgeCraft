@@ -88,15 +88,30 @@ namespace SMP
 			    Server.Log(x + " Row Generated.");
 			}*/
 
-			Parallel.For(-3, 3, delegate(int x)
-			{
-				Parallel.For(-3, 3, delegate(int z)
-				{
-					GenerateChunk(x, z);
-				});
-                Server.Log(x + " Row Generated.");
-                
-			});
+            if (!Program.RunningInMono())
+            {
+                Parallel.For(-3, 3, delegate(int x)
+                {
+                    Parallel.For(-3, 3, delegate(int z)
+                    {
+                        GenerateChunk(x, z);
+                    });
+                    Server.Log(x + " Row Generated.");
+
+                });
+            }
+            else
+            {
+                for (int x = -3; x < 3; x++)
+                {
+                    for (int z = -3; z < 3; z++)
+                    {
+                        GenerateChunk(x, z);
+                    }
+                    Server.Log(x + " Row Generated.");
+                }
+            }
+
             Server.Log("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
 			timeupdate.Elapsed += delegate {
@@ -161,8 +176,9 @@ namespace SMP
 	                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
 	                        c.RecalculateLight();
 	                        c.SpreadLight();
-	                        if (!w.chunkData.ContainsKey(new Point(x, z)))
-	                            w.chunkData.Add(new Point(x, z), c);
+                            lock (w.chunkData) 
+	                            if (!w.chunkData.ContainsKey(new Point(x, z)))
+	                                w.chunkData.Add(new Point(x, z), c);
 	                    }
 	                    catch (Exception ex)
 	                    {
@@ -182,8 +198,9 @@ namespace SMP
 	                        Array.Copy(bytes, 8 + block, c.blocks, 0, 32768);
 	                        c.RecalculateLight();
 	                        c.SpreadLight();
-	                        if (!w.chunkData.ContainsKey(new Point(x, z)))
-	                            w.chunkData.Add(new Point(x, z), c);
+                            lock (w.chunkData) 
+	                            if (!w.chunkData.ContainsKey(new Point(x, z)))
+	                                w.chunkData.Add(new Point(x, z), c);
 	                    }
 	                    catch (Exception ex)
 	                    {
@@ -239,13 +256,15 @@ namespace SMP
             }
             using (MemoryStream blocks = new MemoryStream())
             {
-                foreach (Chunk ch in w.chunkData.Values)
-                {
-                    //File.WriteAllBytes(w.name + "/" + ch.x + " " + ch.z, ch.blocks);
-                    blocks.Write(BitConverter.GetBytes(ch.x), 0, 4);
-                    blocks.Write(BitConverter.GetBytes(ch.z), 0, 4);
-                    blocks.Write(ch.blocks, 0, ch.blocks.Length);
-                }
+                lock (w.chunkData)
+                    foreach (Chunk ch in w.chunkData.Values)
+                    {
+                        //if (ch == null) continue;
+                        //File.WriteAllBytes(w.name + "/" + ch.x + " " + ch.z, ch.blocks);
+                        blocks.Write(BitConverter.GetBytes(ch.x), 0, 4);
+                        blocks.Write(BitConverter.GetBytes(ch.z), 0, 4);
+                        blocks.Write(ch.blocks, 0, ch.blocks.Length);
+                    }
                 byte[] bytes;
                 CompressData(blocks.ToArray(), out bytes);
                 using (FileStream fs = new FileStream(w.name + "/" + w.name + ".blocks", FileMode.Create))
@@ -292,26 +311,9 @@ namespace SMP
 
 		public void Rain(bool rain)
 		{
-			if (rain)
-			{
-				foreach (Player p in Player.players.ToArray())
-				{
-					if (p.MapLoaded && !p.disconnected)
-					{
-						p.SendRain(true);
-					}
-				}
-			}
-			else
-			{
-				foreach (Player p in Player.players.ToArray())
-				{
-					if (p.MapLoaded && !p.disconnected)
-					{
-						p.SendRain(false);
-					}
-				}
-			}
+			foreach (Player p in Player.players)
+			    if (p.MapLoaded && !p.disconnected)
+				    p.SendRain(rain);
 		}
 		public void Lightning(int x, int y, int z)
 		{
@@ -328,18 +330,24 @@ namespace SMP
 
 		public void GenerateChunk(int x, int z)
 		{
-			Chunk c = new Chunk(x, z);
-			generator.Generate(this, c);
-			//generator.PerlinChunk(c);
-			//generator.RandMap(c, seed);
-			c.RecalculateLight();
-            c.SpreadLight();
-			if (GeneratedChunk != null)
-				GeneratedChunk(this, c, x, z);
-			if (WorldGenerateChunk != null)
-				WorldGenerateChunk(this, c, x, z);
-			if(!chunkData.ContainsKey(new Point(x,z))) 
-				chunkData.Add(new Point(x,z), c);
+            // Temporary fix for epic fail in chunk generation...
+            try
+            {
+                Chunk c = new Chunk(x, z);
+                generator.Generate(this, c);
+                //generator.PerlinChunk(c);
+                //generator.RandMap(c, seed);
+                c.RecalculateLight();
+                c.SpreadLight();
+                if (GeneratedChunk != null)
+                    GeneratedChunk(this, c, x, z);
+                if (WorldGenerateChunk != null)
+                    WorldGenerateChunk(this, c, x, z);
+                lock (chunkData)
+                    if (!chunkData.ContainsKey(new Point(x, z)))
+                        chunkData.Add(new Point(x, z), c);
+            }
+            catch (Exception e) { Console.WriteLine(e); }
 		}
 		public void BlockChange(int x, int y, int z, byte type, byte meta)
 		{
