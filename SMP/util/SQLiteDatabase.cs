@@ -359,6 +359,17 @@ namespace SMP
 				      	"Alias TEXT" +
 				      	");"
 				                     );
+				
+				this.ExecuteNonQuery(
+				        "CREATE TABLE Warp(" +
+				        "ID			INTEGER PRIMARY KEY, " +
+				        "Name		TEXT, " +
+				        "X			INTEGER, " +
+				        "Y			INTEGER, " +
+				        "Z			INTEGER," +
+				        "World  	TEXT" +
+				        ");"
+				                     );
 				#endregion
 				
 				#region INSERTS

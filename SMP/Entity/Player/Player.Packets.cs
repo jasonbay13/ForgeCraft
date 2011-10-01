@@ -705,6 +705,7 @@ namespace SMP
 		}
         public void HandleRespawn(byte[] message)
         {
+			Teleport_Player(level.SpawnX, level.SpawnY, level.SpawnZ, level.SpawnYaw, level.SpawnPitch);
             SendRespawn();
         }
 		public short BlockDropSwitch(short id)

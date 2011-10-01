@@ -41,7 +41,6 @@ namespace SMP
 			//probably an easier way, but couldn't think of it
 			
 			Player toPlayer = null;
-			//short slot = 36;
 			short itemID = -1;
 			byte count = 1;
 			short meta = 0;
@@ -51,9 +50,9 @@ namespace SMP
 			//first arg
 			try
 			{
-				if (short.TryParse(args[0], out s))
+				if (!short.TryParse(args[0], out itemID))
 				{
-					itemID = short.Parse(args[0]);
+					//itemID = short.Parse(args[0]);
 				}
 				else if (args[0].Contains(":"))
 				{
@@ -79,7 +78,7 @@ namespace SMP
 					return;
 				}
 				else
-				{
+				{		
 					SendItem(p, itemID, count, meta);
 					return;
 				}
@@ -148,24 +147,21 @@ namespace SMP
 		}
 		public void SendItem(Player p, short item, byte count, short meta)
 		{
-            if (item < 1) return;
-            foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
-                if ((short)blk == item)
-                    goto addIt;
-            foreach (Items itm in Enum.GetValues(typeof(Items)))
-                if ((short)itm == item)
-                    goto addIt;
-            return;
-
-            addIt:
-			p.inventory.Add(item, count, meta);
-			p.SendMessage(HelpBot + "Enjoy!");
+            if (FindBlocks.ValidItem(item))
+			{
+				p.inventory.Add(item, count, meta);
+				p.SendMessage(HelpBot + "Enjoy!");
+			}
+			else
+			{
+				p.SendMessage(HelpBot + "Invalid item ID.");
+			}
 		}
 
 		public override void Help(Player p)
 		{
 			p.SendMessage("Spawns item(s), and if specified to a player.");
-			p.SendMessage("/give (player) <item(:value)> (amount)");
+			p.SendMessage("/give (player) <item(:meta)> (amount)");
 		}
 	}
 }

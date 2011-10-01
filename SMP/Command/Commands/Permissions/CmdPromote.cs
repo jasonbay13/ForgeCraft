@@ -60,7 +60,7 @@ namespace SMP
 		public override void Help(Player p)
 		{
 			p.SendMessage(Description);
-			p.SendMessage("/promote (Player)");
+			p.SendMessage("/promote [Player]");
 		}
 	}
 }

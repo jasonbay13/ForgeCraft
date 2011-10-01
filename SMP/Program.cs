@@ -163,7 +163,7 @@ namespace SMP
                 }
                 else
                 {
-                    Player.GlobalMessage(Color.Announce + "[Console] " + Color.Blue + input);
+                    Player.GlobalMessage(Color.Announce + "[" + Server.consolePlayer.username + "]: " + Color.Blue + input);
                 }
             }
         }

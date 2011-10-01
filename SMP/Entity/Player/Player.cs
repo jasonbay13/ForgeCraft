@@ -16,7 +16,7 @@ namespace SMP
 		public World level { get { return e.level; } set { e.level = value; } }
 		public int viewdistance = 3;
 		byte mode = Server.mode;
-
+		
 		public short current_slot_holding;
 		public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendInventory(); } }
 
@@ -742,8 +742,6 @@ namespace SMP
 			void SendInventory()
 			{
 				List<byte> data = new List<byte>();
-				data.Add(0);
-				data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)45));
 				
 				for(int i = 0; i <= 44; i++)
 				{
@@ -755,11 +753,14 @@ namespace SMP
 							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
 						}		
 				}
-				SendRaw(0x68, data.ToArray());
+				SendWindow(0, 45, data.ToArray());
 			}
 			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
 			public void SendItem(short slot, short Item, byte count, short use)
 			{
+				if (!FindBlocks.ValidItem(Item))
+					return;
+			
 				if (!MapLoaded) return;
 
 				byte[] tosend;
@@ -999,7 +1000,6 @@ namespace SMP
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
 				util.BigEndianBitConverter.Big.GetBytes((long)0).CopyTo(bytes, 5);
-
                 SendRaw(0x09, bytes);
             }
 			#endregion
@@ -1114,7 +1114,7 @@ namespace SMP
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
-            this.SendRaw((byte)KnownPackets.ChatMessage, bytes);
+            this.SendRaw(0x03, bytes);
 
         }
         public void SendMessage(string message)
@@ -1248,7 +1248,7 @@ namespace SMP
 				byte[] bytes = new byte[(message.Length * 2) + 2];
 				util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
 				Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
-				this.SendRaw((byte)KnownPackets.Disconnect, bytes);
+				this.SendRaw(0xFF, bytes);
 			}
 			catch{}
 			
@@ -1613,8 +1613,6 @@ namespace SMP
 				//TODO Set Default to default group, setup accounts etc
 				SaveAttributes(true);
 			}
-			
-			Server.Log("COUNT: " + this.group.Tracks.Count);
 		}
 		
 		/// <summary>

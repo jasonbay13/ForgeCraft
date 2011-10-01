@@ -132,6 +132,7 @@ namespace SMP
 			LeftClicked.Add((short)Blocks.ButtonStone, new BCD(HitButton));
 			LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd));
 			LeftClicked.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
+            LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
 
 			//Block Delete Delegates (Holds Delegates for when specific items are DELETED)
 			Destroyed.Add((short)Blocks.Dispenser, new BCD(DestroyDispenser)); //Drop all Item's from the dispenser
@@ -639,7 +640,55 @@ namespace SMP
 		}
 		public static bool PlaceTorch(Player a, BCS b)
 		{
-			return false;
+            byte placingon = 255;
+            switch (b.Direction)
+            {
+                case 0:
+
+                    break;
+                case 1:
+                    b.Direction = 0;
+                    break;
+                case 2:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z + 1);
+                    b.Direction = 4; //East
+                    break;
+                case 3:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z - 1);
+                    b.Direction = 3; //West
+                    break;
+                case 4:
+                    placingon = a.level.GetBlock((int)b.pos.X + 1, (int)b.pos.Y, (int)b.pos.Z);
+                    b.Direction = 2; //North
+                    break;
+                case 5:
+                    placingon = a.level.GetBlock((int)b.pos.X - 1, (int)b.pos.Y, (int)b.pos.Z);
+                    b.Direction = 1; //South
+                    break;
+            }
+            if (placingon == 50) b.Direction = 0;
+            /*if (/*placingon == 50 || *//*a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z) != 0)
+            {
+                a.SendBlockChange(b.pos, a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z), a.level.GetMeta((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z));
+                if (Server.mode == 0) { a.inventory.Add((short)Blocks.Torch, a.inventory.items[a.inventory.current_index].count, a.inventory.current_item.meta, a.inventory.current_index); }
+                return false;
+            }*/
+            switch (a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z))
+            {
+                case 0: return false;
+                case 20: return false;
+                case 50: return false;
+                default:
+                    a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+                    if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
+                    return false;
+            }
+            /*if (BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z)))
+            {
+                a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); }
+            }
+            return false;*/
 		}
 		public static bool PlaceTrapdoor(Player a, BCS b)
 		{
@@ -674,7 +723,13 @@ namespace SMP
 		{
 			return false;
 		}
-
+        public static bool DestroyTorch(Player a, BCS b)
+        {
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 0, 0);
+            Item item = new Item(50, a.level) { count = 1, meta = 0, pos = new Point3(b.pos.X + .5, b.pos.Y + .5, b.pos.Z + .5), rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+            item.e.UpdateChunks(false, false);
+            return false;
+        }
 		public static bool DestroyDispenser(Player a, BCS b)
 		{
 			return false;

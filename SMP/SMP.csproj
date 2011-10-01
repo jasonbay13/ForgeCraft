@@ -54,11 +54,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command\Commands\CmdClearInventory.cs" />
-    <Compile Include="Command\Commands\CmdGameMode.cs" />
-    <Compile Include="Command\Commands\CmdSaveLVL.cs" />
-    <Compile Include="Command\Commands\CmdLoadLVL.cs" />
-    <Compile Include="Command\Commands\CmdUnloadLVL.cs" />
+    <Compile Include="Command\Commands\Other\CmdClearInventory.cs" />
+    <Compile Include="Command\Commands\Other\CmdGameMode.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,12 +72,6 @@
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />
     <Compile Include="Entity\AI\Creeper.cs" />
-    <Compile Include="Command\Commands\CmdCheckPort.cs" />
-    <Compile Include="Command\Commands\CmdCuboid.cs" />
-    <Compile Include="Command\Commands\CmdFly.cs" />
-    <Compile Include="Command\Commands\CmdRain.cs" />
-    <Compile Include="Command\Commands\CmdStrike.cs" />
-    <Compile Include="Command\Commands\CmdViewDistance.cs" />
     <Compile Include="Server\GUI\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,7 +80,6 @@
     </Compile>
     <Compile Include="Entity\Objects\McObject.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Command\Commands\CmdFire.cs" />
     <Compile Include="Server\Properties.cs" />
     <Compile Include="Server\WebserverStuff\WebServer.cs" />
     <Compile Include="Server\World\BlockChangeSystem.cs" />
@@ -243,7 +233,6 @@
     <Compile Include="Server\Plugins\Plugin_Manager.cs" />
     <Compile Include="Entity\Player\Player.Packets.cs" />
     <Compile Include="Entity\Player\Player.cs" />
-    <Compile Include="Entity\Player\KnownPackets.cs" />
     <Compile Include="UsefulStuff\NBToolkit\TKOptions.cs" />
     <Compile Include="UsefulStuff\NBToolkit\TKFilter.cs" />
     <Compile Include="UsefulStuff\NBToolkit\Replace.cs" />
@@ -267,38 +256,49 @@
     <Compile Include="util\Color.cs" />
     <Compile Include="Command\CommandList.cs" />
     <Compile Include="Command\Command.cs" />
-    <Compile Include="Command\Commands\CmdTeleport.cs" />
-    <Compile Include="Command\Commands\CmdSpawn.cs" />
-    <Compile Include="Command\Commands\CmdSay.cs" />
-    <Compile Include="Command\Commands\CmdMe.cs" />
-    <Compile Include="Command\Commands\CmdList.cs" />
-    <Compile Include="Command\Commands\CmdKill.cs" />
-    <Compile Include="Command\Commands\CmdKick.cs" />
-    <Compile Include="Command\Commands\CmdHelp.cs" />
-    <Compile Include="Command\Commands\CmdHackz.cs" />
-    <Compile Include="Command\Commands\CmdGod.cs" />
-    <Compile Include="Command\Commands\CmdGive.cs" />
-    <Compile Include="Command\Commands\CmdDND.cs" />
-    <Compile Include="Command\Commands\CmdDevs.cs" />
-    <Compile Include="Command\Commands\CmdAFK.cs" />
-    <Compile Include="Command\Commands\CmdMotd.cs" />
-    <Compile Include="Command\Commands\CmdMsg.cs" />
     <Compile Include="Entity\Player\Groups\GroupUtils.cs" />
     <Compile Include="Entity\Player\Groups\DefaultGroup.cs" />
-    <Compile Include="Command\Commands\CmdBan.cs" />
-    <Compile Include="Command\Commands\CmdUnban.cs" />
-    <Compile Include="Command\Commands\CmdVIPList.cs" />
-    <Compile Include="Command\Commands\CmdWhiteList.cs" />
     <Compile Include="Server\Economy\Bank.cs" />
     <Compile Include="Server\Economy\Account.cs" />
     <Compile Include="Server\Economy\Currency.cs" />
     <Compile Include="util\ItemDB.cs" />
     <Compile Include="util\SQLiteDatabase.cs" />
     <Compile Include="Command\Commands\Permissions\CmdSetRank.cs" />
-    <Compile Include="Command\Commands\CmdSetTime.cs" />
-    <Compile Include="Command\Commands\CmdNewLVL.cs" />
-    <Compile Include="Command\Commands\CmdGotoLVL.cs" />
     <Compile Include="Command\Commands\Permissions\CmdPromote.cs" />
+    <Compile Include="Command\Commands\General\CmdAFK.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdBan.cs" />
+    <Compile Include="Command\Commands\Util\CmdCheckPort.cs" />
+    <Compile Include="Command\Commands\Build\CmdCuboid.cs" />
+    <Compile Include="Command\Commands\Information\CmdDevs.cs" />
+    <Compile Include="Command\Commands\Other\CmdDND.cs" />
+    <Compile Include="Command\Commands\Other\CmdFire.cs" />
+    <Compile Include="Command\Commands\Other\CmdFly.cs" />
+    <Compile Include="Command\Commands\Cheats\CmdGive.cs" />
+    <Compile Include="Command\Commands\Cheats\CmdGod.cs" />
+    <Compile Include="Command\Commands\General\CmdGotoLVL.cs" />
+    <Compile Include="Command\Commands\Gag\CmdHackz.cs" />
+    <Compile Include="Command\Commands\Information\CmdHelp.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdKick.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdKill.cs" />
+    <Compile Include="Command\Commands\Information\CmdList.cs" />
+    <Compile Include="Command\Commands\Gag\CmdLoadLVL.cs" />
+    <Compile Include="Command\Commands\Information\CmdMe.cs" />
+    <Compile Include="Command\Commands\General\CmdMotd.cs" />
+    <Compile Include="Command\Commands\General\CmdMsg.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdRain.cs" />
+    <Compile Include="Command\Commands\Information\CmdSay.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdSetTime.cs" />
+    <Compile Include="Command\Commands\General\CmdSpawn.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdStrike.cs" />
+    <Compile Include="Command\Commands\General\CmdTeleport.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdUnban.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdUnloadLVL.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdNewLVL.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdSaveLVL.cs" />
+    <Compile Include="Command\Commands\General\CmdViewDistance.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdVIPList.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdWhiteList.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdWarp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
