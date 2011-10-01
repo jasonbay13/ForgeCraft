@@ -260,7 +260,13 @@ namespace SMP
 		Vines = 106,
 		FenceGate = 107,
 		BrickStairs = 108,
-		StoneBrickStairs = 109
+		StoneBrickStairs = 109,
+		Mycelium = 110,
+		LilyPad = 111,
+		NetherBrick = 112,
+		NetherBrickFence = 113,
+		NetherBrickStairs = 114,
+		NetherWart = 115
 	};
 	public enum Items : short
 	{
@@ -378,8 +384,29 @@ namespace SMP
 		ChickenRaw = 365,
 		ChickenCooked = 366,
 		RottenFlesh = 367,
+		EnderPearl = 368,
+		BlazeRod = 369,
+		GoldNugget = 370,
+		NetherWart = 372,
+		Potions = 373,
+		GlassBottle = 374,
+		SpiderEye = 375,
+		FermentedSpiderEye = 376,
+		BlazePowder = 377,
+		MagmaCream = 378,
+		
 		GoldMusicDisc = 2256,
-		GreenMusicDisc = 2257
+		GreenMusicDisc = 2257,
+		blocksMusicDisc = 2258,
+		chirpMusicDisc = 2259,
+		farMusicDisc = 2260,
+		mallMusicDisc = 2261,
+		mellohiMusicDisc = 2262,
+		stalMusicDisc = 2263,
+		stradMusicDisc = 2264,
+		wardMusicDisc = 2265,
+		elevenMusicDisc = 2266
+		
 	};
 	/// <summary>
 	/// Goes for wood types AND leaves

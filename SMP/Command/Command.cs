@@ -48,14 +48,14 @@ namespace SMP
 			#region please put in alphabetical order and use core.add now not all.add
             core.Add(new CmdAFK());
             core.Add(new CmdCheckPort());
-            core.Add(new CmdClearInventory());
+            //core.Add(new CmdClearInventory());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
             core.Add(new CmdFly());
-            core.Add(new CmdGameMode());
+            //core.Add(new CmdGameMode());
             core.Add(new CmdGive());
 			core.Add(new CmdGod());
 			core.Add(new CmdGotoLVL());
