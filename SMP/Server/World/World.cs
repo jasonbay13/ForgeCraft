@@ -87,30 +87,29 @@ namespace SMP
 			    }
 			    Server.Log(x + " Row Generated.");
 			}*/
-
-            if (!Program.RunningInMono())
-            {
-                Parallel.For(-3, 3, delegate(int x)
-                {
-                    Parallel.For(-3, 3, delegate(int z)
-                    {
-                        GenerateChunk(x, z);
-                    });
-                    Server.Log(x + " Row Generated.");
-
-                });
-            }
-            else
-            {
-                for (int x = -3; x < 3; x++)
-                {
-                    for (int z = -3; z < 3; z++)
-                    {
-                        GenerateChunk(x, z);
-                    }
-                    Server.Log(x + " Row Generated.");
-                }
-            }
+			try
+			{
+	            Parallel.For(-3, 3, delegate(int x)
+	            {
+	                Parallel.For(-3, 3, delegate(int z)
+	                {
+	                    GenerateChunk(x, z);
+	                });
+	                Server.Log(x + " Row Generated.");
+	
+	            });
+			}
+			catch(NotImplementedException)
+			{
+				for (int x = -3; x <= 3; x++)
+				{
+				    for (int z = -3; z <= 3; z++)
+				    {
+				        GenerateChunk(x, z);
+				    }
+			    	Server.Log(x + " Row Generated.");
+				}		
+			}
 
             Server.Log("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
