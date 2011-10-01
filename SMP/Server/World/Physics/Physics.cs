@@ -47,10 +47,8 @@ namespace SMP
         {
             while (true)
             {
-                Chunk c = null;
                 foreach (Data d in Checks)
                 {
-                    c = w.chunkData[new Point(d.x, d.z)];
                     switch (d.Block)
                     {
                         case (byte)Blocks.AWater:
@@ -60,25 +58,55 @@ namespace SMP
                                 if (d.time < 3)
                                 {
                                     d.time++;
+                                    Thread.Sleep(500);
+                                    break;
+                                }
+                                if (w.GetBlock(d.x, d.y - 1, d.z) == 0)
+                                {
+                                    w.BlockChange(d.x, d.y - 1, d.z, (byte)Blocks.AWater, 0);
+                                    d.time = 0;
+                                    Thread.Sleep(500);
+                                    break;
+                                }
+                                bool continuemagma = true;
+                                //Is in a conner?
+                                if (w.GetBlock(d.x + 1, d.y - 1, d.z) == 0 && w.GetBlock(d.x + 1, d.y, d.z) == 0)
+                                {
+                                    w.BlockChange(d.x + 1, d.y, d.z, (byte)Blocks.AWater, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x - 1, d.y - 1, d.z) == 0 && w.GetBlock(d.x - 1, d.y, d.z) == 0)
+                                {
+                                    w.BlockChange(d.x - 1, d.y, d.z, (byte)Blocks.AWater, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x, d.y - 1, d.z + 1) == 0 && w.GetBlock(d.x, d.y, d.z + 1) == 0)
+                                {
+                                    w.BlockChange(d.x, d.y, d.z + 1, (byte)Blocks.AWater, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x, d.y - 1, d.z - 1) == 0 && w.GetBlock(d.x, d.y, d.z - 1) == 0)
+                                {
+                                    w.BlockChange(d.x, d.y, d.z - 1, (byte)Blocks.AWater, 0);
+                                    continuemagma = false;
+                                }
+                                if (!continuemagma)
+                                {
+                                    Thread.Sleep(500);
                                     break;
                                 }
                                 //Magma flow
-                                if (w.GetBlock(d.x, d.y - 1, d.z) == 0)
-                                {
-                                    c.PlaceBlock(d.x, d.y - 1, d.z, (byte)Blocks.AWater);
-                                    d.time = 0;
-                                    break;
-                                }
                                 if (w.GetBlock(d.x + 1, d.y, d.z) == 0)
-                                    c.PlaceBlock(d.x + 1, d.y, d.z, (byte)Blocks.AWater);
+                                    w.BlockChange(d.x + 1, d.y, d.z, (byte)Blocks.AWater, 0);
                                 if (w.GetBlock(d.x - 1, d.y, d.z) == 0)
-                                    c.PlaceBlock(d.x - 1, d.y, d.z, (byte)Blocks.AWater);
+                                    w.BlockChange(d.x - 1, d.y, d.z, (byte)Blocks.AWater, 0);
                                 if (w.GetBlock(d.x, d.y, d.z + 1) == 0)
-                                    c.PlaceBlock(d.x, d.y, d.z + 1, (byte)Blocks.AWater);
+                                    w.BlockChange(d.x, d.y, d.z + 1, (byte)Blocks.AWater, 0);
                                 if (w.GetBlock(d.x, d.y, d.z - 1) == 0)
-                                    c.PlaceBlock(d.x, d.y, d.z - 1, (byte)Blocks.AWater);
+                                    w.BlockChange(d.x, d.y, d.z - 1, (byte)Blocks.AWater, 0);
                                 d.time = 0;
                             }
+                            Thread.Sleep(500);
                             break;
                         case (byte)Blocks.SLava:
                         case (byte)Blocks.ALava:
@@ -87,25 +115,54 @@ namespace SMP
                                 if (d.time < 6)
                                 {
                                     d.time++;
+                                    Thread.Sleep(1000);
                                     break;
                                 }
-                                //Magma flow
                                 if (w.GetBlock(d.x, d.y - 1, d.z) == 0)
                                 {
-                                    c.PlaceBlock(d.x, d.y - 1, d.z, (byte)Blocks.ALava);
+                                    w.BlockChange(d.x, d.y - 1, d.z, (byte)Blocks.ALava, 0);
                                     d.time = 0;
+                                    Thread.Sleep(1000);
+                                    break;
+                                }
+                                bool continuemagma = true;
+                                //Is in a conner?
+                                if (w.GetBlock(d.x + 1, d.y - 1, d.z) == 0 && w.GetBlock(d.x + 1, d.y, d.z) == 0)
+                                {
+                                    w.BlockChange(d.x + 1, d.y, d.z, (byte)Blocks.ALava, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x - 1, d.y - 1, d.z) == 0 && w.GetBlock(d.x - 1, d.y, d.z) == 0)
+                                {
+                                    w.BlockChange(d.x - 1, d.y, d.z, (byte)Blocks.ALava, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x, d.y - 1, d.z + 1) == 0 && w.GetBlock(d.x, d.y, d.z + 1) == 0)
+                                {
+                                    w.BlockChange(d.x, d.y, d.z + 1, (byte)Blocks.ALava, 0);
+                                    continuemagma = false;
+                                }
+                                if (w.GetBlock(d.x, d.y - 1, d.z - 1) == 0 && w.GetBlock(d.x, d.y, d.z - 1) == 0)
+                                {
+                                    w.BlockChange(d.x, d.y, d.z + 1, (byte)Blocks.ALava, 0);
+                                    continuemagma = false;
+                                }
+                                if (!continuemagma)
+                                {
+                                    Thread.Sleep(1000);
                                     break;
                                 }
                                 if (w.GetBlock(d.x + 1, d.y, d.z) == 0)
-                                    c.PlaceBlock(d.x + 1, d.y, d.z, (byte)Blocks.ALava);
+                                    w.BlockChange(d.x + 1, d.y, d.z, (byte)Blocks.ALava, 0);
                                 if (w.GetBlock(d.x - 1, d.y, d.z) == 0)
-                                    c.PlaceBlock(d.x - 1, d.y, d.z, (byte)Blocks.ALava);
+                                    w.BlockChange(d.x - 1, d.y, d.z, (byte)Blocks.ALava, 0);
                                 if (w.GetBlock(d.x, d.y, d.z + 1) == 0)
-                                    c.PlaceBlock(d.x, d.y, d.z + 1, (byte)Blocks.ALava);
+                                    w.BlockChange(d.x, d.y, d.z + 1, (byte)Blocks.ALava, 0);
                                 if (w.GetBlock(d.x, d.y, d.z - 1) == 0)
-                                    c.PlaceBlock(d.x, d.y, d.z - 1, (byte)Blocks.ALava);
+                                    w.BlockChange(d.x, d.y, d.z - 1, (byte)Blocks.ALava, 0);
                                 d.time = 0;
                             }
+                            Thread.Sleep(1000);
                             break;
                     }
                 }
