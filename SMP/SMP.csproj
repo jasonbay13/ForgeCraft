@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,6 +54,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Other\CmdClearInventory.cs" />
+    <Compile Include="Command\Commands\Other\CmdGameMode.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -314,49 +316,5 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Server\Economy\Commands\" />
-    <Folder Include="Command\Commands\Moderation\" />
-    <Folder Include="Command\Commands\Build\" />
-    <Folder Include="Command\Commands\Information\" />
-    <Folder Include="Command\Commands\General\" />
-    <Folder Include="Command\Commands\Other\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\Util\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\Cheats\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\Gag\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\General\" />
-    <Folder Include="Command\Commands\General\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
-    <Folder Include="Command\Commands\" />
   </ItemGroup>
 </Project>

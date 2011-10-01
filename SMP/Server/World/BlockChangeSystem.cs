@@ -132,6 +132,7 @@ namespace SMP
 			LeftClicked.Add((short)Blocks.ButtonStone, new BCD(HitButton));
 			LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd));
 			LeftClicked.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
+            LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
 
 			//Block Delete Delegates (Holds Delegates for when specific items are DELETED)
 			Destroyed.Add((short)Blocks.Dispenser, new BCD(DestroyDispenser)); //Drop all Item's from the dispenser
@@ -210,7 +211,52 @@ namespace SMP
 		}
 		public static bool PlayMusic(Player a, BCS b)
 		{
-			return false;
+            // TODO: Tile entity stuff!
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            short item = a.inventory.current_item.item;
+            if (meta != 0)
+            {
+                item = 0;
+                switch (meta)
+                {
+                    case 1:
+                        item = (short)Items.GoldMusicDisc;
+                        break;
+                    case 2:
+                        item = (short)Items.GreenMusicDisc;
+                        break;
+                }
+
+                if (item != 0)
+                {
+                    Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+
+                a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0);
+                foreach (Player pl in Player.players)
+                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
+                        pl.SendSoundEffect(b.pos, 1005, 0);
+            }
+            else if (item == (short)Items.GoldMusicDisc || item == (short)Items.GreenMusicDisc)
+            {
+                switch (item)
+                {
+                    case (short)Items.GoldMusicDisc:
+                        meta = 1;
+                        break;
+                    case (short)Items.GreenMusicDisc:
+                        meta = 2;
+                        break;
+                }
+
+                a.inventory.Remove(a.inventory.current_index);
+                a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
+                foreach (Player pl in Player.players)
+                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
+                        pl.SendSoundEffect(b.pos, 1005, item);
+            }
+            return true;
 		}
 		public static bool EatCake(Player a, BCS b)
 		{
@@ -594,7 +640,55 @@ namespace SMP
 		}
 		public static bool PlaceTorch(Player a, BCS b)
 		{
-			return false;
+            byte placingon = 255;
+            switch (b.Direction)
+            {
+                case 0:
+
+                    break;
+                case 1:
+                    b.Direction = 0;
+                    break;
+                case 2:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z + 1);
+                    b.Direction = 4; //East
+                    break;
+                case 3:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z - 1);
+                    b.Direction = 3; //West
+                    break;
+                case 4:
+                    placingon = a.level.GetBlock((int)b.pos.X + 1, (int)b.pos.Y, (int)b.pos.Z);
+                    b.Direction = 2; //North
+                    break;
+                case 5:
+                    placingon = a.level.GetBlock((int)b.pos.X - 1, (int)b.pos.Y, (int)b.pos.Z);
+                    b.Direction = 1; //South
+                    break;
+            }
+            if (placingon == 50) b.Direction = 0;
+            /*if (/*placingon == 50 || *//*a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z) != 0)
+            {
+                a.SendBlockChange(b.pos, a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z), a.level.GetMeta((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z));
+                if (Server.mode == 0) { a.inventory.Add((short)Blocks.Torch, a.inventory.items[a.inventory.current_index].count, a.inventory.current_item.meta, a.inventory.current_index); }
+                return false;
+            }*/
+            switch (a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z))
+            {
+                case 0: return false;
+                case 20: return false;
+                case 50: return false;
+                default:
+                    a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+                    if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
+                    return false;
+            }
+            /*if (BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z)))
+            {
+                a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); }
+            }
+            return false;*/
 		}
 		public static bool PlaceTrapdoor(Player a, BCS b)
 		{
@@ -629,7 +723,13 @@ namespace SMP
 		{
 			return false;
 		}
-
+        public static bool DestroyTorch(Player a, BCS b)
+        {
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 0, 0);
+            Item item = new Item(50, a.level) { count = 1, meta = 0, pos = new Point3(b.pos.X + .5, b.pos.Y + .5, b.pos.Z + .5), rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+            item.e.UpdateChunks(false, false);
+            return false;
+        }
 		public static bool DestroyDispenser(Player a, BCS b)
 		{
 			return false;
@@ -684,7 +784,33 @@ namespace SMP
 		}
 		public static bool DestroyJukebox(Player a, BCS b)
 		{
-			return false;
+            // TODO: Tile entity stuff!
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            if (meta != 0)
+            {
+                short item = 0;
+                switch (meta)
+                {
+                    case 1:
+                        item = (short)Items.GoldMusicDisc;
+                        break;
+                    case 2:
+                        item = (short)Items.GreenMusicDisc;
+                        break;
+                }
+
+                if (item != 0)
+                {
+                    Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+            }
+
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            foreach (Player pl in Player.players)
+                if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
+                    pl.SendSoundEffect(b.pos, 1005, 0);
+            return true;
 		}
 		public static bool DestroyGlowStone(Player a, BCS b)
 		{

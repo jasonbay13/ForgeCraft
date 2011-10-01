@@ -123,7 +123,8 @@ namespace SMP
                                 
                                 Array.Copy(inputParts, 1, args, 0, inputParts.Length - 1);
 
-                                command.Use(Server.consolePlayer, args);
+                                try { command.Use(Server.consolePlayer, args); }
+                                catch (Exception e) { Server.ServerLogger.LogError(e); }
                                 break;
                             }
                             else

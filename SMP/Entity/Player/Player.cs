@@ -196,7 +196,7 @@ namespace SMP
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
-					case 0x09: length = 12; break; //respawn
+					case 0x09: length = 13; break; //respawn
 					
 					case 0x0A: length = 1; break; //OnGround incoming
 					case 0x0B: length = 33; break; //Pos incoming
@@ -315,7 +315,7 @@ namespace SMP
 
 				try
 				{
-					socket.Send(buffer);
+                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, delegate(IAsyncResult result) { }, null);
 					buffer = null;
 				}
 				catch (SocketException)
@@ -570,8 +570,16 @@ namespace SMP
 				bytes[9] = type;
 				bytes[10] = meta;
 				SendRaw(0x35, bytes);
+
+                // USE FOR TESTING PURPOSES ONLY!
+                /*List<Point3> points = new List<Point3>();
+                for (double xx = x - 2; xx <= x + 2; xx++)
+                    for (double yy = y - 2; yy <= y + 2; yy++)
+                        for (double zz = z - 2; zz <= z + 2; zz++)
+                            points.Add(new Point3(xx, yy, zz));
+                SendExplosion(x, y, z, 2, points.ToArray());*/
 			}
-			public void SendBlockChange(int x, byte y, int z, byte type)
+            public void SendBlockChange(int x, byte y, int z, byte type)
 			{
 				SendBlockChange(x, y, z, type, 0);
 			}
@@ -583,9 +591,66 @@ namespace SMP
 			{
 				SendBlockChange(a, type, 0);
 			}
-			#endregion
-			#region Teleport Player
-			public void Teleport_Player(double x, double y, double z)
+            public void SendSoundEffect(int x, byte y, int z, int type, int data)
+            {
+                byte[] bytes = new byte[17];
+                util.EndianBitConverter.Big.GetBytes(type).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 4);
+                bytes[8] = y;
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 9);
+                util.EndianBitConverter.Big.GetBytes(data).CopyTo(bytes, 13);
+                SendRaw(0x3D, bytes);
+            }
+            public void SendSoundEffect(int x, byte y, int z, int type)
+            {
+                SendSoundEffect(x, y, z, type, 0);
+            }
+            public void SendSoundEffect(Point3 a, int type, int data)
+            {
+                SendSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data);
+            }
+            public void SendSoundEffect(Point3 a, int type)
+            {
+                SendSoundEffect(a, type, 0);
+            }
+            public void SendExplosion(double x, double y, double z, float radius, Point3[] records)
+            {
+                byte[] bytes = new byte[32 + (records.Length * 3)];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 8);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 16);
+                util.EndianBitConverter.Big.GetBytes(radius).CopyTo(bytes, 24);
+                util.EndianBitConverter.Big.GetBytes(records.Length).CopyTo(bytes, 28);
+
+                Point3 record, position = new Point3(x, y, z);
+                for (int i = 0; i < records.Length; i++)
+                {
+                    record = records[i] - position;
+                    bytes[32 + (i * 3)] = (byte)record.x;
+                    bytes[33 + (i * 3)] = (byte)record.y;
+                    bytes[34 + (i * 3)] = (byte)record.z;
+                }
+
+                SendRaw(0x3C, bytes);
+            }
+            public void SendExplosion(Point3 a, float radius, Point3[] records)
+            {
+                SendExplosion(a.x, a.y, a.z, radius, records);
+            }
+            public void SendState(byte state, byte mode)
+            {
+                byte[] bytes = new byte[2];
+                bytes[0] = state;
+                bytes[1] = mode;
+                SendRaw(0x46, bytes);
+            }
+            public void SendState(byte state)
+            {
+                SendState(state, 0);
+            }
+            #endregion
+            #region Teleport Player
+            public void Teleport_Player(double x, double y, double z)
 			{
 				Teleport_Player(x, y, z, rot[0], rot[1]);
 			}
@@ -879,6 +944,17 @@ namespace SMP
 				bytes[23] = e1.I.rot[2];
 				SendRaw(0x15, bytes);
 			}
+            public void SendPickupAnimation(Entity e1)
+            {
+                SendPickupAnimation(e1, this);
+            }
+            public void SendPickupAnimation(Entity e1, Player p1)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(p1.id).CopyTo(bytes, 4);
+                SendRaw(0x16, bytes);
+            }
 
 			public void SendEntityPosVelocity()
 			{
@@ -917,13 +993,13 @@ namespace SMP
 			}
             public void SendRespawn()
             {
-                byte[] bytes = new byte[12];
+                byte[] bytes = new byte[13];
 
                 bytes[0] = dimension;
-				bytes[2] = mode;
+				bytes[1] = mode;
+                bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
 				util.BigEndianBitConverter.Big.GetBytes((long)0).CopyTo(bytes, 5);
-			
                 SendRaw(0x09, bytes);
             }
 			#endregion
@@ -940,29 +1016,7 @@ namespace SMP
 			}
 			public void SendRain(bool on)
 			{
-				if (on)
-				{
-					byte[] bytes = new byte[2];
-					byte thisin = 1;
-					bytes[0] = thisin;
-                    bytes[1] = Server.mode;
-					foreach (Player p in Player.players)
-					{
-						p.SendRaw(0x46, bytes);
-					}
-					return;
-				}
-				if (!on)
-				{
-					byte[] bytes = new byte[2];
-					bytes[0] = 2;
-                    bytes[1] = Server.mode;
-					foreach (Player p in Player.players)
-					{
-						p.SendRaw(0x46, bytes);
-					}
-					return;
-				}
+                SendState(on ? (byte)1 : (byte)2);
 			}
 			#endregion
 		#endregion
@@ -1222,6 +1276,11 @@ namespace SMP
 				e.CurrentChunk.Entities.Remove(e);
 				Entity.Entities.Remove(id);
                 LoggedIn = false;
+
+                // Despawn the player
+                foreach (Player p in players)
+                    if (p.VisibleEntities.Contains(id))
+                        p.SendDespawn(id);
 
 				// Close stuff
 				if (socket != null && socket.Connected)
