@@ -1,6 +1,6 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Program.cs" ctype="Workbench">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SMP/Command/Commands/Cheats/CmdGive.cs" ctype="Workbench">
     <Files>
       <File FileName="SMP/util/SQLiteDatabase.cs" Line="76" Column="7" />
       <File FileName="SMP/Entity/Player/Player.cs" Line="352" Column="8" />
@@ -8,9 +8,31 @@
       <File FileName="SMP/Entity/Player/Groups/Group.cs" Line="1" Column="1" />
       <File FileName="SMP/Server/Server.cs" Line="103" Column="12" />
       <File FileName="SMP/Command/Commands/General/CmdAFK.cs" Line="37" Column="41" />
-      <File FileName="SMP/Server/World/World.cs" Line="176" Column="25" />
+      <File FileName="SMP/Server/World/World.cs" Line="81" Column="1" />
       <File FileName="SMP/Program.cs" Line="50" Column="1" />
+      <File FileName="SMP/Command/Commands/Cheats/CmdGive.cs" Line="150" Column="56" />
+      <File FileName="SMP/Command/Command.cs" Line="51" Column="15" />
+      <File FileName="SMP/Server/World/DataValues.cs" Line="143" Column="15" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="SMP" expanded="True">
+            <Node name="References" expanded="True" />
+            <Node name="Command" expanded="True">
+              <Node name="Commands" expanded="True">
+                <Node name="Cheats" expanded="True">
+                  <Node name="CmdGive.cs" selected="True" />
+                </Node>
+              </Node>
+            </Node>
+            <Node name="Server" expanded="True">
+              <Node name="World" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
