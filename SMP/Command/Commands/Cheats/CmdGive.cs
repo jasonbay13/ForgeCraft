@@ -50,9 +50,9 @@ namespace SMP
 			//first arg
 			try
 			{
-				if (!short.TryParse(args[0], out itemID))
+				if (short.TryParse(args[0], out s))
 				{
-					//itemID = short.Parse(args[0]);
+					itemID = short.Parse(args[0]);
 				}
 				else if (args[0].Contains(":"))
 				{
