@@ -138,19 +138,14 @@ namespace SMP
 		
 		public static bool ValidItem(short id)
 		{
-			bool validitem = false;
+            if (id < 1) return false;
 			foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
-        		if ((short)blk == id)
-             		validitem = true;
-			
-			if(!validitem)
-			{
+                if ((short)blk == id)
+                    return true;
      		foreach (Items item in Enum.GetValues(typeof(Items)))
          		if ((short)item == id)
-					 validitem = true;
-			}
-			
-			return validitem;
+					 return true;
+            return false;
 		}
     } 
 
@@ -407,7 +402,7 @@ namespace SMP
 	public enum Dispenser : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Pumpkin : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum PressurePlate : byte { NotPressed = 0x0, Pressed = 0x1 };
-	public enum Slab : byte { Stone = 0x0, SandStone = 0x1, Wooden = 0x2, Cobblestone = 0x3 };
+	public enum Slab : byte { Stone = 0x0, SandStone = 0x1, Wooden = 0x2, Cobblestone = 0x3, Brick = 0x4, StoneBrick = 0x5, Stone2 = 0x6 };
 	public enum Bed : byte { Isfoot = 0x8, West = 0x0, North = 0x1, East = 0x2, South = 0x3 };
 	public enum Repeater : byte { East = 0x0, South = 0x1, West = 0x2, North = 0x3, Tick1 = 0x5, Tick2 = 0x6, Tick3 = 0x7, Tick4 = 0x8 };
 	public enum TallGrass : byte { DeadShrub = 0x0, TallGrass = 0x1, Fern = 0x2 };
@@ -481,6 +476,31 @@ namespace SMP
 				
 			return true;	
 
-		} 
+		}
+
+        public static bool CanInstantBreak(byte a)
+        {
+            switch (a)
+            {
+                case (6):
+                case (31):
+                case (32):
+                case (37):
+                case (38):
+                case (39):
+                case (40):
+                case (46):
+                case (50):
+                case (55):
+                case (59):
+                case (75):
+                case (76):
+                case (104):
+                case (105):
+                case (106):
+                    return true;
+            }
+            return false;
+        }
 	}
 }

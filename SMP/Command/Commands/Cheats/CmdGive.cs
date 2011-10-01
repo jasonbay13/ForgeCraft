@@ -147,7 +147,7 @@ namespace SMP
 		}
 		public void SendItem(Player p, short item, byte count, short meta)
 		{
-			if (FindBlocks.ValidItem(item))
+            if (FindBlocks.ValidItem(item))
 			{
 				p.inventory.Add(item, count, meta);
 				p.SendMessage(HelpBot + "Enjoy!");

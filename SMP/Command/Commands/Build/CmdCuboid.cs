@@ -175,10 +175,23 @@ namespace SMP
             }
             if (p.cuboidtype == "holes")
             {
-                for (int x1 = xx1; x1 <= x2; x1 += 2)
-                    for (byte y1 = yy1; y1 <= y2; y1 += 2)
-                        for (int z1 = zz1; z1 <= z2; z1 += 2)
-                            p.level.BlockChange(x1, y1, z1, (byte)type, 0);
+                bool Checked = true, startZ, startY;
+
+                for (int x1 = xx1; x1 <= x2; x1++)
+                {
+                    startY = Checked;
+                    for (byte y1 = yy1; y1 <= y2; y1++)
+                    {
+                        startZ = Checked;
+                        for (int z1 = zz1; z1 <= z2; z1++)
+                        {
+                            Checked = !Checked;
+                            if (Checked) p.level.BlockChange(x1, y1, z1, (byte)type, 0);
+                        }
+                        Checked = !startZ;
+                    }
+                    Checked = !startY;
+                }
                 return;
             }
             if (p.cuboidtype == "random")

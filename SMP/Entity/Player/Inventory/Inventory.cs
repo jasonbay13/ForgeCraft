@@ -34,7 +34,7 @@ namespace SMP
 			set
 			{
 				Mycurrent_item = value;
-				UpdateVisibleItemInHand(Mycurrent_item.item);
+                UpdateVisibleItemInHand(Mycurrent_item.item, Mycurrent_item.meta);
 			}
 		}
 		public int current_index;
@@ -116,16 +116,17 @@ namespace SMP
 		}
 		public void Add(short item, byte count, short meta, int slot)
 		{
+            if (slot > 44 || slot < 0) return;
 			if (items[slot] == Item.Nothing)
 				if (slot == current_index)
-					UpdateVisibleItemInHand(item);
+					UpdateVisibleItemInHand(item, meta);
 
 			if (count == 0) return;
 
 			Item I = new Item(item, count, meta, p.level);
-			if (slot > 44 || slot < 0) return;
 			items[slot] = I;
             //if (slot == current_index) p.current_block_holding = I;
+            if (slot == current_index) current_item = items[slot];
 
 			p.SendItem((short)slot, item, count, meta);
 		}
@@ -133,19 +134,35 @@ namespace SMP
 		public void Remove(int slot)
 		{
 			items[slot] = Item.Nothing;
+            p.SendItem((short)slot, -1, 0, 0);
 		}
 		public void Remove(int slot, byte count)
 		{
 			if (count >= items[slot].count)
 			{
 				items[slot] = Item.Nothing;
+                if (slot == current_index) current_item = items[slot];
 				p.SendItem((short)slot, -1, 0, 0);
 				return;
 			}
 
-			items[slot].count--;
+			items[slot].count -= count;
+            if (slot == current_index) current_item = items[slot];
 			p.SendItem((short)slot, items[slot].item, items[slot].count, items[slot].meta);
 		}
+
+        public void Clear()
+        {
+            Clear(false);
+        }
+        public void Clear(bool drop)
+        {
+            for (int i = 0; i < 45; i++)
+            {
+                //TODO: Spawn item drops (later fling them in random directions) when drop is true
+                Remove(i);
+            }
+        }
 
 		public void HandleClick(byte[] message)
 		{
@@ -543,6 +560,7 @@ namespace SMP
 					}
 				}
 				#endregion
+                current_item = items[current_index];
 			}
 			#region Empty Mouse done
 			else //Player has NOTHING on the mouse
@@ -597,15 +615,19 @@ namespace SMP
 			}
 		}
 		
-		public void UpdateVisibleItemInHand(short id)
+		public void UpdateVisibleItemInHand(short id, short damage)
 		{
 			foreach (int i in p.VisibleEntities.ToArray())
 			{
 				Entity e = Entity.Entities[i];
-				if (!e.isPlayer) continue;
-				e.p.SendEntityEquipment(p.id, 0, id, 0);
+				if (!e.isPlayer || !e.p.VisibleEntities.Contains(p.id)) continue;
+				e.p.SendEntityEquipment(p.id, 0, id, damage);
 			}
 		}
+        public void UpdateVisibleItemInHand(short id)
+        {
+            UpdateVisibleItemInHand(id, 0);
+        }
 
 		public int FindEmptySlot()
 		{			
@@ -625,7 +647,7 @@ namespace SMP
 		}
 		public static byte isStackable(short id)
 		{
-			if(id >= 1 && id <= 96) //all blocks are stackable and there is no missing id's
+			if(id >= 1 && id <= 109) //all blocks are stackable and there is no missing id's
 				return 64;
 			
 			// may be missing a few

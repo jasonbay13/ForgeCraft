@@ -38,7 +38,8 @@ namespace SMP
 
                    Array.Copy(args, 1, args, 0, args.Length - 1);
 
-                   command.Use(remotePlayer, args);
+                   try { command.Use(remotePlayer, args); }
+                   catch (Exception e) { Server.ServerLogger.LogError(e); }
                    return;
                }
                else
