@@ -34,7 +34,7 @@ namespace SMP
 			if (p.AFK)
 			{
 				p.AFK = false;
-				Player.GlobalMessage(p.username + "is back.");
+				Player.GlobalMessage(p.username + " is back.");
 				return;
 			}
 			if (args.Length == 0)
