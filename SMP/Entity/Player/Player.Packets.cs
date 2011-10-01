@@ -344,11 +344,29 @@ namespace SMP
 
                 if (Server.mode == 1)
                 {
+                    if (BlockChange.Destroyed.ContainsKey(rc))
+                    {
+                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
+                        {
+                            Server.Log("Delegate for " + rc + " Destroyed returned false");
+                            return;
+                        }
+                    }
+
                     level.BlockChange(x, y, z, 0, 0);
                     goto doSound;
                 }
                 else if (BlockData.CanInstantBreak(rc))
                 {
+                    if (BlockChange.Destroyed.ContainsKey(rc))
+                    {
+                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
+                        {
+                            Server.Log("Delegate for " + rc + " Destroyed returned false");
+                            return;
+                        }
+                    }
+
                     short dropId = BlockDropSwitch(rc);
                     if (dropId != 0)
                     {
@@ -362,9 +380,7 @@ namespace SMP
                 return;
 
                 doSound:
-                foreach (Player p1 in Player.players)
-                    if ((p1 != this || Server.mode == 1) && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
-                        p1.SendSoundEffect(x, y, z, 2001, rc);
+                Player.GlobalBreakEffect(x, y, z, rc, Server.mode == 1 ? null : this);
 		    }
 			if (message[0] == 2)
 			{
@@ -396,9 +412,7 @@ namespace SMP
 				
 				level.BlockChange(x, y, z, 0, 0);
 
-                foreach (Player p1 in Player.players)
-                    if (p1 != this && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
-                        p1.SendSoundEffect(x, y, z, 2001, storeId);
+                Player.GlobalBreakEffect(x, y, z, storeId, this);
 			}
 			if (message[0] == 4)
 			{

@@ -648,6 +648,17 @@ namespace SMP
             {
                 SendState(state, 0);
             }
+
+            public static void GlobalBreakEffect(int x, byte y, int z, int type, Player exclude = null)
+            {
+                foreach (Player p1 in Player.players)
+                    if ((p1 != exclude || Server.mode == 1) && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                        p1.SendSoundEffect(x, y, z, 2001, type);
+            }
+            public static void GlobalBreakEffect(Point3 a, int type, Player exclude = null)
+            {
+                GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, exclude);
+            }
             #endregion
             #region Teleport Player
             public void Teleport_Player(double x, double y, double z)

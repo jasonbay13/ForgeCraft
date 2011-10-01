@@ -24,7 +24,7 @@ namespace SMP
 	{
 		public Item[] items;
 		public Player p;
-		public Item Mycurrent_item;
+		private Item Mycurrent_item;
 		public Item current_item
 		{
 			get
@@ -133,8 +133,7 @@ namespace SMP
 
 		public void Remove(int slot)
 		{
-			items[slot] = Item.Nothing;
-            p.SendItem((short)slot, -1, 0, 0);
+            Remove(slot, items[slot].count);
 		}
 		public void Remove(int slot, byte count)
 		{
