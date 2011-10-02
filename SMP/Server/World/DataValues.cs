@@ -138,7 +138,8 @@ namespace SMP
 		
 		public static bool ValidItem(short id)
 		{
-            if (id == 0 || id < -1) return false;
+			if (id == -1) return true;
+            else if (id == 0 || id < -1) return false;
 			foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
                 if ((short)blk == id)
                     return true;
