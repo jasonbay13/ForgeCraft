@@ -108,15 +108,15 @@ namespace SMP
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (WaterFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        WaterFlow(C.x, C.y - 1, C.z, SetHalf(1, 0, 0x8));
+                                        WaterFlow(C.x, C.y - 1, C.z, SetQuarter(1, 0, 0x8));
                                     }
                                     else
                                     {
-                                        if (GetHalf(0, meta) >= 0x7) { C.time = 255; break; }
-                                        WaterFlow(C.x + 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x - 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z + 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z - 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
+                                        if (GetQuarter(0, meta) >= 0x7) { C.time = 255; break; }
+                                        WaterFlow(C.x + 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
+                                        WaterFlow(C.x - 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
+                                        WaterFlow(C.x, C.y, C.z + 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
+                                        WaterFlow(C.x, C.y, C.z - 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
                                     }
                                 }
                                 C.time = 255;
@@ -130,15 +130,15 @@ namespace SMP
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (LavaFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        LavaFlow(C.x, C.y - 1, C.z, SetHalf(1, 0, 0x8));
+                                        LavaFlow(C.x, C.y - 1, C.z, SetQuarter(1, 0, 0x8));
                                     }
                                     else
                                     {
-                                        if (GetHalf(0, meta) >= 0x6) { C.time = 255; break; }
-                                        LavaFlow(C.x + 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x - 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z + 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z - 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
+                                        if (GetQuarter(0, meta) >= 0x6) { C.time = 255; break; }
+                                        LavaFlow(C.x + 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
+                                        LavaFlow(C.x - 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
+                                        LavaFlow(C.x, C.y, C.z + 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
+                                        LavaFlow(C.x, C.y, C.z - 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
                                     }
                                 }
                                 C.time = 255;
@@ -167,11 +167,11 @@ namespace SMP
 
         private byte GetBit(int index, byte data)
         {
-
+            return 0;
         }
         private byte SetBit(int index, byte data, byte value)
         {
-
+            return 0;
         }
 
         private byte GetQuarter(int index, byte data)

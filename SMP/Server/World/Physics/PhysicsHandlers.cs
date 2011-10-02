@@ -34,7 +34,7 @@ namespace SMP
         public void WaterFlow(int x, int y, int z, byte meta)
         {
             byte block = w.GetBlock(x, y, z);
-            if (block == 0 || ((block == 8 || block == 9) && GetHalf(1, meta) == 0x8))
+            if (block == 0 || ((block == 8 || block == 9) && GetQuarter(1, meta) == 0x8))
             {
                 w.BlockChange(x, y, z, 8, meta);
             }
@@ -54,7 +54,7 @@ namespace SMP
         public void LavaFlow(int x, int y, int z, byte meta)
         {
             byte block = w.GetBlock(x, y, z);
-            if (block == 0 || ((block == 10 || block == 11) && GetHalf(1, meta) == 0x8))
+            if (block == 0 || ((block == 10 || block == 11) && GetQuarter(1, meta) == 0x8))
             {
                 w.BlockChange(x, y, z, 10, meta);
             }
