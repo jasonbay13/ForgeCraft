@@ -128,7 +128,6 @@ namespace SMP
                                     if (C.time < 20) { C.time++; break; }
 
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
-                                    Console.WriteLine(GetHalf(0, meta) + " " + GetHalf(1, meta));
                                     if (LavaFlowCheck(C.x, C.y - 1, C.z))
                                     {
                                         LavaFlow(C.x, C.y - 1, C.z, SetHalf(1, 0, 0x8));
@@ -166,11 +165,20 @@ namespace SMP
             }
         }
 
-        private byte GetHalf(int index, byte data)
+        private byte GetBit(int index, byte data)
+        {
+
+        }
+        private byte SetBit(int index, byte data, byte value)
+        {
+
+        }
+
+        private byte GetQuarter(int index, byte data)
         {
             return (index % 2 == 0) ? (byte)(data & 0x0F) : (byte)((data >> 4) & 0x0F);
         }
-        private byte SetHalf(int index, byte data, byte value)
+        private byte SetQuarter(int index, byte data, byte value)
 		{
 			if (index % 2 == 0)
 			{
