@@ -187,10 +187,13 @@ namespace SMP
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
 			//Change Metadata
-			
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            meta++; if (meta > 24) meta = 0;
+            a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
+            Console.WriteLine(a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
 
 			//Send NoteSound
-
+            PlayNoteblock(a, b);
 			return false;
 		}
 		public static bool GetInBed(Player a, BCS b)
@@ -250,7 +253,7 @@ namespace SMP
                         break;
                 }
 
-                a.inventory.Remove(a.inventory.current_index);
+                a.inventory.Remove(a.inventory.current_index, 1);
                 a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
                 foreach (Player pl in Player.players)
                     if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
@@ -321,7 +324,34 @@ namespace SMP
 		}
 		public static bool LightFire(Player a, BCS b)
 		{
-			return false;
+            /*Point3 firePos = new Point3();
+            switch (b.Direction)
+            {
+                case 0:
+                    firePos = new Point3(b.pos.x, b.pos.y - 1, b.pos.z);
+                    break;
+                case 1:
+                    firePos = new Point3(b.pos.x, b.pos.y + 1, b.pos.z);
+                    break;
+                case 2:
+                    firePos = new Point3(b.pos.x, b.pos.y, b.pos.z - 1);
+                    break;
+                case 3:
+                    firePos = new Point3(b.pos.x, b.pos.y, b.pos.z + 1);
+                    break;
+                case 4:
+                    firePos = new Point3(b.pos.x - 1, b.pos.y, b.pos.z);
+                    break;
+                case 5:
+                    firePos = new Point3(b.pos.x + 1, b.pos.y, b.pos.z);
+                    break;
+                default:
+                    return false;
+            }*/
+
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) == (byte)Blocks.Air)
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Fire, 0);
+            return false;
 		}
 		public static bool PlaceBed(Player a, BCS b)
 		{
@@ -644,9 +674,8 @@ namespace SMP
             switch (b.Direction)
             {
                 case 0:
-
-                    break;
                 case 1:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z);
                     b.Direction = 0;
                     break;
                 case 2:
@@ -666,14 +695,18 @@ namespace SMP
                     b.Direction = 1; //South
                     break;
             }
-            if (placingon == 50) b.Direction = 0;
+            if (placingon == 50)
+            {
+                b.Direction = 0;
+                placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z);
+            }
             /*if (/*placingon == 50 || *//*a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z) != 0)
             {
                 a.SendBlockChange(b.pos, a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z), a.level.GetMeta((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z));
                 if (Server.mode == 0) { a.inventory.Add((short)Blocks.Torch, a.inventory.items[a.inventory.current_index].count, a.inventory.current_item.meta, a.inventory.current_index); }
                 return false;
             }*/
-            switch (a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z))
+            switch (placingon)
             {
                 case 0: return false;
                 case 20: return false;
@@ -701,6 +734,8 @@ namespace SMP
 
 		public static bool PlayNoteblock(Player a, BCS b)
 		{
+            // TODO: Check block below for instrument.
+            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)
@@ -725,10 +760,11 @@ namespace SMP
 		}
         public static bool DestroyTorch(Player a, BCS b)
         {
-            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 0, 0);
+            // THIS IS ALL HANDLED ELSEWHERE
+            /*a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 0, 0);
             Item item = new Item(50, a.level) { count = 1, meta = 0, pos = new Point3(b.pos.X + .5, b.pos.Y + .5, b.pos.Z + .5), rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-            item.e.UpdateChunks(false, false);
-            return false;
+            item.e.UpdateChunks(false, false);*/
+            return true;
         }
 		public static bool DestroyDispenser(Player a, BCS b)
 		{
@@ -788,33 +824,46 @@ namespace SMP
             byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             if (meta != 0)
             {
-                short item = 0;
-                switch (meta)
+                if (Server.mode == 0)
                 {
-                    case 1:
-                        item = (short)Items.GoldMusicDisc;
-                        break;
-                    case 2:
-                        item = (short)Items.GreenMusicDisc;
-                        break;
+                    short item = 0;
+                    switch (meta)
+                    {
+                        case 1:
+                            item = (short)Items.GoldMusicDisc;
+                            break;
+                        case 2:
+                            item = (short)Items.GreenMusicDisc;
+                            break;
+                    }
+
+                    if (item != 0)
+                    {
+                        Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        itemDrop.e.UpdateChunks(false, false);
+                    }
+
+                    a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0);
                 }
 
-                if (item != 0)
-                {
-                    Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
-                }
+                foreach (Player pl in Player.players)
+                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
+                        pl.SendSoundEffect(b.pos, 1005, 0);
             }
-
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
-            foreach (Player pl in Player.players)
-                if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
-                    pl.SendSoundEffect(b.pos, 1005, 0);
             return true;
 		}
 		public static bool DestroyGlowStone(Player a, BCS b)
 		{
-			return false;
+            if (Server.mode == 1) return true;
+            Item item; int count = Entity.random.Next(2, 5); // 2-4 drops
+            for (int i = 0; i < count; i++)
+            {
+                item = new Item(348, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                item.e.UpdateChunks(false, false);
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            Player.GlobalBreakEffect(b.pos, b.ID, a);
+            return false;
 		}
 
 		public static byte DirectionByRotFlat(Player p, BCS a)

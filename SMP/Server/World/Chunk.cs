@@ -143,7 +143,7 @@ namespace SMP
 			if (InBound(x, y, z))
 			{
 				int index = PosToInt(x, y, z);
-				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]);
+				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]); // THIS IS FUCKING STUPID! METADATA SHOULD BE A BYTE!
 			}
 		}
 		public byte GetMetaData(int x, int y, int z)

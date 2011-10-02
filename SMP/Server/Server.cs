@@ -54,6 +54,7 @@ namespace SMP
         
         #endregion
 
+        public static System.Timers.Timer keepAliveTimer = new System.Timers.Timer(2000);
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;
@@ -96,6 +97,13 @@ namespace SMP
             } //changed to seed 0 for now
 			ml = new MainLoop("server");
 			#region updatetimer
+            ml.Queue(delegate
+            {
+                keepAliveTimer.Elapsed += delegate
+                {
+                    Player.players.ForEach(delegate(Player p) { p.SendKeepAlive(); });
+                }; keepAliveTimer.Start();
+            });
 			ml.Queue(delegate
 			{
 				updateTimer.Elapsed += delegate

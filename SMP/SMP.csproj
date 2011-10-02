@@ -66,6 +66,7 @@
     <Compile Include="Server\Plugins\Plugin.Events.cs" />
     <Compile Include="Server\WebserverStuff\Remote.Handler.cs" />
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
+    <Compile Include="Server\World\Physics\PhysicsHandlers.cs" />
     <Compile Include="util\PreLoaded.cs" />
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="Server\WebserverStuff\WebServer.cs" />
     <Compile Include="Server\World\BlockChangeSystem.cs" />
     <Compile Include="Server\World\Physics\Physics.cs" />
-    <Compile Include="Server\World\Physics\Physics_Setting.cs" />
     <Compile Include="Server\World\Weather.cs" />
     <Compile Include="Server\World\World.cs" />
     <Compile Include="Server\World\Noise.cs" />

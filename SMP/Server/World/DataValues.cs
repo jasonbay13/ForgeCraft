@@ -530,5 +530,98 @@ namespace SMP
             }
             return false;
         }
+
+        public static bool HasPhysics(byte a)
+        {
+            switch (a)
+            {
+                case 3:
+                case 6:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 18:
+                //case 19: // Do we want sponge physics?
+                case 27:
+                case 28:
+                case 29:
+                case 33:
+                /*case 34: // Do piston heads need physics?
+                case 36:*/
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 46: // =)
+                case 50: // For removing the torch when it should be there
+                case 51:
+                case 52: // We gotta spawn mobs somehow
+                case 55:
+                case 59: // How else will it grow? :P
+                case 60:
+                case 63:
+                case 64:
+                case 65:
+                case 66:
+                case 68:
+                case 69: // Aw yeah...
+                case 70:
+                case 71:
+                case 72:
+                case 75:
+                case 76:
+                case 77:
+                case 78: // Snow and ice melt, we'll figure it out later
+                case 79:
+                case 81: 
+                case 83:
+                case 90: // Portal blocks are weird
+                case 93:
+                case 94:
+                case 96:
+                case 104:
+                case 105:
+                case 106:
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool LiquidDestroy(byte a)
+        {
+            switch (a)
+            {
+                case 6:
+                case 27:
+                case 28:
+                case 30:
+                case 31:
+                case 32:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 50:
+                case 55:
+                case 66:
+                case 69:
+                case 70:
+                case 72:
+                case 75:
+                case 76:
+                case 77:
+                case 83:
+                case 93:
+                case 94:
+                case 104:
+                case 105:
+                case 106:
+                    return true;
+            }
+            return false;
+        }
 	}
 }
