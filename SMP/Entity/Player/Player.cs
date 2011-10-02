@@ -348,8 +348,6 @@ namespace SMP
 				players.ForEach(delegate(Player p)
 				{
 					if (!p.LoggedIn) return;
-					p.SendKeepAlive();
-					p.SendTime();
 					if (!p.hidden)
 					{
 						p.UpdatePosition();
@@ -365,7 +363,7 @@ namespace SMP
                     p.SendRaw(0, util.EndianBitConverter.Big.GetBytes(1337));
                 });
             } 
-			void SendKeepAlive()
+			public void SendKeepAlive()
 			{
 				byte[] bytes = new byte[4];
 				util.EndianBitConverter.Big.GetBytes(Entity.random.Next()).CopyTo(bytes, 0);
@@ -647,6 +645,49 @@ namespace SMP
             public void SendState(byte state)
             {
                 SendState(state, 0);
+            }
+            public void SendBlockAction(int x, short y, int z, byte byte1, byte byte2)
+            {
+                byte[] bytes = new byte[12];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 6);
+                bytes[10] = byte1;
+                bytes[11] = byte2;
+                SendRaw(0x36, bytes);
+            }
+            public void SendBlockAction(Point3 a, byte byte1, byte byte2)
+            {
+                SendBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2);
+            }
+
+            public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2)
+            {
+                foreach (Player p1 in Player.players)
+                    if (p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                        p1.SendBlockAction(x, y, z, byte1, byte2);
+            }
+            public static void GlobalBlockAction(Point3 a, byte byte1, byte byte2)
+            {
+                GlobalBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2);
+            }
+            public static void GlobalSoundEffect(int x, byte y, int z, int type, int data)
+            {
+                foreach (Player p1 in Player.players)
+                    if (p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                        p1.SendSoundEffect(x, y, z, type, data);
+            }
+            public static void GlobalSoundEffect(int x, byte y, int z, int type)
+            {
+                GlobalSoundEffect(x, y, z, type, 0);
+            }
+            public static void GlobalSoundEffect(Point3 a, int type, int data)
+            {
+                GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data);
+            }
+            public static void GlobalSoundEffect(Point3 a, int type)
+            {
+                GlobalSoundEffect(a, type, 0);
             }
 
             public static void GlobalBreakEffect(int x, byte y, int z, int type, Player exclude = null)

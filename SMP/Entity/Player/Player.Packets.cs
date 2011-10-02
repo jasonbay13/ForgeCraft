@@ -458,7 +458,7 @@ namespace SMP
 			foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
-				Point3 pp = new Point3((int[])pos);
+				Point3 pp = new Point3((int[])e1.pos);
 
 				if (block==pp)
 				{
@@ -490,7 +490,7 @@ namespace SMP
 			foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
-				Point3 pp = new Point3((int[])pos);
+                Point3 pp = new Point3((int[])e1.pos);
 				pp.y--;
 
 				if (block == pp)
@@ -722,7 +722,7 @@ namespace SMP
 			Teleport_Player(level.SpawnX, level.SpawnY, level.SpawnZ, level.SpawnYaw, level.SpawnPitch);
             SendRespawn();
         }
-		public short BlockDropSwitch(short id)
+		public static short BlockDropSwitch(short id)
 		{
 			switch (id)
 			{
@@ -747,6 +747,8 @@ namespace SMP
 					return 0;
 				case (21):
 					return 251;
+                case (30):
+                    return 287;
 				case (31):
 					if (Entity.random.Next(1, 5) == 3) return 295;
 					return 0;
@@ -764,6 +766,10 @@ namespace SMP
 					return 331;
 				case (56):
 					return 264;
+                case (59):
+                    return 295;
+                case (60):
+                    return 3;
 				case (63):
 					return 323;
 				case (68):

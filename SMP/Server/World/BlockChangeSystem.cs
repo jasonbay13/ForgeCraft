@@ -187,10 +187,13 @@ namespace SMP
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
 			//Change Metadata
-			
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            meta++; if (meta > 24) meta = 0;
+            a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
+            Console.WriteLine(a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
 
 			//Send NoteSound
-
+            PlayNoteblock(a, b);
 			return false;
 		}
 		public static bool GetInBed(Player a, BCS b)
@@ -671,9 +674,8 @@ namespace SMP
             switch (b.Direction)
             {
                 case 0:
-
-                    break;
                 case 1:
+                    placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z);
                     b.Direction = 0;
                     break;
                 case 2:
@@ -732,6 +734,8 @@ namespace SMP
 
 		public static bool PlayNoteblock(Player a, BCS b)
 		{
+            // TODO: Check block below for instrument.
+            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)

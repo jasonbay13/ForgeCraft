@@ -40,6 +40,7 @@ namespace SMP
 		public Dictionary<Point, Chunk> chunkData;
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
 		public List<Point> ToGenerate = new List<Point>();
+        public Physics physics;
         public bool Raining = false;
 		public byte height = 128;
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
@@ -114,13 +115,16 @@ namespace SMP
             Server.Log("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
 			timeupdate.Elapsed += delegate {
-				time += 10;
+				time += 20;
 				if (time > 24000)
 					time = 0;
 				Player.players.ForEach(delegate(Player p) { if (p.level == this) p.SendTime(); });
 			};
 			timeupdate.Start();
 			this.name = name;
+
+            this.physics = new Physics(this);
+            this.physics.Start();
 		}
        
 		public static World Find(string name)
@@ -222,13 +226,17 @@ namespace SMP
             Server.Log("Look distance = 3");
             w.timeupdate.Elapsed += delegate
             {
-                w.time += 10;
+                w.time += 20;
                 if (w.time > 24000)
                     w.time = 0;
                 Player.players.ForEach(delegate(Player p) { if (p.level == w) p.SendTime(); });
             };
             w.timeupdate.Start();
             w.name = filename;
+
+            w.physics = new Physics(w);
+            w.physics.Start();
+
             return w;
         }
 		
@@ -354,6 +362,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
+                physics.BlockUpdate(x, y, z);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);
                 foreach (Player p in Player.players.ToArray())
