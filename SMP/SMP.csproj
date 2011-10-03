@@ -67,6 +67,7 @@
     <Compile Include="Server\WebserverStuff\Remote.Handler.cs" />
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
     <Compile Include="Server\World\Physics\PhysicsHandlers.cs" />
+    <Compile Include="util\Extensions.cs" />
     <Compile Include="util\PreLoaded.cs" />
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />

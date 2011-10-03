@@ -20,6 +20,16 @@ namespace SMP
         }
 
         #region Liquids
+        public bool LiquidSourceCheck()
+        {
+            return false;
+        }
+
+        public bool AdjacentLiquidCheck(int x, int y, int z, byte type, bool above = true, bool below = false)
+        {
+            return (w.GetBlock(x + 1, y, z) == type || w.GetBlock(x - 1, y, z) == type || w.GetBlock(x, y, z + 1) == type || w.GetBlock(x, y, z - 1) == type || (above && w.GetBlock(x, y + 1, z) == type) || (below && w.GetBlock(x, y, z) == type));
+        }
+
         public bool WaterFlowCheck(int x, int y, int z)
         {
             byte block = w.GetBlock(x, y, z);
@@ -34,7 +44,8 @@ namespace SMP
         public void WaterFlow(int x, int y, int z, byte meta)
         {
             byte block = w.GetBlock(x, y, z);
-            if (block == 0 || ((block == 8 || block == 9) && GetQuarter(1, meta) == 0x8))
+            byte bMeta = w.GetMeta(x, y, z);
+            if (block == 0 || ((block == 8 || block == 9) && (meta.GetBits(3, 1) == 0x8 || meta.GetBits(0, 3) < bMeta)))
             {
                 w.BlockChange(x, y, z, 8, meta);
             }
@@ -49,12 +60,22 @@ namespace SMP
 
                 w.BlockChange(x, y, z, 8, meta);
             }
+            else if (block == 10 || block == 11)
+            {
+                if (bMeta.GetBits(0, 3) == 0)
+                    w.BlockChange(x, y, z, 49, 0);
+                else
+                    w.BlockChange(x, y, z, 4, 0);
+                Player.GlobalSoundEffect(x, (byte)y, z, 1004);
+                Player.GlobalSoundEffect(x, (byte)y, z, 2000, 4);
+            }
         }
 
         public void LavaFlow(int x, int y, int z, byte meta)
         {
             byte block = w.GetBlock(x, y, z);
-            if (block == 0 || ((block == 10 || block == 11) && GetQuarter(1, meta) == 0x8))
+            byte bMeta = w.GetMeta(x, y, z);
+            if (block == 0 || ((block == 10 || block == 11) && (meta.GetBits(3, 1) == 0x8 || meta.GetBits(0, 3) < bMeta)))
             {
                 w.BlockChange(x, y, z, 10, meta);
             }

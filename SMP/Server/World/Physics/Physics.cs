@@ -78,6 +78,11 @@ namespace SMP
                     Calculate();
                     TimeSpan Took = DateTime.Now - Start;
                     wait = speed - (int)Took.TotalMilliseconds;
+
+                    /*byte b = 0x3;
+                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));
+                    b = b.SetBits(1, 2, 2);
+                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));*/
                 }
                 catch
                 {
@@ -97,8 +102,6 @@ namespace SMP
                         #region Physics Calculations
                         switch (w.GetBlock(C.x, C.y, C.z))
                         {
-                            case (byte)Blocks.Grass:
-                                
                             case (byte)Blocks.AWater:
                             case (byte)Blocks.SWater:
                                 if (setting >= PSetting.Normal)
@@ -108,15 +111,17 @@ namespace SMP
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (WaterFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        WaterFlow(C.x, C.y - 1, C.z, SetQuarter(1, 0, 0x8));
+                                        WaterFlow(C.x, C.y - 1, C.z, WaterFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
                                     }
                                     else
                                     {
-                                        if (GetQuarter(0, meta) >= 0x7) { C.time = 255; break; }
-                                        WaterFlow(C.x + 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
-                                        WaterFlow(C.x - 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z + 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z - 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 1)));
+                                        meta = meta.SetBits(3, 0);
+                                        if (meta.GetBits(0, 3) >= 0x7) { C.time = 255; break; }
+                                        WaterFlow(C.x, C.y - 1, C.z, 0);
+                                        WaterFlow(C.x + 1, C.y, C.z, (byte)(meta + 1));
+                                        WaterFlow(C.x - 1, C.y, C.z, (byte)(meta + 1));
+                                        WaterFlow(C.x, C.y, C.z + 1, (byte)(meta + 1));
+                                        WaterFlow(C.x, C.y, C.z - 1, (byte)(meta + 1));
                                     }
                                 }
                                 C.time = 255;
@@ -130,15 +135,26 @@ namespace SMP
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (LavaFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        LavaFlow(C.x, C.y - 1, C.z, SetQuarter(1, 0, 0x8));
+                                        LavaFlow(C.x, C.y - 1, C.z, LavaFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                    }
+                                    else if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                    {
+                                        if (meta.GetBits(0, 3) == 0)
+                                            w.BlockChange(C.x, C.y, C.z, 49, 0);
+                                        else
+                                            w.BlockChange(C.x, C.y, C.z, 4, 0);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4);
                                     }
                                     else
                                     {
-                                        if (GetQuarter(0, meta) >= 0x6) { C.time = 255; break; }
-                                        LavaFlow(C.x + 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
-                                        LavaFlow(C.x - 1, C.y, C.z, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z + 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z - 1, SetQuarter(0, 0, (byte)(GetQuarter(0, meta) + 2)));
+                                        meta = meta.SetBits(3, 0);
+                                        if (meta.GetBits(0, 3) >= 0x6) { C.time = 255; break; }
+                                        LavaFlow(C.x, C.y - 1, C.z, 0);
+                                        LavaFlow(C.x + 1, C.y, C.z, (byte)(meta + 2));
+                                        LavaFlow(C.x - 1, C.y, C.z, (byte)(meta + 2));
+                                        LavaFlow(C.x, C.y, C.z + 1, (byte)(meta + 2));
+                                        LavaFlow(C.x, C.y, C.z - 1, (byte)(meta + 2));
                                     }
                                 }
                                 C.time = 255;
@@ -164,35 +180,6 @@ namespace SMP
                 Server.ServerLogger.LogError(e);
             }
         }
-
-        private byte GetBit(int index, byte data)
-        {
-            return 0;
-        }
-        private byte SetBit(int index, byte data, byte value)
-        {
-            return 0;
-        }
-
-        private byte GetQuarter(int index, byte data)
-        {
-            return (index % 2 == 0) ? (byte)(data & 0x0F) : (byte)((data >> 4) & 0x0F);
-        }
-        private byte SetQuarter(int index, byte data, byte value)
-		{
-			if (index % 2 == 0)
-			{
-				// Set the lower 4 bits
-				byte high = (byte)((data & 0xF0) >> 4);
-				return (byte)((high << 4) | value);
-			}
-			else
-			{
-				// Set the upper 4 bits
-				byte low = (byte)(data & 0x0F);
-                return (byte)((value << 4) | low);
-			}
-		}
 
 
         public void AddCheck(int x, int y, int z, byte meta, bool overRide)

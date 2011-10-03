@@ -16,8 +16,22 @@ namespace SMP
 		public World level { get { return e.level; } set { e.level = value; } }
 		public int viewdistance = 3;
 		byte mode = Server.mode;
-		
-		public short current_slot_holding;
+        #region Mode Thingy
+        public byte Mode
+        {
+            get
+            {
+                return mode;
+            }
+            set
+            {
+                mode = value;
+                if (LoggedIn) SendState(3, mode);
+            }
+        }
+        #endregion
+
+        public short current_slot_holding;
 		public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendInventory(); } }
 
 		byte[] buffer = new byte[0];

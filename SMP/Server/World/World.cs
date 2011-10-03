@@ -376,21 +376,33 @@ namespace SMP
 		}
 		public byte GetBlock(int x, int y, int z)
 		{
-			int cx = x >> 4, cz = z >> 4;
-			Chunk chunk = Chunk.GetChunk(cx, cz, this);
-			return chunk.SGB(x & 0xf, y, z & 0xf);
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                return chunk.SGB(x & 0xf, y, z & 0xf);
+            }
+            catch { return 0; }
 		}
 		public byte GetMeta(int x, int y, int z)
 		{
-			int cx = x >> 4, cz = z >> 4;
-			Chunk chunk = Chunk.GetChunk(cx, cz, this);
-			return chunk.GetMetaData(x & 0xf, y, z & 0xf);
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                return chunk.GetMetaData(x & 0xf, y, z & 0xf);
+            }
+            catch { return 0; }
 		}
 		public void SetMeta(int x, int y, int z, byte data)
 		{
-			int cx = x >> 4, cz = z >> 4;
-			Chunk chunk = Chunk.GetChunk(cx, cz, this);
-			chunk.SetMetaData(x & 0xf, y, z & 0xf, data);
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                chunk.SetMetaData(x & 0xf, y, z & 0xf, data);
+            }
+            catch { return; }
 		}
 	}
 	public struct Point : IEquatable<Point>
