@@ -16,8 +16,22 @@ namespace SMP
 		public World level { get { return e.level; } set { e.level = value; } }
 		public int viewdistance = 3;
 		byte mode = Server.mode;
-		
-		public short current_slot_holding;
+        #region Mode Thingy
+        public byte Mode
+        {
+            get
+            {
+                return mode;
+            }
+            set
+            {
+                mode = value;
+                if (LoggedIn) SendState(3, mode);
+            }
+        }
+        #endregion
+
+        public short current_slot_holding;
 		public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendInventory(); } }
 
 		byte[] buffer = new byte[0];
@@ -589,6 +603,36 @@ namespace SMP
 			{
 				SendBlockChange(a, type, 0);
 			}
+            public void SendMultiBlockChange(int x, int z, BlockChangeData[] blocks)
+            {
+                blocks = (BlockChangeData[])blocks.Truncate(short.MaxValue);
+                byte[] bytes = new byte[10 + (blocks.Length * 4)];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes((short)blocks.Length).CopyTo(bytes, 8);
+
+                BlockChangeData block;
+                short[] coord = new short[blocks.Length];
+                byte[] type = new byte[blocks.Length];
+                byte[] meta = new byte[blocks.Length];
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    block = blocks[i];
+                    coord[i] = (short)((block.x << 12) | (block.z << 8) | block.y);
+                    type[i] = block.type;
+                    meta[i] = block.meta;
+                }
+                for (int i = 0; i < coord.Length; i++)
+                    util.EndianBitConverter.Big.GetBytes(coord[i]).CopyTo(bytes, 10 + (i * 2));
+                type.CopyTo(bytes, 10 + (blocks.Length * 2));
+                meta.CopyTo(bytes, 10 + (blocks.Length * 3));
+
+                SendRaw(0x34, bytes);
+            }
+            public void SendMultiBlockChange(Point a, BlockChangeData[] blocks)
+            {
+                SendMultiBlockChange(a.x, a.z, blocks);
+            }
             public void SendSoundEffect(int x, byte y, int z, int type, int data)
             {
                 byte[] bytes = new byte[17];
@@ -660,45 +704,61 @@ namespace SMP
             {
                 SendBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2);
             }
-
-            public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2)
+            public void SendItemData(short id, short meta, byte[] data) // This is for maps, not inventory!
             {
-                foreach (Player p1 in Player.players)
-                    if (p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                data = (byte[])data.Truncate(255);
+                byte[] bytes = new byte[5 + data.Length];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(meta).CopyTo(bytes, 2);
+                bytes[4] = (byte)data.Length;
+                data.CopyTo(bytes, 5);
+                SendRaw(0x83, bytes);
+            }
+
+            public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2, World wld)
+            {
+                Player.players.ForEach(delegate(Player p1)
+                {
+                    if (p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
                         p1.SendBlockAction(x, y, z, byte1, byte2);
+                });
             }
-            public static void GlobalBlockAction(Point3 a, byte byte1, byte byte2)
+            public static void GlobalBlockAction(Point3 a, byte byte1, byte byte2, World wld)
             {
-                GlobalBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2);
+                GlobalBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2, wld);
             }
-            public static void GlobalSoundEffect(int x, byte y, int z, int type, int data)
+            public static void GlobalSoundEffect(int x, byte y, int z, int type, int data, World wld)
             {
-                foreach (Player p1 in Player.players)
-                    if (p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                Player.players.ForEach(delegate(Player p1)
+                {
+                    if (p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
                         p1.SendSoundEffect(x, y, z, type, data);
+                });
             }
-            public static void GlobalSoundEffect(int x, byte y, int z, int type)
+            public static void GlobalSoundEffect(int x, byte y, int z, int type, World wld)
             {
-                GlobalSoundEffect(x, y, z, type, 0);
+                GlobalSoundEffect(x, y, z, type, 0, wld);
             }
-            public static void GlobalSoundEffect(Point3 a, int type, int data)
+            public static void GlobalSoundEffect(Point3 a, int type, int data, World wld)
             {
-                GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data);
+                GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data, wld);
             }
-            public static void GlobalSoundEffect(Point3 a, int type)
+            public static void GlobalSoundEffect(Point3 a, int type, World wld)
             {
-                GlobalSoundEffect(a, type, 0);
+                GlobalSoundEffect(a, type, 0, wld);
             }
 
-            public static void GlobalBreakEffect(int x, byte y, int z, int type, Player exclude = null)
+            public static void GlobalBreakEffect(int x, byte y, int z, int type, World wld, Player exclude = null)
             {
-                foreach (Player p1 in Player.players)
-                    if ((p1 != exclude || Server.mode == 1) && p1.MapLoaded && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                Player.players.ForEach(delegate(Player p1)
+                {
+                    if ((p1 != exclude || Server.mode == 1) && p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
                         p1.SendSoundEffect(x, y, z, 2001, type);
+                });
             }
-            public static void GlobalBreakEffect(Point3 a, int type, Player exclude = null)
+            public static void GlobalBreakEffect(Point3 a, int type, World wld, Player exclude = null)
             {
-                GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, exclude);
+                GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, wld, exclude);
             }
             #endregion
             #region Teleport Player

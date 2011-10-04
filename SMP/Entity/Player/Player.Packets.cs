@@ -380,7 +380,7 @@ namespace SMP
                 return;
 
                 doSound:
-                Player.GlobalBreakEffect(x, y, z, rc, Server.mode == 1 ? null : this);
+                Player.GlobalBreakEffect(x, y, z, rc, level, Server.mode == 1 ? null : this);
 		    }
 			if (message[0] == 2)
 			{
@@ -412,7 +412,7 @@ namespace SMP
 				
 				level.BlockChange(x, y, z, 0, 0);
 
-                Player.GlobalBreakEffect(x, y, z, storeId, this);
+                Player.GlobalBreakEffect(x, y, z, storeId, level, this);
 			}
 			if (message[0] == 4)
 			{

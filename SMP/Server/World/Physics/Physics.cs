@@ -78,6 +78,11 @@ namespace SMP
                     Calculate();
                     TimeSpan Took = DateTime.Now - Start;
                     wait = speed - (int)Took.TotalMilliseconds;
+
+                    /*byte b = 0x3;
+                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));
+                    b = b.SetBits(1, 2, 2);
+                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));*/
                 }
                 catch
                 {
@@ -97,8 +102,6 @@ namespace SMP
                         #region Physics Calculations
                         switch (w.GetBlock(C.x, C.y, C.z))
                         {
-                            case (byte)Blocks.Grass:
-                                
                             case (byte)Blocks.AWater:
                             case (byte)Blocks.SWater:
                                 if (setting >= PSetting.Normal)
@@ -108,15 +111,24 @@ namespace SMP
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (WaterFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        WaterFlow(C.x, C.y - 1, C.z, SetHalf(1, 0, 0x8));
+                                        WaterFlow(C.x, C.y - 1, C.z, WaterFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                        {
+                                            WaterFlow(C.x + 1, C.y, C.z, 0x7 | 0x8);
+                                            WaterFlow(C.x - 1, C.y, C.z, 0x7 | 0x8);
+                                            WaterFlow(C.x, C.y, C.z + 1, 0x7 | 0x8);
+                                            WaterFlow(C.x, C.y, C.z - 1, 0x7 | 0x8);
+                                        }
                                     }
                                     else
                                     {
-                                        if (GetHalf(0, meta) >= 0x7) { C.time = 255; break; }
-                                        WaterFlow(C.x + 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x - 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z + 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
-                                        WaterFlow(C.x, C.y, C.z - 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 1)));
+                                        meta = meta.SetBits(3, 0);
+                                        if (meta.GetBits(0, 3) >= 0x7) { C.time = 255; break; }
+                                        WaterFlow(C.x, C.y - 1, C.z, 0);
+                                        WaterFlow(C.x + 1, C.y, C.z, (byte)(meta + 1));
+                                        WaterFlow(C.x - 1, C.y, C.z, (byte)(meta + 1));
+                                        WaterFlow(C.x, C.y, C.z + 1, (byte)(meta + 1));
+                                        WaterFlow(C.x, C.y, C.z - 1, (byte)(meta + 1));
                                     }
                                 }
                                 C.time = 255;
@@ -125,23 +137,44 @@ namespace SMP
                             case (byte)Blocks.ALava:
                                 if (setting >= PSetting.Normal)
                                 {
-                                    if (C.time < 20) { C.time++; break; }
+                                    if (C.time < 30) { C.time++; break; }
 
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
-                                    Console.WriteLine(GetHalf(0, meta) + " " + GetHalf(1, meta));
                                     if (LavaFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        LavaFlow(C.x, C.y - 1, C.z, SetHalf(1, 0, 0x8));
+                                        LavaFlow(C.x, C.y - 1, C.z, LavaFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
+                                        {
+                                            LavaFlow(C.x + 1, C.y, C.z, 0x6 | 0x8);
+                                            LavaFlow(C.x - 1, C.y, C.z, 0x6 | 0x8);
+                                            LavaFlow(C.x, C.y, C.z + 1, 0x6 | 0x8);
+                                            LavaFlow(C.x, C.y, C.z - 1, 0x6 | 0x8);
+                                        }
+                                    }
+                                    else if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                    {
+                                        if (meta.GetBits(0, 3) == 0)
+                                            w.BlockChange(C.x, C.y, C.z, 49, 0);
+                                        else
+                                            w.BlockChange(C.x, C.y, C.z, 4, 0);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4, w);
                                     }
                                     else
                                     {
-                                        if (GetHalf(0, meta) >= 0x6) { C.time = 255; break; }
-                                        LavaFlow(C.x + 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x - 1, C.y, C.z, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z + 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
-                                        LavaFlow(C.x, C.y, C.z - 1, SetHalf(0, 0, (byte)(GetHalf(0, meta) + 2)));
+                                        meta = meta.SetBits(3, 0);
+                                        if (meta.GetBits(0, 3) >= 0x6) { C.time = 255; break; }
+                                        LavaFlow(C.x, C.y - 1, C.z, 0);
+                                        LavaFlow(C.x + 1, C.y, C.z, (byte)(meta + 2));
+                                        LavaFlow(C.x - 1, C.y, C.z, (byte)(meta + 2));
+                                        LavaFlow(C.x, C.y, C.z + 1, (byte)(meta + 2));
+                                        LavaFlow(C.x, C.y, C.z - 1, (byte)(meta + 2));
                                     }
                                 }
+                                C.time = 255;
+                                break;
+                            case (byte)Blocks.Sponge:
+                                SpongePlaced(C.x, C.y, C.z);
                                 C.time = 255;
                                 break;
                             default:
@@ -166,32 +199,12 @@ namespace SMP
             }
         }
 
-        private byte GetHalf(int index, byte data)
-        {
-            return (index % 2 == 0) ? (byte)(data & 0x0F) : (byte)((data >> 4) & 0x0F);
-        }
-        private byte SetHalf(int index, byte data, byte value)
-		{
-			if (index % 2 == 0)
-			{
-				// Set the lower 4 bits
-				byte high = (byte)((data & 0xF0) >> 4);
-				return (byte)((high << 4) | value);
-			}
-			else
-			{
-				// Set the upper 4 bits
-				byte low = (byte)(data & 0x0F);
-                return (byte)((value << 4) | low);
-			}
-		}
-
 
         public void AddCheck(int x, int y, int z, byte meta, bool overRide)
         {
             try
             {
-                if (!Checks.Exists(Check => (Check.x == x && Check.y == y && Check.z == z)))
+                if (!Checks.Exists(Check => (Check != null && Check.x == x && Check.y == y && Check.z == z)))
                 {
                     Checks.Add(new Check(x, y, z, meta));
                 }

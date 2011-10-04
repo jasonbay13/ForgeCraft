@@ -26,20 +26,30 @@ namespace SMP
         public override List<string> Shortcuts { get { return new List<string> { "gm" }; } }
         public override string Category { get { return "other"; } }
         public override bool ConsoleUseable { get { return true; } }
-        public override string Description { get { return "Toggle the gamemode"; } }
+        public override string Description { get { return "Toggle the game mode"; } }
         public override string PermissionNode { get { return "core.other.gamemode"; } }
 
         public override void Use(Player p, params string[] args)
         {
-            Server.mode = (Server.mode == 0 ? (byte)1 : (byte)0);
-            foreach (Player pl in Player.players)
-                pl.SendState(3, Server.mode);
-            Player.GlobalMessage("The gamemode has been changed to " + (Server.mode == 0 ? "Survival" : "Creative") + "!");
+            if (args.Length < 1 || args[0] == "")
+            {
+                Server.mode = Server.mode == 0 ? (byte)1 : (byte)0;
+                foreach (Player pl in Player.players)
+                    pl.Mode = Server.mode;
+                Player.GlobalMessage("The server game mode is now " + (Server.mode == 0 ? Color.DarkRed + "Survival" : Color.DarkGreen + "Creative") + Color.ServerDefaultColor + "!");
+            }
+            else
+            {
+                Player pl = Player.FindPlayer(args[0]);
+                if (pl == null) { p.SendMessage("Could not find player."); return; }
+                pl.Mode = pl.Mode == 0 ? (byte)1 : (byte)0;
+                Player.GlobalMessage("Your game mode is now " + (pl.Mode == 0 ? Color.DarkRed + "Survival" : Color.DarkGreen + "Creative") + Color.ServerDefaultColor + "!");
+            }
         }
 
         public override void Help(Player p)
         {
-            p.SendMessage("/gamemode");
+            p.SendMessage("/gamemode [player]");
         }
     }
 }

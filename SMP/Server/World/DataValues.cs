@@ -545,7 +545,7 @@ namespace SMP
                 case 12:
                 case 13:
                 case 18:
-                //case 19: // Do we want sponge physics?
+                case 19:
                 case 27:
                 case 28:
                 case 29:

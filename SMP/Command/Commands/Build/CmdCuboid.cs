@@ -129,7 +129,7 @@ namespace SMP
                 for (int x1 = xx1; x1 <= x2; ++x1)
                     for (byte y1 = yy1; y1 <= y2; ++y1)
                         for (int z1 = zz1; z1 <= z2; ++z1)
-                            p.level.BlockChange(x1, y1, z1, (byte)type, 0);
+                            p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
                 return;
             }
 
@@ -138,20 +138,20 @@ namespace SMP
                 for (int x1 = xx1; x1 <= x2; ++x1)
                     for (int z1 = zz1; z1 <= z2; ++z1)
                     {
-                        p.level.BlockChange(x1, yy1, z1, (byte)type, 0);
-                        p.level.BlockChange(x1, y2, z1, (byte)type, 0);
+                        p.level.BlockChange(x1, yy1, z1, (byte)type, 0, false);
+                        p.level.BlockChange(x1, y2, z1, (byte)type, 0, false);
                     }
                 for (int y1 = yy1; y1 <= y2; ++y1)
                 {
                     for (int z1 = zz1; z1 <= z2; ++z1)
                     {
-                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0);
-                        p.level.BlockChange(x2, y1, z1, (byte)type, 0);
+                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0, false);
+                        p.level.BlockChange(x2, y1, z1, (byte)type, 0, false);
                     }
                     for (int x1 = xx1; x1 <= x2; ++x1)
                     {
-                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0);
-                        p.level.BlockChange(x1, y1, z2, (byte)type, 0);
+                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0, false);
+                        p.level.BlockChange(x1, y1, z2, (byte)type, 0, false);
                     }
                 }
                 return;
@@ -162,13 +162,13 @@ namespace SMP
                 {
                     for (int z1 = zz1; z1 <= z2; ++z1)
                     {
-                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0);
-                        p.level.BlockChange(x2, y1, z1, (byte)type, 0);
+                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0, false);
+                        p.level.BlockChange(x2, y1, z1, (byte)type, 0, false);
                     }
                     for (int x1 = xx1; x1 <= x2; ++x1)
                     {
-                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0);
-                        p.level.BlockChange(x1, y1, z2, (byte)type, 0);
+                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0, false);
+                        p.level.BlockChange(x1, y1, z2, (byte)type, 0, false);
                     }
                 }
                 return;
@@ -186,7 +186,7 @@ namespace SMP
                         for (int z1 = zz1; z1 <= z2; z1++)
                         {
                             Checked = !Checked;
-                            if (Checked) p.level.BlockChange(x1, y1, z1, (byte)type, 0);
+                            if (Checked) p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
                         }
                         Checked = !startZ;
                     }
@@ -200,7 +200,7 @@ namespace SMP
                 for (int x1 = xx1; x1 <= x2; ++x1)
                     for (byte y1 = yy1; y1 <= y2; ++y1)
                         for (int z1 = zz1; z1 <= z2; ++z1)
-                            if (rand.Next(1, 11) <= 5) p.level.BlockChange(x1, y1, z1, (byte)type, 0);
+                            if (rand.Next(1, 11) <= 5) p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
                 return;
             }
             //if (p.level.GetBlock(x1, y1, z1) != type)
