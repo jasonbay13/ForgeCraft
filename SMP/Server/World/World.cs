@@ -36,15 +36,19 @@ namespace SMP
 		public int seed;
 		public long time;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
+        public System.Timers.Timer blockflush = new System.Timers.Timer(20);
 		public GenStandard generator;
 		public Dictionary<Point, Chunk> chunkData;
+        public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
 		public List<Point> ToGenerate = new List<Point>();
+        public DateTime lastBlockChange = new DateTime(1);
         public Physics physics;
         public bool Raining = false;
 		public byte height = 128;
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
         public int ChunkLimit = int.MaxValue;
+        public int ChunkHeight = 128; // This is 1-based, not 0-based. Got it?
         #region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
@@ -121,6 +125,8 @@ namespace SMP
 				Player.players.ForEach(delegate(Player p) { if (p.level == this) p.SendTime(); });
 			};
 			timeupdate.Start();
+            blockflush.Elapsed += delegate { FlushBlockChanges(); };
+            blockflush.Start();
 			this.name = name;
 
             this.physics = new Physics(this);
@@ -232,6 +238,8 @@ namespace SMP
                 Player.players.ForEach(delegate(Player p) { if (p.level == w) p.SendTime(); });
             };
             w.timeupdate.Start();
+            w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
+            w.blockflush.Start();
             w.name = filename;
 
             w.physics = new Physics(w);
@@ -356,20 +364,60 @@ namespace SMP
             }
             catch (Exception e) { Console.WriteLine(e); }
 		}
-		public void BlockChange(int x, int y, int z, byte type, byte meta)
+        public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
+        {
+            lock (blockQueue)
+            {
+                Point pt = new Point(x >> 4, z >> 4);
+                BlockChangeData data = new BlockChangeData(x & 0xf, y, z & 0xf, type, meta);
+                if (!blockQueue.ContainsKey(pt))
+                    blockQueue.Add(pt, new List<BlockChangeData>());
+                blockQueue[pt].RemoveAll(bl => (bl.x == data.x && bl.y == data.y && bl.z == data.z)); // We don't want multiple with the same coordinates.
+                blockQueue[pt].Add(data);
+            }
+        }
+        public void FlushBlockChanges()
+        {
+            if (blockQueue.Count < 1) return;
+            lock (blockQueue)
+            {
+                foreach (KeyValuePair<Point, List<BlockChangeData>> kvp in blockQueue)
+                {
+                    foreach (Player p in Player.players.ToArray())
+                    {
+                        if (!p.VisibleChunks.Contains(kvp.Key)) continue;
+                        if (p.level == this)
+                            p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
+                    }
+                }
+                blockQueue.Clear();
+            }
+        }
+		public void BlockChange(int x, int y, int z, byte type, byte meta, bool phys = true)
 		{
             try
             {
+                if (y < 0 || y > ChunkHeight - 1) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
-                physics.BlockUpdate(x, y, z);
+                if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);
-                foreach (Player p in Player.players.ToArray())
+                TimeSpan diff = DateTime.Now - lastBlockChange;
+                if (diff.TotalMilliseconds < 10)
                 {
-                    if (!p.VisibleChunks.Contains(chunk.point)) continue;
-                    if (p.level == this)
-                        p.SendBlockChange(x, (byte)y, z, type, meta);
+                    QueueBlockChange(x, y, z, type, meta);
+                }
+                else {
+                    foreach (Player p in Player.players.ToArray())
+                    {
+                        if (!p.VisibleChunks.Contains(chunk.point)) continue;
+                        if (p.level == this)
+                            p.SendBlockChange(x, (byte)y, z, type, meta);
+                    }
+                    FlushBlockChanges();
+                    lastBlockChange = DateTime.Now;
                 }
             }
             catch { return; }
@@ -686,5 +734,21 @@ namespace SMP
        
         
 	}
+
+    // This holds data for the Multi Block Change stuff!
+    public struct BlockChangeData
+    {
+        public int x, y, z;
+        public byte type, meta;
+
+        public BlockChangeData(int x, int y, int z, byte type, byte meta)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.type = type;
+            this.meta = meta;
+        }
+    }
 }
 

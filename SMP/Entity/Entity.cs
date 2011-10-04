@@ -240,18 +240,20 @@ namespace SMP
 				Entity e = Entities[i];
 				if (e.isItem)
 				{
-					Point3 diff = pos.RD() - e.pos.RD();
+					Point3 diff = pos - e.pos;
 
                     //Console.WriteLine(diff.x + " " + diff.z);
-                    if (Math.Abs(diff.x) <= 1 && diff.y <= 0 && diff.y >= -1 && Math.Abs(diff.z) <= 1)
+                    if (Math.Abs(diff.x) <= 1.5 && Math.Floor(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
 
                         p.SendPickupAnimation(e);
-                        foreach (Player p1 in Player.players)
-                            if (p1 != p && p1.VisibleEntities.Contains(p.id))
-                                p1.SendPickupAnimation(e, p);
+                        Player.players.ForEach(delegate(Player pl)
+                        {
+                            if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
+                                pl.SendPickupAnimation(e, p);
+                        });
 
 						e.CurrentChunk.Entities.Remove(e);
 						p.inventory.Add(e.I);
@@ -282,6 +284,21 @@ namespace SMP
 				}
 			}
 		}
+        public static void EntityPhysics()
+        {
+            lock (Entities)
+            {
+                Entity e;
+                foreach (KeyValuePair<int, Entity> kvp in Entities)
+                {
+                    e = kvp.Value;
+                    if (e.isPlayer) continue; // Players don't have physics.
+                    if (e.isObject) continue; // TODO
+                    if (e.isAI) e.ai.Update();
+                    if (e.isItem) e.I.Physics();
+                }
+            }
+        }
 		
 		public static int FreeId()
 		{

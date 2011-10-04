@@ -735,7 +735,8 @@ namespace SMP
 		public static bool PlayNoteblock(Player a, BCS b)
 		{
             // TODO: Check block below for instrument.
-            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
+            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)
@@ -862,7 +863,7 @@ namespace SMP
                 item.e.UpdateChunks(false, false);
             }
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
-            Player.GlobalBreakEffect(b.pos, b.ID, a);
+            Player.GlobalBreakEffect(b.pos, b.ID, a.level, a);
             return false;
 		}
 

@@ -112,6 +112,13 @@ namespace SMP
                                     if (WaterFlowCheck(C.x, C.y - 1, C.z))
                                     {
                                         WaterFlow(C.x, C.y - 1, C.z, WaterFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                        {
+                                            WaterFlow(C.x + 1, C.y, C.z, 0x7 | 0x8);
+                                            WaterFlow(C.x - 1, C.y, C.z, 0x7 | 0x8);
+                                            WaterFlow(C.x, C.y, C.z + 1, 0x7 | 0x8);
+                                            WaterFlow(C.x, C.y, C.z - 1, 0x7 | 0x8);
+                                        }
                                     }
                                     else
                                     {
@@ -130,12 +137,19 @@ namespace SMP
                             case (byte)Blocks.ALava:
                                 if (setting >= PSetting.Normal)
                                 {
-                                    if (C.time < 20) { C.time++; break; }
+                                    if (C.time < 30) { C.time++; break; }
 
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
                                     if (LavaFlowCheck(C.x, C.y - 1, C.z))
                                     {
                                         LavaFlow(C.x, C.y - 1, C.z, LavaFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
+                                        {
+                                            LavaFlow(C.x + 1, C.y, C.z, 0x6);
+                                            LavaFlow(C.x - 1, C.y, C.z, 0x6);
+                                            LavaFlow(C.x, C.y, C.z + 1, 0x6);
+                                            LavaFlow(C.x, C.y, C.z - 1, 0x6);
+                                        }
                                     }
                                     else if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
                                     {
@@ -143,8 +157,8 @@ namespace SMP
                                             w.BlockChange(C.x, C.y, C.z, 49, 0);
                                         else
                                             w.BlockChange(C.x, C.y, C.z, 4, 0);
-                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004);
-                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
+                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4, w);
                                     }
                                     else
                                     {
@@ -157,6 +171,10 @@ namespace SMP
                                         LavaFlow(C.x, C.y, C.z - 1, (byte)(meta + 2));
                                     }
                                 }
+                                C.time = 255;
+                                break;
+                            case (byte)Blocks.Sponge:
+                                SpongePlaced(C.x, C.y, C.z);
                                 C.time = 255;
                                 break;
                             default:
@@ -186,7 +204,7 @@ namespace SMP
         {
             try
             {
-                if (!Checks.Exists(Check => (Check.x == x && Check.y == y && Check.z == z)))
+                if (!Checks.Exists(Check => (Check != null && Check.x == x && Check.y == y && Check.z == z)))
                 {
                     Checks.Add(new Check(x, y, z, meta));
                 }
@@ -207,6 +225,7 @@ namespace SMP
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 Server.ServerLogger.LogError(e);
             }
         }

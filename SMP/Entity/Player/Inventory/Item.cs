@@ -90,6 +90,11 @@ namespace SMP
 			 *	DeleteThisItem();
 			*/
 		}
+
+        public void Physics()
+        {
+            // TODO
+        }
 	}
 }
 
