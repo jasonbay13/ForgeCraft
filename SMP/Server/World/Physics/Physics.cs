@@ -225,7 +225,6 @@ namespace SMP
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 Server.ServerLogger.LogError(e);
             }
         }
