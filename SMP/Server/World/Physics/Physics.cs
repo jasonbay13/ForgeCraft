@@ -145,10 +145,10 @@ namespace SMP
                                         LavaFlow(C.x, C.y - 1, C.z, LavaFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
                                         if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
                                         {
-                                            LavaFlow(C.x + 1, C.y, C.z, 0x6);
-                                            LavaFlow(C.x - 1, C.y, C.z, 0x6);
-                                            LavaFlow(C.x, C.y, C.z + 1, 0x6);
-                                            LavaFlow(C.x, C.y, C.z - 1, 0x6);
+                                            LavaFlow(C.x + 1, C.y, C.z, 0x6 | 0x8);
+                                            LavaFlow(C.x - 1, C.y, C.z, 0x6 | 0x8);
+                                            LavaFlow(C.x, C.y, C.z + 1, 0x6 | 0x8);
+                                            LavaFlow(C.x, C.y, C.z - 1, 0x6 | 0x8);
                                         }
                                     }
                                     else if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
