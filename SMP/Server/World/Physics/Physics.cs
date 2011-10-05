@@ -238,6 +238,11 @@ namespace SMP
             AddCheck(x, y, z, 0, false);
         }
 
+        public void RemoveChunkChecks(int x, int z)
+        {
+            Checks.RemoveAll(Check => ((Check.x >> 4) == x && (Check.z >> 4) == z));
+        }
+
         public class Check
         {
             public byte time, meta;

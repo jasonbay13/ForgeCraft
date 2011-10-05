@@ -45,6 +45,7 @@ namespace SMP
                             {
                                 if (Player.players[i].level == w) Command.core.Find("goto").Use(Player.players[i], Server.mainlevel.name);
                             }
+                            w.SaveLVL();
                             w.chunkData = null;
                             w.generator = null;
                             w.lightningTimer.Dispose();

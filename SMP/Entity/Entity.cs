@@ -145,7 +145,7 @@ namespace SMP
                         {
                             if (!p.level.chunkData.ContainsKey(po))
                             {
-                                p.level.GenerateChunk(po.x, po.z);
+                                p.level.LoadChunk(po.x, po.z);
                             }
                             p.SendChunk(p.level.chunkData[po]);
                         }
@@ -177,6 +177,10 @@ namespace SMP
                     {
                         p.SendPreChunk(p.level.chunkData[point], 0);
                         p.VisibleChunks.Remove(point);
+
+                        bool unloadChunk = true;
+                        Player.players.ForEach(delegate(Player pl) { if (pl.VisibleChunks.Contains(point)) { unloadChunk = false; return; } });
+                        if (unloadChunk) p.level.UnloadChunk(point.x, point.z);
                     }
                 }
             }

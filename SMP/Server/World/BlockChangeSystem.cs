@@ -193,10 +193,9 @@ namespace SMP
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
 			//Change Metadata
-            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
-            meta++; if (meta > 24) meta = 0;
-            a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
-            Console.WriteLine(a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
+            ushort extra = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            extra++; if (extra > 24) extra = 0;
+            a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, extra);
 
 			//Send NoteSound
             PlayNoteblock(a, b);
@@ -784,7 +783,7 @@ namespace SMP
 		{
             // TODO: Check block below for instrument.
             if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
-            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
+            Player.GlobalBlockAction(b.pos, 0, (byte)a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)
@@ -971,7 +970,6 @@ namespace SMP
 		public static byte DirectionByRotFlat(Player p, BCS a, bool invert = false)
 		{
 			byte direction = (byte)Math.Floor((double)((p.rot[0] * 4F) / 360F) + 0.5D);
-            Console.WriteLine(direction);
             direction = (byte)(direction % 4);
             if (invert)
                 switch (direction)

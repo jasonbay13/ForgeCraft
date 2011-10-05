@@ -22,7 +22,7 @@ using zlib;
 
 namespace SMP
 {
-	public partial class Chunk
+	public partial class Chunk : IDisposable
 	{
 		static int Width = 16;
 		static int Depth = 16;
@@ -32,11 +32,14 @@ namespace SMP
 		public byte[] Light;
 		public byte[] SkyL;
 		public byte[] meta;
+        public Dictionary<int, ushort> extra;
 		public int x;
 		public int z;
 		public bool mountain = true;
+        private bool _dirty = false;
 
 		public Point point { get { return new Point(x, z); } }
+        public bool dirty { get { return this._dirty; } }
 
 		public List<Entity> Entities = new List<Entity>();
 
@@ -59,7 +62,7 @@ namespace SMP
 		public event OnBlockPlaced BlockPlaced;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SMP.Chunck"/> class with the default Block Count (32768)
+		/// Initializes a new instance of the <see cref="SMP.Chunk"/> class with the default Block Count (32768)
 		/// </summary>
 		/// <param name='x'>
 		/// X. The x position of the chunk
@@ -73,10 +76,11 @@ namespace SMP
 			Light = new byte[16384];
 			SkyL = new byte[16384];
 			meta = new byte[16384];
+            extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SMP.Chunck"/> class with a custom Block Count
+		/// Initializes a new instance of the <see cref="SMP.Chunk"/> class with a custom Block Count
 		/// </summary>
 		/// <param name='x'>
 		/// X. The x position of the chunk
@@ -93,8 +97,76 @@ namespace SMP
 			Light = new byte[BlockCount / 2];
 			SkyL = new byte[BlockCount / 2];
 			meta = new byte[BlockCount / 2];
+            extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
+
+        public static Chunk Load(int x, int z, World w)
+        {
+            string file = w.name + "/chunks/" + Convert.ToString(x & 0x3f, 16) + "/" + Convert.ToString(z & 0x3f, 16) + "/" + x.ToString() + "." + z.ToString() + ".chunk";
+            if (File.Exists(file))
+            {
+                Chunk ch = new Chunk(x, z);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (FileStream fs = new FileStream(file, FileMode.Open))
+                    {
+                        byte[] comp;
+                        ms.SetLength(fs.Length);
+                        fs.Read(ms.GetBuffer(), 0, (int)fs.Length);
+                        comp = ms.GetBuffer().Decompress();
+                        ms.Write(comp, 0, comp.Length);
+                    }
+                    byte[] bytes = ms.ToArray();
+                    Array.Copy(bytes, ch.blocks, 32768);
+                    Array.Copy(bytes, 32768, ch.meta, 0, 16384);
+                    Array.Copy(bytes, 49152, ch.SkyL, 0, 16384);
+                    Array.Copy(bytes, 65536, ch.Light, 0, 16384);
+                    int index = 81922;
+                    short extraCount = BitConverter.ToInt16(bytes, index - 2);
+                    lock (ch.extra)
+                        for (int i = 0; i < extraCount; i++)
+                        {
+                            ch.extra.Add(BitConverter.ToInt32(bytes, index), BitConverter.ToUInt16(bytes, index + 4));
+                            index += 6;
+                        }
+                }
+                //Console.WriteLine("LOADED " + x + " " + z);
+                return ch;
+            }
+            //Console.WriteLine("GENERATED " + x + " " + z);
+            return w.GenerateChunk(x, z);
+        }
+
+        public void Save(World w)
+        {
+            string path = w.name + "/chunks/" + Convert.ToString(x & 0x3f, 16) + "/" + Convert.ToString(z & 0x3f, 16);
+            string file = path + "/" + x.ToString() + "." + z.ToString() + ".chunk";
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            using (MemoryStream data = new MemoryStream())
+            {
+                data.Write(blocks, 0, blocks.Length);
+                data.Write(meta, 0, meta.Length);
+                data.Write(SkyL, 0, SkyL.Length);
+                data.Write(Light, 0, Light.Length);
+                data.Write(BitConverter.GetBytes((short)extra.Count), 0, 2);
+                lock (extra)
+                    foreach (KeyValuePair<int, ushort> kvp in extra)
+                    {
+                        data.Write(BitConverter.GetBytes((int)kvp.Key), 0, 4);
+                        data.Write(BitConverter.GetBytes((ushort)kvp.Value), 0, 2);
+                    }
+
+                byte[] bytes;
+                bytes = data.ToArray().Compress();
+                using (FileStream fs = new FileStream(file, FileMode.Create))
+                {
+                    fs.Write(bytes, 0, (int)bytes.Length);
+                }
+            }
+            this._dirty = false;
+            //Console.WriteLine("SAVED " + x + " " + z);
+        }
 
 		public void SetBlockLight(int x, int y, int z, byte light)
 		{
@@ -103,6 +175,7 @@ namespace SMP
 				int index = PosToInt(x, y, z);
 				SetHalf(index, light, ref Light[index / 2]);
 			}
+            this._dirty = true;
 		}
 		public byte GetBlockLight(int x, int y, int z)
 		{
@@ -124,6 +197,7 @@ namespace SMP
 				int index = PosToInt(x, y, z);
 				SetHalf(index, light, ref SkyL[index / 2]);
 			}
+            this._dirty = true;
 		}
 		public byte GetSkyLight(int x, int y, int z)
 		{
@@ -145,6 +219,7 @@ namespace SMP
 				int index = PosToInt(x, y, z);
 				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]); // Why did Notch make metadata a nibble? WHY!?
 			}
+            this._dirty = true;
 		}
 		public byte GetMetaData(int x, int y, int z)
 		{
@@ -159,6 +234,25 @@ namespace SMP
 				return 0xFF;
 			}
 		}
+        public void SetExtraData(int x, int y, int z, ushort data)
+        {
+            int index = PosToInt(x, y, z);
+            if (!extra.ContainsKey(index)) extra.Add(index, data);
+            else extra[index] = data;
+            this._dirty = true;
+        }
+        public void UnsetExtraData(int x, int y, int z)
+        {
+            int index = PosToInt(x, y, z);
+            if (extra.ContainsKey(index)) extra.Remove(index);
+            this._dirty = true;
+        }
+        public ushort GetExtraData(int x, int y, int z)
+        {
+            int index = PosToInt(x, y, z);
+            if (!extra.ContainsKey(index)) return 0;
+            return extra[index];
+        }
 		private void SetHalf(int index, byte value, ref byte data)
 		{
 			if (index % 2 == 0)
@@ -237,6 +331,7 @@ namespace SMP
 				blocks[PosToInt(x, y, z)] = id;
 				SetMetaData(x, y, z, meta);
 			}
+            this._dirty = true;
 		}
 		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id)
 		{
@@ -246,6 +341,7 @@ namespace SMP
 		{
 			blocks[PosToInt(x, y, z)] = id;
 			if(meta != 0) SetMetaData(x, y, z, meta);
+            this._dirty = true;
 		}
 
 		//DO NOT USE ANY FORM OF CHUNK.GETBLOCK UNLESS YOU REALLY KNOW YOU WANT TO, USE WORLD.GETBLOCK INSTEAD (TRUST ME, YOU WILL ONLY CAUSE ERRORS IF YOU USE THIS)
@@ -305,6 +401,17 @@ namespace SMP
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];
             return null;
+        }
+
+        public void Dispose()
+        {
+            blocks = null;
+            meta = null;
+            SkyL = null;
+            Light = null;
+            Entities = null;
+            extra.Clear();
+            extra = null;
         }
 	}
 }

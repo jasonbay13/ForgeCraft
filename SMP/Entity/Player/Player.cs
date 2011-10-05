@@ -1091,6 +1091,59 @@ namespace SMP
 				SendRaw(0x05, bytes);
 			}
 
+            public void SendEntityMeta(int eid, object[] data) // This packet isn't fully understood, so this method may or may not work. Needs testing...
+            {
+                List<byte> bytes = new List<byte>();
+                bytes.AddRange(util.EndianBitConverter.Big.GetBytes(eid));
+                foreach (object obj in data)
+                {
+                    if (obj == null) continue;
+                    if (obj.GetType() == typeof(byte))
+                    {
+                        bytes.Add(0x00);
+                        bytes.Add((byte)obj);
+                    }
+                    else if (obj.GetType() == typeof(short))
+                    {
+                        bytes.Add(0x01);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
+                    }
+                    else if (obj.GetType() == typeof(int))
+                    {
+                        bytes.Add(0x02);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
+                    }
+                    else if (obj.GetType() == typeof(float))
+                    {
+                        bytes.Add(0x03);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
+                    }
+                    else if (obj.GetType() == typeof(string))
+                    {
+                        bytes.Add(0x04);
+                        bytes.AddRange(Encoding.ASCII.GetBytes((string)obj));
+                    }
+                    else if (obj.GetType() == typeof(Item))
+                    {
+                        Item item = (Item)obj;
+                        bytes.Add(0x05);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.item));
+                        bytes.Add(item.count);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
+                    }
+                    else if (obj.GetType() == typeof(Point3))
+                    {
+                        Point3 point = (Point3)obj;
+                        bytes.Add(0x06);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
+                    }
+                }
+                bytes.Add(0x7F);
+                SendRaw(0x28, bytes.ToArray());
+            }
+
 			public void SendDespawn(int id) //Despawn ALL types of Entities (player mod item)
 			{
 				if (!LoggedIn)
