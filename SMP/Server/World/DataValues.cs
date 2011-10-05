@@ -534,6 +534,7 @@ namespace SMP
         {
             switch (a)
             {
+                case 2:
                 case 3:
                 case 6:
                 case 8:

@@ -542,7 +542,10 @@ namespace SMP
 			{
 				if(BlockChange.ItemRightClick.ContainsKey(blockID))
 				{
-					BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage));
+                    if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
+                    {
+                        if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
+                    }
 				}
 				return;
 			}

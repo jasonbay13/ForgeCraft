@@ -16,7 +16,7 @@ namespace SMP
         public static Array Truncate(this Array source, int maxLength)
         {
             if (source.Length > maxLength)
-                Buffer.BlockCopy(source, 0, source, 0, maxLength);
+                Array.Copy(source, 0, source, 0, maxLength);
             return source;
         }
 

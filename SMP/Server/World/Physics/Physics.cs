@@ -67,6 +67,7 @@ namespace SMP
             {
                 try
                 {
+                    //Player.players.ForEach(delegate(Player p) { Console.WriteLine(p.rot[0]); });
                     if (wait > 0) Thread.Sleep(wait);
                     if (setting == PSetting.None || paused || Checks.Count == 0)
                     {

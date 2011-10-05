@@ -243,16 +243,16 @@ namespace SMP
 					Point3 diff = pos - e.pos;
 
                     //Console.WriteLine(diff.x + " " + diff.z);
-                    if (Math.Abs(diff.x) <= 1.5 && Math.Floor(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
+                    if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
 
-                        p.SendPickupAnimation(e);
+                        p.SendPickupAnimation(e.id);
                         Player.players.ForEach(delegate(Player pl)
                         {
                             if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
-                                pl.SendPickupAnimation(e, p);
+                                pl.SendPickupAnimation(e.id, p.id);
                         });
 
 						e.CurrentChunk.Entities.Remove(e);
