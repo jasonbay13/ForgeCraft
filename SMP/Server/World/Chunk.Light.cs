@@ -34,7 +34,7 @@ namespace SMP
 			{
 				block = blocks[Chunk.PosToInt(x, y, z)];
 				curLight -= LightOpacity[block];
-				if (curLight <= 0) break;
+                //if (curLight <= 0) break; // It's not that simple...
 				SetSkyLight(x, y, z, (byte)curLight);
 			}
 		}

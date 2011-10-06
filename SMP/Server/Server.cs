@@ -54,7 +54,7 @@ namespace SMP
         
         #endregion
 
-        public static System.Timers.Timer keepAliveTimer = new System.Timers.Timer(2000);
+        public static System.Timers.Timer keepAliveTimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
 		public static MainLoop ml;

@@ -280,7 +280,7 @@
     <Compile Include="Command\Commands\Moderation\CmdKick.cs" />
     <Compile Include="Command\Commands\Moderation\CmdKill.cs" />
     <Compile Include="Command\Commands\Information\CmdList.cs" />
-    <Compile Include="Command\Commands\Gag\CmdLoadLVL.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdLoadLVL.cs" />
     <Compile Include="Command\Commands\Information\CmdMe.cs" />
     <Compile Include="Command\Commands\General\CmdMotd.cs" />
     <Compile Include="Command\Commands\General\CmdMsg.cs" />

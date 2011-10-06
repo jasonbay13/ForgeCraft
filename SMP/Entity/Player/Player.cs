@@ -244,8 +244,8 @@ namespace SMP
 					case 0xFF: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //DC
 
 					default:
-                        Server.Log("unhandled message id " + msg);
-					    Kick("Unknown Packet id: " + msg);
+                        Server.ServerLogger.Log("Unhandled message ID: " + msg);
+					    Kick("Unknown packet ID: " + msg);
 						return new byte[0];
 				}
 				if (buffer.Length > length)
@@ -727,25 +727,25 @@ namespace SMP
             {
                 GlobalBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2, wld);
             }
-            public static void GlobalSoundEffect(int x, byte y, int z, int type, int data, World wld)
+            public static void GlobalSoundEffect(int x, byte y, int z, int type, int data, World wld, Player exclude = null)
             {
                 Player.players.ForEach(delegate(Player p1)
                 {
-                    if (p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
+                    if (p1 != exclude && p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
                         p1.SendSoundEffect(x, y, z, type, data);
                 });
             }
-            public static void GlobalSoundEffect(int x, byte y, int z, int type, World wld)
+            public static void GlobalSoundEffect(int x, byte y, int z, int type, World wld, Player exclude = null)
             {
-                GlobalSoundEffect(x, y, z, type, 0, wld);
+                GlobalSoundEffect(x, y, z, type, 0, wld, exclude);
             }
-            public static void GlobalSoundEffect(Point3 a, int type, int data, World wld)
+            public static void GlobalSoundEffect(Point3 a, int type, int data, World wld, Player exclude = null)
             {
-                GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data, wld);
+                GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data, wld, exclude);
             }
-            public static void GlobalSoundEffect(Point3 a, int type, World wld)
+            public static void GlobalSoundEffect(Point3 a, int type, World wld, Player exclude = null)
             {
-                GlobalSoundEffect(a, type, 0, wld);
+                GlobalSoundEffect(a, type, 0, wld, exclude);
             }
 
             public static void GlobalBreakEffect(int x, byte y, int z, int type, World wld, Player exclude = null)
@@ -1056,16 +1056,16 @@ namespace SMP
 				bytes[23] = e1.I.rot[2];
 				SendRaw(0x15, bytes);
 			}
-            public void SendPickupAnimation(Entity e1)
-            {
-                SendPickupAnimation(e1, this);
-            }
-            public void SendPickupAnimation(Entity e1, Player p1)
+            public void SendPickupAnimation(int eid, int pid)
             {
                 byte[] bytes = new byte[8];
-                util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
-                util.EndianBitConverter.Big.GetBytes(p1.id).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(pid).CopyTo(bytes, 4);
                 SendRaw(0x16, bytes);
+            }
+            public void SendPickupAnimation(int eid)
+            {
+                SendPickupAnimation(eid, this.id);
             }
 
 			public void SendEntityPosVelocity()
@@ -1090,6 +1090,59 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(a).CopyTo(bytes, 8);
 				SendRaw(0x05, bytes);
 			}
+
+            public void SendEntityMeta(int eid, object[] data) // This packet isn't fully understood, so this method may or may not work. Needs testing...
+            {
+                List<byte> bytes = new List<byte>();
+                bytes.AddRange(util.EndianBitConverter.Big.GetBytes(eid));
+                foreach (object obj in data)
+                {
+                    if (obj == null) continue;
+                    if (obj.GetType() == typeof(byte))
+                    {
+                        bytes.Add(0x00);
+                        bytes.Add((byte)obj);
+                    }
+                    else if (obj.GetType() == typeof(short))
+                    {
+                        bytes.Add(0x01);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
+                    }
+                    else if (obj.GetType() == typeof(int))
+                    {
+                        bytes.Add(0x02);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
+                    }
+                    else if (obj.GetType() == typeof(float))
+                    {
+                        bytes.Add(0x03);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
+                    }
+                    else if (obj.GetType() == typeof(string))
+                    {
+                        bytes.Add(0x04);
+                        bytes.AddRange(Encoding.ASCII.GetBytes((string)obj));
+                    }
+                    else if (obj.GetType() == typeof(Item))
+                    {
+                        Item item = (Item)obj;
+                        bytes.Add(0x05);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.item));
+                        bytes.Add(item.count);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
+                    }
+                    else if (obj.GetType() == typeof(Point3))
+                    {
+                        Point3 point = (Point3)obj;
+                        bytes.Add(0x06);
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
+                    }
+                }
+                bytes.Add(0x7F);
+                SendRaw(0x28, bytes.ToArray());
+            }
 
 			public void SendDespawn(int id) //Despawn ALL types of Entities (player mod item)
 			{
@@ -1407,9 +1460,10 @@ namespace SMP
 
         private void UpdatePList(bool keep)
         {
+            string uname = username.Truncate(16);
             byte[] bytes = new byte[5 + (username.Length * 2)];
-            util.EndianBitConverter.Big.GetBytes((short)username.Length).CopyTo(bytes, 0);
-            Encoding.BigEndianUnicode.GetBytes(username).CopyTo(bytes, 2);
+            util.EndianBitConverter.Big.GetBytes((short)uname.Length).CopyTo(bytes, 0);
+            Encoding.BigEndianUnicode.GetBytes(uname).CopyTo(bytes, 2);
             util.EndianBitConverter.Big.GetBytes(keep).CopyTo(bytes, bytes.Length - 3);
             util.EndianBitConverter.Big.GetBytes(Ping).CopyTo(bytes, bytes.Length - 2);
             players.ForEach((p) => p.SendRaw(0xC9, bytes));

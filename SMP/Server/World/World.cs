@@ -82,6 +82,7 @@ namespace SMP
             this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
 			generator = new GenStandard();
+            this.name = name;
 			Server.Log("Generating...");
 
 			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
@@ -90,7 +91,7 @@ namespace SMP
 	            {
 	                Parallel.For(-3, 3, delegate(int z)
 	                {
-	                    GenerateChunk(x, z);
+                        LoadChunk(x, z);
 	                });
 	                Server.Log(x + " Row Generated.");
 	
@@ -102,7 +103,7 @@ namespace SMP
 				{
 				    for (int z = -3; z <= 3; z++)
 				    {
-				        GenerateChunk(x, z);
+                        LoadChunk(x, z);
 				    }
 			    	Server.Log(x + " Row Generated.");
 				}		
@@ -119,7 +120,6 @@ namespace SMP
 			timeupdate.Start();
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();
-			this.name = name;
 
             this.physics = new Physics(this);
             this.physics.Start();
@@ -143,15 +143,58 @@ namespace SMP
             if (tempLevel != null) return tempLevel;
             return null;
 		}
+
+        #region Chunk Saving/Loading
+        public void LoadChunk(int x, int z)
+        {
+            LoadChunk(x, z, this);
+        }
+        public static void LoadChunk(int x, int z, World w)
+        {
+            Point pt = new Point(x, z);
+            Chunk ch = Chunk.Load(x, z, w);
+            lock (w.chunkData)
+                if (!w.chunkData.ContainsKey(pt))
+                    w.chunkData.Add(pt, ch);
+        }
+
+        public void UnloadChunk(int x, int z)
+        {
+            UnloadChunk(x, z, this);
+        }
+        public static void UnloadChunk(int x, int z, World w)
+        {
+            Point pt = new Point(x, z);
+            SaveChunk(x, z, w);
+            lock (w.chunkData)
+                if (w.chunkData.ContainsKey(pt))
+                {
+                    w.chunkData[pt].Dispose();
+                    w.chunkData.Remove(pt);
+                }
+        }
+
+        public void SaveChunk(int x, int z)
+        {
+            SaveChunk(x, z, this);
+        }
+        public static void SaveChunk(int x, int z, World w)
+        {
+            Chunk ch = Chunk.GetChunk(x, z, w);
+            if (ch == null || !ch.dirty) return;
+            ch.Save(w);
+        }
+        #endregion
+
         public static World LoadLVL(string filename)
         {
             //TODO make loading/saving better.
             //if (WorldLoad != null)
             //	WorldLoad(this);
-            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard() };
+            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard(), name = filename };
             Server.Log("Loading...");
 
-            using (MemoryStream ms = new MemoryStream())
+            /*using (MemoryStream ms = new MemoryStream())
             {
                 using (FileStream fs = new FileStream(filename + "/" + filename + ".blocks", FileMode.Open))
                 {
@@ -209,9 +252,31 @@ namespace SMP
 	                    }
 	                }
 				}
-                World.worlds.Add(w);
-                Server.Log(filename + " Loaded.");
+            }*/
+
+            try
+            {
+                Parallel.For(-3, 3, x =>
+                {
+                    Parallel.For(-3, 3, z =>
+                    {
+                        w.LoadChunk(x, z);
+                    });
+                });
             }
+            catch (NotImplementedException)
+            {
+                for (int x = -3; x < 3; x++)
+                {
+                    for (int z = -3; z < 3; z++)
+                    {
+                        w.LoadChunk(x, z);
+                    }
+                }
+            }
+
+            World.worlds.Add(w);
+            Server.Log(filename + " Loaded.");
 
             using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
             {
@@ -232,7 +297,6 @@ namespace SMP
             w.timeupdate.Start();
             w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
             w.blockflush.Start();
-            w.name = filename;
 
             w.physics = new Physics(w);
             w.physics.Start();
@@ -261,7 +325,7 @@ namespace SMP
                 sw.WriteLine(w.SpawnZ);
                 sw.WriteLine(w.ChunkLimit);
             }
-            using (MemoryStream blocks = new MemoryStream())
+            /*using (MemoryStream blocks = new MemoryStream())
             {
                 lock (w.chunkData)
                     foreach (Chunk ch in w.chunkData.Values)
@@ -277,6 +341,13 @@ namespace SMP
                 using (FileStream fs = new FileStream(w.name + "/" + w.name + ".blocks", FileMode.Create))
                 {
                     fs.Write(bytes, 0, (int)bytes.Length);
+                }
+            }*/
+            lock (w.chunkData)
+            {
+                foreach (Chunk ch in w.chunkData.Values)
+                {
+                    w.SaveChunk(ch.x, ch.z);
                 }
             }
             Server.Log(w.name + " Saved.");
@@ -297,11 +368,11 @@ namespace SMP
         {
             using (MemoryStream outMemoryStream = new MemoryStream())
             using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream))
-            using (Stream inMemoryStream = new MemoryStream(inData))
+            using (MemoryStream inMemoryStream = new MemoryStream(inData))
             {
-                CopyStream(inMemoryStream, outZStream);
-                outZStream.finish();
-                outData = outMemoryStream.ToArray();
+                Console.WriteLine("z0"); CopyStream(inMemoryStream, outZStream); Console.WriteLine("z1");
+                outZStream.finish(); Console.WriteLine("z2");
+                outData = outMemoryStream.ToArray(); Console.WriteLine("z3");
             }
         }
 
@@ -335,26 +406,22 @@ namespace SMP
 			//Not sure if lightning needs depsawned, seems to not require it.
 		}
 
-		public void GenerateChunk(int x, int z)
+		public Chunk GenerateChunk(int x, int z)
 		{
-            // Temporary fix for epic fail in chunk generation...
-            try
-            {
-                Chunk c = new Chunk(x, z);
-                generator.Generate(this, c);
-                //generator.PerlinChunk(c);
-                //generator.RandMap(c, seed);
-                c.RecalculateLight();
-                c.SpreadLight();
-                if (GeneratedChunk != null)
-                    GeneratedChunk(this, c, x, z);
-                if (WorldGenerateChunk != null)
-                    WorldGenerateChunk(this, c, x, z);
-                lock (chunkData)
-                    if (!chunkData.ContainsKey(new Point(x, z)))
-                        chunkData.Add(new Point(x, z), c);
-            }
-            catch (Exception e) { Console.WriteLine(e); }
+            Chunk c = new Chunk(x, z);
+            generator.Generate(this, c);
+            //generator.PerlinChunk(c);
+            //generator.RandMap(c, seed);
+            c.RecalculateLight();
+            c.SpreadLight();
+            if (GeneratedChunk != null)
+                GeneratedChunk(this, c, x, z);
+            if (WorldGenerateChunk != null)
+                WorldGenerateChunk(this, c, x, z);
+            /*lock (chunkData)
+                if (!chunkData.ContainsKey(new Point(x, z)))
+                    chunkData.Add(new Point(x, z), c);*/
+            return c;
 		}
         public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
         {
@@ -393,6 +460,7 @@ namespace SMP
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
+                chunk.RecalculateLight();
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);
@@ -444,6 +512,36 @@ namespace SMP
             }
             catch { return; }
 		}
+        public ushort GetExtra(int x, int y, int z)
+        {
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                return chunk.GetExtraData(x & 0xf, y, z & 0xf);
+            }
+            catch { return 0; }
+        }
+        public void SetExtra(int x, int y, int z, ushort data)
+        {
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                chunk.SetExtraData(x & 0xf, y, z & 0xf, data);
+            }
+            catch { return; }
+        }
+        public void UnsetExtra(int x, int y, int z)
+        {
+            try
+            {
+                int cx = x >> 4, cz = z >> 4;
+                Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                chunk.UnsetExtraData(x & 0xf, y, z & 0xf);
+            }
+            catch { return; }
+        }
 	}
 	public struct Point : IEquatable<Point>
 	{

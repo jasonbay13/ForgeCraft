@@ -145,7 +145,7 @@ namespace SMP
                         {
                             if (!p.level.chunkData.ContainsKey(po))
                             {
-                                p.level.GenerateChunk(po.x, po.z);
+                                p.level.LoadChunk(po.x, po.z);
                             }
                             p.SendChunk(p.level.chunkData[po]);
                         }
@@ -177,6 +177,10 @@ namespace SMP
                     {
                         p.SendPreChunk(p.level.chunkData[point], 0);
                         p.VisibleChunks.Remove(point);
+
+                        bool unloadChunk = true;
+                        Player.players.ForEach(delegate(Player pl) { if (pl.VisibleChunks.Contains(point)) { unloadChunk = false; return; } });
+                        if (unloadChunk) p.level.UnloadChunk(point.x, point.z);
                     }
                 }
             }
@@ -243,16 +247,16 @@ namespace SMP
 					Point3 diff = pos - e.pos;
 
                     //Console.WriteLine(diff.x + " " + diff.z);
-                    if (Math.Abs(diff.x) <= 1.5 && Math.Floor(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
+                    if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
 						if (!e.I.OnGround) continue;
 						e.I.OnGround = false;
 
-                        p.SendPickupAnimation(e);
+                        p.SendPickupAnimation(e.id);
                         Player.players.ForEach(delegate(Player pl)
                         {
                             if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
-                                pl.SendPickupAnimation(e, p);
+                                pl.SendPickupAnimation(e.id, p.id);
                         });
 
 						e.CurrentChunk.Entities.Remove(e);

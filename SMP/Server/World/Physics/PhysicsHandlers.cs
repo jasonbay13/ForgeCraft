@@ -49,7 +49,7 @@ namespace SMP
             if (SpongeCheck(x, y, z)) return;
             byte block = w.GetBlock(x, y, z);
             byte bMeta = w.GetMeta(x, y, z);
-            if (block == 0 || block == 51 || ((block == 8 || block == 9) && (meta.GetBits(3, 1) == 0x8 || meta.GetBits(0, 3) < bMeta)))
+            if (block == 0 || block == 51 || ((block == 8 || block == 9) && meta.GetBits(0, 3) < bMeta))
             {
                 w.BlockChange(x, y, z, 8, meta);
                 if (block == 51)
@@ -81,7 +81,7 @@ namespace SMP
         {
             byte block = w.GetBlock(x, y, z);
             byte bMeta = w.GetMeta(x, y, z);
-            if (block == 0 || block == 51 || ((block == 10 || block == 11) && (meta.GetBits(3, 1) == 0x8 || meta.GetBits(0, 3) < bMeta)))
+            if (block == 0 || block == 51 || ((block == 10 || block == 11) && meta.GetBits(0, 3) < bMeta))
             {
                 w.BlockChange(x, y, z, 10, meta);
                 if (block == 51)

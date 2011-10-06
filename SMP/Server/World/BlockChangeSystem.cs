@@ -53,6 +53,8 @@ namespace SMP
 			RightClickedOn.Add((short)Blocks.CakeBlock, new BCD(EatCake));
 			RightClickedOn.Add((short)Blocks.RedstoneRepeaterOff, new BCD(ChangeRepeater));
 			RightClickedOn.Add((short)Blocks.RedstoneRepeaterOn, new BCD(ChangeRepeater));
+            RightClickedOn.Add((short)Blocks.DoorWooden, new BCD(OpenDoor));
+            RightClickedOn.Add((short)Blocks.DoorIron, new BCD(DoNothing));
 
 			//Item RightClick Deletgates (Holds Delegates for when the player right clicks with specific items)
 			ItemRightClick.Add((short)Items.FlintAndSteel, new BCD(LightFire));
@@ -154,6 +156,10 @@ namespace SMP
 			Destroyed.Add((short)Blocks.GlowstoneBlock, new BCD(DestroyGlowStone)); //Drop random amount
 		}
 
+        public static bool DoNothing(Player a, BCS b)
+        {
+            return false;
+        }
 		public static bool Till(Player a, BCS b)
 		{
 			if (a.inventory.current_item.item == (short)Items.DiamondHoe || a.inventory.current_item.item == (short)Items.IronHoe || a.inventory.current_item.item == (short)Items.GoldHoe || a.inventory.current_item.item == (short)Items.StoneHoe || a.inventory.current_item.item == (short)Items.WoodenHoe)
@@ -187,10 +193,9 @@ namespace SMP
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
 			//Change Metadata
-            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
-            meta++; if (meta > 24) meta = 0;
-            a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
-            Console.WriteLine(a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
+            ushort extra = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            extra++; if (extra > 24) extra = 0;
+            a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, extra);
 
 			//Send NoteSound
             PlayNoteblock(a, b);
@@ -367,7 +372,28 @@ namespace SMP
 		}
 		public static bool PlaceIronDoor(Player a, BCS b)
 		{
-			return false;
+            //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
+            if (b.Direction != 1) return false;
+            byte rot = DirectionByRotFlat(a, b);
+            switch (rot)
+            {
+                case (byte)Directions.North:
+                    rot = (byte)Doors.SouthWest;
+                    break;
+                case (byte)Directions.East:
+                    rot = (byte)Doors.NorthWest;
+                    break;
+                case (byte)Directions.South:
+                    rot = (byte)Doors.NorthEast;
+                    break;
+                case (byte)Directions.West:
+                    rot = (byte)Doors.SouthEast;
+                    break;
+            }
+
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.DoorIron, rot);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, (byte)Blocks.DoorIron, (byte)(rot | 0x8));
+            return true;
 		}
 		public static bool PlaceMinecart(Player a, BCS b)
 		{
@@ -399,7 +425,28 @@ namespace SMP
 		}
 		public static bool PlaceWoodenDoor(Player a, BCS b)
 		{
-			return false;
+            //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
+            if (b.Direction != 1) return false;
+            byte rot = DirectionByRotFlat(a, b);
+            switch (rot)
+            {
+                case (byte)Directions.North:
+                    rot = (byte)Doors.SouthWest;
+                    break;
+                case (byte)Directions.East:
+                    rot = (byte)Doors.NorthWest;
+                    break;
+                case (byte)Directions.South:
+                    rot = (byte)Doors.NorthEast;
+                    break;
+                case (byte)Directions.West:
+                    rot = (byte)Doors.SouthEast;
+                    break;
+            }
+
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.DoorWooden, rot);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, (byte)Blocks.DoorWooden, (byte)(rot | 0x8));
+			return true;
 		}
 		public static bool PlantSeeds(Player a, BCS b)
 		{
@@ -465,8 +512,8 @@ namespace SMP
 			{
 				case (0):
 				case (1):
-					return false;
-
+					b.Direction = DirectionByRotFlat(a, b);
+                    break;
 				case ((byte)Directions.East):
 					b.Direction = (byte)Buttons.West;
 					break;
@@ -503,13 +550,13 @@ namespace SMP
 		}
 		public static bool PlaceDispenser(Player a, BCS b)
 		{
+            retry:
 			switch (b.Direction)
 			{
 				case (0):
 				case (1):
-                    Server.Log(DirectionByRotFlat(a, b) + "");
-					return false;
-
+                    b.Direction = DirectionByRotFlat(a, b, true);
+                    goto retry;
 				case ((byte)Directions.South):
 					b.Direction = (byte)Dispenser.South;
 					break;
@@ -541,8 +588,8 @@ namespace SMP
 			{
 				case (0):
 				case (1):
-					return false;
-
+                    b.Direction = DirectionByRotFlat(a, b);
+                    break;
 				case ((byte)Directions.East):
 					b.Direction = (byte)Furnace.East;
 					break;
@@ -736,11 +783,26 @@ namespace SMP
 		{
             // TODO: Check block below for instrument.
             if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
-            Player.GlobalBlockAction(b.pos, 0, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
+            Player.GlobalBlockAction(b.pos, 0, (byte)a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)
 		{
+            byte type = a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            if ((meta & 0x8) == 0)
+            {
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, type, (byte)(meta ^ 0x4));
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, type, (byte)((meta | 0x8) ^ 0x4));
+            }
+            else
+            {
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, type, (byte)(meta ^ 0x4));
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z, type, (byte)((meta ^ 0x8) ^ 0x4));
+            }
+            Player.GlobalSoundEffect(b.pos, 1003, a.level, a);
 			return false;
 		}
 		public static bool SwitchLever(Player a, BCS b)
@@ -793,11 +855,49 @@ namespace SMP
 		}
 		public static bool DestroyDoorWood(Player a, BCS b)
 		{
+            byte type = a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            if ((meta & 0x8) == 0)
+            {
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, 0, 0);
+            }
+            else
+            {
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z, 0, 0);
+            }
+
+            if (Server.mode == 0)
+            {
+                Item itemDrop = new Item((short)Items.DoorWooden, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                itemDrop.e.UpdateChunks(false, false);
+            }
 			return false;
 		}
 		public static bool DestroyDoorIron(Player a, BCS b)
 		{
-			return false;
+            byte type = a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            if ((meta & 0x8) == 0)
+            {
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, 0, 0);
+            }
+            else
+            {
+                if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z) == type)
+                    a.level.BlockChange((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z, 0, 0);
+            }
+
+            if (Server.mode == 0)
+            {
+                Item itemDrop = new Item((short)Items.DoorIron, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                itemDrop.e.UpdateChunks(false, false);
+            }
+            return false;
 		}
 		public static bool DestroyRedstoneOre(Player a, BCS b)
 		{
@@ -867,18 +967,33 @@ namespace SMP
             return false;
 		}
 
-		public static byte DirectionByRotFlat(Player p, BCS a)
+		public static byte DirectionByRotFlat(Player p, BCS a, bool invert = false)
 		{
 			byte direction = (byte)Math.Floor((double)((p.rot[0] * 4F) / 360F) + 0.5D);
-			direction = (byte)(direction % 4);
-			return direction;
+            direction = (byte)(direction % 4);
+            if (invert)
+                switch (direction)
+                {
+                    case 0: return (byte)Directions.East;
+                    case 1: return (byte)Directions.South;
+                    case 2: return (byte)Directions.West;
+                    case 3: return (byte)Directions.North;
+                }
+            else
+                switch (direction)
+                {
+                    case 0: return (byte)Directions.West;
+                    case 1: return (byte)Directions.North;
+                    case 2: return (byte)Directions.East;
+                    case 3: return (byte)Directions.South;
+                }
+            return 0;
 		}
-		public static byte DirectionByRotNOTFlat(Player p, BCS a)
+        public static byte DirectionByRotNOTFlat(Player p, BCS a, bool invert = false)
 		{
-			if (p.rot[1] > 45) return (byte)Directions.Top;
-			if (p.rot[1] < -45) return (byte)Directions.Top;
-
-			return DirectionByRotFlat(p, a);
+			if (p.rot[1] > 45) return invert ? (byte)Directions.Bottom : (byte)Directions.Top;
+            if (p.rot[1] < -45) return invert ? (byte)Directions.Top : (byte)Directions.Bottom;
+			return DirectionByRotFlat(p, a, invert);
 		}
 
 		/// <summary>
