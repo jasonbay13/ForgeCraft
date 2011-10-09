@@ -21,6 +21,9 @@ namespace SMP
 {
 	public class Item
 	{
+		//public static const System.Collections.Generic.List<short> ENCHANTABLE_ITEMS = new System.Collections.Generic.List<short> {
+				//TODO: add flint steel, fishing rod, shears, all armour, and all tools and weapons
+		//};
 		public Entity e;
 		public World level { get { return e.level; } set { e.level = value; } }
 

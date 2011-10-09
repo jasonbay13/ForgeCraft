@@ -132,12 +132,62 @@ namespace SMP
                 case "redstonerepeateron": return 94;
                 //case "lockedchest": return 95;
                 case "trapdoor": return 96;
+				case "hiddensilverfish": return 97;
+				case "stonebricks": return 98;
+				case "hugebrownmushroom": return 99;
+				case "hugeredmushroom": return 100;
+				case "ironbars": return 101;
+				case "glasspane": return 102;
+				case "melon": return 103;
+				case "pumpkinstem": return 104;
+				case "melonstem": return 105;
+				case "vines": return 106;
+				case "fencegate": return 107;
+				case "brickstairs": return 108;
+				case "stonebrickstairs": return 109;
+				case "mycelium": return 110;
+				case "lilypad": return 111;
+				case "netherbrick": return 112;
+				case "netherbrickfence": return 113;
+				case "netherbrickstairs": return 114;
+				case "netherwart": return 115;
+				case "enchantmenttable": return 116;
+				case "brewingstand": return 117;
+				case "cauldron": return 118;
+				case "airportal": return 119;
+				case "airportalframe": return 120;
                 default: return -1;
             }
         }
 		
+		public static short[] FindItem(string type)
+		{
+			short[] item = {FindBlock(type), 0};
+			
+			if (item[0] == -1)
+			{
+				string sid = Server.SQLiteDB.ExecuteScalar("SELECT Value FROM Item WHERE Alias = '" + type + "';");
+				if(!String.IsNullOrEmpty(sid))
+				{
+					try{item[0] = short.Parse(sid);}
+					catch{item[0] = -1;}
+				}
+				else item[0] = -1;
+				
+				string smeta = Server.SQLiteDB.ExecuteScalar("SELECT Meta FROM Item WHERE Alias = '" + type + "';");
+				if (!String.IsNullOrEmpty(smeta))
+				{
+					try{item[1] = short.Parse(smeta);}
+					catch{item[1] = 0;}
+				}
+				else item[1] = 0;
+			}
+			return item;
+		}
+		
 		public static bool ValidItem(short id)
 		{
+			if (id == -1) return true;
             if (id == 0 || id < -1) return false;
 			foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
                 if ((short)blk == id)
@@ -150,9 +200,7 @@ namespace SMP
     } 
 
 	public enum Blocks : byte
-	{
-		Nothing = -1
-		
+	{		
 		Air = 0,
 		Stone = 1,
 		Grass = 2,
@@ -268,7 +316,12 @@ namespace SMP
 		NetherBrick = 112,
 		NetherBrickFence = 113,
 		NetherBrickStairs = 114,
-		NetherWart = 115
+		NetherWart = 115,
+		EnchantmentTable = 116,
+		BrewingStand = 117,
+		Cauldron = 118,
+		AirPortal = 119,
+		AirPortalFrame = 120
 	};
 	public enum Items : short
 	{
@@ -396,6 +449,9 @@ namespace SMP
 		FermentedSpiderEye = 376,
 		BlazePowder = 377,
 		MagmaCream = 378,
+		BrewingStand = 379,
+		Cauldron = 380,
+		EyeOfEnder = 381,
 		
 		GoldMusicDisc = 2256,
 		GreenMusicDisc = 2257,
