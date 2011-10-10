@@ -85,15 +85,7 @@ namespace SMP
             this.name = name;
 			Server.Log("Generating...");
 
-			/*for (int x = -3; x <= 3; x++)
-			{
-			    for (int z = -3; z <= 3; z++)
-			    {
-			        GenerateChunk(x, z);
-			    }
-			    Server.Log(x + " Row Generated.");
-			}*/
-			try
+			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
 			{
 	            Parallel.For(-3, 3, delegate(int x)
 	            {
