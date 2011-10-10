@@ -220,51 +220,26 @@ namespace SMP
 		public static bool PlayMusic(Player a, BCS b)
 		{
             // TODO: Tile entity stuff!
-            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             short item = a.inventory.current_item.item;
             if (meta != 0)
             {
-                item = 0;
-                switch (meta)
+                if (meta >= 2256 && meta <= 2257)
                 {
-                    case 1:
-                        item = (short)Items.GoldMusicDisc;
-                        break;
-                    case 2:
-                        item = (short)Items.GreenMusicDisc;
-                        break;
-                }
-
-                if (item != 0)
-                {
-                    Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    Item itemDrop = new Item((short)meta, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
                     itemDrop.e.UpdateChunks(false, false);
                 }
 
-                a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0);
-                foreach (Player pl in Player.players)
-                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
-                        pl.SendSoundEffect(b.pos, 1005, 0);
+                a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
-            else if (item == (short)Items.GoldMusicDisc || item == (short)Items.GreenMusicDisc)
+            else if (item >= 2256 && item <= 2257)
             {
-                switch (item)
-                {
-                    case (short)Items.GoldMusicDisc:
-                        meta = 1;
-                        break;
-                    case (short)Items.GreenMusicDisc:
-                        meta = 2;
-                        break;
-                }
-
                 a.inventory.Remove(a.inventory.current_index, 1);
-                a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
-                foreach (Player pl in Player.players)
-                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
-                        pl.SendSoundEffect(b.pos, 1005, item);
+                a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
+                Player.GlobalSoundEffect(b.pos, 1005, item, a.level);
             }
-            return true;
+            return false;
 		}
 		public static bool EatCake(Player a, BCS b)
 		{
@@ -360,6 +335,8 @@ namespace SMP
 		}
 		public static bool PlaceBed(Player a, BCS b)
 		{
+            byte rot = DirectionByRotFlat(a, b);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, 0);
 			return false;
 		}
 		public static bool PlaceBoat(Player a, BCS b)

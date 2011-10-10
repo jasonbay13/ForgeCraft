@@ -13,3 +13,10 @@ obj/
 *.DS_Store
 /SMP/obj/Debug/DesignTimeResolveAssemblyReferences.cache
 /SMP/.DS_Store
+
+#MonoDevelop junk
+*.userprefs
+*.usertasks
+*.pidb
+*.resources
+test-results/

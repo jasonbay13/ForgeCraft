@@ -34,33 +34,31 @@ namespace SMP
 
         public static byte[] Compress(this byte[] bytes)
         {
-            using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
                 using (GZipStream gs = new GZipStream(ms, CompressionMode.Compress, true))
                 {
                     gs.Write(bytes, 0, bytes.Length);
-                    gs.Close(); gs.Dispose();
-                    ms.Position = 0;
-                    bytes = new byte[ms.Length];
-                    ms.Read(bytes, 0, (int)ms.Length);
-                    ms.Close(); ms.Dispose();
                 }
+                ms.Position = 0;
+                bytes = new byte[ms.Length];
+                ms.Read(bytes, 0, (int)ms.Length);
             }
             return bytes;
         }
-        public static byte[] Decompress(this byte[] gzip)
+        public static byte[] Decompress(this byte[] bytes)
         {
-            using (GZipStream stream = new GZipStream(new MemoryStream(gzip), CompressionMode.Decompress))
+            int size = 4096;
+            byte[] buffer = new byte[size];
+            using (MemoryStream memory = new MemoryStream())
             {
-                int size = 4096;
-                byte[] buffer = new byte[size];
-                using (MemoryStream memory = new MemoryStream())
+                using (GZipStream stream = new GZipStream(new MemoryStream(bytes), CompressionMode.Decompress))
                 {
                     int count = 0;
                     while ((count = stream.Read(buffer, 0, size)) > 0)
                         memory.Write(buffer, 0, count);
-                    return memory.ToArray();
                 }
+                return memory.ToArray();
             }
         }
     }

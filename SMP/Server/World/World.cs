@@ -123,7 +123,7 @@ namespace SMP
 				time += 20;
 				if (time > 24000)
 					time = 0;
-				Player.players.ForEach(delegate(Player p) { if (p.level == this) p.SendTime(); });
+				Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == this) p.SendTime(); });
 			};
 			timeupdate.Start();
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
@@ -293,6 +293,7 @@ namespace SMP
                 w.SpawnY = int.Parse(sw.ReadLine());
                 w.SpawnZ = int.Parse(sw.ReadLine());
                 w.ChunkLimit = int.Parse(sw.ReadLine());
+                w.time = long.Parse(sw.ReadLine());
             }
             Server.Log("Look distance = 3");
             w.timeupdate.Elapsed += delegate
@@ -300,7 +301,7 @@ namespace SMP
                 w.time += 20;
                 if (w.time > 24000)
                     w.time = 0;
-                Player.players.ForEach(delegate(Player p) { if (p.level == w) p.SendTime(); });
+                Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == w) p.SendTime(); });
             };
             w.timeupdate.Start();
             w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
@@ -332,6 +333,7 @@ namespace SMP
                 sw.WriteLine(w.SpawnY);
                 sw.WriteLine(w.SpawnZ);
                 sw.WriteLine(w.ChunkLimit);
+                sw.WriteLine(w.time);
             }
             /*using (MemoryStream blocks = new MemoryStream())
             {
@@ -351,11 +353,20 @@ namespace SMP
                     fs.Write(bytes, 0, (int)bytes.Length);
                 }
             }*/
+
             lock (w.chunkData)
             {
-                foreach (Chunk ch in w.chunkData.Values)
+                try
                 {
-                    w.SaveChunk(ch.x, ch.z);
+                    Parallel.ForEach(w.chunkData.Values, delegate(Chunk ch)
+                    {
+                        w.SaveChunk(ch.x, ch.z);
+                    });
+                }
+                catch (NotImplementedException)
+                {
+                    foreach (Chunk ch in w.chunkData.Values)
+                        w.SaveChunk(ch.x, ch.z);
                 }
             }
             Server.Log(w.name + " Saved.");
@@ -421,7 +432,7 @@ namespace SMP
             //generator.PerlinChunk(c);
             //generator.RandMap(c, seed);
             c.RecalculateLight();
-            c.SpreadLight();
+            //c.SpreadLight();
             if (GeneratedChunk != null)
                 GeneratedChunk(this, c, x, z);
             if (WorldGenerateChunk != null)
@@ -468,7 +479,9 @@ namespace SMP
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
-                chunk.RecalculateLight();
+                chunk.RecalculateLight(x & 0xf, z & 0xf);
+                //chunk.SpreadLight();
+                SpreadLight(x, y, z);
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);

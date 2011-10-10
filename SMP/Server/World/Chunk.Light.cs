@@ -36,6 +36,7 @@ namespace SMP
 				curLight -= LightOpacity[block];
                 //if (curLight <= 0) break; // It's not that simple...
 				SetSkyLight(x, y, z, (byte)curLight);
+                SetBlockLight(x, y, z, (byte)LightOutput[block]);
 			}
 		}
 
@@ -50,14 +51,17 @@ namespace SMP
 			}
 		}
 
-        public void SpreadLight() {
+        #region Light spread is now in the World class!
+        /*public void SpreadLight() {
             for( int x = 0; x < Chunk.Width; x++ ) {
                 for( int z = 0; z < Chunk.Depth; z++ ) {
                     for( int y = 0; y < Chunk.Height; y++ ) {
                         byte type = blocks[x << 11 | z << 7 | y];
-                        sbyte opacity = LightOpacity[type];
-                        if( opacity == 0x0 && GetSkyLight( x, y, z ) == 0xf ) {
-                            SpreadLightInternal( x, y, z );
+                        if (LightOpacity[type] == 0 && GetSkyLight(x, y, z) == 0xf)
+                            SpreadLightInternal(x, y, z);
+                        if (GetBlockLight(x, y, z) > 0)
+                        {
+                            SpreadBlockLightInternal(x, y, z);
                         }
                     }
                 }
@@ -65,20 +69,37 @@ namespace SMP
         }
 
         private void SpreadLightInternal( int x, int y, int z ) {
-            var currLight = GetSkyLight( x, y, z );
-            if ( currLight == 0x0 ) return;
+            var currLight = GetSkyLight(x, y, z);
+            if (currLight == 0) return;
 
             ForEveryAdjacentBlock( x, y, z, delegate( int xx, int yy, int zz ) {
                 var type = blocks[ xx << 11 | zz << 7 | yy ];
-                var light = GetSkyLight( xx, yy, zz );
-                if( LightOpacity[type] == 0x00 ) {
-                    if( light < currLight ) {
-                        SetSkyLight( xx, yy, zz, (byte)(currLight - 1) );
-                        SpreadLightInternal( xx, yy, zz );
-                    }
+                var light = GetSkyLight(xx, yy, zz);
+                if(LightOpacity[type] == 0 && light < currLight)
+                {
+                    SetSkyLight( xx, yy, zz, (byte)(currLight - 1) );
+                    SpreadLightInternal( xx, yy, zz );
                 }
             } );
         }
+        private void SpreadBlockLightInternal(int x, int y, int z)
+        {
+            var currLight = GetBlockLight(x, y, z);
+            if (currLight == 0) return;
+
+            ForEveryAdjacentBlock(x, y, z, delegate(int xx, int yy, int zz)
+            {
+                var type = blocks[xx << 11 | zz << 7 | yy];
+                var light = GetBlockLight(xx, yy, zz);
+                Console.WriteLine(light);
+                if (LightOpacity[type] == 0 && light < currLight)
+                {
+                    SetBlockLight(xx, yy, zz, (byte)(currLight - 1));
+                    SpreadBlockLightInternal(xx, yy, zz);
+                }
+            });
+        }*/
+        #endregion
 
         delegate void BlockDel( int x, int y, int z );
         private void ForEveryAdjacentBlock( int x, int y, int z, BlockDel del ) {
@@ -91,13 +112,24 @@ namespace SMP
         }
 
 
-		private static sbyte[] LightOpacity = new sbyte[] {
+        public static readonly sbyte[] LightOpacity = new sbyte[] { // TODO: Fix incorrect values!
             0x0, 0xf, 0xf, 0xf, 0xf, 0xf, 0x0, 0xf, 0x3, 0x3, 0x0, 0x0, 0xf, 0xf, 0xf, 0xf,
             0xf, 0xf, 0x1, 0xf, 0x0, 0xf, 0xf, 0xf, 0xf, 0xf, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0,
             0x0, 0x0, 0x0, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0x0, 0x0, 0xf, 0xf,
             0xf, 0x0, 0xf, 0xf, 0xf, 0x0, 0xf, 0xf, 0xf, 0x0, 0x0, 0x0, 0x0, 0xf, 0x0, 0x0,
             0x0, 0x0, 0x0, 0xf, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0xf, 0xf, 0x0, 0xf, 0x0,
-            0xf, 0xf, 0xf, 0xf, 0x0, 0xf, 0x0, 0x0, 0x0, 0xf
+            0xf, 0xf, 0xf, 0xf, 0x0, 0xf, 0x0, 0x0, 0x0, 0xf, 0xf, 0xf, 0x0, 0xf, 0xf, 0xf,
+            0x0, 0xf, 0xf, 0xf, 0xf, 0x0, 0x0, 0xf, 0x0, 0x0, 0x0, 0x0, 0xf, 0xf
+        };
+
+        public static readonly sbyte[] LightOutput = new sbyte[] {
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0xf, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0xe, 0xf, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xd, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x9, 0x0, 0x7, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xf, 0xb, 0xf, 0x0, 0x0, 0x9, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
         };
 	}
 }
