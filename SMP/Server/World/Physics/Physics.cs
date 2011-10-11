@@ -132,7 +132,7 @@ namespace SMP
                                         WaterFlow(C.x, C.y, C.z - 1, (byte)(meta + 1));
                                     }
                                 }
-                                C.time = 255;
+                                C.time = short.MaxValue;
                                 break;
                             case (byte)Blocks.SLava:
                             case (byte)Blocks.ALava:
@@ -172,14 +172,14 @@ namespace SMP
                                         LavaFlow(C.x, C.y, C.z - 1, (byte)(meta + 2));
                                     }
                                 }
-                                C.time = 255;
+                                C.time = short.MaxValue;
                                 break;
                             case (byte)Blocks.Sponge:
                                 SpongePlaced(C.x, C.y, C.z);
-                                C.time = 255;
+                                C.time = short.MaxValue;
                                 break;
                             default:
-                                C.time = 255;
+                                C.time = short.MaxValue;
                                 break;
                         }
                         #endregion
@@ -191,7 +191,7 @@ namespace SMP
                         Checks.Remove(C);
                     }
                 });
-                Checks.RemoveAll(Check => Check.time == 255);
+                Checks.RemoveAll(Check => Check.time == short.MaxValue);
             }
             catch (Exception e)
             {
@@ -245,7 +245,8 @@ namespace SMP
 
         public class Check
         {
-            public byte time, meta;
+            public byte meta;
+            public short time;
             public int x, y, z;
 
             public Check(int x, int y, int z, byte meta)

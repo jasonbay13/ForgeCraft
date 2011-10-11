@@ -20,11 +20,31 @@ using System;
 namespace SMP
 {
 	public class Item
-	{
-		//public static const System.Collections.Generic.List<short> ENCHANTABLE_ITEMS = new System.Collections.Generic.List<short> {
-				//TODO: add flint steel, fishing rod, shears, all armour, and all tools and weapons
-		//};
-		public Entity e;
+    {
+        #region Enchantable Items List
+        public static readonly System.Collections.Generic.List<short> ENCHANTABLE_ITEMS = new System.Collections.Generic.List<short> {
+            0x103, //Flint and steel
+            0x15A, //Fishing rod
+            0x167, //Shears
+
+            //TOOLS
+            //sword, shovel, pickaxe, axe, hoe
+            0x10C, 0x10D, 0x10E, 0x10F, 0x122, //WOOD
+            0x110, 0x111, 0x112, 0x113, 0x123, //STONE
+            0x10B, 0x100, 0x101, 0x102, 0x124, //IRON
+            0x114, 0x115, 0x116, 0x117, 0x125, //DIAMOND
+            0x11B, 0x11C, 0x11D, 0x11E, 0x126, //GOLD
+
+            //ARMOR
+            //helmet, chestplate, leggings, boots
+            0x12A, 0x12B, 0x12C, 0x12D, //LEATHER
+            0x12E, 0x12F, 0x130, 0x131, //CHAIN
+            0x132, 0x133, 0x134, 0x135, //IRON
+            0x136, 0x137, 0x138, 0x139, //DIAMOND
+            0x13A, 0x13B, 0x13C, 0x14D  //GOLD
+		};
+        #endregion
+        public Entity e;
 		public World level { get { return e.level; } set { e.level = value; } }
 
 		public short item = -1;

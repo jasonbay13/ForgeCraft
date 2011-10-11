@@ -37,7 +37,7 @@ namespace SMP
                 UpdateVisibleItemInHand(Mycurrent_item.item, Mycurrent_item.meta);
 			}
 		}
-		public int current_index;
+		public short current_index;
 
 		public Inventory (Player pl)
 		{

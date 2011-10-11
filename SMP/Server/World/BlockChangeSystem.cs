@@ -55,6 +55,8 @@ namespace SMP
 			RightClickedOn.Add((short)Blocks.RedstoneRepeaterOn, new BCD(ChangeRepeater));
             RightClickedOn.Add((short)Blocks.DoorWooden, new BCD(OpenDoor));
             RightClickedOn.Add((short)Blocks.DoorIron, new BCD(DoNothing));
+            RightClickedOn.Add((short)Blocks.Lever, new BCD(SwitchLever));
+            RightClickedOn.Add((short)Blocks.ButtonStone, new BCD(HitButton));
 
 			//Item RightClick Deletgates (Holds Delegates for when the player right clicks with specific items)
 			ItemRightClick.Add((short)Items.FlintAndSteel, new BCD(LightFire));
@@ -202,7 +204,7 @@ namespace SMP
 			return false;
 		}
 		public static bool GetInBed(Player a, BCS b)
-		{
+        {
 			return false;
 		}
 		public static bool OpenChest(Player a, BCS b)
@@ -219,12 +221,11 @@ namespace SMP
 		}
 		public static bool PlayMusic(Player a, BCS b)
 		{
-            // TODO: Tile entity stuff!
             ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             short item = a.inventory.current_item.item;
             if (meta != 0)
             {
-                if (meta >= 2256 && meta <= 2257)
+                if (meta >= 2256 && meta <= 2266)
                 {
                     Item itemDrop = new Item((short)meta, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
                     itemDrop.e.UpdateChunks(false, false);
@@ -233,16 +234,19 @@ namespace SMP
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
                 Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
-            else if (item >= 2256 && item <= 2257)
+            else if (item >= 2256 && item <= 2266)
             {
                 a.inventory.Remove(a.inventory.current_index, 1);
-                a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, meta);
+                a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (ushort)item);
                 Player.GlobalSoundEffect(b.pos, 1005, item, a.level);
             }
             return false;
 		}
 		public static bool EatCake(Player a, BCS b)
 		{
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z); meta++;
+            if (meta > 0x5) a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            else a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.CakeBlock, meta);
 			return false;
 		}
 		public static bool ChangeRepeater(Player a, BCS b)
@@ -335,9 +339,43 @@ namespace SMP
 		}
 		public static bool PlaceBed(Player a, BCS b)
 		{
+            if (b.Direction != 1) return false;
             byte rot = DirectionByRotFlat(a, b);
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, 0);
-			return false;
+            switch (rot)
+            {
+                case (byte)Directions.North:
+                    rot = (byte)Bed.North;
+                    break;
+                case (byte)Directions.East:
+                    rot = (byte)Bed.East;
+                    break;
+                case (byte)Directions.South:
+                    rot = (byte)Bed.South;
+                    break;
+                case (byte)Directions.West:
+                    rot = (byte)Bed.West;
+                    break;
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, rot);
+
+            switch (rot)
+            {
+                case (byte)Bed.North:
+                    b.pos.x--;
+                    break;
+                case (byte)Bed.East:
+                    b.pos.z--;
+                    break;
+                case (byte)Bed.South:
+                    b.pos.x++;
+                    break;
+                case (byte)Bed.West:
+                    b.pos.z++;
+                    break;
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, (byte)(rot | 0x8));
+
+			return true;
 		}
 		public static bool PlaceBoat(Player a, BCS b)
 		{
@@ -345,10 +383,16 @@ namespace SMP
 		}
 		public static bool PlaceCake(Player a, BCS b)
 		{
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z) != 0)
+            {
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.CakeBlock, 0);
+                return true;
+            }
 			return false;
 		}
 		public static bool PlaceIronDoor(Player a, BCS b)
 		{
+            // TODO: Double doors!
             //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
             if (b.Direction != 1) return false;
             byte rot = DirectionByRotFlat(a, b);
@@ -402,6 +446,7 @@ namespace SMP
 		}
 		public static bool PlaceWoodenDoor(Player a, BCS b)
 		{
+            // TODO: Double doors!
             //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
             if (b.Direction != 1) return false;
             byte rot = DirectionByRotFlat(a, b);
@@ -443,12 +488,13 @@ namespace SMP
 		}
 		public static bool UseBucket(Player a, BCS b)
 		{
-			if (Blockclicked(a, b) == (byte)Blocks.AWater || Blockclicked(a, b) == (byte)Blocks.SWater)
+            byte bl = a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), blc = Blockclicked(a, b);
+			if (bl == 8 || bl == 9 || blc == 8 || blc == 9)
 			{
 				a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
 				a.inventory.current_item.item = (short)Items.BucketWater;
 			}
-			else if (Blockclicked(a, b) == (byte)Blocks.ALava || Blockclicked(a, b) == (byte)Blocks.SLava)
+            else if (bl == 10 || bl == 11 || blc == 10 || blc == 11)
 			{
 				a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
 				a.inventory.current_item.item = (short)Items.BucketLava;
@@ -465,6 +511,8 @@ namespace SMP
 		}
 		public static bool UseLavaBucket(Player a, BCS b)
 		{
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 10, 0);
+            if (Server.mode == 0) a.inventory.Add((short)Items.Bucket, 1, 0, a.inventory.current_index);
 			return false;
 		}
 		public static bool UseSaddle(Player a, BCS b)
@@ -477,6 +525,8 @@ namespace SMP
 		}
 		public static bool UseWaterBucket(Player a, BCS b)
 		{
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 8, 0);
+            if (Server.mode == 0) a.inventory.Add((short)Items.Bucket, 1, 0, a.inventory.current_index);
 			return false;
 		}
 
@@ -489,19 +539,18 @@ namespace SMP
 			{
 				case (0):
 				case (1):
-					b.Direction = DirectionByRotFlat(a, b);
-                    break;
+                    return false;
 				case ((byte)Directions.East):
-					b.Direction = (byte)Buttons.West;
+                    b.Direction = (byte)Buttons.North;
 					break;
 				case ((byte)Directions.West):
-					b.Direction = (byte)Buttons.East;
-					break;
-				case ((byte)Directions.North):
 					b.Direction = (byte)Buttons.South;
 					break;
+				case ((byte)Directions.North):
+					b.Direction = (byte)Buttons.East;
+					break;
 				case ((byte)Directions.South):
-					b.Direction = (byte)Buttons.North;
+					b.Direction = (byte)Buttons.West;
 					break;
 
 				default:
@@ -608,13 +657,13 @@ namespace SMP
 					b.Direction = (byte)Ladder.South;
 					break;
 				case ((byte)Directions.North):
-					b.Direction = (byte)Furnace.North;
+                    b.Direction = (byte)Ladder.North;
 					break;
 				case ((byte)Directions.West):
-					b.Direction = (byte)Furnace.West;
+                    b.Direction = (byte)Ladder.West;
 					break;
 				case ((byte)Directions.East):
-					b.Direction = (byte)Furnace.East;
+                    b.Direction = (byte)Ladder.East;
 					break;
 
 				default:
@@ -631,13 +680,44 @@ namespace SMP
 		}
 		public static bool PlaceLever(Player a, BCS b)
 		{
+            if (b.Direction == 0) return false;
+            if (!BlockData.CanPlaceAgainst(Blockclicked(a, b))) return false;
+            if (b.Direction == 1)
+            {
+                switch (DirectionByRotFlat(a, b))
+                {
+                    case (byte)Directions.East:
+                    case (byte)Directions.West:
+                        b.Direction = (byte)Levers.GroundWest;
+                        break;
+                    case (byte)Directions.North:
+                    case (byte)Directions.South:
+                        b.Direction = (byte)Levers.GroundSouth;
+                        break;
+                }
+            }
+            else
+            {
+                switch (b.Direction)
+                {
+                    case ((byte)Directions.East):
+                        b.Direction = (byte)Levers.WallEast;
+                        break;
+                    case ((byte)Directions.West):
+                        b.Direction = (byte)Levers.WallWest;
+                        break;
+                    case ((byte)Directions.North):
+                        b.Direction = (byte)Levers.WallNorth;
+                        break;
+                    case ((byte)Directions.South):
+                        b.Direction = (byte)Levers.WallSouth;
+                        break;
+                }
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Lever, b.Direction);
 			return false;
 		}
 		public static bool PlaceNormalPiston(Player a, BCS b)
-		{
-			return false;
-		}
-		public static bool PlaceStikyPiston(Player a, BCS b)
 		{
 			return false;
 		}
@@ -758,9 +838,27 @@ namespace SMP
 
 		public static bool PlayNoteblock(Player a, BCS b)
 		{
-            // TODO: Check block below for instrument.
             if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
-            Player.GlobalBlockAction(b.pos, 0, (byte)a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
+
+            byte instrument = 0;
+            switch (BlockData.BlockMaterial(a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z)))
+            {
+                case Material.Wood:
+                    instrument = 1;
+                    break;
+                case Material.Sand:
+                case Material.Gravel:
+                    instrument = 2;
+                    break;
+                case Material.Glass:
+                    instrument = 3;
+                    break;
+                case Material.Stone:
+                    instrument = 4;
+                    break;
+            }
+
+            Player.GlobalBlockAction(b.pos, instrument, (byte)a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), a.level);
 			return false;
 		}
 		public static bool OpenDoor(Player a, BCS b)
@@ -784,6 +882,9 @@ namespace SMP
 		}
 		public static bool SwitchLever(Player a, BCS b)
 		{
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Lever, (byte)(meta ^ 0x8));
+            //Player.GlobalSoundEffect(b.pos, 1000, a.level); // There is no suitable sound effect. DAMN YOU NOTCH!!!
 			return false;
 		}
 		public static bool HitButton(Player a, BCS b)
@@ -812,6 +913,57 @@ namespace SMP
 		}
 		public static bool DestroyBed(Player a, BCS b)
 		{
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+
+            Point3 storePos = b.pos;
+            byte rot = (byte)(meta & 0x3);
+            bool head = (meta & 0x8) != 0;
+            if (head)
+            {
+                switch (rot)
+                {
+                    case (byte)Bed.North:
+                        b.pos.x++;
+                        break;
+                    case (byte)Bed.East:
+                        b.pos.z++;
+                        break;
+                    case (byte)Bed.South:
+                        b.pos.x--;
+                        break;
+                    case (byte)Bed.West:
+                        b.pos.z--;
+                        break;
+                }
+            }
+            else
+            {
+                switch (rot)
+                {
+                    case (byte)Bed.North:
+                        b.pos.x--;
+                        break;
+                    case (byte)Bed.East:
+                        b.pos.z--;
+                        break;
+                    case (byte)Bed.South:
+                        b.pos.x++;
+                        break;
+                    case (byte)Bed.West:
+                        b.pos.z++;
+                        break;
+                }
+            }
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) == (byte)Blocks.Bed)
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+
+            if (Server.mode == 0)
+            {
+                Item itemDrop = new Item((short)Items.Bed, a.level) { count = 1, meta = 0, pos = new double[3] { storePos.x + .5, storePos.y + .5, storePos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                itemDrop.e.UpdateChunks(false, false);
+            }
+
 			return false;
 		}
 		public static bool DestroyDoubleSlab(Player a, BCS b)

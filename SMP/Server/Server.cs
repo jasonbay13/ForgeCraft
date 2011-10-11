@@ -92,7 +92,7 @@ namespace SMP
             }
             else
             {
-                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = 4 };
+                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue };
                 World.worlds.Add(mainlevel);
             } //changed to seed 0 for now
 			ml = new MainLoop("server");

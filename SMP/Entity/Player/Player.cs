@@ -31,8 +31,8 @@ namespace SMP
         }
         #endregion
 
-        public short current_slot_holding;
-		public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendInventory(); } }
+        public short current_slot_holding { get { return inventory.current_index; } set { inventory.current_index = value; current_block_holding = inventory.items[value]; } }
+        public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta); } }
 
 		byte[] buffer = new byte[0];
 		byte[] tempbuffer = new byte[0xFF];
@@ -119,8 +119,9 @@ namespace SMP
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
-        public CmdCuboid.Pos cuboidpos;
-        public string cuboidtype = "solid";
+
+        // This is for commands and stuff
+        public object BlockChangeObject;
 		
 		Entity e;
 		public string ip;
@@ -713,6 +714,10 @@ namespace SMP
                 bytes[4] = (byte)data.Length;
                 data.CopyTo(bytes, 5);
                 SendRaw(0x83, bytes);
+            }
+            public void SendUseBed(int x, byte y, int z, int eid)
+            {
+
             }
 
             public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2, World wld)

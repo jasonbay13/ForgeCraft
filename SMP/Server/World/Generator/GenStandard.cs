@@ -80,6 +80,7 @@ namespace SMP {
         /// <param name="c"></param>
         public override void Generate(World w, Chunk c)
         {
+            random = new Random(w.seed);
             int cx = c.x << 4, cz = c.z << 4;
             int waterLevel = 64 + 15 / 2 - 4;
             if (w.seed == 0)

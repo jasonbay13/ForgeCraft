@@ -57,14 +57,14 @@ namespace SMP
             }
             else if (BlockData.LiquidDestroy(block))
             {
+                w.BlockChange(x, y, z, 8, meta);
+
                 short dropId = Player.BlockDropSwitch(block);
                 if (dropId != 0)
                 {
                     Item item = new Item(dropId, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
                     item.e.UpdateChunks(false, false);
                 }
-
-                w.BlockChange(x, y, z, 8, meta);
             }
             else if (block == 10 || block == 11)
             {
@@ -89,14 +89,15 @@ namespace SMP
             }
             else if (BlockData.LiquidDestroy(block))
             {
+                w.BlockChange(x, y, z, 10, meta);
+                Player.GlobalSoundEffect(x, (byte)y, z, 2000, 4, w);
+
                 short dropId = Player.BlockDropSwitch(block);
                 if (dropId != 0)
                 {
                     Item item = new Item(dropId, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
                     item.e.UpdateChunks(false, false);
                 }
-
-                w.BlockChange(x, y, z, 10, meta);
             }
         }
         #endregion

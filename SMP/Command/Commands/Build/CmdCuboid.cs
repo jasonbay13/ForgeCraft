@@ -24,86 +24,90 @@ namespace SMP
     {
         public override string Name { get { return "cuboid"; } }
         public override List<string> Shortcuts { get { return new List<string> { "z" }; } }
-        public override string Category { get { return "other"; } }
+        public override string Category { get { return "build"; } }
         public override bool ConsoleUseable { get { return false; } }
         public override string Description { get { return "Cuboid"; } }
         public override string PermissionNode { get { return "core.build.cuboid"; } }
         
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length != 0)
-            {
-                if (args[0] == "help") { Help(p); return; }
+            CuboidData cd; cd.x = 0; cd.y = 0; cd.z = 0;
+            cd.type = -1; cd.mode = CuboidType.Solid;
 
-                try
-                {
-                    p.cuboidpos.type = short.Parse(args[0]);
-                }
-                catch
-                {
-                    p.cuboidpos.type = FindBlocks.FindBlock(args[0]);
-                }
-                if (p.cuboidpos.type == -1)
-                {
-                    switch (args[0])
-                    {
-                        case "hollow":
-                            p.cuboidtype = "hollow";
-                            break;
-                        case "walls":
-                            p.cuboidtype = "walls";
-                            break;
-                        case "holes":
-                            p.cuboidtype = "holes";
-                            break;
-                        //case "wire":
-                        //cuboidtype = "wire";
-                        //break;
-                        case "random":
-                            p.cuboidtype = "random";
-                            break;
-                        default:
-                            p.cuboidtype = "solid";
-                            break;
-                    }
-                }
-            }
-            else { p.cuboidpos.type = -1; }
-            if (args.Length == 2)
+            if (args.Length >= 2)
             {
-                switch (args[1])
+                try { cd.type = Convert.ToInt16(args[0]); }
+                catch { cd.type = FindBlocks.FindBlock(args[0]); }
+                if (!FindBlocks.ValidBlock(cd.type)) { p.SendMessage("There is no block \"" + args[0] + "\"."); return; }
+
+                switch (args[1].ToLower())
                 {
                     case "hollow":
-                        p.cuboidtype = "hollow";
+                        cd.mode = CuboidType.Hollow;
                         break;
                     case "walls":
-                        p.cuboidtype = "walls";
+                        cd.mode = CuboidType.Walls;
                         break;
                     case "holes":
-                        p.cuboidtype = "holes";
+                        cd.mode = CuboidType.Holes;
                         break;
-                    //case "wire":
-                    //cuboidtype = "wire";
-                    //break;
+                    case "wire":
+                        cd.mode = CuboidType.Wire;
+                        break;
                     case "random":
-                        p.cuboidtype = "random";
-                        break;
-                    default:
-                        p.cuboidtype = "solid";
+                        cd.mode = CuboidType.Random;
                         break;
                 }
             }
-            p.SendMessage("place/delete a block at 2 corners for the cuboid.");
+            else if (args.Length >= 1)
+            {
+                switch (args[0].ToLower())
+                {
+                    case "hollow":
+                        cd.mode = CuboidType.Hollow;
+                        break;
+                    case "walls":
+                        cd.mode = CuboidType.Walls;
+                        break;
+                    case "holes":
+                        cd.mode = CuboidType.Holes;
+                        break;
+                    case "wire":
+                        cd.mode = CuboidType.Wire;
+                        break;
+                    case "random":
+                        cd.mode = CuboidType.Random;
+                        break;
+                }
+
+                if (cd.mode == CuboidType.Solid)
+                {
+                    try { cd.type = Convert.ToInt16(args[0]); }
+                    catch { cd.type = FindBlocks.FindBlock(args[0]); }
+                    if (!FindBlocks.ValidBlock(cd.type)) { p.SendMessage("There is no block \"" + args[0] + "\"."); return; }
+                }
+            }
+
+            p.ClearBlockChange();
+            p.BlockChangeObject = cd;
             p.OnBlockChange += Blockchange1;
+            p.SendMessage("Place/delete a block at 2 corners for the cuboid.");
             //p.Blockchange += new Player.BlockchangeEventHandler(Blockchange1);
         }
+
+        public override void Help(Player p)
+        {
+            p.SendMessage(Description);
+        }
+
         void Blockchange1(Player p, int x, int y, int z, short type)
         {
             p.ClearBlockChange();
             //p.SendMessage("tile: " + x + " " + y + " " + z + " " + type);
-            p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), (byte)0);
-            type = p.cuboidpos.type;
-            p.cuboidpos = new Pos { x = x, y = y, z = z, type = type };
+            p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), p.level.GetMeta(x, y, z));
+            CuboidData cd = (CuboidData)p.BlockChangeObject;
+            cd.x = x; cd.y = y; cd.z = z;
+            p.BlockChangeObject = cd;
             p.OnBlockChange += Blockchange2;
         }
 
@@ -111,165 +115,138 @@ namespace SMP
         {
             p.ClearBlockChange();
             //p.SendMessage("tile: " + x + " " + y + " " + z + " " + type);
-            p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), (byte)0);
-            if (p.cuboidpos.type != -1) type = p.cuboidpos.type;
-            int xx1, zz1, x2, z2;
-            byte y2, yy1;
-            xx1 = Math.Min(p.cuboidpos.x, x);
-            x2 = Math.Max(p.cuboidpos.x, x);
-            yy1 = (byte)Math.Min(p.cuboidpos.y, y);
-            y2 = (byte)Math.Max(p.cuboidpos.y, y);
-            zz1 = Math.Min(p.cuboidpos.z, z);
-            z2 = Math.Max(p.cuboidpos.z, z);
-            if (type == 255 || type == -1) type = 20;
-            //int total = Math.Abs(pos.x - x + 1) * Math.Abs(pos.z - z + 1) * Math.Abs(pos.y - y + 1);
-            p.SendMessage("Cuboiding " + total(p.cuboidtype, xx1, x2, yy1, y2, zz1, z2) + " Blocks.");
-            if (p.cuboidtype == "solid")
-            {
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (byte y1 = yy1; y1 <= y2; ++y1)
-                        for (int z1 = zz1; z1 <= z2; ++z1)
-                            p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
-                return;
-            }
+            p.SendBlockChange(x, (byte)y, z, p.level.GetBlock(x, y, z), p.level.GetMeta(x, y, z));
+            CuboidData cd = (CuboidData)p.BlockChangeObject;
+            byte meta = (byte)p.inventory.current_item.meta;
+            if (cd.type != -1) type = cd.type;
+            if (!FindBlocks.ValidBlock(type)) type = 0;
 
-            if (p.cuboidtype == "hollow")
-            {
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                    {
-                        p.level.BlockChange(x1, yy1, z1, (byte)type, 0, false);
-                        p.level.BlockChange(x1, y2, z1, (byte)type, 0, false);
-                    }
-                for (int y1 = yy1; y1 <= y2; ++y1)
-                {
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                    {
-                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0, false);
-                        p.level.BlockChange(x2, y1, z1, (byte)type, 0, false);
-                    }
-                    for (int x1 = xx1; x1 <= x2; ++x1)
-                    {
-                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0, false);
-                        p.level.BlockChange(x1, y1, z2, (byte)type, 0, false);
-                    }
-                }
-                return;
-            }
-            if (p.cuboidtype == "walls")
-            {
-                for (int y1 = yy1; y1 <= y2; ++y1)
-                {
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                    {
-                        p.level.BlockChange(xx1, y1, z1, (byte)type, 0, false);
-                        p.level.BlockChange(x2, y1, z1, (byte)type, 0, false);
-                    }
-                    for (int x1 = xx1; x1 <= x2; ++x1)
-                    {
-                        p.level.BlockChange(x1, y1, zz1, (byte)type, 0, false);
-                        p.level.BlockChange(x1, y1, z2, (byte)type, 0, false);
-                    }
-                }
-                return;
-            }
-            if (p.cuboidtype == "holes")
-            {
-                bool Checked = true, startZ, startY;
+            int sx = Math.Min(cd.x, x);
+            int ex = Math.Max(cd.x, x);
+            int sy = Math.Min(cd.y, y);
+            int ey = Math.Max(cd.y, y);
+            int sz = Math.Min(cd.z, z);
+            int ez = Math.Max(cd.z, z);
 
-                for (int x1 = xx1; x1 <= x2; x1++)
-                {
-                    startY = Checked;
-                    for (byte y1 = yy1; y1 <= y2; y1++)
-                    {
-                        startZ = Checked;
-                        for (int z1 = zz1; z1 <= z2; z1++)
-                        {
-                            Checked = !Checked;
-                            if (Checked) p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
-                        }
-                        Checked = !startZ;
-                    }
-                    Checked = !startY;
-                }
-                return;
-            }
-            if (p.cuboidtype == "random")
-            {
-                Random rand = new Random();
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (byte y1 = yy1; y1 <= y2; ++y1)
-                        for (int z1 = zz1; z1 <= z2; ++z1)
-                            if (rand.Next(1, 11) <= 5) p.level.BlockChange(x1, y1, z1, (byte)type, 0, false);
-                return;
-            }
-            //if (p.level.GetBlock(x1, y1, z1) != type)
-            //p.SendBlockChange(x1, y1, z1, type, 0);
-        }
-        int total(string cuboidtype, int xx1, int x2, byte yy1, int y2, int zz1, int z2)
-        {
             int total = 0;
-            if (cuboidtype == "solid")
+            p.SendMessage("Cuboiding...");
+            switch (cd.mode)
             {
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (byte y1 = yy1; y1 <= y2; ++y1)
-                        for (int z1 = zz1; z1 <= z2; ++z1)
-                            total++;
-                return total;
+                case CuboidType.Solid:
+                    for (int xx = sx; xx <= ex; xx++)
+                        for (int yy = sy; yy <= ey; yy++)
+                            for (int zz = sz; zz <= ez; zz++)
+                            {
+                                p.level.BlockChange(xx, yy, zz, (byte)type, meta, false);
+                                total++;
+                            }
+                    break;
+                case CuboidType.Hollow:
+                    for (int xx = sx; xx <= ex; xx++)
+                        for (int zz = sz; zz <= ez; zz++)
+                        {
+                            p.level.BlockChange(xx, sy, zz, (byte)type, meta, false);
+                            p.level.BlockChange(xx, ey, zz, (byte)type, meta, false);
+                            total += 2;
+                        }
+                    for (int yy = sy; yy <= ey; yy++)
+                    {
+                        for (int xx = sx; xx <= ex; xx++)
+                        {
+                            p.level.BlockChange(xx, yy, sz, (byte)type, meta, false);
+                            p.level.BlockChange(xx, yy, ez, (byte)type, meta, false);
+                            total += 2;
+                        }
+                        for (int zz = sz; zz <= ez; zz++)
+                        {
+                            p.level.BlockChange(sx, yy, zz, (byte)type, meta, false);
+                            p.level.BlockChange(ex, yy, zz, (byte)type, meta, false);
+                            total += 2;
+                        }
+                    }
+                    break;
+                case CuboidType.Walls:
+                    for (int yy = sy; yy <= ey; yy++)
+                    {
+                        for (int xx = sx; xx <= ex; xx++)
+                        {
+                            p.level.BlockChange(xx, yy, sz, (byte)type, meta, false);
+                            p.level.BlockChange(xx, yy, ez, (byte)type, meta, false);
+                            total += 2;
+                        }
+                        for (int zz = sz; zz <= ez; zz++)
+                        {
+                            p.level.BlockChange(sx, yy, zz, (byte)type, meta, false);
+                            p.level.BlockChange(ex, yy, zz, (byte)type, meta, false);
+                            total += 2;
+                        }
+                    }
+                    break;
+                case CuboidType.Holes:
+                    bool Checked = true, startZ, startY;
+                    for (int xx = sx; xx <= ex; xx++)
+                    {
+                        startY = Checked;
+                        for (int yy = sy; yy <= ey; yy++)
+                        {
+                            startZ = Checked;
+                            for (int zz = sz; zz <= ez; zz++)
+                            {
+                                Checked = !Checked;
+                                if (Checked) { p.level.BlockChange(xx, yy, zz, (byte)type, meta, false); total++; }
+                            }
+                            Checked = !startZ;
+                        }
+                        Checked = !startY;
+                    }
+                    break;
+                case CuboidType.Wire:
+                    for (int xx = sx; xx <= ex; xx++)
+                    {
+                        p.level.BlockChange(xx, sy, sz, (byte)type, meta, false);
+                        p.level.BlockChange(xx, sy, ez, (byte)type, meta, false);
+                        p.level.BlockChange(xx, ey, sz, (byte)type, meta, false);
+                        p.level.BlockChange(xx, ey, ez, (byte)type, meta, false);
+                        total += 4;
+                    }
+                    for (int yy = sy; yy <= ey; yy++)
+                    {
+                        p.level.BlockChange(sx, yy, sz, (byte)type, meta, false);
+                        p.level.BlockChange(sx, yy, ez, (byte)type, meta, false);
+                        p.level.BlockChange(ex, yy, sz, (byte)type, meta, false);
+                        p.level.BlockChange(ex, yy, ez, (byte)type, meta, false);
+                        total += 4;
+                    }
+                    for (int zz = sz; zz <= ez; zz++)
+                    {
+                        p.level.BlockChange(sx, sy, zz, (byte)type, meta, false);
+                        p.level.BlockChange(sx, ey, zz, (byte)type, meta, false);
+                        p.level.BlockChange(ex, sy, zz, (byte)type, meta, false);
+                        p.level.BlockChange(ex, ey, zz, (byte)type, meta, false);
+                        total += 4;
+                    }
+                    break;
+                case CuboidType.Random:
+                    Random rand = new Random();
+                    for (int xx = sx; xx <= ex; xx++)
+                        for (int yy = sy; yy <= ey; yy++)
+                            for (int zz = sz; zz <= ez; zz++)
+                                if (rand.Next(1, 11) <= 5)
+                                {
+                                    p.level.BlockChange(xx, yy, zz, (byte)type, meta, false);
+                                    total++;
+                                }
+                    break;
             }
+            p.SendMessage(total + " blocks.");
+        }
 
-            if (cuboidtype == "hollow")
-            {
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                        total++;
-                for (int y1 = yy1; y1 <= y2; ++y1)
-                {
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                        total++;
-                    for (int x1 = xx1; x1 <= x2; ++x1)
-                        total++;
-                }
-                return total;
-            }
-            if (cuboidtype == "walls")
-            {
-                for (int y1 = yy1; y1 <= y2; ++y1)
-                {
-                    for (int z1 = zz1; z1 <= z2; ++z1)
-                        total++;
-                    for (int x1 = xx1; x1 <= x2; ++x1)
-                        total++;
-                }
-                return total;
-            }
-            if (cuboidtype == "holes")
-            {
-                for (int x1 = xx1; x1 <= x2; x1 += 2)
-                    for (byte y1 = yy1; y1 <= y2; y1 += 2)
-                        for (int z1 = zz1; z1 <= z2; z1 += 2)
-                            total++;
-                return total;
-            }
-            if (cuboidtype == "random")
-            {
-                Random rand = new Random();
-                for (int x1 = xx1; x1 <= x2; ++x1)
-                    for (byte y1 = yy1; y1 <= y2; ++y1)
-                        for (int z1 = zz1; z1 <= z2; ++z1)
-                            if (rand.Next(1, 11) <= 5) total++;
-                return total;
-            }
-            return total;
-        }
-        public struct Pos
+        public enum CuboidType { Solid, Hollow, Walls, Holes, Wire, Random };
+        public struct CuboidData
         {
-            public int x, y, z;
             public short type;
-        }
-        public override void Help(Player p)
-        {
-            p.SendMessage(Description);
+            public int x, y, z;
+            public CuboidType mode;
         }
     }
 }

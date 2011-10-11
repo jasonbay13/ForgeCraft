@@ -42,7 +42,7 @@ namespace SMP
 				p.SendMessage("Invalid radius.");
 				return;
 			}
-			if (radius >= 11)
+			if (radius > 15)
 			{
 				p.SendMessage("Radius too big");
 				return;

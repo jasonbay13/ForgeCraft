@@ -48,6 +48,7 @@ namespace SMP
 			#region please put in alphabetical order and use core.add now not all.add
             core.Add(new CmdAFK());
             core.Add(new CmdCheckPort());
+            core.Add(new CmdChunks());
             core.Add(new CmdClearInventory());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
@@ -74,6 +75,7 @@ namespace SMP
             core.Add(new CmdRain());
             core.Add(new CmdSay());
 			core.Add(new CmdSetRank());
+            core.Add(new CmdSpheroid());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());

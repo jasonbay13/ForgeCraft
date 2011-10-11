@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -55,6 +55,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
+    <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,6 +72,7 @@
     <Compile Include="Server\World\Physics\PhysicsHandlers.cs" />
     <Compile Include="Server\World\World.Light.cs" />
     <Compile Include="util\Extensions.cs" />
+    <Compile Include="util\MathHelper.cs" />
     <Compile Include="util\PreLoaded.cs" />
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />

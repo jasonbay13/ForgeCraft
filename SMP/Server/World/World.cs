@@ -254,6 +254,16 @@ namespace SMP
 				}
             }*/
 
+            using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
+            {
+                w.seed = int.Parse(sw.ReadLine());
+                w.SpawnX = int.Parse(sw.ReadLine());
+                w.SpawnY = int.Parse(sw.ReadLine());
+                w.SpawnZ = int.Parse(sw.ReadLine());
+                w.ChunkLimit = int.Parse(sw.ReadLine());
+                w.time = long.Parse(sw.ReadLine());
+            }
+
             try
             {
                 Parallel.For(-3, 3, x =>
@@ -277,16 +287,6 @@ namespace SMP
 
             World.worlds.Add(w);
             Server.Log(filename + " Loaded.");
-
-            using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
-            {
-                w.seed = int.Parse(sw.ReadLine());
-                w.SpawnX = int.Parse(sw.ReadLine());
-                w.SpawnY = int.Parse(sw.ReadLine());
-                w.SpawnZ = int.Parse(sw.ReadLine());
-                w.ChunkLimit = int.Parse(sw.ReadLine());
-                w.time = long.Parse(sw.ReadLine());
-            }
             Server.Log("Look distance = 3");
             w.timeupdate.Elapsed += delegate
             {
@@ -455,7 +455,7 @@ namespace SMP
                 {
                     foreach (Player p in Player.players.ToArray())
                     {
-                        if (!p.VisibleChunks.Contains(kvp.Key)) continue;
+                        if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
                         if (p.level == this)
                             p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
                     }

@@ -120,7 +120,7 @@ namespace SMP
             }
             if (isPlayer && p.LoggedIn)
             {
-                bool locked = false;
+                //bool locked = false;
                 List<Point> templist = new List<Point>();
 
                 int sx = CurrentChunk.point.x - p.viewdistance; //StartX
@@ -128,7 +128,8 @@ namespace SMP
                 int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
                 int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
 
-                Parallel.For(sx, ex + 1, delegate(int x)
+                // This can cause severe lag! DO NOT USE IT!!!
+                /*Parallel.For(sx, ex + 1, delegate(int x)
                 {
                     Parallel.For(sz, ez + 1, delegate(int z)
                     {
@@ -144,31 +145,26 @@ namespace SMP
                         if ((!p.VisibleChunks.Contains(po) || forcesend) && (Math.Abs(po.x) < p.level.ChunkLimit && Math.Abs(po.z) < p.level.ChunkLimit))
                         {
                             if (!p.level.chunkData.ContainsKey(po))
-                            {
                                 p.level.LoadChunk(po.x, po.z);
-                            }
                             p.SendChunk(p.level.chunkData[po]);
                         }
                     });
-                });
+                });*/
 
-                //for (int x = sx; x <= ex; x++)
-                //{
-                //    for (int z = sz; z <= ez; z++)
-                //    {
-                //        Point po = new Point(x, z);
-                //        templist.Add(po);
-                //        if (p.VisibleChunks.Contains(po) && !forcesend)
-                //        {
-                //            continue; //Continue if the player already has this chunk
-                //        }
-                //        if (!p.level.chunkData.ContainsKey(po))
-                //        {
-                //            p.level.GenerateChunk(po.x, po.z);
-                //        }
-                //        p.SendChunk(p.level.chunkData[po]);
-                //    }
-                //}
+                for (int x = sx; x <= ex; x++)
+                {
+                    for (int z = sz; z <= ez; z++)
+                    {
+                        Point po = new Point(x, z);
+                        templist.Add(po);
+                        if ((!p.VisibleChunks.Contains(po) || forcesend) && (Math.Abs(po.x) < p.level.ChunkLimit && Math.Abs(po.z) < p.level.ChunkLimit))
+                        {
+                            if (!p.level.chunkData.ContainsKey(po))
+                                p.level.LoadChunk(po.x, po.z);
+                            p.SendChunk(p.level.chunkData[po]);
+                        }
+                    }
+                }
 
                 //UNLOAD CHUNKS THE PLAYER CANNOT SEE
                 foreach (Point point in p.VisibleChunks.ToArray())

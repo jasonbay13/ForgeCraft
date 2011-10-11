@@ -38,6 +38,7 @@ namespace SMP
                 case "solid":
                 case "admintite":
                 case "blackrock":
+                case "bedrock":
                 case "adminium": return 7;
                 case "activewater":
                 case "active_water": return 8;
@@ -197,6 +198,15 @@ namespace SMP
 					 return true;
             return false;
 		}
+
+        public static bool ValidBlock(short id)
+        {
+            if (id < 0) return false;
+            foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
+                if ((short)blk == id)
+                    return true;
+            return false;
+        }
     } 
 
 	public enum Blocks : byte
@@ -499,6 +509,7 @@ namespace SMP
 	public enum Vines : byte {Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8}
 	public enum FenceGate : byte {West = 0x0, North = 0x1, East = 0x2, South = 0x3}
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
+    public enum Material { Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Unknown };
 	
 	public static class BlockData
 	{
@@ -607,14 +618,13 @@ namespace SMP
                 case 28:
                 case 29:
                 case 33:
-                /*case 34: // Do piston heads need physics?
-                case 36:*/
+                //case 34: // Do piston heads need physics?
                 case 37:
                 case 38:
                 case 39:
                 case 40:
                 case 46: // =)
-                case 50: // For removing the torch when it should be there
+                case 50: // For removing the torch when it shouldn't be there
                 case 51:
                 case 52: // We gotta spawn mobs somehow
                 case 55:
@@ -680,6 +690,130 @@ namespace SMP
                     return true;
             }
             return false;
+        }
+
+        public static Material BlockMaterial(byte a)
+        {
+            switch (a)
+            {
+                case 20:
+                case 79:
+                case 90:
+                case 102:
+                    return Material.Glass;
+                case 2:
+                case 6:
+                case 18:
+                case 19:
+                case 31:
+                case 32:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 46:
+                case 59:
+                case 83:
+                case 104:
+                case 105:
+                case 106:
+                case 110:
+                case 111:
+                case 115:
+                    return Material.Grass;
+                case 3:
+                case 13:
+                case 60:
+                case 82:
+                    return Material.Gravel;
+                case 12:
+                case 88:
+                    return Material.Sand;
+                case 78:
+                case 80:
+                    return Material.Snow;
+                case 1:
+                case 4:
+                case 7:
+                case 14:
+                case 15:
+                case 16:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 33:
+                case 34:
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                case 45:
+                case 48:
+                case 49:
+                case 52:
+                case 55:
+                case 56:
+                case 57:
+                case 61:
+                case 62:
+                case 66:
+                case 67:
+                case 70:
+                case 71:
+                case 73:
+                case 74:
+                case 77:
+                case 87:
+                case 89:
+                case 97:
+                case 98:
+                case 101:
+                case 108:
+                case 109:
+                case 112:
+                case 113:
+                case 114:
+                    return Material.Stone;
+                case 5:
+                case 17:
+                case 25:
+                case 47:
+                case 50:
+                case 53:
+                case 54:
+                case 58:
+                case 63:
+                case 64:
+                case 65:
+                case 68:
+                case 69:
+                case 72:
+                case 75:
+                case 76:
+                case 84:
+                case 85:
+                case 86:
+                case 91:
+                case 93:
+                case 94:
+                case 95:
+                case 96:
+                case 99:
+                case 100:
+                case 103:
+                case 107:
+                    return Material.Wood;
+                case 35:
+                case 81:
+                case 92:
+                    return Material.Wool;
+            }
+            return Material.Unknown;
         }
 	}
 }

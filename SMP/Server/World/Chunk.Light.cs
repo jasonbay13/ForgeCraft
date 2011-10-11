@@ -33,7 +33,7 @@ namespace SMP
 			for (int y = Chunk.Height - 1; y >= 0; y--)
 			{
 				block = blocks[Chunk.PosToInt(x, y, z)];
-				curLight -= LightOpacity[block];
+                curLight -= Math.Min(LightOpacity[block], curLight);
                 //if (curLight <= 0) break; // It's not that simple...
 				SetSkyLight(x, y, z, (byte)curLight);
                 SetBlockLight(x, y, z, (byte)LightOutput[block]);

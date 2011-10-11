@@ -348,6 +348,7 @@ namespace SMP
                     {
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
+                            SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Server.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
@@ -362,6 +363,7 @@ namespace SMP
                     {
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
+                            SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Server.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
@@ -397,6 +399,7 @@ namespace SMP
 				{
 					if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
 					{
+                        SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                         Server.Log("Delegate for " + id + " Destroyed returned false");
 						return;
 					}
@@ -478,7 +481,7 @@ namespace SMP
 						//do stuff, like shear sheep
 						continue;
 					}
-					if (e1.isPlayer)
+                    if (e1.isPlayer && e1.p != this)
 					{
 						//dont do anything here? is there a case where you right click a player? a snowball maybe...
 						//Check the players holding item, if they need to do something with it, do it.
@@ -495,7 +498,7 @@ namespace SMP
 
 				if (block == pp)
 				{
-					if (e1.isPlayer)
+					if (e1.isPlayer && e1.p != this)
 					{
 						//dont do anything here? is there a case where you right click a player? a snowball maybe...
 						//we should do an item check, then return...
@@ -505,15 +508,15 @@ namespace SMP
 				}
 			}
 
-			switch (direction)
-			{
-				case 0: blockY--; break;
-				case 1: blockY++; break;
-				case 2: blockZ--; break;
-				case 3: blockZ++; break;
-				case 4: blockX--; break;
-				case 5: blockX++; break;				
-			}
+            switch (direction)
+            {
+                case 0: blockY--; break;
+                case 1: blockY++; break;
+                case 2: blockZ--; break;
+                case 3: blockZ++; break;
+                case 4: blockX--; break;
+                case 5: blockX++; break;
+            }
 
             if (OnBlockChange != null)
                 OnBlockChange(this, blockX, blockY, blockZ, blockID);
@@ -525,12 +528,14 @@ namespace SMP
 				return;
 			}
 
-			if (blockID >= 1 && blockID <= 127)
+			if (blockID >= 1 && blockID <= 255)
 			{
 				if (BlockChange.Placed.ContainsKey(blockID))
 				{
 					if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
 					{
+                        SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                        SendItem((short)inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
 						return;
 					}
 				}
@@ -554,21 +559,7 @@ namespace SMP
 
 		public void HandleHoldingChange(byte[] message)
 		{
-			try
-			{
-				current_slot_holding = (short)(util.EndianBitConverter.Big.ToInt16(message, 0) + 36);
-
-				inventory.current_index = current_slot_holding;
-				inventory.current_item = inventory.items[current_slot_holding];
-				current_block_holding = inventory.current_item;
-
-				foreach (int i in VisibleEntities.ToArray())
-				{
-					Entity e = Entity.Entities[i];
-					if (!e.isPlayer) continue;
-					e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
-				}
-			}
+			try { current_slot_holding = (short)(util.EndianBitConverter.Big.ToInt16(message, 0) + 36); }
 			catch { }
 		}
 
