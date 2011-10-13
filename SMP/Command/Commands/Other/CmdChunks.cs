@@ -10,7 +10,7 @@ namespace SMP
         public override string Name { get { return "chunks"; } }
         public override List<string> Shortcuts { get { return new List<string> { }; } }
         public override string Category { get { return "other"; } }
-        public override bool ConsoleUseable { get { return false; } }
+        public override bool ConsoleUseable { get { return true; } }
         public override string Description { get { return "View chunk count."; } }
         public override string PermissionNode { get { return "core.other.chunks"; } }
 

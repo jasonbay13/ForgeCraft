@@ -134,7 +134,7 @@ namespace SMP
 			LeftClicked.Add((short)Blocks.DoorWooden, new BCD(OpenDoor));
 			LeftClicked.Add((short)Blocks.Lever, new BCD(SwitchLever));
 			LeftClicked.Add((short)Blocks.ButtonStone, new BCD(HitButton));
-			LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd));
+			//LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd));
 			LeftClicked.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
             LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
 
@@ -155,7 +155,8 @@ namespace SMP
 			Destroyed.Add((short)Blocks.ClayBlock, new BCD(DestroyClay)); //Drop random amount
 			Destroyed.Add((short)Blocks.SugarCane, new BCD(DestroySugarCane)); //Destroy Other canes
 			Destroyed.Add((short)Blocks.Jukebox, new BCD(DestroyJukebox)); //Drop Contents
-			Destroyed.Add((short)Blocks.GlowstoneBlock, new BCD(DestroyGlowStone)); //Drop random amount
+            Destroyed.Add((short)Blocks.GlowstoneBlock, new BCD(DestroyGlowStone)); //Drop random amount
+            Destroyed.Add((short)Blocks.NoteBlock, new BCD(DestroyNoteBlock)); // Unset pitch value
 		}
 
         public static bool DoNothing(Player a, BCS b)
@@ -164,12 +165,16 @@ namespace SMP
         }
 		public static bool Till(Player a, BCS b)
 		{
-			if (a.inventory.current_item.item == (short)Items.DiamondHoe || a.inventory.current_item.item == (short)Items.IronHoe || a.inventory.current_item.item == (short)Items.GoldHoe || a.inventory.current_item.item == (short)Items.StoneHoe || a.inventory.current_item.item == (short)Items.WoodenHoe)
-				if (Blockclicked(a, b) == (byte)Blocks.Grass)
-				{
+			switch (a.inventory.current_item.item) {
+                case (short)Items.DiamondHoe:
+                case (short)Items.GoldHoe:
+                case (short)Items.IronHoe:
+                case (short)Items.StoneHoe:
+                case (short)Items.WoodenHoe:
 					a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.FarmLand, 0);
 					a.inventory.current_item.meta++; //damage of the item
-				}
+                    return false;
+            }
 			return true;
 		}
 		public static bool OpenDispenser(Player a, BCS b)
@@ -251,6 +256,10 @@ namespace SMP
 		}
 		public static bool ChangeRepeater(Player a, BCS b)
 		{
+            byte meta = (byte)((a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) & 0xC) >> 2);
+            meta++; if (meta > 3) meta = 0;
+            meta = (byte)((meta << 2) | (a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) & 0x3));
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z), meta);
 			return false;
 		}
 
@@ -340,7 +349,9 @@ namespace SMP
 		public static bool PlaceBed(Player a, BCS b)
 		{
             if (b.Direction != 1) return false;
+            Point3 pos2 = b.pos;
             byte rot = DirectionByRotFlat(a, b);
+
             switch (rot)
             {
                 case (byte)Directions.North:
@@ -356,24 +367,25 @@ namespace SMP
                     rot = (byte)Bed.West;
                     break;
             }
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, rot);
-
             switch (rot)
             {
                 case (byte)Bed.North:
-                    b.pos.x--;
+                    pos2.x--;
                     break;
                 case (byte)Bed.East:
-                    b.pos.z--;
+                    pos2.z--;
                     break;
                 case (byte)Bed.South:
-                    b.pos.x++;
+                    pos2.x++;
                     break;
                 case (byte)Bed.West:
-                    b.pos.z++;
+                    pos2.z++;
                     break;
             }
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, (byte)(rot | 0x8));
+
+            if (a.level.GetBlock((int)pos2.x, (int)pos2.y, (int)pos2.z) != 0 || !BlockData.CanPlaceAgainst(a.level.GetBlock((int)pos2.x, (int)pos2.y - 1, (int)pos2.z))) return false;
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, rot);
+            a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, (byte)Blocks.Bed, (byte)(rot | 0x8));
 
 			return true;
 		}
@@ -434,6 +446,24 @@ namespace SMP
 		}
 		public static bool PlaceRepeater(Player a, BCS b)
 		{
+            if (!BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z))) return false;
+            byte rot = DirectionByRotFlat(a, b);
+            switch (rot)
+            {
+                case (byte)Directions.North:
+                    rot = (byte)Repeater.North;
+                    break;
+                case (byte)Directions.East:
+                    rot = (byte)Repeater.East;
+                    break;
+                case (byte)Directions.South:
+                    rot = (byte)Repeater.South;
+                    break;
+                case (byte)Directions.West:
+                    rot = (byte)Repeater.West;
+                    break;
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.RedstoneRepeaterOff, rot);
 			return false;
 		}
 		public static bool PlaceSign(Player a, BCS b)
@@ -447,7 +477,7 @@ namespace SMP
 		public static bool PlaceWoodenDoor(Player a, BCS b)
 		{
             // TODO: Double doors!
-            //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
             if (b.Direction != 1) return false;
             byte rot = DirectionByRotFlat(a, b);
             switch (rot)
@@ -472,7 +502,9 @@ namespace SMP
 		}
 		public static bool PlantSeeds(Player a, BCS b)
 		{
-			return false;
+            if (Blockclicked(a, b) != (byte)Blocks.FarmLand) return false;
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Seeds, 0);
+			return true;
 		}
 		public static bool ThrowEgg(Player a, BCS b)
 		{
@@ -492,17 +524,56 @@ namespace SMP
 			if (bl == 8 || bl == 9 || blc == 8 || blc == 9)
 			{
 				a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
-				a.inventory.current_item.item = (short)Items.BucketWater;
+                a.inventory.Add((short)Items.BucketWater, 1, 0, a.inventory.current_index);
 			}
             else if (bl == 10 || bl == 11 || blc == 10 || blc == 11)
 			{
 				a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
-				a.inventory.current_item.item = (short)Items.BucketLava;
+                a.inventory.Add((short)Items.BucketLava, 1, 0, a.inventory.current_index);
 			}
 			return false;
 		}
 		public static bool UseDye(Player a, BCS b)
 		{
+            switch (Blockclicked(a, b))
+            {
+                case (byte)Blocks.Sapling:
+                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    {
+                        Point3 pos2 = BlockclickedPos(a, b);
+                        GenTrees.Normal(a.level, (int)pos2.x, (int)pos2.y, (int)pos2.z, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
+                        return true;
+                    }
+                    return false;
+                case (byte)Blocks.Grass:
+                    if (b.Direction != 1) return false;
+                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    {
+                        byte type;
+                        for (int x = -2; x <= 2; x++)
+                            for (int z = -2; z <= 2; z++)
+                            {
+                                if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(5) < 4)
+                                {
+                                    switch (Entity.random.Next(15))
+                                    {
+                                        case 0:
+                                            type = (byte)Blocks.FlowerDandelion;
+                                            break;
+                                        case 1:
+                                            type = (byte)Blocks.FlowerRose;
+                                            break;
+                                        default:
+                                            type = (byte)Blocks.TallGrass;
+                                            break;
+                                    }
+                                    a.level.BlockChange((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z, type, (type == (byte)Blocks.TallGrass ? (byte)TallGrass.TallGrass : (byte)0));
+                                }
+                            }
+                        return true;
+                    }
+                    return false;
+            }
 			return false;
 		}
 		public static bool UseFishingRod(Player a, BCS b)
@@ -558,12 +629,14 @@ namespace SMP
 			}
 
 			a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
-			a.inventory.Remove(a.inventory.current_index, 1);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 
 		}
 		public static bool PlaceCactus(Player a, BCS b)
 		{
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z) != (byte)Blocks.Sand) return false;
+            // TODO: Adjacent block checks!
 			return true;
 		}
 		public static bool PlaceChest(Player a, BCS b)
@@ -601,7 +674,7 @@ namespace SMP
 			}
 
 			a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
-			a.inventory.Remove(a.inventory.current_index, 1);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceFence(Player a, BCS b)
@@ -634,7 +707,7 @@ namespace SMP
 			}
 
 			a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
-			a.inventory.Remove(a.inventory.current_index, 1);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceGravel(Player a, BCS b)
@@ -671,7 +744,7 @@ namespace SMP
 			}
 
 			a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
-			a.inventory.Remove(a.inventory.current_index, 1);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceLava(Player a, BCS b)
@@ -715,10 +788,16 @@ namespace SMP
                 }
             }
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Lever, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceNormalPiston(Player a, BCS b)
 		{
+            if (b.pos.y >= a.pos.y + 2) b.Direction = (byte)Directions.Bottom;
+            else if (b.pos.y <= a.pos.y - 1) b.Direction = DirectionByRotNOTFlat(a, b, true);
+            else if (b.Direction == 0 || b.Direction == 1) b.Direction = DirectionByRotFlat(a, b, true);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Piston, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlacePumpkin(Player a, BCS b)
@@ -766,6 +845,11 @@ namespace SMP
 		}
 		public static bool PlaceStickyPiston(Player a, BCS b)
 		{
+            if (b.pos.y >= a.pos.y + 2) b.Direction = (byte)Directions.Bottom;
+            else if (b.pos.y <= a.pos.y - 1) b.Direction = DirectionByRotNOTFlat(a, b, true);
+            else if (b.Direction == 0 || b.Direction == 1) b.Direction = DirectionByRotFlat(a, b, true);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.PistonSticky, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceSugarCane(Player a, BCS b)
@@ -884,7 +968,7 @@ namespace SMP
 		{
             byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Lever, (byte)(meta ^ 0x8));
-            //Player.GlobalSoundEffect(b.pos, 1000, a.level); // There is no suitable sound effect. DAMN YOU NOTCH!!!
+            //Player.GlobalSoundEffect(b.pos, 1000, a.level); // There is no sound effect for this. DAMN YOU NOTCH!!!
 			return false;
 		}
 		public static bool HitButton(Player a, BCS b)
@@ -968,7 +1052,17 @@ namespace SMP
 		}
 		public static bool DestroyDoubleSlab(Player a, BCS b)
 		{
-			return false;
+            if (Server.mode == 0)
+            {
+                Item itemDrop;
+                for (int i = 0; i < 2; i++)
+                {
+                    itemDrop = new Item((short)Items.Bed, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+                return false;
+            }
+			return true;
 		}
 		public static bool DestroyChest(Player a, BCS b)
 		{
@@ -976,11 +1070,11 @@ namespace SMP
 		}
 		public static bool DestroyWheat(Player a, BCS b)
 		{
-			return false;
+			return true;
 		}
 		public static bool DestroyFurnace(Player a, BCS b)
 		{
-			return false;
+            return false;
 		}
 		public static bool DestroyDoorWood(Player a, BCS b)
 		{
@@ -1034,51 +1128,80 @@ namespace SMP
 		}
 		public static bool DestroySnow(Player a, BCS b)
 		{
+            if (Server.mode == 0)
+            {
+                switch (a.inventory.current_item.item) {
+                    case (short)Items.DiamondShovel:
+                    case (short)Items.GoldShovel:
+                    case (short)Items.IronShovel:
+                    case (short)Items.StoneShovel:
+                    case (short)Items.WoodenShovel:
+                        Item itemDrop = new Item((short)Items.Snowball, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        itemDrop.e.UpdateChunks(false, false);
+                        break;
+                }
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
 			return false;
 		}
 		public static bool DestroyCacti(Player a, BCS b)
 		{
+            Item itemDrop;
+            while (a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) == (byte)Blocks.Cactus)
+            {
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y++, (int)b.pos.z, 0, 0);
+                if (Server.mode == 0)
+                {
+                    itemDrop = new Item((short)Blocks.Cactus, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+            }
 			return false;
 		}
 		public static bool DestroyClay(Player a, BCS b)
 		{
+            if (Server.mode == 0)
+            {
+                Item itemDrop;
+                for (int i = 0; i < 4; i++)
+                {
+                    itemDrop = new Item((short)Items.Clay, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+            }
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
 			return false;
 		}
 		public static bool DestroySugarCane(Player a, BCS b)
 		{
+            Item itemDrop;
+            while (a.level.GetBlock((int)b.pos.x, (int)b.pos.y++, (int)b.pos.z) == (byte)Blocks.SugarCane)
+            {
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+                if (Server.mode == 0)
+                {
+                    itemDrop = new Item((short)Items.SugarCane, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+                }
+            }
 			return false;
 		}
 		public static bool DestroyJukebox(Player a, BCS b)
 		{
             // TODO: Tile entity stuff!
-            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             if (meta != 0)
             {
                 if (Server.mode == 0)
                 {
-                    short item = 0;
-                    switch (meta)
+                    if (meta >= 2256 && meta <= 2266)
                     {
-                        case 1:
-                            item = (short)Items.GoldMusicDisc;
-                            break;
-                        case 2:
-                            item = (short)Items.GreenMusicDisc;
-                            break;
-                    }
-
-                    if (item != 0)
-                    {
-                        Item itemDrop = new Item(item, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        Item itemDrop = new Item((short)meta, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
                         itemDrop.e.UpdateChunks(false, false);
                     }
-
-                    a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0);
                 }
-
-                foreach (Player pl in Player.players)
-                    if (pl.MapLoaded && pl.VisibleChunks.Contains(Chunk.GetChunk((int)b.pos.x >> 4, (int)b.pos.z >> 4, pl.level).point))
-                        pl.SendSoundEffect(b.pos, 1005, 0);
+                a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
             return true;
 		}
@@ -1095,6 +1218,11 @@ namespace SMP
             Player.GlobalBreakEffect(b.pos, b.ID, a.level, a);
             return false;
 		}
+        public static bool DestroyNoteBlock(Player a, BCS b)
+        {
+            a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            return true;
+        }
 
 		public static byte DirectionByRotFlat(Player p, BCS a, bool invert = false)
 		{
@@ -1120,8 +1248,8 @@ namespace SMP
 		}
         public static byte DirectionByRotNOTFlat(Player p, BCS a, bool invert = false)
 		{
-			if (p.rot[1] > 45) return invert ? (byte)Directions.Bottom : (byte)Directions.Top;
-            if (p.rot[1] < -45) return invert ? (byte)Directions.Top : (byte)Directions.Bottom;
+            if (p.rot[1] > 45) return invert ? (byte)Directions.Top : (byte)Directions.Bottom;
+            if (p.rot[1] < -45) return invert ? (byte)Directions.Bottom : (byte)Directions.Top;
 			return DirectionByRotFlat(p, a, invert);
 		}
 
@@ -1151,6 +1279,24 @@ namespace SMP
 
 			return p.level.GetBlock(x, y, z);
 		}
+        public static Point3 BlockclickedPos(Player p, BCS a)
+        {
+            int x = (int)a.pos.x;
+            int y = (int)a.pos.y;
+            int z = (int)a.pos.z;
+
+            switch (a.Direction)
+            {
+                case 0: y++; break;
+                case 1: y--; break;
+                case 2: z++; break;
+                case 3: z--; break;
+                case 4: x++; break;
+                case 5: x--; break;
+            }
+
+            return new Point3(x, y, z);
+        }
 	}
 	public struct BCS //BlockChangeStruct (This is used to hold the blockchange information)
 	{

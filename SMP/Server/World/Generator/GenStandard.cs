@@ -33,13 +33,13 @@ namespace SMP {
         RidgedMultifractal mountains;
         Perlin mountains2;
 
-        public GenStandard() {
-            random = new Random();
+        public GenStandard(int seed) {
+            random = new Random(seed);
 
             perlin = new Perlin();
             perlin.Frequency = 0.009;
             perlin.Persistence = 0.3;
-            perlin.Seed = (int)( DateTime.Now.Ticks & 0xffffffff );
+            perlin.Seed = seed;
 
             perlin2 = new Perlin();
             perlin2.Frequency = 0.007;
@@ -80,7 +80,6 @@ namespace SMP {
         /// <param name="c"></param>
         public override void Generate(World w, Chunk c)
         {
-            random = new Random(w.seed);
             int cx = c.x << 4, cz = c.z << 4;
             int waterLevel = 64 + 15 / 2 - 4;
             if (w.seed == 0)
@@ -190,6 +189,18 @@ namespace SMP {
                     }
                 }
             }
+        }
+
+        public override void SetSeed(int seed)
+        {
+            random = new Random(seed);
+            perlin.Seed = seed;
+            perlin2.Seed = seed - 7;
+            caves.Seed = seed + 99;
+            voronoi.Seed = seed + 2;
+            desertSelector.Seed = seed + 245;
+            mountains.Seed = seed + 41;
+            mountains2.Seed = seed + 41;
         }
     }
 }

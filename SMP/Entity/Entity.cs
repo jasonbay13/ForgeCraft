@@ -183,12 +183,15 @@ namespace SMP
         }
 		public void UpdateEntities()
 		{
+            if (CurrentChunk == null)
+                return;
+
 			List<int> tempelist = new List<int>();
 
-			int sx = CurrentChunk.point.x - 3; //StartX
-			int ex = CurrentChunk.point.x + 3; //EndX
-			int sz = CurrentChunk.point.z - 3; //StartZ
-			int ez = CurrentChunk.point.z + 3; //EndZ
+            int sx = CurrentChunk.point.x - p.viewdistance; //StartX
+            int ex = CurrentChunk.point.x + p.viewdistance; //EndX
+            int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
+            int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
 			for (int x = sx; x <= ex; x++)
 			{
 				for (int z = sz; z <= ez; z++)
@@ -286,17 +289,18 @@ namespace SMP
 		}
         public static void EntityPhysics()
         {
-            lock (Entities)
+            Entity e;
+            for (int i = 0; i < Entities.Count; i++)
             {
-                Entity e;
-                foreach (KeyValuePair<int, Entity> kvp in Entities)
+                try
                 {
-                    e = kvp.Value;
+                    e = Entities[i];
                     if (e.isPlayer) continue; // Players don't have physics.
                     if (e.isObject) continue; // TODO
                     if (e.isAI) e.ai.Update();
                     if (e.isItem) e.I.Physics();
                 }
+                catch { }
             }
         }
 		

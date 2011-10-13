@@ -90,6 +90,9 @@ namespace SMP
 			SendLoginPass();
 			
 			UpdateShi(this);
+
+            if (Chunk.GetChunk((int)pos.x, (int)pos.z, level) == null)
+                Kick("Chunk missing: " + (int)pos.x + "," + (int)pos.z);
 			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
@@ -97,12 +100,11 @@ namespace SMP
 
         private void UpdateShi(Player p)
         {
-            World w = World.Find(p.level.name);
-
-            if (w.Israining)
-            {
-                w.Rain(true);
-            }
+            p.SendTime();
+            if (Chunk.GetChunk((int)p.pos.x, (int)p.pos.z, p.level) == null)
+                p.level.LoadChunk((int)p.pos.x, (int)p.pos.z);
+            if (p.level.Israining)
+                p.level.Rain(true);
         }
 		private void HandleHandshake(byte[] message)
 		{
@@ -340,7 +342,10 @@ namespace SMP
 				}
 
                 if (OnBlockChange != null)
+                {
                     OnBlockChange(this, x, y, z, rc);
+                    return;
+                }
 
                 if (Server.mode == 1)
                 {
@@ -519,7 +524,10 @@ namespace SMP
             }
 
             if (OnBlockChange != null)
+            {
                 OnBlockChange(this, blockX, blockY, blockZ, blockID);
+                return;
+            }
 
 			if (blockID == -1)
 			{
@@ -779,7 +787,8 @@ namespace SMP
 					return 0;
 				case (93):
 				case (94):
-					return 354;
+                    return 356;
+					//return 354; // lolwut? why cake?
 
 				default:
 					return id;

@@ -36,7 +36,8 @@ namespace SMP
                 Help(p);
                 return;
             }
-            p.Teleport_Player(p.level.SpawnX, p.level.SpawnY, p.level.SpawnZ);
+            p.Teleport_Spawn();
+            //p.Teleport_Player(p.level.SpawnX, p.level.SpawnY, p.level.SpawnZ);
             /*byte[] bytes = new byte[41];
             util.EndianBitConverter.Big.GetBytes(p.level.SpawnX).CopyTo(bytes, 0);
             util.EndianBitConverter.Big.GetBytes(p.Stance).CopyTo(bytes, 8);

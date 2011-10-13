@@ -793,6 +793,13 @@ namespace SMP
 				tosend[40] = onground;
 				SendRaw(0x0D, tosend);
 			}
+            public void Teleport_Spawn()
+            {
+                int y;
+                for (y = 127; y >= 0; y--)
+                    if (level.GetBlock((int)level.SpawnX, y, (int)level.SpawnZ) != 0) break;
+                Teleport_Player(level.SpawnX, ++y, level.SpawnZ, 0, 0);
+            }
 			#endregion
 			#region Login Stuffs
 			void SendLoginPass()
@@ -1793,8 +1800,7 @@ namespace SMP
         /// <returns>Player</returns>
         public static Player FindPlayer(string name)
         {
-            List<Player> tempList = new List<Player>();
-            tempList.AddRange(players);
+            List<Player> tempList = new List<Player>(players);
             Player tempPlayer = null; 
 			bool returnNull = false;
 

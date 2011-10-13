@@ -432,7 +432,7 @@ namespace SMP
 		GlowstoneDust = 348,
 		FishRaw = 349,
 		FishCooked = 350,
-		Dye = 551,
+		Dye = 351,
 		Bone = 352,
 		Sugar = 353,
 		Cake = 354,
@@ -509,7 +509,7 @@ namespace SMP
 	public enum Vines : byte {Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8}
 	public enum FenceGate : byte {West = 0x0, North = 0x1, East = 0x2, South = 0x3}
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
-    public enum Material { Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Unknown };
+    public enum Material { Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Dirt, Unknown };
 	
 	public static class BlockData
 	{
@@ -591,6 +591,8 @@ namespace SMP
                 case (59):
                 case (75):
                 case (76):
+                case (93):
+                case (94):
                 case (104):
                 case (105):
                 case (106):
@@ -692,10 +694,63 @@ namespace SMP
             return false;
         }
 
+        public static bool CanWalkThrough(byte a)
+        {
+            switch (a)
+            {
+                case 6:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 27:
+                case 28:
+                case 30:
+                case 31:
+                case 32:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 50:
+                case 51:
+                case 55:
+                case 59:
+                case 63:
+                case 64:
+                case 65:
+                case 66:
+                case 68:
+                case 69:
+                case 70:
+                case 71:
+                case 72:
+                case 75:
+                case 76:
+                case 77:
+                case 78:
+                case 83:
+                case 90:
+                case 93:
+                case 94:
+                case 96:
+                case 104:
+                case 105:
+                case 106:
+                case 107:
+                case 111:
+                case 115:
+                    return true;
+            }
+            return false;
+        }
+
         public static Material BlockMaterial(byte a)
         {
             switch (a)
             {
+                case 3:
+                    return Material.Dirt;
                 case 20:
                 case 79:
                 case 90:
@@ -721,7 +776,6 @@ namespace SMP
                 case 111:
                 case 115:
                     return Material.Grass;
-                case 3:
                 case 13:
                 case 60:
                 case 82:

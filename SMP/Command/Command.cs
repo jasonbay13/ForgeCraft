@@ -79,6 +79,7 @@ namespace SMP
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
 			core.Add(new CmdTeleport());
+            core.Add(new CmdTree());
             core.Add(new CmdSaveLVL());
 			core.Add(new CmdSetTime());
             core.Add(new CmdUnban());

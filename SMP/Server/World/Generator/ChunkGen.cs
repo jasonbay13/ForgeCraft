@@ -30,5 +30,6 @@ namespace SMP {
         /// <param name="w"></param>
         /// <param name="c"></param>
         public abstract void Generate( World w, Chunk c );
+        public abstract void SetSeed( int seed );
     }
 }

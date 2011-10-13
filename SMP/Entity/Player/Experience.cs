@@ -29,7 +29,7 @@ namespace SMP
                 _Experience++;
                 if (_Experience == ((_Level + 1) * 10)) { _Experience = 0; _Level++; }
             }
-            if (oldlevel < _Level) { p.SendMessage("Congratulations! You are now level " + _Level); RewardItem(p); }
+            if (oldlevel < _Level) { p.SendMessage("Congratulations! You are now level " + _Level); /*RewardItem(p);*/ } // The reward is annoying as hell!
             //if (_Experience > 127) { _Experience = 127; }
 
             /*switch (_TotalExp)

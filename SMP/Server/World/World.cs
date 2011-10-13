@@ -33,7 +33,8 @@ namespace SMP
 		public float SpawnPitch;
 		public string Map_Name;
 		public string name;
-		public int seed;
+        private int Seed;
+        public int seed { get { return Seed; } set { Seed = value; if (generator != null) generator.SetSeed(value); } }
 		public long time;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
@@ -81,7 +82,7 @@ namespace SMP
 		{
             this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
-			generator = new GenStandard();
+            generator = new GenStandard(seed);
             this.name = name;
 			Server.Log("Generating...");
 
@@ -191,7 +192,7 @@ namespace SMP
             //TODO make loading/saving better.
             //if (WorldLoad != null)
             //	WorldLoad(this);
-            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard(), name = filename };
+            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard(0), name = filename };
             Server.Log("Loading...");
 
             /*using (MemoryStream ms = new MemoryStream())
