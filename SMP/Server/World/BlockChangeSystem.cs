@@ -1286,7 +1286,7 @@ namespace SMP
         {
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
             Explosion exp = new Explosion(a.level, b.pos.x + .5, b.pos.y + .5, b.pos.z + .5, 3);
-            exp.doExplosionA();
+            exp.DoExplosion();
             a.SendExplosion(b.pos, 3, exp.destroyedBlockPositions.ToArray());
             Item item; byte block;
             foreach (Point3 pt in exp.destroyedBlockPositions)

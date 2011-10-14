@@ -20,7 +20,7 @@ namespace SMP
             explosionZ = d2;
         }
 
-        public void doExplosionA()
+        public void DoExplosion()
         {
             float f = explosionSize;
             int i = 16;
