@@ -328,6 +328,6 @@
     <Folder Include="Server\Economy\Commands\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mojang\LICENSE..txt" />
+    <Content Include="Mojang\LICENSE.txt" />
   </ItemGroup>
 </Project>

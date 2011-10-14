@@ -109,8 +109,31 @@ namespace SMP
             }*/
 
             explosionSize = f;
+
+            Player.players.ForEach(delegate(Player pl)
+            {
+                if (pl.MapLoaded && pl.level == worldObj && pl.VisibleChunks.Contains(Chunk.GetChunk((int)explosionX >> 4, (int)explosionZ >> 4, pl.level).point))
+                    pl.SendExplosion((int)explosionX, (int)explosionY, (int)explosionZ, explosionSize, destroyedBlockPositions.ToArray());
+            });
+
             List<Point3> arraylist = new List<Point3>();
             arraylist.AddRange(destroyedBlockPositions);
+
+            Item item; byte block;
+            foreach (Point3 pt in arraylist)
+            {
+                if (Server.mode == 0 && Entity.random.Next(2) == 0)
+                {
+                    block = (byte)Player.BlockDropSwitch(worldObj.GetBlock((int)pt.x, (int)pt.y, (int)pt.z));
+                    if (FindBlocks.ValidItem(block))
+                    {
+                        item = new Item(block, worldObj) { count = 1, meta = worldObj.GetMeta((int)pt.x, (int)pt.y, (int)pt.z), pos = new double[3] { pt.x + .5, pt.y + .5, pt.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        item.e.UpdateChunks(false, false);
+                    }
+                }
+                worldObj.BlockChange((int)pt.x, (int)pt.y, (int)pt.z, 0, 0);
+            }
+
             if(isFlaming)
             {
                 for(int l2 = arraylist.Count - 1; l2 >= 0; l2--)

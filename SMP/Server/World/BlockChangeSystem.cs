@@ -161,7 +161,7 @@ namespace SMP
 			Destroyed.Add((short)Blocks.Jukebox, new BCD(DestroyJukebox)); //Drop Contents
             Destroyed.Add((short)Blocks.GlowstoneBlock, new BCD(DestroyGlowStone)); //Drop random amount
             Destroyed.Add((short)Blocks.NoteBlock, new BCD(DestroyNoteBlock)); // Unset pitch value
-            //Destroyed.Add((short)Blocks.TNT, new BCD(DestroyTNT)); // For testing :)
+            Destroyed.Add((short)Blocks.TNT, new BCD(DestroyTNT)); // For testing :)
 		}
 
         public static bool DoNothing(Player a, BCS b)
@@ -1287,21 +1287,6 @@ namespace SMP
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
             Explosion exp = new Explosion(a.level, b.pos.x + .5, b.pos.y + .5, b.pos.z + .5, 3);
             exp.DoExplosion();
-            a.SendExplosion(b.pos, 3, exp.destroyedBlockPositions.ToArray());
-            Item item; byte block;
-            foreach (Point3 pt in exp.destroyedBlockPositions)
-            {
-                if (Server.mode == 0)
-                {
-                    block = (byte)Player.BlockDropSwitch(a.level.GetBlock((int)pt.x, (int)pt.y, (int)pt.z));
-                    if (FindBlocks.ValidItem(block))
-                    {
-                        item = new Item(block, a.level) { count = 1, meta = a.level.GetMeta((int)pt.x, (int)pt.y, (int)pt.z), pos = new double[3] { pt.x + .5, pt.y + .5, pt.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        item.e.UpdateChunks(false, false);
-                    }
-                }
-                a.level.BlockChange((int)pt.x, (int)pt.y, (int)pt.z, 0, 0);
-            }
             return false;
         }
 
