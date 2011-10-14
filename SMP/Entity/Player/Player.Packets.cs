@@ -353,7 +353,7 @@ namespace SMP
                     {
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
-                            SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
+                            //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Server.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
@@ -368,7 +368,7 @@ namespace SMP
                     {
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
-                            SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
+                            //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Server.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
@@ -404,7 +404,7 @@ namespace SMP
 				{
 					if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
 					{
-                        SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
+                        //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                         Server.Log("Delegate for " + id + " Destroyed returned false");
 						return;
 					}
@@ -542,8 +542,8 @@ namespace SMP
 				{
 					if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
 					{
-                        SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
-                        SendItem((short)inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
+                        //SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                        //SendItem((short)inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
 						return;
 					}
 				}

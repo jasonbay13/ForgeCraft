@@ -869,5 +869,103 @@ namespace SMP
             }
             return Material.Unknown;
         }
+
+        public static float GetExplosionResistance(byte a)
+        {
+            switch (a)
+            {
+                case 7:
+                    return 18000000;
+                case 49:
+                    return 6000;
+                case 8:
+                case 9:
+                case 11:
+                    return 500;
+                case 45:
+                case 98:
+                case 4:
+                case 57:
+                case 41:
+                case 42:
+                case 84:
+                case 48:
+                case 67:
+                case 44:
+                case 43:
+                case 1:
+                    return 30;
+                case 71:
+                case 52:
+                    return 25;
+                case 23:
+                case 61:
+                case 62:
+                    return 17.5F;
+                case 16:
+                case 56:
+                case 64:
+                case 85:
+                case 14:
+                case 15:
+                case 22:
+                case 21:
+                case 73:
+                case 74:
+                case 53:
+                case 5:
+                    return 15;
+                case 54:
+                case 58:
+                    return 12.5F;
+                case 17:
+                    return 10;
+                case 47:
+                    return 7.5F;
+                case 91:
+                case 86:
+                case 63:
+                case 68:
+                    return 5;
+                case 25:
+                case 24:
+                case 35:
+                    return 4;
+                case 27:
+                case 28:
+                case 66:
+                    return 3.5F;
+                case 82:
+                case 60:
+                case 2:
+                case 13:
+                case 19:
+                    return 3;
+                case 92:
+                case 3:
+                case 79:
+                case 69:
+                case 70:
+                case 72:
+                case 12:
+                case 88:
+                case 77:
+                    return 2.5F;
+                case 81:
+                case 65:
+                case 87:
+                    return 2;
+                case 20:
+                case 89:
+                    return 1.5F;
+                case 26:
+                case 18:
+                case 80:
+                    return 1;
+                case 78:
+                    return 0.5F;
+            }
+            return 0;
+        }
 	}
 }

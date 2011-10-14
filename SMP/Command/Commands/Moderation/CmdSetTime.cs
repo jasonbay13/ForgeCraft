@@ -48,7 +48,7 @@ namespace SMP
 		}
 		public override System.Collections.Generic.List<string> Shortcuts {
 			get {
-				return new System.Collections.Generic.List<string>{ "set", "time" };
+				return new System.Collections.Generic.List<string>{ "time" };
 			}
 		}
 		public override void Use (Player p, params string[] args1)

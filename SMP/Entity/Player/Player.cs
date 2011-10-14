@@ -715,9 +715,20 @@ namespace SMP
                 data.CopyTo(bytes, 5);
                 SendRaw(0x83, bytes);
             }
-            public void SendUseBed(int x, byte y, int z, int eid)
-            {
 
+            public void SendUseBed(int eid, int x, byte y, int z)
+            {
+                byte[] bytes = new byte[14];
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                bytes[4] = 0; // What is this?
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 5);
+                bytes[9] = y;
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 10);
+                SendRaw(0x11, bytes);
+            }
+            public void SendUseBed(int eid, Point3 a)
+            {
+                SendUseBed(eid, (int)a.x, (byte)a.y, (int)a.z);
             }
 
             public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2, World wld)
@@ -1080,10 +1091,20 @@ namespace SMP
                 SendPickupAnimation(eid, this.id);
             }
 
-			public void SendEntityPosVelocity()
+			public void SendEntityVelocity(int eid, short x, short y, short z)
 			{
 				if (!MapLoaded) return;
+                byte[] bytes = new byte[10];
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 6);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 8);
+                SendRaw(0x1C, bytes);
 			}
+            public void SendEntityVelocity(int eid, Point3 a)
+            {
+                SendEntityVelocity(eid, (short)a.x, (short)a.y, (short)a.z);
+            }
 
 			public void SendEntityEquipment(Player p)
 			{
@@ -1103,7 +1124,27 @@ namespace SMP
 				SendRaw(0x05, bytes);
 			}
 
-            public void SendEntityMeta(int eid, object[] data) // This packet isn't fully understood, so this method may or may not work. Needs testing...
+            public void SendEntityStatus(int eid, byte status)
+            {
+                byte[] bytes = new byte[5];
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                bytes[4] = status;
+                SendRaw(0x26, bytes);
+            }
+
+            public void SendAttachEntity(int eid, int eid2)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(eid2).CopyTo(bytes, 4);
+                SendRaw(0x27, bytes);
+            }
+            public void SendAttachEntity(int eid)
+            {
+                SendAttachEntity(this.id, eid);
+            }
+
+            public void SendEntityMeta(int eid, params object[] data) // This packet isn't fully understood, so this method may or may not work. Needs testing...
             {
                 List<byte> bytes = new List<byte>();
                 bytes.AddRange(util.EndianBitConverter.Big.GetBytes(eid));

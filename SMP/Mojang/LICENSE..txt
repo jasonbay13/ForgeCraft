@@ -1,0 +1,10 @@
+﻿From here on "we" means the party using material from the company "Mojang AB"
+
+The files in this folder and its subfolders are only partially the work of the ForgeCraft development team.
+They are heavily based on work by Mojang, AB.  Please, respect that these algorithms represent that hard
+work of Notch and other developers at Mojang.  They are not meant to be open source, and should not be
+redistributed.  On the Behave of Forgeware Int, the use these files are not an attempt to compete with Mojang, but
+bettering the Minecraft community and thus increasing profits for Mojang.  We consider this project a thank
+you to Mojang for their wonderful product: a compliment to it, not a replacement for it.  These files were
+released with that intent in mind.  We cannot imagine why someone would use these files abusively, or even
+how, but please, do not be the person to surprise us.

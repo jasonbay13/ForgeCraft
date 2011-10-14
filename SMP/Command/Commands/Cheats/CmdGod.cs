@@ -37,7 +37,7 @@ namespace SMP
 				Help(p);
 			}
 			
-			p.SendMessage("%3Currently doesn't do anything. :(");
+			p.SendMessage(Color.DarkTeal + "Currently doesn't do anything. :(");
 			if (!p.GodMode)
 			{
 				p.GodMode = true;

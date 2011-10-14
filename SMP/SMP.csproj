@@ -70,6 +70,7 @@
     <Compile Include="Server\Plugins\Plugin.Events.cs" />
     <Compile Include="Server\WebserverStuff\Remote.Handler.cs" />
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
+    <Compile Include="Mojang\Server\World\Explosion.cs" />
     <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
     <Compile Include="Server\World\Physics\PhysicsHandlers.cs" />
     <Compile Include="Server\World\World.Light.cs" />
@@ -323,6 +324,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Folder Include="Mojang\Server\World\Generator\" />
     <Folder Include="Server\Economy\Commands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Mojang\LICENSE..txt" />
   </ItemGroup>
 </Project>

@@ -53,6 +53,7 @@ namespace SMP
 			RightClickedOn.Add((short)Blocks.CakeBlock, new BCD(EatCake));
 			RightClickedOn.Add((short)Blocks.RedstoneRepeaterOff, new BCD(ChangeRepeater));
 			RightClickedOn.Add((short)Blocks.RedstoneRepeaterOn, new BCD(ChangeRepeater));
+            RightClickedOn.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
             RightClickedOn.Add((short)Blocks.DoorWooden, new BCD(OpenDoor));
             RightClickedOn.Add((short)Blocks.DoorIron, new BCD(DoNothing));
             RightClickedOn.Add((short)Blocks.Lever, new BCD(SwitchLever));
@@ -113,12 +114,15 @@ namespace SMP
 			Placed.Add((short)Blocks.Piston, new BCD(PlaceNormalPiston));
 			Placed.Add((short)Blocks.Slabs, new BCD(PlaceSlabs));
 			Placed.Add((short)Blocks.Torch, new BCD(PlaceTorch));
-			Placed.Add((short)Blocks.StairsWooden, new BCD(PlaceStairsWooden));
+			Placed.Add((short)Blocks.StairsWooden, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.StairsCobblestone, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.BrickStairs, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.StoneBrickStairs, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.NetherBrickStairs, new BCD(PlaceStairs));
 			Placed.Add((short)Blocks.Chest, new BCD(PlaceChest));
 			Placed.Add((short)Blocks.Furnace, new BCD(PlaceFurnace));
 			Placed.Add((short)Blocks.Ladder, new BCD(PlaceLadder));
 			Placed.Add((short)Blocks.Rails, new BCD(PlaceRail));
-			Placed.Add((short)Blocks.StairsCobblestone, new BCD(PlaceStairsCobblestone));
 			Placed.Add((short)Blocks.Lever, new BCD(PlaceLever));
 			Placed.Add((short)Blocks.RedstoneTorchOff, new BCD(PlaceRedstoneTorch));
 			Placed.Add((short)Blocks.ButtonStone, new BCD(PlaceButtonStone));
@@ -157,6 +161,7 @@ namespace SMP
 			Destroyed.Add((short)Blocks.Jukebox, new BCD(DestroyJukebox)); //Drop Contents
             Destroyed.Add((short)Blocks.GlowstoneBlock, new BCD(DestroyGlowStone)); //Drop random amount
             Destroyed.Add((short)Blocks.NoteBlock, new BCD(DestroyNoteBlock)); // Unset pitch value
+            //Destroyed.Add((short)Blocks.TNT, new BCD(DestroyTNT)); // For testing :)
 		}
 
         public static bool DoNothing(Player a, BCS b)
@@ -383,7 +388,7 @@ namespace SMP
                     break;
             }
 
-            if (a.level.GetBlock((int)pos2.x, (int)pos2.y, (int)pos2.z) != 0 || !BlockData.CanPlaceAgainst(a.level.GetBlock((int)pos2.x, (int)pos2.y - 1, (int)pos2.z))) return false;
+            if (!BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z)) || !BlockData.CanPlaceAgainst(a.level.GetBlock((int)pos2.x, (int)pos2.y - 1, (int)pos2.z))) return false;
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Bed, rot);
             a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, (byte)Blocks.Bed, (byte)(rot | 0x8));
 
@@ -405,7 +410,7 @@ namespace SMP
 		public static bool PlaceIronDoor(Player a, BCS b)
 		{
             // TODO: Double doors!
-            //if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
+            if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) != 0) return false;
             if (b.Direction != 1) return false;
             byte rot = DirectionByRotFlat(a, b);
             switch (rot)
@@ -442,7 +447,9 @@ namespace SMP
 		}
 		public static bool PlaceRedstone(Player a, BCS b)
 		{
-			return false;
+            if (!BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.x, (int)b.pos.y - 1, (int)b.pos.z))) return false;
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.RedStoneWire, 0);
+			return true;
 		}
 		public static bool PlaceRepeater(Player a, BCS b)
 		{
@@ -835,12 +842,24 @@ namespace SMP
             }
             return true;
         }
-		public static bool PlaceStairsCobblestone(Player a, BCS b)
+		public static bool PlaceStairs(Player a, BCS b)
 		{
-			return false;
-		}
-		public static bool PlaceStairsWooden(Player a, BCS b)
-		{
+            switch (DirectionByRotFlat(a, b))
+            {
+                case (byte)Directions.North:
+                    b.Direction = (byte)Stairs.North;
+                    break;
+                case (byte)Directions.South:
+                    b.Direction = (byte)Stairs.South;
+                    break;
+                case (byte)Directions.East:
+                    b.Direction = (byte)Stairs.East;
+                    break;
+                case (byte)Directions.West:
+                    b.Direction = (byte)Stairs.West;
+                    break;
+            }
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, (byte)b.ID, b.Direction);
 			return false;
 		}
 		public static bool PlaceStickyPiston(Player a, BCS b)
@@ -883,36 +902,45 @@ namespace SMP
                     b.Direction = 1; //South
                     break;
             }
+
             if (placingon == 50)
             {
                 b.Direction = 0;
                 placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z);
             }
-            /*if (/*placingon == 50 || *//*a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z) != 0)
-            {
-                a.SendBlockChange(b.pos, a.level.GetBlock((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z), a.level.GetMeta((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z));
-                if (Server.mode == 0) { a.inventory.Add((short)Blocks.Torch, a.inventory.items[a.inventory.current_index].count, a.inventory.current_item.meta, a.inventory.current_index); }
-                return false;
-            }*/
+            if (!BlockData.CanPlaceAgainst(placingon)) return false;
             switch (placingon)
             {
                 case 0: return false;
                 case 20: return false;
                 case 50: return false;
-                default:
-                    a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
-                    if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
-                    return false;
             }
-            /*if (BlockData.CanPlaceAgainst(a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z)))
-            {
-                a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
-                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); }
-            }
-            return false;*/
+
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
+            return false;
 		}
 		public static bool PlaceTrapdoor(Player a, BCS b)
 		{
+            if (b.Direction == 0 || b.Direction == 1) return false;
+            if (!BlockData.CanPlaceAgainst(Blockclicked(a, b))) return false;
+            switch (InvertDirection(b.Direction))
+            {
+                case (byte)Directions.North:
+                    b.Direction = (byte)TrapDoors.North;
+                    break;
+                case (byte)Directions.East:
+                    b.Direction = (byte)TrapDoors.East;
+                    break;
+                case (byte)Directions.South:
+                    b.Direction = (byte)TrapDoors.South;
+                    break;
+                case (byte)Directions.West:
+                    b.Direction = (byte)TrapDoors.West;
+                    break;
+            }
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, (byte)Blocks.Trapdoor, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceWater(Player a, BCS b)
@@ -981,6 +1009,9 @@ namespace SMP
 		}
 		public static bool OpenTrapdoor(Player a, BCS b)
 		{
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Trapdoor, (byte)(meta ^ 0x4));
+            Player.GlobalSoundEffect(b.pos, 1003, a.level, a);
 			return false;
 		}
         public static bool DestroyTorch(Player a, BCS b)
@@ -1070,6 +1101,34 @@ namespace SMP
 		}
 		public static bool DestroyWheat(Player a, BCS b)
 		{
+            if (Server.mode == 0)
+            {
+                byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                if (meta >= 0x7)
+                {
+                    Item itemDrop = new Item((short)Items.Wheat, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                    itemDrop.e.UpdateChunks(false, false);
+
+                    int amount = Entity.random.Next(4);
+                    for (int i = 0; i < amount; i++)
+                    {
+                        itemDrop = new Item((short)Items.Seeds, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        itemDrop.e.UpdateChunks(false, false);
+                    }
+                }
+                else
+                {
+                    Item itemDrop;
+                    int amount = Entity.random.Next((int)(meta / 2) + 1);
+                    for (int i = 0; i < amount; i++)
+                    {
+                        itemDrop = new Item((short)Items.Seeds, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        itemDrop.e.UpdateChunks(false, false);
+                    }
+                }
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+                return false;
+            }
 			return true;
 		}
 		public static bool DestroyFurnace(Player a, BCS b)
@@ -1223,6 +1282,28 @@ namespace SMP
             a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             return true;
         }
+        public static bool DestroyTNT(Player a, BCS b)
+        {
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
+            Explosion exp = new Explosion(a.level, b.pos.x + .5, b.pos.y + .5, b.pos.z + .5, 3);
+            exp.doExplosionA();
+            a.SendExplosion(b.pos, 3, exp.destroyedBlockPositions.ToArray());
+            Item item; byte block;
+            foreach (Point3 pt in exp.destroyedBlockPositions)
+            {
+                if (Server.mode == 0)
+                {
+                    block = (byte)Player.BlockDropSwitch(a.level.GetBlock((int)pt.x, (int)pt.y, (int)pt.z));
+                    if (FindBlocks.ValidItem(block))
+                    {
+                        item = new Item(block, a.level) { count = 1, meta = a.level.GetMeta((int)pt.x, (int)pt.y, (int)pt.z), pos = new double[3] { pt.x + .5, pt.y + .5, pt.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                        item.e.UpdateChunks(false, false);
+                    }
+                }
+                a.level.BlockChange((int)pt.x, (int)pt.y, (int)pt.z, 0, 0);
+            }
+            return false;
+        }
 
 		public static byte DirectionByRotFlat(Player p, BCS a, bool invert = false)
 		{
@@ -1296,6 +1377,25 @@ namespace SMP
             }
 
             return new Point3(x, y, z);
+        }
+        public static byte InvertDirection(byte direction)
+        {
+            switch (direction)
+            {
+                case (byte)Directions.Top:
+                    return (byte)Directions.Bottom;
+                case (byte)Directions.Bottom:
+                    return (byte)Directions.Top;
+                case (byte)Directions.North:
+                    return (byte)Directions.South;
+                case (byte)Directions.South:
+                    return (byte)Directions.North;
+                case (byte)Directions.East:
+                    return (byte)Directions.West;
+                case (byte)Directions.West:
+                    return (byte)Directions.East;
+            }
+            return 0; // So the compiler will shut up.
         }
 	}
 	public struct BCS //BlockChangeStruct (This is used to hold the blockchange information)
