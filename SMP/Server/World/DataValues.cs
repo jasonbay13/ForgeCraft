@@ -188,8 +188,7 @@ namespace SMP
 		
 		public static bool ValidItem(short id)
 		{
-			if (id == -1) return true;
-            if (id == 0 || id < -1) return false;
+            if (id == 0) return false;
 			foreach (Blocks blk in Enum.GetValues(typeof(Blocks)))
                 if ((short)blk == id)
                     return true;
@@ -683,6 +682,7 @@ namespace SMP
                 case 75:
                 case 76:
                 case 77:
+                case 78:
                 case 83:
                 case 93:
                 case 94:
@@ -868,6 +868,22 @@ namespace SMP
                     return Material.Wool;
             }
             return Material.Unknown;
+        }
+
+        public static bool CanPlaceIn(byte a)
+        {
+            switch (a)
+            {
+                case 0:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 51:
+                case 78:
+                    return true;
+            }
+            return false;
         }
 
         public static float GetExplosionResistance(byte a)

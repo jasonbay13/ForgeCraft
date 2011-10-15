@@ -72,6 +72,7 @@ namespace SMP
         public static string name = "sc";
         public static int port = 25565;
         public static string ConsoleName = "Console";
+        public static int genThreads = 1;
         //---------------//
         public static bool usewhitelist = false;
 		public static bool useviplist = false;
@@ -118,6 +119,10 @@ namespace SMP
                 {
                     Player.PlayerlistUpdate();
                 }; playerlisttimer.Start();
+            });
+            ml.Queue(delegate
+            {
+                World.chunker.Start();
             });
 			#endregion
 			//TODO AI Update Timer

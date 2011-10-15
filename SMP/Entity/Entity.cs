@@ -105,6 +105,8 @@ namespace SMP
 
         public void UpdateChunks(bool force, bool forcesend)
         {
+            if (c == null)
+                level.LoadChunk((int)(pos.x / 16), (int)(pos.z / 16));
             if (c == null || (c == CurrentChunk && !force))
                 return;
 
@@ -161,7 +163,11 @@ namespace SMP
                         {
                             if (!p.level.chunkData.ContainsKey(po))
                                 p.level.LoadChunk(po.x, po.z);
-                            p.SendChunk(p.level.chunkData[po]);
+
+                            if (p.level.chunkData.ContainsKey(po))
+                                p.SendChunk(p.level.chunkData[po]);
+                            else
+                                World.chunker.QueueChunkSend(po, p);
                         }
                     }
                 }

@@ -124,7 +124,8 @@ namespace SMP
 			Placed.Add((short)Blocks.Ladder, new BCD(PlaceLadder));
 			Placed.Add((short)Blocks.Rails, new BCD(PlaceRail));
 			Placed.Add((short)Blocks.Lever, new BCD(PlaceLever));
-			Placed.Add((short)Blocks.RedstoneTorchOff, new BCD(PlaceRedstoneTorch));
+			Placed.Add((short)Blocks.RedstoneTorchOff, new BCD(PlaceTorch));
+            Placed.Add((short)Blocks.RedstoneTorchOn, new BCD(PlaceTorch));
 			Placed.Add((short)Blocks.ButtonStone, new BCD(PlaceButtonStone));
 			Placed.Add((short)Blocks.Cactus, new BCD(PlaceCactus));
 			Placed.Add((short)Blocks.SugarCane, new BCD(PlaceSugarCane));
@@ -138,7 +139,7 @@ namespace SMP
 			LeftClicked.Add((short)Blocks.DoorWooden, new BCD(OpenDoor));
 			LeftClicked.Add((short)Blocks.Lever, new BCD(SwitchLever));
 			LeftClicked.Add((short)Blocks.ButtonStone, new BCD(HitButton));
-			//LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd));
+			//LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd)); // NO!
 			LeftClicked.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
             LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
 
@@ -237,8 +238,7 @@ namespace SMP
             {
                 if (meta >= 2256 && meta <= 2266)
                 {
-                    Item itemDrop = new Item((short)meta, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)meta);
                 }
 
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
@@ -348,7 +348,10 @@ namespace SMP
             }*/
 
             if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) == (byte)Blocks.Air)
+            {
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Fire, 0);
+                a.inventory.current_item.meta++;
+            }
             return false;
 		}
 		public static bool PlaceBed(Player a, BCS b)
@@ -559,24 +562,33 @@ namespace SMP
                         byte type;
                         for (int x = -2; x <= 2; x++)
                             for (int z = -2; z <= 2; z++)
-                            {
-                                if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(5) < 4)
+                                for (int y = -1; y <= 1; y++)
                                 {
-                                    switch (Entity.random.Next(15))
+                                    if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(5) < 4)
                                     {
-                                        case 0:
-                                            type = (byte)Blocks.FlowerDandelion;
-                                            break;
-                                        case 1:
-                                            type = (byte)Blocks.FlowerRose;
-                                            break;
-                                        default:
-                                            type = (byte)Blocks.TallGrass;
-                                            break;
+                                        switch (Entity.random.Next(15))
+                                        {
+                                            case 0:
+                                                type = (byte)Blocks.FlowerDandelion;
+                                                break;
+                                            case 1:
+                                                type = (byte)Blocks.FlowerRose;
+                                                break;
+                                            default:
+                                                type = (byte)Blocks.TallGrass;
+                                                break;
+                                        }
+                                        a.level.BlockChange((int)b.pos.x + x, (int)b.pos.y + y, (int)b.pos.z + z, type, (type == (byte)Blocks.TallGrass ? (byte)TallGrass.TallGrass : (byte)0));
                                     }
-                                    a.level.BlockChange((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z, type, (type == (byte)Blocks.TallGrass ? (byte)TallGrass.TallGrass : (byte)0));
                                 }
-                            }
+                        return true;
+                    }
+                    return false;
+                case (byte)Blocks.Seeds:
+                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    {
+                        Point3 pos2 = BlockclickedPos(a, b);
+                        a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, (byte)Blocks.Seeds, 0x7);
                         return true;
                     }
                     return false;
@@ -823,10 +835,6 @@ namespace SMP
 		{
 			return false;
 		}
-		public static bool PlaceRedstoneTorch(Player a, BCS b)
-		{
-			return false;
-		}
 		public static bool PlaceSand(Player a, BCS b)
 		{
 			return true;
@@ -903,20 +911,14 @@ namespace SMP
                     break;
             }
 
-            if (placingon == 50)
+            if (!BlockData.CanPlaceAgainst(placingon) || placingon == 20)
             {
                 b.Direction = 0;
                 placingon = a.level.GetBlock((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z);
             }
-            if (!BlockData.CanPlaceAgainst(placingon)) return false;
-            switch (placingon)
-            {
-                case 0: return false;
-                case 20: return false;
-                case 50: return false;
-            }
+            if (!BlockData.CanPlaceAgainst(placingon) || placingon == 20) return false;
 
-            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, 50, b.Direction);
+            a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, (byte)b.ID, b.Direction);
             if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
             return false;
 		}
@@ -1075,8 +1077,7 @@ namespace SMP
 
             if (Server.mode == 0)
             {
-                Item itemDrop = new Item((short)Items.Bed, a.level) { count = 1, meta = 0, pos = new double[3] { storePos.x + .5, storePos.y + .5, storePos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                itemDrop.e.UpdateChunks(false, false);
+                a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Bed);
             }
 
 			return false;
@@ -1085,12 +1086,10 @@ namespace SMP
 		{
             if (Server.mode == 0)
             {
-                Item itemDrop;
+                byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
                 for (int i = 0; i < 2; i++)
-                {
-                    itemDrop = new Item((short)Items.Bed, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
-                }
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Blocks.Slabs, meta);
                 return false;
             }
 			return true;
@@ -1106,24 +1105,19 @@ namespace SMP
                 byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
                 if (meta >= 0x7)
                 {
-                    Item itemDrop = new Item((short)Items.Wheat, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
-
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Wheat);
                     int amount = Entity.random.Next(4);
                     for (int i = 0; i < amount; i++)
                     {
-                        itemDrop = new Item((short)Items.Seeds, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        itemDrop.e.UpdateChunks(false, false);
+                        a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Seeds);
                     }
                 }
                 else
                 {
-                    Item itemDrop;
                     int amount = Entity.random.Next((int)(meta / 2) + 1);
                     for (int i = 0; i < amount; i++)
                     {
-                        itemDrop = new Item((short)Items.Seeds, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        itemDrop.e.UpdateChunks(false, false);
+                        a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Seeds);
                     }
                 }
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
@@ -1153,8 +1147,7 @@ namespace SMP
 
             if (Server.mode == 0)
             {
-                Item itemDrop = new Item((short)Items.DoorWooden, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                itemDrop.e.UpdateChunks(false, false);
+                a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.DoorWooden);
             }
 			return false;
 		}
@@ -1176,8 +1169,7 @@ namespace SMP
 
             if (Server.mode == 0)
             {
-                Item itemDrop = new Item((short)Items.DoorIron, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                itemDrop.e.UpdateChunks(false, false);
+                a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.DoorIron);
             }
             return false;
 		}
@@ -1195,8 +1187,7 @@ namespace SMP
                     case (short)Items.IronShovel:
                     case (short)Items.StoneShovel:
                     case (short)Items.WoodenShovel:
-                        Item itemDrop = new Item((short)Items.Snowball, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        itemDrop.e.UpdateChunks(false, false);
+                        a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Snowball);
                         break;
                 }
             }
@@ -1205,14 +1196,12 @@ namespace SMP
 		}
 		public static bool DestroyCacti(Player a, BCS b)
 		{
-            Item itemDrop;
             while (a.level.GetBlock((int)b.pos.x, (int)b.pos.y, (int)b.pos.z) == (byte)Blocks.Cactus)
             {
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y++, (int)b.pos.z, 0, 0);
                 if (Server.mode == 0)
                 {
-                    itemDrop = new Item((short)Blocks.Cactus, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Blocks.Cactus);
                 }
             }
 			return false;
@@ -1221,11 +1210,9 @@ namespace SMP
 		{
             if (Server.mode == 0)
             {
-                Item itemDrop;
                 for (int i = 0; i < 4; i++)
                 {
-                    itemDrop = new Item((short)Items.Clay, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.Clay);
                 }
             }
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
@@ -1233,14 +1220,12 @@ namespace SMP
 		}
 		public static bool DestroySugarCane(Player a, BCS b)
 		{
-            Item itemDrop;
             while (a.level.GetBlock((int)b.pos.x, (int)b.pos.y++, (int)b.pos.z) == (byte)Blocks.SugarCane)
             {
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
                 if (Server.mode == 0)
                 {
-                    itemDrop = new Item((short)Items.SugarCane, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    itemDrop.e.UpdateChunks(false, false);
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)Items.SugarCane);
                 }
             }
 			return false;
@@ -1255,8 +1240,7 @@ namespace SMP
                 {
                     if (meta >= 2256 && meta <= 2266)
                     {
-                        Item itemDrop = new Item((short)meta, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + 1.5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        itemDrop.e.UpdateChunks(false, false);
+                        a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)meta);
                     }
                 }
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
@@ -1267,11 +1251,10 @@ namespace SMP
 		public static bool DestroyGlowStone(Player a, BCS b)
 		{
             if (Server.mode == 1) return true;
-            Item item; int count = Entity.random.Next(2, 5); // 2-4 drops
+            int count = Entity.random.Next(2, 5); // 2-4 drops
             for (int i = 0; i < count; i++)
             {
-                item = new Item(348, a.level) { count = 1, meta = 0, pos = new double[3] { b.pos.x + .5, b.pos.y + .5, b.pos.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                item.e.UpdateChunks(false, false);
+                a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 348);
             }
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
             Player.GlobalBreakEffect(b.pos, b.ID, a.level, a);
@@ -1285,8 +1268,9 @@ namespace SMP
         public static bool DestroyTNT(Player a, BCS b)
         {
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
-            Explosion exp = new Explosion(a.level, b.pos.x + .5, b.pos.y + .5, b.pos.z + .5, 3);
-            exp.DoExplosion();
+            Explosion exp = new Explosion(a.level, b.pos.x + .5, b.pos.y + .5, b.pos.z + .5, 4);
+            exp.DoExplosionA();
+            exp.DoExplosionB();
             return false;
         }
 

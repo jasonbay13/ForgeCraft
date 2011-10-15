@@ -135,7 +135,8 @@ namespace SMP
                 return ch;
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
-            return w.GenerateChunk(x, z);
+            World.chunker.QueueChunk(x, z, w);
+            return null;
         }
 
         public void Save(World w)

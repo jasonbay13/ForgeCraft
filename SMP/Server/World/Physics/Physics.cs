@@ -13,6 +13,7 @@ namespace SMP
         private Thread physthread;
         private List<Check> Checks = new List<Check>();
         private int wait = 0;
+        private Random random;
         #region Accessors
         public World world
         {
@@ -30,17 +31,13 @@ namespace SMP
         }
         #endregion
 
-        public Physics(World w)
-        {
-            this.w = w;
-            setting = PSetting.Normal;
-            this.wait = this.speed;
-        }
+        public Physics(World w) : this(w, PSetting.Hardcore) { }
         public Physics(World w, PSetting setting)
         {
             this.w = w;
             this.setting = setting;
             this.wait = this.speed;
+            this.random = new Random();
         }
 
         public void Start()
@@ -110,26 +107,51 @@ namespace SMP
                                     if (C.time < 5) { C.time++; break; }
 
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
+                                    if (!HigherLiquidCheck(C.x, C.y, C.z, 8, meta) && !HigherLiquidCheck(C.x, C.y, C.z, 9, meta))
+                                    {
+                                        if ((meta & 0x7) >= 0x7)
+                                            w.BlockChange(C.x, C.y, C.z, 0, 0);
+                                        else
+                                        {
+                                            w.BlockChange(C.x, C.y, C.z, 8, (byte)Math.Min(meta + 2, 0x7));
+                                            if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9)) { C.time = 0; break; }
+                                        }
+                                    }
+                                    else if ((meta & 0x8) != 0)
+                                    {
+                                        if (!WaterFlowCheck(C.x, C.y - 1, C.z)) { meta = 0; goto flowOut; }
+                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
+                                    }
+                                    else if ((meta & 0x7) < 0x7)
+                                    {
+                                        goto flowOut;
+                                    }
+                                    else
+                                    {
+                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
+                                    }
+                                    C.time = short.MaxValue;
+                                    break;
+
+                                    flowOut:
                                     if (WaterFlowCheck(C.x, C.y - 1, C.z))
                                     {
-                                        WaterFlow(C.x, C.y - 1, C.z, WaterFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
+                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
                                         if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9))
                                         {
-                                            WaterFlow(C.x + 1, C.y, C.z, 0x7 | 0x8);
-                                            WaterFlow(C.x - 1, C.y, C.z, 0x7 | 0x8);
-                                            WaterFlow(C.x, C.y, C.z + 1, 0x7 | 0x8);
-                                            WaterFlow(C.x, C.y, C.z - 1, 0x7 | 0x8);
+                                            WaterFlow(C.x + 1, C.y, C.z, 0x7);
+                                            WaterFlow(C.x - 1, C.y, C.z, 0x7);
+                                            WaterFlow(C.x, C.y, C.z + 1, 0x7);
+                                            WaterFlow(C.x, C.y, C.z - 1, 0x7);
                                         }
                                     }
                                     else
                                     {
-                                        meta = meta.SetBits(3, 0);
-                                        if (meta.GetBits(0, 3) >= 0x7) { C.time = 255; break; }
-                                        WaterFlow(C.x, C.y - 1, C.z, 0);
-                                        WaterFlow(C.x + 1, C.y, C.z, (byte)(meta + 1));
-                                        WaterFlow(C.x - 1, C.y, C.z, (byte)(meta + 1));
-                                        WaterFlow(C.x, C.y, C.z + 1, (byte)(meta + 1));
-                                        WaterFlow(C.x, C.y, C.z - 1, (byte)(meta + 1));
+                                        meta++;
+                                        WaterFlow(C.x + 1, C.y, C.z, meta);
+                                        WaterFlow(C.x - 1, C.y, C.z, meta);
+                                        WaterFlow(C.x, C.y, C.z + 1, meta);
+                                        WaterFlow(C.x, C.y, C.z - 1, meta);
                                     }
                                 }
                                 C.time = short.MaxValue;
@@ -141,35 +163,69 @@ namespace SMP
                                     if (C.time < 30) { C.time++; break; }
 
                                     byte meta = w.GetMeta(C.x, C.y, C.z);
-                                    if (LavaFlowCheck(C.x, C.y - 1, C.z))
+                                    if (!HigherLiquidCheck(C.x, C.y, C.z, 10, meta) && !HigherLiquidCheck(C.x, C.y, C.z, 11, meta))
                                     {
-                                        LavaFlow(C.x, C.y - 1, C.z, LavaFlowCheck(C.x, C.y - 2, C.z) ? (byte)0x8 : (byte)0x0);
-                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
+                                        if ((meta & 0x7) >= 0x6)
+                                            w.BlockChange(C.x, C.y, C.z, 0, 0);
+                                        else
                                         {
-                                            LavaFlow(C.x + 1, C.y, C.z, 0x6 | 0x8);
-                                            LavaFlow(C.x - 1, C.y, C.z, 0x6 | 0x8);
-                                            LavaFlow(C.x, C.y, C.z + 1, 0x6 | 0x8);
-                                            LavaFlow(C.x, C.y, C.z - 1, 0x6 | 0x8);
+                                            w.BlockChange(C.x, C.y, C.z, 10, (byte)Math.Min(meta + 2, 0x6));
+                                            if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11)) { C.time = 0; break; }
                                         }
                                     }
-                                    else if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                    else if ((meta & 0x8) != 0)
                                     {
-                                        if (meta.GetBits(0, 3) == 0)
-                                            w.BlockChange(C.x, C.y, C.z, 49, 0);
-                                        else
-                                            w.BlockChange(C.x, C.y, C.z, 4, 0);
-                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
-                                        Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4, w);
+                                        if (!LavaFlowCheck(C.x, C.y - 1, C.z)) { meta = 0; goto flowOut; }
+                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
+                                    }
+                                    else if ((meta & 0x7) < 0x6)
+                                    {
+                                        goto flowOut;
                                     }
                                     else
                                     {
-                                        meta = meta.SetBits(3, 0);
-                                        if (meta.GetBits(0, 3) >= 0x6) { C.time = 255; break; }
-                                        LavaFlow(C.x, C.y - 1, C.z, 0);
-                                        LavaFlow(C.x + 1, C.y, C.z, (byte)(meta + 2));
-                                        LavaFlow(C.x - 1, C.y, C.z, (byte)(meta + 2));
-                                        LavaFlow(C.x, C.y, C.z + 1, (byte)(meta + 2));
-                                        LavaFlow(C.x, C.y, C.z - 1, (byte)(meta + 2));
+                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
+                                    }
+                                    C.time = short.MaxValue;
+                                    break;
+
+                                    flowOut:
+                                    if (LavaFlowCheck(C.x, C.y - 1, C.z))
+                                    {
+                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
+                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
+                                        {
+                                            LavaFlow(C.x + 1, C.y, C.z, 0x6);
+                                            LavaFlow(C.x - 1, C.y, C.z, 0x6);
+                                            LavaFlow(C.x, C.y, C.z + 1, 0x6);
+                                            LavaFlow(C.x, C.y, C.z - 1, 0x6);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
+                                        {
+                                            if ((meta & 0x7) == 0)
+                                                w.BlockChange(C.x, C.y, C.z, 49, 0);
+                                            else
+                                                w.BlockChange(C.x, C.y, C.z, 4, 0);
+                                            Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
+                                            //Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4, w);
+                                        }
+                                        else
+                                        {
+                                            meta += 2;
+                                            LavaFlow(C.x + 1, C.y, C.z, meta);
+                                            LavaFlow(C.x - 1, C.y, C.z, meta);
+                                            LavaFlow(C.x, C.y, C.z + 1, meta);
+                                            LavaFlow(C.x, C.y, C.z - 1, meta);
+
+                                            if (w.GetBlock(C.x, C.y - 1, C.z) == 8 || w.GetBlock(C.x, C.y - 1, C.z) == 9)
+                                            {
+                                                w.BlockChange(C.x, C.y - 1, C.z, 4, 0);
+                                                Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
+                                            }
+                                        }
                                     }
                                 }
                                 C.time = short.MaxValue;

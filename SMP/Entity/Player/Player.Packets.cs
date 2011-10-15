@@ -91,8 +91,8 @@ namespace SMP
 			
 			UpdateShi(this);
 
-            if (Chunk.GetChunk((int)pos.x, (int)pos.z, level) == null)
-                Kick("Chunk missing: " + (int)pos.x + "," + (int)pos.z);
+            if (Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
+                Kick("Chunk missing: " + ((int)pos.x >> 4) + "," + ((int)pos.z >> 4));
 			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
@@ -101,8 +101,8 @@ namespace SMP
         private void UpdateShi(Player p)
         {
             p.SendTime();
-            if (Chunk.GetChunk((int)p.pos.x, (int)p.pos.z, p.level) == null)
-                p.level.LoadChunk((int)p.pos.x, (int)p.pos.z);
+            if (Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, p.level) == null)
+                p.level.LoadChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4);
             if (p.level.Israining)
                 p.level.Rain(true);
         }
@@ -334,6 +334,18 @@ namespace SMP
 				int x = util.EndianBitConverter.Big.ToInt32(message, 1);
 				byte y = message[5];
 				int z = util.EndianBitConverter.Big.ToInt32(message, 6);
+                byte direction = message[10];
+
+                Point3 face = new Point3(x, y, z);
+                switch (direction)
+                {
+                    case 0: face.y--; break;
+                    case 1: face.y++; break;
+                    case 2: face.z--; break;
+                    case 3: face.z++; break;
+                    case 4: face.x--; break;
+                    case 5: face.x++; break;
+                }
 
 				byte rc = level.GetBlock(x,y,z); //block hit
 				if(BlockChange.LeftClicked.ContainsKey(rc))
@@ -346,6 +358,13 @@ namespace SMP
                     OnBlockChange(this, x, y, z, rc);
                     return;
                 }
+
+                if (level.GetBlock((int)face.x, (int)face.y, (int)face.z) == 51)
+                {
+                    level.BlockChange((int)face.x, (int)face.y, (int)face.z, 0, 0);
+                    Player.GlobalSoundEffect(face, 1004, level);
+                }
+
 
                 if (Server.mode == 1)
                 {
@@ -376,10 +395,7 @@ namespace SMP
 
                     short dropId = BlockDropSwitch(rc);
                     if (dropId != 0)
-                    {
-                        Item item = new Item(dropId, level) { count = 1, meta = level.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        item.e.UpdateChunks(false, false);
-                    }
+                        level.DropItem(x, y, z, dropId, level.GetMeta(x, y, z));
 
                     level.BlockChange(x, y, z, 0, 0);
                     goto doSound;
@@ -395,6 +411,18 @@ namespace SMP
 				int x = util.EndianBitConverter.Big.ToInt32(message, 1);
 				byte y = message[5];
 				int z = util.EndianBitConverter.Big.ToInt32(message, 6);
+                byte direction = message[10];
+
+                Point3 face = new Point3(x, y, z);
+                switch (direction)
+                {
+                    case 0: face.y--; break;
+                    case 1: face.y++; break;
+                    case 2: face.z--; break;
+                    case 3: face.z++; break;
+                    case 4: face.x--; break;
+                    case 5: face.x++; break;
+                }
 
 				short id = e.level.GetBlock(x, y, z);
                 short storeId = id;
@@ -413,10 +441,7 @@ namespace SMP
 				id = BlockDropSwitch(id);
 
                 if (id != 0)
-                {
-                    Item item = new Item(id, level) { count = count, meta = level.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    item.e.UpdateChunks(false, false);
-                }
+                    level.DropItem(x, y, z, id, level.GetMeta(x, y, z), count);
 				
 				level.BlockChange(x, y, z, 0, 0);
 
@@ -425,7 +450,12 @@ namespace SMP
 			if (message[0] == 4)
 			{
 				//TODO drop one of the item the player is holding!
+                //inventory.Remove(inventory.current_index, 1);
 			}
+            if (message[0] == 5)
+            {
+                // TODO: Shoot arrow!
+            }
 		}
 		private void HandleBlockPlacementPacket(byte[] message)
 		{
@@ -463,12 +493,14 @@ namespace SMP
 				}
 			}
 
+            bool second = false;
+            checkEnt:
 			foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
 				Point3 pp = new Point3((int[])e1.pos);
 
-				if (block==pp)
+				if (block == pp)
 				{
 					//Server.Log("Entity found!");
 					if (e1.isItem)
@@ -486,7 +518,7 @@ namespace SMP
 						//do stuff, like shear sheep
 						continue;
 					}
-                    if (e1.isPlayer && e1.p != this)
+                    if (e1.isPlayer)
 					{
 						//dont do anything here? is there a case where you right click a player? a snowball maybe...
 						//Check the players holding item, if they need to do something with it, do it.
@@ -494,8 +526,20 @@ namespace SMP
 						return;
 					}
 				}
+
+                pp.y--;
+                if (block == pp)
+                {
+                    if (e1.isPlayer)
+                    {
+                        //dont do anything here? is there a case where you right click a player? a snowball maybe...
+                        //Check the players holding item, if they need to do something with it, do it.
+                        //anyway, if this is a player, then we dont place a block :D so return.
+                        return;
+                    }
+                }
 			}
-			foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
+			/*foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
                 Point3 pp = new Point3((int[])e1.pos);
@@ -503,7 +547,7 @@ namespace SMP
 
 				if (block == pp)
 				{
-					if (e1.isPlayer && e1.p != this)
+					if (e1.isPlayer)
 					{
 						//dont do anything here? is there a case where you right click a player? a snowball maybe...
 						//we should do an item check, then return...
@@ -511,17 +555,21 @@ namespace SMP
 						return;
 					}
 				}
-			}
+			}*/
 
-            switch (direction)
+            if (!second && level.GetBlock(blockX, blockY, blockZ) != 78) // You can place stuff IN snow, not on it.
             {
-                case 0: blockY--; break;
-                case 1: blockY++; break;
-                case 2: blockZ--; break;
-                case 3: blockZ++; break;
-                case 4: blockX--; break;
-                case 5: blockX++; break;
+                switch (direction)
+                {
+                    case 0: blockY--; break;
+                    case 1: blockY++; break;
+                    case 2: blockZ--; break;
+                    case 3: blockZ++; break;
+                    case 4: blockX--; break;
+                    case 5: blockX++; break;
+                }
             }
+            if (second) { second = true; goto checkEnt; }
 
             if (OnBlockChange != null)
             {
@@ -535,6 +583,9 @@ namespace SMP
 				//Player right clicked with empty hand!
 				return;
 			}
+
+            if (!BlockData.CanPlaceIn(level.GetBlock(blockX, blockY, blockZ)))
+                return;
 
 			if (blockID >= 1 && blockID <= 255)
 			{
@@ -777,12 +828,10 @@ namespace SMP
 				case (68):
 					return 323;
 				case (75):
-				case (76):
-					return 75;
+					return 76;
+                case (78):
 				case (79):
-					return 0;
 				case (90):
-					return 0;
 				case (92):
 					return 0;
 				case (93):

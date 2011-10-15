@@ -20,7 +20,7 @@ namespace SMP
             explosionZ = d2;
         }
 
-        public void DoExplosion()
+        public void DoExplosionA()
         {
             float f = explosionSize;
             int i = 16;
@@ -106,10 +106,12 @@ namespace SMP
                     entity.motionY += d8 * d14;
                     entity.motionZ += d10 * d14;
                 }
-            }*/
+            }
+            explosionSize = f;*/
+        }
 
-            explosionSize = f;
-
+        public void DoExplosionB(/*bool flag*/)
+        {
             Player.players.ForEach(delegate(Player pl)
             {
                 if (pl.MapLoaded && pl.level == worldObj && pl.VisibleChunks.Contains(Chunk.GetChunk((int)explosionX >> 4, (int)explosionZ >> 4, pl.level).point))
@@ -118,25 +120,49 @@ namespace SMP
 
             List<Point3> arraylist = new List<Point3>();
             arraylist.AddRange(destroyedBlockPositions);
-
-            Item item; byte block;
-            foreach (Point3 pt in arraylist)
+            for (int i = arraylist.Count - 1; i >= 0; i--)
             {
-                if (Server.mode == 0 && Entity.random.Next(2) == 0)
+                Point3 chunkposition = arraylist[i];
+                int j = (int)chunkposition.x;
+                int k = (int)chunkposition.y;
+                int l = (int)chunkposition.z;
+                int i1 = worldObj.GetBlock(j, k, l);
+                // This is particle code, and isn't needed here.
+                /*if (flag)
                 {
-                    block = (byte)Player.BlockDropSwitch(worldObj.GetBlock((int)pt.x, (int)pt.y, (int)pt.z));
-                    if (FindBlocks.ValidItem(block))
+                    double d = (float)j + worldObj.rand.nextFloat();
+                    double d1 = (float)k + worldObj.rand.nextFloat();
+                    double d2 = (float)l + worldObj.rand.nextFloat();
+                    double d3 = d - explosionX;
+                    double d4 = d1 - explosionY;
+                    double d5 = d2 - explosionZ;
+                    double d6 = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+                    d3 /= d6;
+                    d4 /= d6;
+                    d5 /= d6;
+                    double d7 = 0.5D / (d6 / (double)explosionSize + 0.10000000000000001D);
+                    d7 *= worldObj.rand.nextFloat() * worldObj.rand.nextFloat() + 0.3F;
+                    d3 *= d7;
+                    d4 *= d7;
+                    d5 *= d7;
+                    worldObj.spawnParticle("explode", (d + explosionX * 1.0D) / 2D, (d1 + explosionY * 1.0D) / 2D, (d2 + explosionZ * 1.0D) / 2D, d3, d4, d5);
+                    worldObj.spawnParticle("smoke", d, d1, d2, d3, d4, d5);
+                }*/
+                if (i1 > 0)
+                {
+                    if (ExplosionRNG.Next(10) < 3)
                     {
-                        item = new Item(block, worldObj) { count = 1, meta = worldObj.GetMeta((int)pt.x, (int)pt.y, (int)pt.z), pos = new double[3] { pt.x + .5, pt.y + .5, pt.z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                        item.e.UpdateChunks(false, false);
+                        short block = Player.BlockDropSwitch((short)i1);
+                        if (block != 0)
+                            worldObj.DropItem(j, k, l, block);
                     }
+                    worldObj.BlockChange(j, k, l, 0, 0);
                 }
-                worldObj.BlockChange((int)pt.x, (int)pt.y, (int)pt.z, 0, 0);
             }
 
-            if(isFlaming)
+            if (isFlaming)
             {
-                for(int l2 = arraylist.Count - 1; l2 >= 0; l2--)
+                for (int l2 = arraylist.Count - 1; l2 >= 0; l2--)
                 {
                     Point3 chunkposition = arraylist[l2];
                     int i3 = (int)chunkposition.x;
@@ -144,12 +170,11 @@ namespace SMP
                     int k3 = (int)chunkposition.z;
                     int l3 = worldObj.GetBlock(i3, j3, k3);
                     int i4 = worldObj.GetBlock(i3, j3 - 1, k3);
-                    if(l3 == 0 && i4 != 20 && BlockData.CanPlaceAgainst((byte)i4) && ExplosionRNG.Next(3) == 0)
+                    if (l3 == 0 && i4 != 20 && BlockData.CanPlaceAgainst((byte)i4) && ExplosionRNG.Next(3) == 0)
                     {
                         worldObj.BlockChange(i3, j3, k3, (byte)Blocks.Fire, 0);
                     }
                 }
-
             }
         }
 

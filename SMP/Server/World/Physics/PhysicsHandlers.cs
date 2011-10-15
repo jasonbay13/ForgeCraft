@@ -23,8 +23,20 @@ namespace SMP
         }
 
         #region Liquids
-        public bool LiquidSourceCheck()
+        public bool SourceLiquidCheck(int x, int y, int z, byte type, byte meta, bool above = true, bool below = false)
         {
+            return ((w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x + 1, y, z) & 0x7) == 0) || (w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x - 1, y, z) & 0x7) == 0) || (w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x, y, z + 1) & 0x7) == 0) || (w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x, y, z - 1) & 0x7) == 0) || (above && w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x, y + 1, z) & 0x7) == 0) || (below && w.GetBlock(x + 1, y, z) == type && (w.GetMeta(x, y, z) & 0x7) == 0));
+        }
+
+        public bool HigherLiquidCheck(int x, int y, int z, byte type, byte meta)
+        {
+            if (w.GetBlock(x, y, z) == type && (w.GetBlock(x, y + 1, z) == type || ((w.GetMeta(x, y, z) & 0x7) == 0 && (w.GetMeta(x, y, z) & 0x8) == 0))) return true;
+            if ((w.GetMeta(x, y, z) & 0x8) != 0) return false;
+            if (w.GetBlock(x + 1, y, z) == type && ((w.GetMeta(x + 1, y, z) & 0x7) < meta || (w.GetMeta(x + 1, y, z) & 0x8) != 0)) return true;
+            if (w.GetBlock(x - 1, y, z) == type && ((w.GetMeta(x - 1, y, z) & 0x7) < meta || (w.GetMeta(x - 1, y, z) & 0x8) != 0)) return true;
+            if (w.GetBlock(x, y, z + 1) == type && ((w.GetMeta(x, y, z + 1) & 0x7) < meta || (w.GetMeta(x, y, z + 1) & 0x8) != 0)) return true;
+            if (w.GetBlock(x, y, z - 1) == type && ((w.GetMeta(x, y, z - 1) & 0x7) < meta || (w.GetMeta(x, y, z - 1) & 0x8) != 0)) return true;
+            if (w.GetBlock(x, y + 1, z) == type && ((w.GetMeta(x, y + 1, z) & 0x7) < meta || (w.GetMeta(x, y + 1, z) & 0x8) != 0)) return true;
             return false;
         }
 
@@ -36,12 +48,12 @@ namespace SMP
         public bool WaterFlowCheck(int x, int y, int z)
         {
             byte block = w.GetBlock(x, y, z);
-            return block == 0 || block == 8 || block == 9 || BlockData.LiquidDestroy(block);
+            return block == 0 || block == 51 || block == 8 || block == 9 || BlockData.LiquidDestroy(block);
         }
         public bool LavaFlowCheck(int x, int y, int z)
         {
             byte block = w.GetBlock(x, y, z);
-            return block == 0 || block == 10 || block == 11 || BlockData.LiquidDestroy(block);
+            return block == 0 || block == 51 || block == 10 || block == 11 || BlockData.LiquidDestroy(block);
         }
 
         public void WaterFlow(int x, int y, int z, byte meta)
@@ -49,7 +61,7 @@ namespace SMP
             if (SpongeCheck(x, y, z)) return;
             byte block = w.GetBlock(x, y, z);
             byte bMeta = w.GetMeta(x, y, z);
-            if (block == 0 || block == 51 || ((block == 8 || block == 9) && meta.GetBits(0, 3) < bMeta))
+            if (block == 0 || block == 51 || ((block == 8 || block == 9) && (meta & 0x7) < bMeta && (bMeta & 0x8) == 0))
             {
                 w.BlockChange(x, y, z, 8, meta);
                 if (block == 51)
@@ -60,20 +72,18 @@ namespace SMP
                 w.BlockChange(x, y, z, 8, meta);
 
                 short dropId = Player.BlockDropSwitch(block);
-                if (dropId != 0)
-                {
-                    Item item = new Item(dropId, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    item.e.UpdateChunks(false, false);
-                }
+                if (FindBlocks.ValidItem(dropId))
+                    w.DropItem(x, y, z, dropId);
             }
             else if (block == 10 || block == 11)
             {
-                if (bMeta.GetBits(0, 3) == 0)
+                if ((bMeta & 0x8) != 0) return;
+                if ((bMeta & 0x7) == 0)
                     w.BlockChange(x, y, z, 49, 0);
                 else
                     w.BlockChange(x, y, z, 4, 0);
                 Player.GlobalSoundEffect(x, (byte)y, z, 1004, w);
-                Player.GlobalSoundEffect(x, (byte)y, z, 2000, 4, w);
+                //Player.GlobalSoundEffect(x, (byte)y, z, 2000, 4, w);
             }
         }
 
@@ -81,7 +91,7 @@ namespace SMP
         {
             byte block = w.GetBlock(x, y, z);
             byte bMeta = w.GetMeta(x, y, z);
-            if (block == 0 || block == 51 || ((block == 10 || block == 11) && meta.GetBits(0, 3) < bMeta))
+            if (block == 0 || block == 51 || ((block == 10 || block == 11) && (meta & 0x7) < bMeta && (bMeta & 0x8) == 0))
             {
                 w.BlockChange(x, y, z, 10, meta);
                 if (block == 51)
@@ -93,11 +103,8 @@ namespace SMP
                 Player.GlobalSoundEffect(x, (byte)y, z, 2000, 4, w);
 
                 short dropId = Player.BlockDropSwitch(block);
-                if (dropId != 0)
-                {
-                    Item item = new Item(dropId, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
-                    item.e.UpdateChunks(false, false);
-                }
+                if (FindBlocks.ValidItem(dropId))
+                    w.DropItem(x, y, z, dropId);
             }
         }
         #endregion

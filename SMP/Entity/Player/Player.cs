@@ -803,6 +803,8 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(pitch).CopyTo(tosend, 36);
 				tosend[40] = onground;
 				SendRaw(0x0D, tosend);
+
+                e.UpdateChunks(true, true);
 			}
             public void Teleport_Spawn()
             {

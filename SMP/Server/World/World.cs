@@ -26,6 +26,7 @@ namespace SMP
 	public partial class World
 	{
 		public static List<World> worlds = new List<World>();
+        public static Chunker chunker = new Chunker();
 		public double SpawnX;
 		public double SpawnY;
 		public double SpawnZ;
@@ -152,11 +153,14 @@ namespace SMP
         }
         public static void LoadChunk(int x, int z, World w)
         {
-            Point pt = new Point(x, z);
             Chunk ch = Chunk.Load(x, z, w);
-            lock (w.chunkData)
-                if (!w.chunkData.ContainsKey(pt))
-                    w.chunkData.Add(pt, ch);
+            if (ch != null)
+            {
+                Point pt = new Point(x, z);
+                lock (w.chunkData)
+                    if (!w.chunkData.ContainsKey(pt))
+                        w.chunkData.Add(pt, ch);
+            }
         }
 
         public void UnloadChunk(int x, int z)
@@ -166,6 +170,7 @@ namespace SMP
         public static void UnloadChunk(int x, int z, World w)
         {
             Point pt = new Point(x, z);
+            w.physics.RemoveChunkChecks(x, z);
             SaveChunk(x, z, w);
             lock (w.chunkData)
                 if (w.chunkData.ContainsKey(pt))
@@ -184,6 +189,30 @@ namespace SMP
             Chunk ch = Chunk.GetChunk(x, z, w);
             if (ch == null || !ch.dirty) return;
             ch.Save(w);
+        }
+        #endregion
+
+        #region Item Drops
+        public void DropItem(int x, int y, int z, short id)
+        {
+            DropItem(x, y, z, id, 0, 1, this);
+        }
+        public void DropItem(int x, int y, int z, short id, short meta)
+        {
+            DropItem(x, y, z, id, meta, 1, this);
+        }
+        public void DropItem(int x, int y, int z, short id, short meta, byte count)
+        {
+            DropItem(x, y, z, id, meta, count, this);
+        }
+        public static void DropItem(int x, int y, int z, short id, short meta, byte count, World w)
+        {
+            if (!FindBlocks.ValidItem(id)) return;
+            if (Server.mode == 0)
+            {
+                Item item = new Item(id, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                item.e.UpdateChunks(false, false);
+            }
         }
         #endregion
 
