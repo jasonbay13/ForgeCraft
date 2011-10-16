@@ -580,7 +580,10 @@ namespace SMP
 			}
 
             if (!BlockData.CanPlaceIn(level.GetBlock(blockX, blockY, blockZ)))
+            {
+                SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                 return;
+            }
 
 			if (blockID >= 1 && blockID <= 255)
 			{
