@@ -31,18 +31,22 @@ namespace SMP
                     ChunkGenQueue cgq; Chunk ch;
                     while (!Server.s.shuttingDown)
                     {
-                        if (genQueue.Count < 1) { Thread.Sleep(100); continue; }
-                        lock (genQueue)
-                            cgq = genQueue.Dequeue();
-                        lock (generated)
-                            generated.Add(cgq);
-                        ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
-                        Point pt = new Point(cgq.x, cgq.z);
-                        lock (cgq.world.chunkData)
-                            if (!cgq.world.chunkData.ContainsKey(pt))
-                                cgq.world.chunkData.Add(pt, ch);
-                        lock (generated)
-                            generated.Remove(cgq);
+                        try
+                        {
+                            if (genQueue.Count < 1) { Thread.Sleep(100); continue; }
+                            lock (genQueue)
+                                cgq = genQueue.Dequeue();
+                            lock (generated)
+                                generated.Add(cgq);
+                            ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
+                            Point pt = new Point(cgq.x, cgq.z);
+                            lock (cgq.world.chunkData)
+                                if (!cgq.world.chunkData.ContainsKey(pt))
+                                    cgq.world.chunkData.Add(pt, ch);
+                            lock (generated)
+                                generated.Remove(cgq);
+                        }
+                        catch { }
                     }
                 });
             }));
@@ -52,17 +56,21 @@ namespace SMP
             {
                 while (!Server.s.shuttingDown)
                 {
-                    if (sendQueue.Count < 1) { Thread.Sleep(100); continue; }
-                    lock (sendQueue)
+                    try
+                    {
+                        if (sendQueue.Count < 1) { Thread.Sleep(100); continue; }
                         sendQueue.ForEach(delegate(ChunkSendQueue csq)
                         {
                             if (csq.player.level.chunkData.ContainsKey(new Point(csq.x, csq.z)))
                             {
+                                //Console.WriteLine("SENT " + csq.x + "," + csq.z);
                                 csq.player.SendChunk(csq.player.level.chunkData[new Point(csq.x, csq.z)]);
                                 sendQueue.Remove(csq);
-                                //Console.WriteLine("sent " + csq.x + " " + csq.z);
+                                Thread.Sleep(2);
                             }
                         });
+                    }
+                    catch { }
                 }
             }));
             sendThread.Start();
@@ -88,11 +96,8 @@ namespace SMP
         public void QueueChunkSend(int x, int z, Player player)
         {
             ChunkSendQueue csq = new ChunkSendQueue(x, z, player);
-            lock (sendQueue)
-            {
-                if (sendQueue.Contains(csq)) return;
-                sendQueue.Add(csq);
-            }
+            if (sendQueue.Contains(csq)) return;
+            sendQueue.Add(csq);
         }
     }
 

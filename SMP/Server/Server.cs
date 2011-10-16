@@ -72,7 +72,7 @@ namespace SMP
         public static string name = "sc";
         public static int port = 25565;
         public static string ConsoleName = "Console";
-        public static int genThreads = 1;
+        public static byte genThreads = 1;
         //---------------//
         public static bool usewhitelist = false;
 		public static bool useviplist = false;
@@ -240,8 +240,11 @@ namespace SMP
 		
 		public void Stop()
 		{
+            s.shuttingDown = true;
+
 			foreach(World w in World.worlds)
 			{
+                w.physics.Stop();
 				w.SaveLVL();
 			}
 			
@@ -249,12 +252,9 @@ namespace SMP
 			
 			Group.SaveGroups();
 			
-			if ((File.Exists("properties/banned.txt")) || (!File.Exists("properties/banned.txt") && WhiteList.Count > 0))
-				Properties.WriteList(BanList, "properties/banned.txt");
-			if ((File.Exists("properties/whitelist.txt")) || (!File.Exists("properties/whitelist.txt") && WhiteList.Count > 0))
-				Properties.WriteList(WhiteList, "properties/whitelist.txt");
-			if ((File.Exists("properties/viplist.txt")) || (!File.Exists("properties/viplist.txt") && WhiteList.Count > 0))
-				Properties.WriteList(VIPList, "properties/viplist.txt");
+			Properties.WriteList(BanList, "properties/banned.txt");
+			Properties.WriteList(WhiteList, "properties/whitelist.txt");
+			Properties.WriteList(VIPList, "properties/viplist.txt");
 				
 			if (listen != null)
             {

@@ -80,6 +80,7 @@ namespace SMP {
         /// <param name="c"></param>
         public override void Generate(World w, Chunk c)
         {
+            //DateTime start = DateTime.Now;
             int cx = c.x << 4, cz = c.z << 4;
             int waterLevel = 64 + 15 / 2 - 4;
             if (w.seed == 0)
@@ -174,21 +175,23 @@ namespace SMP {
                     {
                         for (int y = 0; y < 128; y++)
                         {
-                            if (caves.GetValue(cx + x, y, cz + z) > (128 - y) * 0.0132)
-                            {
-								c.UNCHECKEDPlaceBlock(x, y, z, 0x00);
-                                if (c.SGB(x, y - 1, z) == 0x03)
-									c.UNCHECKEDPlaceBlock(x, y - 1, z, 0x02);
-                            }
-
                             if (y <= waterLevel && c.SGB(x, y, z) == 0x00)
                             {
 								c.UNCHECKEDPlaceBlock(x, y, z, 0x08);
+                            }
+
+                            if (caves.GetValue(cx + x, y, cz + z) > (128 - y) * 0.0132)
+                            {
+                                c.UNCHECKEDPlaceBlock(x, y, z, 0x00);
+                                if (c.SGB(x, y - 1, z) == 0x03)
+                                    c.UNCHECKEDPlaceBlock(x, y - 1, z, 0x02);
                             }
                         }
                     }
                 }
             }
+            //TimeSpan took = DateTime.Now - start;
+            //Console.WriteLine(took.TotalMilliseconds);
         }
 
         public override void SetSeed(int seed)

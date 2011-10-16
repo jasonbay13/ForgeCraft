@@ -560,11 +560,11 @@ namespace SMP
                     if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
                     {
                         byte type;
-                        for (int x = -2; x <= 2; x++)
-                            for (int z = -2; z <= 2; z++)
+                        for (int x = -3; x <= 3; x++)
+                            for (int z = -3; z <= 3; z++)
                                 for (int y = -1; y <= 1; y++)
                                 {
-                                    if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(5) < 4)
+                                    if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(2) == 0)
                                     {
                                         switch (Entity.random.Next(15))
                                         {

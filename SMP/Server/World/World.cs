@@ -93,7 +93,7 @@ namespace SMP
 	            {
 	                Parallel.For(-3, 3, delegate(int z)
 	                {
-                        LoadChunk(x, z);
+                        LoadChunk(x, z, false);
 	                });
 	                Server.Log(x + " Row Generated.");
 	
@@ -105,7 +105,7 @@ namespace SMP
 				{
 				    for (int z = -3; z <= 3; z++)
 				    {
-                        LoadChunk(x, z);
+                        LoadChunk(x, z, false);
 				    }
 			    	Server.Log(x + " Row Generated.");
 				}		
@@ -147,13 +147,13 @@ namespace SMP
 		}
 
         #region Chunk Saving/Loading
-        public void LoadChunk(int x, int z)
+        public void LoadChunk(int x, int z, bool thread = true)
         {
-            LoadChunk(x, z, this);
+            LoadChunk(x, z, this, thread);
         }
-        public static void LoadChunk(int x, int z, World w)
+        public static void LoadChunk(int x, int z, World w, bool thread = true)
         {
-            Chunk ch = Chunk.Load(x, z, w);
+            Chunk ch = Chunk.Load(x, z, w, thread);
             if (ch != null)
             {
                 Point pt = new Point(x, z);
@@ -300,7 +300,7 @@ namespace SMP
                 {
                     Parallel.For(-3, 3, z =>
                     {
-                        w.LoadChunk(x, z);
+                        w.LoadChunk(x, z, false);
                     });
                 });
             }
@@ -310,7 +310,7 @@ namespace SMP
                 {
                     for (int z = -3; z < 3; z++)
                     {
-                        w.LoadChunk(x, z);
+                        w.LoadChunk(x, z, false);
                     }
                 }
             }
@@ -513,6 +513,13 @@ namespace SMP
                     QueueBlockChange(x, y, z, type, meta);
                 }
                 else {
+                    lock (blockQueue)
+                    {
+                        Point pt = new Point(cx, cz);
+                        if (blockQueue.ContainsKey(pt))
+                            blockQueue[new Point(cx, cz)].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
+                    }
+
                     foreach (Player p in Player.players.ToArray())
                     {
                         if (!p.VisibleChunks.Contains(chunk.point)) continue;

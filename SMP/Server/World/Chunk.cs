@@ -101,9 +101,9 @@ namespace SMP
 			this.x = x; this.z = z;
 		}
 
-        public static Chunk Load(int x, int z, World w)
+        public static Chunk Load(int x, int z, World w, bool thread = true)
         {
-            string file = w.name + "/chunks/" + Convert.ToString(x & 0x3f, 16) + "/" + Convert.ToString(z & 0x3f, 16) + "/" + x.ToString() + "." + z.ToString() + ".chunk";
+            string file = String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
             if (File.Exists(file))
             {
                 Chunk ch = new Chunk(x, z);
@@ -135,14 +135,17 @@ namespace SMP
                 return ch;
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
-            World.chunker.QueueChunk(x, z, w);
+            if (thread)
+                World.chunker.QueueChunk(x, z, w);
+            else
+                return w.GenerateChunk(x, z);
             return null;
         }
 
         public void Save(World w)
         {
-            string path = w.name + "/chunks/" + Convert.ToString(x & 0x3f, 16) + "/" + Convert.ToString(z & 0x3f, 16);
-            string file = path + "/" + x.ToString() + "." + z.ToString() + ".chunk";
+            string path = String.Format("{0}/chunks/{1}/{2}", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16));
+            string file = String.Format("{0}/{1}.{2}.chunk", path, x.ToString(), z.ToString());
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using (MemoryStream data = new MemoryStream())
             {

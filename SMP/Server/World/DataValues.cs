@@ -157,6 +157,7 @@ namespace SMP
 				case "cauldron": return 118;
 				case "airportal": return 119;
 				case "airportalframe": return 120;
+                case "whitestone": return 121;
                 default: return -1;
             }
         }
@@ -330,7 +331,8 @@ namespace SMP
 		BrewingStand = 117,
 		Cauldron = 118,
 		AirPortal = 119,
-		AirPortalFrame = 120
+		AirPortalFrame = 120,
+        WhiteStone = 121
 	};
 	public enum Items : short
 	{
@@ -654,6 +656,9 @@ namespace SMP
                 case 104:
                 case 105:
                 case 106:
+                case 110:
+                case 111:
+                case 115:
                     return true;
             }
             return false;
@@ -698,6 +703,7 @@ namespace SMP
         {
             switch (a)
             {
+                case 0:
                 case 6:
                 case 8:
                 case 9:
@@ -712,6 +718,7 @@ namespace SMP
                 case 38:
                 case 39:
                 case 40:
+                case 44:
                 case 50:
                 case 51:
                 case 55:
@@ -731,6 +738,7 @@ namespace SMP
                 case 78:
                 case 83:
                 case 90:
+                case 92:
                 case 93:
                 case 94:
                 case 96:
@@ -740,6 +748,7 @@ namespace SMP
                 case 107:
                 case 111:
                 case 115:
+                case 119:
                     return true;
             }
             return false;
@@ -886,6 +895,92 @@ namespace SMP
             return false;
         }
 
+        public static bool CanPlaceOnEntity(byte a)
+        {
+            switch (a)
+            {
+                case 0:
+                case 6:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 27:
+                case 28:
+                case 30:
+                case 31:
+                case 32:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 50:
+                case 51:
+                case 55:
+                case 59:
+                case 63:
+                case 64:
+                case 65:
+                case 66:
+                case 68:
+                case 69:
+                case 70:
+                case 71:
+                case 72:
+                case 75:
+                case 76:
+                case 77:
+                case 78:
+                case 83:
+                case 104:
+                case 105:
+                case 106:
+                case 111:
+                case 115:
+                case 119:
+                    return true;
+            }
+            return false;
+        }
+
+        public static byte PlaceableItemSwitch(short a)
+        {
+            switch (a)
+            {
+                case 259:
+                    return 51;
+                case 295:
+                    return 59;
+                case 323:
+                    return 63;
+                case 324:
+                    return 64;
+                case 326:
+                    return 8;
+                case 327:
+                    return 10;
+                case 330:
+                    return 71;
+                case 331:
+                    return 55;
+                case 338:
+                    return 83;
+                case 354:
+                    return 92;
+                case 355:
+                    return 26;
+                case 356:
+                    return 93;
+                case 361:
+                    return 104;
+                case 362:
+                    return 105;
+                case 372:
+                    return 115;
+            }
+            return 0;
+        }
+
         public static float GetExplosionResistance(byte a)
         {
             switch (a)
@@ -898,6 +993,8 @@ namespace SMP
                 case 9:
                 case 11:
                     return 500;
+                case 121:
+                    return 35;
                 case 45:
                 case 98:
                 case 4:
@@ -910,6 +1007,12 @@ namespace SMP
                 case 44:
                 case 43:
                 case 1:
+                case 97:
+                case 101:
+                case 108:
+                case 109:
+                case 112:
+                case 114:
                     return 30;
                 case 71:
                 case 52:
@@ -930,6 +1033,8 @@ namespace SMP
                 case 74:
                 case 53:
                 case 5:
+                case 96:
+                case 107:
                     return 15;
                 case 54:
                 case 58:
@@ -966,6 +1071,7 @@ namespace SMP
                 case 12:
                 case 88:
                 case 77:
+                case 110:
                     return 2.5F;
                 case 81:
                 case 65:
@@ -977,6 +1083,7 @@ namespace SMP
                 case 26:
                 case 18:
                 case 80:
+                case 106:
                     return 1;
                 case 78:
                     return 0.5F;

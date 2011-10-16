@@ -75,10 +75,10 @@ namespace SMP
                                 catch { Server.Log("max-players invalid! setting to default."); }
                                 break;
                             case "use-whitelist":
-                                Server.usewhitelist = (value.ToLower() == "true") ? true : false;
+                                Server.usewhitelist = (value.ToLower() == "true");
                                 break;
 							case "use-viplist":
-                                Server.useviplist = (value.ToLower() == "true") ? true : false;
+                                Server.useviplist = (value.ToLower() == "true");
                                 break;
 							case "defaultcolor":
 								if (value.Length == 2)
@@ -108,6 +108,20 @@ namespace SMP
 									}
 								else Server.ServerLogger.Log(LogLevel.Warning, "Invalid irc-color, setting to default.");
 								break;
+                            case "generator-threads":
+                                try
+                                {
+                                    if (Convert.ToByte(value) < 1)
+                                    {
+                                        value = "1"; Server.Log("Generator threads has been increased to 1.");
+                                    }
+                                    Server.genThreads = Convert.ToByte(value);
+                                }
+                                catch
+                                {
+                                    Server.ServerLogger.Log(LogLevel.Warning, "Invalid generator-threads, setting to default.");
+                                }
+                                break;
                         }
 
                     }
@@ -157,6 +171,7 @@ namespace SMP
 			w.WriteLine("use-VIPlist = " + Server.useviplist.ToString().ToLower());
             w.WriteLine("defaultColor = " + Color.ServerDefaultColor);
             w.WriteLine("irc-color = " + Color.IRCColor);
+            w.WriteLine("generator-threads = " + Server.genThreads.ToString());
         }
 		
 		public static List<string> LoadList(string file)

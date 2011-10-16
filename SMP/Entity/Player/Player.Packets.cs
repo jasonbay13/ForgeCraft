@@ -91,6 +91,13 @@ namespace SMP
 			
 			UpdateShi(this);
 
+            int tries = 0;
+            while (tries < 100 && Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
+            {
+                tries++;
+                System.Threading.Thread.Sleep(50);
+            }
+
             if (Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
                 Kick("Chunk missing: " + ((int)pos.x >> 4) + "," + ((int)pos.z >> 4));
 			
@@ -464,7 +471,7 @@ namespace SMP
 			int blockZ = util.EndianBitConverter.Big.ToInt32(message, 5);
 			byte direction = message[9];
 
-			if (blockX == -1 && blockZ == -1)
+            if (blockX == -1 && blockY == unchecked((byte)-1) && blockZ == -1 && direction == unchecked((byte)-1))
 			{
 				//this is supposed to just tell the server to update food and stuffs
 				return;
@@ -483,6 +490,12 @@ namespace SMP
 
             //Console.WriteLine(blockID + " " + amount + " " + damage);
 
+            if (OnBlockChange != null)
+            {
+                OnBlockChange(this, blockX, blockY, blockZ, blockID);
+                return;
+            }
+
 			byte rc = level.GetBlock(blockX, blockY, blockZ);
 			if (BlockChange.RightClickedOn.ContainsKey(rc))
 			{
@@ -493,17 +506,34 @@ namespace SMP
 				}
 			}
 
-            bool second = false;
-            checkEnt:
-			foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
+
+            if (level.GetBlock(blockX, blockY, blockZ) != 78) // You can place stuff IN snow, not on it.
+            {
+                switch (direction)
+                {
+                    case 0: blockY--; break;
+                    case 1: blockY++; break;
+                    case 2: blockZ--; break;
+                    case 3: blockZ++; break;
+                    case 4: blockX--; break;
+                    case 5: blockX++; break;
+                }
+            }
+
+            bool canPlaceOnEntity = (blockID < 0 || ((blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID)))));
+            Console.WriteLine(canPlaceOnEntity);
+            foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
 				Point3 pp = new Point3((int[])e1.pos);
 
-				if (block == pp)
+                if (block == pp && !canPlaceOnEntity)
 				{
 					//Server.Log("Entity found!");
-					if (e1.isItem)
+                    SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    return;
+                    
+                    /*if (e1.isItem)
 					{
 						//move item
 						continue;
@@ -524,58 +554,24 @@ namespace SMP
 						//Check the players holding item, if they need to do something with it, do it.
 						//anyway, if this is a player, then we dont place a block :D so return.
 						return;
-					}
+					}*/
 				}
 
-                pp.y--;
-                if (block == pp)
+                pp.y++;
+                if (block == pp && !canPlaceOnEntity)
                 {
-                    if (e1.isPlayer)
+                    SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    return;
+
+                    /*if (e1.isPlayer)
                     {
                         //dont do anything here? is there a case where you right click a player? a snowball maybe...
                         //Check the players holding item, if they need to do something with it, do it.
                         //anyway, if this is a player, then we dont place a block :D so return.
                         return;
-                    }
+                    }*/
                 }
 			}
-			/*foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
-			{
-				Point3 block = new Point3(blockX, blockY, blockZ);
-                Point3 pp = new Point3((int[])e1.pos);
-				pp.y--;
-
-				if (block == pp)
-				{
-					if (e1.isPlayer)
-					{
-						//dont do anything here? is there a case where you right click a player? a snowball maybe...
-						//we should do an item check, then return...
-						//anyway, if this is a player, then we dont place a block :D so return.
-						return;
-					}
-				}
-			}*/
-
-            if (!second && level.GetBlock(blockX, blockY, blockZ) != 78) // You can place stuff IN snow, not on it.
-            {
-                switch (direction)
-                {
-                    case 0: blockY--; break;
-                    case 1: blockY++; break;
-                    case 2: blockZ--; break;
-                    case 3: blockZ++; break;
-                    case 4: blockX--; break;
-                    case 5: blockX++; break;
-                }
-            }
-            if (second) { second = true; goto checkEnt; }
-
-            if (OnBlockChange != null)
-            {
-                OnBlockChange(this, blockX, blockY, blockZ, blockID);
-                return;
-            }
 
 			if (blockID == -1)
 			{
