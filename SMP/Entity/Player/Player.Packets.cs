@@ -521,7 +521,6 @@ namespace SMP
             }
 
             bool canPlaceOnEntity = (blockID < 0 || ((blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID)))));
-            Console.WriteLine(canPlaceOnEntity);
             foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
