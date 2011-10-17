@@ -520,16 +520,18 @@ namespace SMP
                 }
             }
 
-            bool canPlaceOnEntity = (blockID < 0 || ((blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID)))));
+            bool canPlaceOnEntity = (blockID < 0 || (blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID))));
             foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
 			{
 				Point3 block = new Point3(blockX, blockY, blockZ);
 				Point3 pp = new Point3((int[])e1.pos);
 
+                if (e1.isItem) continue;
                 if (block == pp && !canPlaceOnEntity)
 				{
-					//Server.Log("Entity found!");
+					Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
                     return;
                     
                     /*if (e1.isItem)
@@ -559,7 +561,9 @@ namespace SMP
                 pp.y++;
                 if (block == pp && !canPlaceOnEntity)
                 {
+                    Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
                     return;
 
                     /*if (e1.isPlayer)
@@ -582,6 +586,7 @@ namespace SMP
             if (!BlockData.CanPlaceIn(level.GetBlock(blockX, blockY, blockZ)))
             {
                 SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
                 return;
             }
 
