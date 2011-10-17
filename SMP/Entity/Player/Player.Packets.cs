@@ -529,7 +529,7 @@ namespace SMP
                 if (e1.isItem) continue;
                 if (block == pp && !canPlaceOnEntity)
 				{
-					Server.Log("Entity found!");
+					//Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                     SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
                     return;
@@ -561,7 +561,7 @@ namespace SMP
                 pp.y++;
                 if (block == pp && !canPlaceOnEntity)
                 {
-                    Server.Log("Entity found!");
+                    //Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                     SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
                     return;
