@@ -564,7 +564,7 @@ namespace SMP
                             for (int z = -3; z <= 3; z++)
                                 for (int y = -1; y <= 1; y++)
                                 {
-                                    if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(2) == 0)
+                                    if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(2) == 0)
                                     {
                                         switch (Entity.random.Next(15))
                                         {
