@@ -60,11 +60,7 @@ namespace SMP
         {
             if (physthread == null) return;
             //Checks.Clear();
-            try
-            {
-                physthread.Abort();
-                physthread.Join();
-            }
+            try { physthread.Abort(); physthread.Join(); }
             catch { }
             physthread = null;
             Server.ServerLogger.Log("Physics stopped on " + w.name + ".");
@@ -116,6 +112,7 @@ namespace SMP
                 {
                     try
                     {
+                        if (C == null) { Checks.Remove(C); return; }
                         type = w.GetBlock(C.x, C.y, C.z);
                         if (Handlers.handlers.ContainsKey(type))
                         {
@@ -136,7 +133,7 @@ namespace SMP
                         Checks.Remove(C);
                     }
                 });
-                Checks.RemoveAll(Check => Check.time == short.MaxValue);
+                Checks.RemoveAll(Check => (Check != null && Check.time == short.MaxValue));
 
                 lastUpdate = Updates.Count;
                 Updates.ForEach(delegate(Update U)
@@ -147,7 +144,7 @@ namespace SMP
                     }
                     catch
                     {
-                        Server.ServerLogger.Log("Physics update error.");
+                        Server.ServerLogger.Log("Physics update error on " + w.name + "!");
                     }
                 });
                 Updates.Clear();

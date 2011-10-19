@@ -486,19 +486,30 @@ namespace SMP
         }
         public void FlushBlockChanges()
         {
-            if (blockQueue.Count < 1) return;
-
-            Dictionary<Point, List<BlockChangeData>> tempQueue = new Dictionary<Point, List<BlockChangeData>>(blockQueue);
-            blockQueue.Clear();
-
-            foreach (KeyValuePair<Point, List<BlockChangeData>> kvp in tempQueue)
+            try
             {
-                foreach (Player p in Player.players.ToArray())
+                if (blockQueue.Count < 1) return;
+
+                Dictionary<Point, List<BlockChangeData>> tempQueue;
+                lock (blockQueue)
                 {
-                    if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
-                    if (p.level == this)
-                        p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
+                    tempQueue = new Dictionary<Point, List<BlockChangeData>>(blockQueue);
+                    blockQueue.Clear();
                 }
+
+                foreach (KeyValuePair<Point, List<BlockChangeData>> kvp in tempQueue)
+                {
+                    foreach (Player p in Player.players.ToArray())
+                    {
+                        if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
+                        if (p.level == this)
+                            p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 		public void BlockChange(int x, int y, int z, byte type, byte meta, bool phys = true)

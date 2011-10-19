@@ -85,57 +85,14 @@ namespace SMP
 
         public Server()
 		{
-			Log("Starting Server");
 			s = this;
-            if (Directory.Exists("main"))
-            {
-                mainlevel = World.LoadLVL("main");
-            }
-            else
-            {
-                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
-                //mainlevel = new World(0, 127, 0, "main", (int)(DateTime.Now.Ticks & 0xffffffff)) { ChunkLimit = int.MaxValue }; // Perlin
-                World.worlds.Add(mainlevel);
-            } //changed to seed 0 for now
-			ml = new MainLoop("server");
-			#region updatetimer
-            ml.Queue(delegate
-            {
-                keepAliveTimer.Elapsed += delegate
-                {
-                    Player.players.ForEach(delegate(Player p) { p.SendKeepAlive(); });
-                }; keepAliveTimer.Start();
-            });
-			ml.Queue(delegate
-			{
-				updateTimer.Elapsed += delegate
-				{
-				Player.GlobalUpdate();
-				}; updateTimer.Start();
-			});
-            ml.Queue(delegate
-            {
-                playerlisttimer.Elapsed += delegate
-                {
-                    Player.PlayerlistUpdate();
-                }; playerlisttimer.Start();
-            });
-            ml.Queue(delegate
-            {
-                World.chunker.Start();
-            });
-			#endregion
-			//TODO AI Update Timer
-
-			//Setup();
-            
-            //new Creeper(new Point3(0, 72, 0), mainlevel);
 		}
 		
 		public bool Setup()
 		{
-		//TODO: (in order)
-			SQLiteDB  = new SQLiteDatabase(); //
+		    //TODO: (in order)
+            Log("Starting Server");
+            SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
 			//ItemDB = new ItemDB();
             LoadFiles();
@@ -157,6 +114,7 @@ namespace SMP
             if (useviplist)
                VIPList.AddRange(Properties.LoadList("properties/viplist.txt"));
 
+            loadLevels();
             loadCleanUp();
 			
 			try
@@ -181,6 +139,54 @@ namespace SMP
 
             Log("Setting up on port: " + port);
             Log("Server Started");
+        }
+
+        private void loadLevels()
+        {
+            // TODO: autoload.txt
+            if (Directory.Exists("main"))
+            {
+                mainlevel = World.LoadLVL("main");
+            }
+            else
+            {
+                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
+                //mainlevel = new World(0, 127, 0, "main", (int)(DateTime.Now.Ticks & 0xffffffff)) { ChunkLimit = int.MaxValue }; // Perlin
+                World.worlds.Add(mainlevel);
+            } //changed to seed 0 for now
+            ml = new MainLoop("server");
+            #region updatetimer
+            ml.Queue(delegate
+            {
+                keepAliveTimer.Elapsed += delegate
+                {
+                    Player.players.ForEach(delegate(Player p) { p.SendKeepAlive(); });
+                }; keepAliveTimer.Start();
+            });
+            ml.Queue(delegate
+            {
+                updateTimer.Elapsed += delegate
+                {
+                    Player.GlobalUpdate();
+                }; updateTimer.Start();
+            });
+            ml.Queue(delegate
+            {
+                playerlisttimer.Elapsed += delegate
+                {
+                    Player.PlayerlistUpdate();
+                }; playerlisttimer.Start();
+            });
+            ml.Queue(delegate
+            {
+                World.chunker.Start();
+            });
+            #endregion
+            //TODO AI Update Timer
+
+            //Setup();
+
+            //new Creeper(new Point3(0, 72, 0), mainlevel);
         }
 
         private void LoadFiles()
