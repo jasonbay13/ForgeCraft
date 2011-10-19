@@ -509,7 +509,7 @@ namespace SMP
             }
             catch (Exception ex)
             {
-
+                Server.ServerLogger.LogError(ex);
             }
         }
 		public void BlockChange(int x, int y, int z, byte type, byte meta, bool phys = true)
@@ -526,23 +526,28 @@ namespace SMP
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);
-                TimeSpan diff = DateTime.Now - lastBlockChange;
-                if (diff.TotalMilliseconds < 10)
-                {
-                    QueueBlockChange(x, y, z, type, meta);
-                }
-                else {
-                    if (blockQueue.ContainsKey(chunk.point))
-                        blockQueue[chunk.point].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
 
-                    foreach (Player p in Player.players.ToArray())
+                if (type != oldBlock || meta != oldMeta) // Don't send block change if it's the same.
+                {
+                    TimeSpan diff = DateTime.Now - lastBlockChange;
+                    if (diff.TotalMilliseconds < 10)
                     {
-                        if (!p.VisibleChunks.Contains(chunk.point)) continue;
-                        if (p.level == this)
-                            p.SendBlockChange(x, (byte)y, z, type, meta);
+                        QueueBlockChange(x, y, z, type, meta);
                     }
-                    FlushBlockChanges();
-                    lastBlockChange = DateTime.Now;
+                    else
+                    {
+                        if (blockQueue.ContainsKey(chunk.point))
+                            blockQueue[chunk.point].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
+
+                        foreach (Player p in Player.players.ToArray())
+                        {
+                            if (!p.VisibleChunks.Contains(chunk.point)) continue;
+                            if (p.level == this)
+                                p.SendBlockChange(x, (byte)y, z, type, meta);
+                        }
+                        
+                        lastBlockChange = DateTime.Now;
+                    }
                 }
             }
             catch { return; }
