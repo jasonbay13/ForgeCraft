@@ -39,7 +39,7 @@ namespace SMP
         private bool _dirty = false;
 
 		public Point point { get { return new Point(x, z); } }
-        public bool dirty { get { return this._dirty; } }
+        public bool Dirty { get { return this._dirty; } }
 
 		public List<Entity> Entities = new List<Entity>();
 
@@ -172,7 +172,36 @@ namespace SMP
             //Console.WriteLine("SAVED " + x + " " + z);
         }
 
-		public void SetBlockLight(int x, int y, int z, byte light)
+        public void GlobalUpdate(World w)
+        {
+            Player.players.ForEach(delegate(Player pl)
+            {
+                if (pl.MapLoaded && pl.level == w && pl.VisibleChunks.Contains(this.point))
+                    this.Update(w, pl);
+            });
+        }
+        public void Update(World w, Player p)
+        {
+            byte bType, bMeta;
+            ushort bExtra;
+            for (int xx = 0; xx < Width; xx++)
+                for (int zz = 0; zz < Depth; zz++)
+                    for (int yy = 0; yy < Height; yy++)
+                    {
+                        bType = GetBlock(xx, yy, zz);
+
+                        if (bType == (byte)Blocks.SignPost || bType == (byte)Blocks.SignWall)
+                            p.SendUpdateSign(xx, (short)yy, zz, w.GetSign(xx, yy, zz));
+                        if (bType == (byte)Blocks.Jukebox)
+                        {
+                            bExtra = GetExtraData(xx, yy, zz);
+                            if (bExtra >= 2256 && bExtra <= 2266)
+                                p.SendSoundEffect(xx, (byte)yy, zz, 1005, bExtra);
+                        }
+                    }
+        }
+
+        public void SetBlockLight(int x, int y, int z, byte light)
 		{
 			if (InBound(x, y, z))
 			{

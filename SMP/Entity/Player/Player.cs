@@ -231,11 +231,11 @@ namespace SMP
 						break; //Clicked window
                     case 0x6B: length = 8; break; 
 					case 0x82:
-						short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 10) * 2);
-						short b = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 12 + (a/2)) * 2);
-						short c = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 14 + (a/2)+(b/2)) * 2);
-						short d = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 16 + (a/2) + (b/2) + (c/2)) * 2);
-						length = 18 + a + b + c + d;
+                        short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 11) * 2);
+                        short b = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 13 + a) * 2);
+                        short c = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 15 + a + b) * 2);
+                        short d = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 17 + a + b + c) * 2);
+                        length = 18 + a + b + c + d;
 						break;
 					case 0xFE: length = 0;
 						Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers);
@@ -288,6 +288,7 @@ namespace SMP
 						case 0x65: HandleWindowClose(message); break; //Window Closed
 						case 0x66: HandleWindowClick(message); break; //Window Click
                         case 0x6B: HandleCreativeInventoryAction(message); break;
+                        case 0x82: HandleUpdateSign(message); break;
 					}
 					if (buffer.Length > 0)
 						buffer = HandleMessage(buffer);
@@ -730,7 +731,44 @@ namespace SMP
             {
                 SendUseBed(eid, (int)a.x, (byte)a.y, (int)a.z);
             }
+            public void SendUpdateSign(int x, short y, int z, bool additions, params string[] text)
+            {
+                if (text.Length != 4)
+                    throw new ArgumentException("Text must be 4 strings.");
 
+                if (additions)
+                    for (int i = 0; i < text.Length; i++)
+                        text[i] = MessageAdditions(text[i]);
+
+                byte[] bytes = new byte[18 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2) + (text[3].Length * 2)];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 6);
+
+                util.EndianBitConverter.Big.GetBytes((short)text[0].Length).CopyTo(bytes, 10);
+                Encoding.BigEndianUnicode.GetBytes(text[0]).CopyTo(bytes, 12);
+                util.EndianBitConverter.Big.GetBytes((short)text[1].Length).CopyTo(bytes, 12 + (text[0].Length * 2));
+                Encoding.BigEndianUnicode.GetBytes(text[1]).CopyTo(bytes, 14 + (text[0].Length * 2));
+                util.EndianBitConverter.Big.GetBytes((short)text[2].Length).CopyTo(bytes, 14 + (text[0].Length * 2) + (text[1].Length * 2));
+                Encoding.BigEndianUnicode.GetBytes(text[2]).CopyTo(bytes, 16 + (text[0].Length * 2) + (text[1].Length * 2));
+                util.EndianBitConverter.Big.GetBytes((short)text[3].Length).CopyTo(bytes, 16 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2));
+                Encoding.BigEndianUnicode.GetBytes(text[3]).CopyTo(bytes, 18 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2));
+
+                SendRaw(0x82, bytes);
+            }
+            public void SendUpdateSign(int x, short y, int z, params string[] text)
+            {
+                SendUpdateSign(x, y, z, true, text);
+            }
+
+            public static void GlobalUpdateSign(World wld, int x, short y, int z, params string[] text)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl.MapLoaded && pl.level == wld && pl.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, pl.level).point))
+                        pl.SendUpdateSign(x, y, z, text);
+                });
+            }
             public static void GlobalBlockAction(int x, short y, int z, byte byte1, byte byte2, World wld)
             {
                 Player.players.ForEach(delegate(Player p1)
@@ -1357,16 +1395,21 @@ namespace SMP
                 SendMessage(string.Format(this.MessageAdditions(message), args), method);
         }
         #endregion
-        public string MessageAdditions(string msg)
+        public string MessageAdditions(string message)
         {
-            //$s
-           msg =  msg.Replace("$name", this.username);
-           msg =  msg.Replace("$server", Server.name);
-           msg =  msg.Replace("$ip", this.ip);
-           msg = msg.Replace("%", "§");
-           // msg.Replace("$rank", this.group.Name);
+            StringBuilder sb = new StringBuilder(message);
 
-            return msg;
+            for (int i = 0; i <= 9; i++)
+                sb.Replace("%" + i, Color.Signal + i);
+            for (char c = 'a'; c <= 'f'; c++)
+                sb.Replace("%" + c, Color.Signal + c);
+
+            sb.Replace("$name", this.username);
+            sb.Replace("$server", Server.name);
+            sb.Replace("$ip", this.ip);
+            //sb.Replace("$rank", this.group.Name); // NullReferenceException?
+
+            return sb.ToString();
         }
 		#endregion
 

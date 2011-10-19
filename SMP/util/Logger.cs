@@ -33,8 +33,8 @@ namespace SMP
     public class Logger
     {
         public static Logger log = new Logger();
-        string LogFile = Environment.CurrentDirectory + "/logs/" + DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss") + "_server.log";
-        string ErrorFile = Environment.CurrentDirectory + "/logs/errors/" + DateTime.Now.ToString("yyyy-mm-dd_HH-mm-ss") + "_error.log";
+        string LogFile = Environment.CurrentDirectory + "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_server.log";
+        string ErrorFile = Environment.CurrentDirectory + "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
 
 
         /// <summary>

@@ -237,16 +237,14 @@ namespace SMP
             if (meta != 0)
             {
                 if (meta >= 2256 && meta <= 2266)
-                {
-                    a.level.DropItem((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (short)meta);
-                }
+                    a.level.DropItem((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, (short)meta);
 
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
                 Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
             else if (item >= 2256 && item <= 2266)
             {
-                a.inventory.Remove(a.inventory.current_index, 1);
+                if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
                 a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (ushort)item);
                 Player.GlobalSoundEffect(b.pos, 1005, item, a.level);
             }
@@ -478,6 +476,33 @@ namespace SMP
 		}
 		public static bool PlaceSign(Player a, BCS b)
 		{
+            if (b.Direction == 0) return false;
+            if (b.Direction == 1)
+            {
+                b.Direction = (byte)((byte)Math.Floor(((a.rot[0] + 11.25F + 180F) / 360F) * 16) & 0xf);
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.SignPost, b.Direction);
+            }
+            else
+            {
+                switch (b.Direction)
+                {
+                    case (byte)Directions.North:
+                        b.Direction = (byte)WallSigns.North;
+                        break;
+                    case (byte)Directions.South:
+                        b.Direction = (byte)WallSigns.South;
+                        break;
+                    case (byte)Directions.East:
+                        b.Direction = (byte)WallSigns.East;
+                        break;
+                    case (byte)Directions.West:
+                        b.Direction = (byte)WallSigns.West;
+                        break;
+                }
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.SignWall, b.Direction);
+            }
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
+            a.level.UnsetSign((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
 			return false;
 		}
 		public static bool PlaceStorageMinecart(Player a, BCS b)
@@ -566,7 +591,7 @@ namespace SMP
                                 {
                                     if (a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y - 1, (int)b.pos.z + z) == (byte)Blocks.Grass && a.level.GetBlock((int)b.pos.x + x, (int)b.pos.y + y, (int)b.pos.z + z) == (byte)Blocks.Air && Entity.random.Next(2) == 0)
                                     {
-                                        switch (Entity.random.Next(15))
+                                        switch (Entity.random.Next(20))
                                         {
                                             case 0:
                                                 type = (byte)Blocks.FlowerDandelion;

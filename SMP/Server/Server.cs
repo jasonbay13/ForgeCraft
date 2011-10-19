@@ -276,7 +276,22 @@ namespace SMP
 		
 		//Update db, i.e. new columns, tables etc
 		//right now irrelevant
-		private void UpdateDB(){}
+        //anything in here should be removed prior to first release
+        private void UpdateDB()
+        {
+            SQLiteDB.ExecuteNonQuery(
+                        "CREATE TABLE IF NOT EXISTS Sign(" +
+                        "X			INTEGER, " +
+                        "Y			INTEGER, " +
+                        "Z			INTEGER, " +
+                        "World  	TEXT, " +
+                        "Line1		TEXT, " +
+                        "Line2		TEXT, " +
+                        "Line3		TEXT, " +
+                        "Line4		TEXT " +
+                        ");"
+                                     );
+        }
 
 	}
 }

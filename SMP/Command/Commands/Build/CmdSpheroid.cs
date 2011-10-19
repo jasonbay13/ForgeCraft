@@ -128,7 +128,7 @@ namespace SMP
                                         // test if it's inside ellipse
                                         if ((dx * dx) * rx2 + (dy * dy) * ry2 + (dz * dz) * rz2 <= 1)
                                         {
-                                            p.level.BlockChange(x3 + xx, yy + y3, zz + z3, (byte)type, meta);
+                                            p.level.BlockChange(x3 + xx, yy + y3, zz + z3, (byte)type, meta, false);
                                             total++;
                                         }
                                     }
@@ -160,7 +160,7 @@ namespace SMP
                                 // test if it's inside ellipse
                                 if ((dx * dx) * rx2 + (dz * dz) * rz2 <= 1 && (dx * dx) * smallrx2 + (dz * dz) * smallrz2 > 1)
                                 {
-                                    p.level.BlockChange(x3 + xx, sy, zz + z3, (byte)type, meta);
+                                    p.level.BlockChange(x3 + xx, sy, zz + z3, (byte)type, meta, false);
                                     total++;
                                 }
                             }

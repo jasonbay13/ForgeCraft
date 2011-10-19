@@ -370,6 +370,19 @@ namespace SMP
 				        "World  	TEXT" +
 				        ");"
 				                     );
+
+                this.ExecuteNonQuery(
+                        "CREATE TABLE Sign(" +
+                        "X			INTEGER, " +
+                        "Y			INTEGER, " +
+                        "Z			INTEGER, " +
+                        "World  	TEXT, " +
+                        "Line1		TEXT, " +
+                        "Line2		TEXT, " +
+                        "Line3		TEXT, " +
+                        "Line4		TEXT " +
+                        ");"
+                                     );
 				#endregion
 				
 				#region INSERTS
@@ -566,6 +579,7 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(118, 0, 'cauldronblock');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(119, 0, 'airportal');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(120, 0, 'airportalframe');");
+            this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(121, 0, 'whitestone');");
 			#endregion
 			
 			#region ITEMS

@@ -66,7 +66,7 @@ namespace SMP
                 {
                     //Player.players.ForEach(delegate(Player p) { Console.WriteLine(p.rot[0]); });
                     if (wait > 0) Thread.Sleep(wait);
-                    if (setting == PSetting.None || paused || Checks.Count == 0)
+                    if (paused || setting == PSetting.None || Checks.Count == 0)
                     {
                         wait = speed;
                         continue;
@@ -294,6 +294,10 @@ namespace SMP
             AddCheck(x, y, z, 0, false);
         }
 
+        public List<Check> GetChunkChecks(int x, int z)
+        {
+            return Checks.FindAll(Check => ((Check.x >> 4) == x && (Check.z >> 4) == z));
+        }
         public void RemoveChunkChecks(int x, int z)
         {
             Checks.RemoveAll(Check => ((Check.x >> 4) == x && (Check.z >> 4) == z));

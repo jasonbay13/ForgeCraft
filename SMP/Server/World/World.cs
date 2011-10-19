@@ -53,10 +53,10 @@ namespace SMP
         public int ChunkHeight = 128; // This is 1-based, not 0-based. Got it?
         #region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
-		public delegate void OnWorldLoad(World w); //TODO When loading levels is finished, add this event
+		public delegate void OnWorldLoad(World w);
 		public static event OnWorldLoad WorldLoad;
 		public delegate void OnWorldSave(World w);
-		public static event OnWorldLoad OnSave;
+		public static event OnWorldSave OnSave;
 		public event OnWorldLoad Save;
 		public delegate void OnGenerateChunk(World w, Chunk c, int x, int z);
 		public static event OnGenerateChunk WorldGenerateChunk;
@@ -125,6 +125,9 @@ namespace SMP
 
             this.physics = new Physics(this);
             this.physics.Start();
+
+            if (World.WorldLoad != null)
+                World.WorldLoad(this);
 		}
        
 		public static World Find(string name)
@@ -187,7 +190,7 @@ namespace SMP
         public static void SaveChunk(int x, int z, World w)
         {
             Chunk ch = Chunk.GetChunk(x, z, w);
-            if (ch == null || !ch.dirty) return;
+            if (ch == null || !ch.Dirty) return;
             ch.Save(w);
         }
         #endregion
@@ -332,6 +335,9 @@ namespace SMP
             w.physics = new Physics(w);
             w.physics.Start();
 
+            if (World.WorldLoad != null)
+                World.WorldLoad(w);
+
             return w;
         }
 		
@@ -466,10 +472,11 @@ namespace SMP
 		}
         public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
         {
+            Point pt = new Point(x >> 4, z >> 4);
+            BlockChangeData data = new BlockChangeData(x & 0xf, y, z & 0xf, type, meta);
+
             lock (blockQueue)
             {
-                Point pt = new Point(x >> 4, z >> 4);
-                BlockChangeData data = new BlockChangeData(x & 0xf, y, z & 0xf, type, meta);
                 if (!blockQueue.ContainsKey(pt))
                     blockQueue.Add(pt, new List<BlockChangeData>());
                 blockQueue[pt].RemoveAll(bl => (bl.x == data.x && bl.y == data.y && bl.z == data.z)); // We don't want multiple with the same coordinates.
@@ -479,18 +486,18 @@ namespace SMP
         public void FlushBlockChanges()
         {
             if (blockQueue.Count < 1) return;
-            lock (blockQueue)
+
+            Dictionary<Point, List<BlockChangeData>> tempQueue = new Dictionary<Point, List<BlockChangeData>>(blockQueue);
+            blockQueue.Clear();
+
+            foreach (KeyValuePair<Point, List<BlockChangeData>> kvp in tempQueue)
             {
-                foreach (KeyValuePair<Point, List<BlockChangeData>> kvp in blockQueue)
+                foreach (Player p in Player.players.ToArray())
                 {
-                    foreach (Player p in Player.players.ToArray())
-                    {
-                        if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
-                        if (p.level == this)
-                            p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
-                    }
+                    if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
+                    if (p.level == this)
+                        p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
                 }
-                blockQueue.Clear();
             }
         }
 		public void BlockChange(int x, int y, int z, byte type, byte meta, bool phys = true)
@@ -513,12 +520,8 @@ namespace SMP
                     QueueBlockChange(x, y, z, type, meta);
                 }
                 else {
-                    lock (blockQueue)
-                    {
-                        Point pt = new Point(cx, cz);
-                        if (blockQueue.ContainsKey(pt))
-                            blockQueue[new Point(cx, cz)].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
-                    }
+                    if (blockQueue.ContainsKey(chunk.point))
+                        blockQueue[chunk.point].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
 
                     foreach (Player p in Player.players.ToArray())
                     {
@@ -591,6 +594,30 @@ namespace SMP
                 chunk.UnsetExtraData(x & 0xf, y, z & 0xf);
             }
             catch { return; }
+        }
+
+        public string[] GetSign(int x, int y, int z)
+        {
+            string[] text = new string[4];
+            for (int i = 0; i < 4; i++)
+                text[i] = Server.SQLiteDB.ExecuteScalar(String.Format("SELECT Line{0} FROM Sign WHERE X = {1} AND Y = {2} AND Z = {3} AND World = '{4}'", i + 1, x, y, z, this.name)); ;
+            return text;
+        }
+        public void SetSign(int x, int y, int z, params string[] text)
+        {
+            if (text.Length != 4)
+                throw new ArgumentException("Text must be 4 strings.");
+
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("INSERT INTO Sign VALUES({0}, {1}, {2}, '{3}', '{4}', '{5}', '{6}', '{7}')", x, y, z, this.name, text[0], text[1], text[2], text[3]));
+
+            Player.GlobalUpdateSign(this, x, (short)y, z, text);
+        }
+        public void UnsetSign(int x, int y, int z)
+        {
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
+
+            Player.GlobalUpdateSign(this, x, (short)y, z, String.Empty, String.Empty, String.Empty, String.Empty);
         }
 	}
 	public struct Point : IEquatable<Point>

@@ -625,6 +625,27 @@ namespace SMP
 			catch { }
 		}
 
+        private void HandleUpdateSign(byte[] message)
+        {
+            int x = util.EndianBitConverter.Big.ToInt32(message, 0);
+            short y = util.EndianBitConverter.Big.ToInt16(message, 4);
+            int z = util.EndianBitConverter.Big.ToInt32(message, 6);
+
+            // String lengths
+            short a = (short)(util.EndianBitConverter.Big.ToInt16(message, 10) * 2);
+            short b = (short)(util.EndianBitConverter.Big.ToInt16(message, 12 + a) * 2);
+            short c = (short)(util.EndianBitConverter.Big.ToInt16(message, 14 + a + b) * 2);
+            short d = (short)(util.EndianBitConverter.Big.ToInt16(message, 16 + a + b + c) * 2);
+
+            string[] text = new string[4];
+            text[0] = Encoding.BigEndianUnicode.GetString(message, 12, a);
+            text[1] = Encoding.BigEndianUnicode.GetString(message, 14 + a, b);
+            text[2] = Encoding.BigEndianUnicode.GetString(message, 16 + a + b, c);
+            text[3] = Encoding.BigEndianUnicode.GetString(message, 18 + a + b + c, d);
+
+            level.SetSign(x, y, z, text);
+        }
+
         private void HandleCreativeInventoryAction(byte[] message)
         {
             if (util.EndianBitConverter.Big.ToInt16(message, 0) == -1) return;

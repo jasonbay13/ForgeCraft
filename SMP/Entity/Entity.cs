@@ -165,7 +165,10 @@ namespace SMP
                                 p.level.LoadChunk(po.x, po.z);
 
                             if (p.level.chunkData.ContainsKey(po))
+                            {
                                 p.SendChunk(p.level.chunkData[po]);
+                                p.level.chunkData[po].Update(p.level, p);
+                            }
                             else
                                 World.chunker.QueueChunkSend(po, p);
                         }

@@ -54,6 +54,7 @@ namespace SMP
 
             sendThread = new Thread(new ThreadStart(delegate
             {
+                Point pt;
                 while (!Server.s.shuttingDown)
                 {
                     try
@@ -64,7 +65,9 @@ namespace SMP
                             if (csq.player.level.chunkData.ContainsKey(new Point(csq.x, csq.z)))
                             {
                                 //Console.WriteLine("SENT " + csq.x + "," + csq.z);
-                                csq.player.SendChunk(csq.player.level.chunkData[new Point(csq.x, csq.z)]);
+                                pt = new Point(csq.x, csq.z);
+                                csq.player.SendChunk(csq.player.level.chunkData[pt]);
+                                csq.player.level.chunkData[pt].Update(csq.player.level, csq.player);
                                 sendQueue.Remove(csq);
                                 Thread.Sleep(2);
                             }
