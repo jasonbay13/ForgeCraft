@@ -51,16 +51,25 @@ namespace SMP
         public void Stop()
         {
             if (physthread == null) return;
-            Checks.Clear();
-            physthread.Abort();
-            physthread.Join();
+            //Checks.Clear();
+            try
+            {
+                physthread.Abort();
+                physthread.Join();
+            }
+            catch { }
             physthread = null;
             Server.ServerLogger.Log("Physics stopped on " + w.name + ".");
         }
 
+        public void Clear()
+        {
+            Checks.Clear();
+        }
+
         private void RunLoop()
         {
-            while (true)
+            while (!Server.s.shuttingDown)
             {
                 try
                 {
@@ -257,13 +266,13 @@ namespace SMP
         }
 
 
-        public void AddCheck(int x, int y, int z, byte meta, bool overRide)
+        public void AddCheck(Check check, bool overRide)
         {
             try
             {
-                if (!Checks.Exists(Check => (Check != null && Check.x == x && Check.y == y && Check.z == z)))
+                if (!Checks.Exists(Check => (Check != null && Check.x == check.x && Check.y == check.y && Check.z == check.z)))
                 {
-                    Checks.Add(new Check(x, y, z, meta));
+                    Checks.Add(check);
                 }
                 else
                 {
@@ -271,9 +280,9 @@ namespace SMP
                     {
                         foreach (Check C in Checks)
                         {
-                            if (C.x == x && C.y == y && C.z == z)
+                            if (C.x == check.x && C.y == check.y && C.z == check.z)
                             {
-                                C.meta = meta;
+                                C.meta = check.meta;
                                 break;
                             }
                         }
@@ -284,6 +293,15 @@ namespace SMP
             {
                 Server.ServerLogger.LogError(e);
             }
+        }
+        public void AddCheck(Check check)
+        {
+            AddCheck(check, false);
+        }
+
+        public void AddCheck(int x, int y, int z, byte meta, bool overRide)
+        {
+            AddCheck(new Check(x, y, z, meta), overRide);
         }
         public void AddCheck(int x, int y, int z, byte meta)
         {
@@ -296,11 +314,11 @@ namespace SMP
 
         public List<Check> GetChunkChecks(int x, int z)
         {
-            return Checks.FindAll(Check => ((Check.x >> 4) == x && (Check.z >> 4) == z));
+            return Checks.FindAll(Check => (Check != null && (Check.x >> 4) == x && (Check.z >> 4) == z));
         }
         public void RemoveChunkChecks(int x, int z)
         {
-            Checks.RemoveAll(Check => ((Check.x >> 4) == x && (Check.z >> 4) == z));
+            Checks.RemoveAll(Check => (Check != null && (Check.x >> 4) == x && (Check.z >> 4) == z));
         }
 
         public class Check
@@ -309,17 +327,13 @@ namespace SMP
             public short time;
             public int x, y, z;
 
-            public Check(int x, int y, int z, byte meta)
+            public Check(Point3 a, byte meta) : this((int)a.x, (int)a.y, (int)a.z, meta, 0) { }
+            public Check(int x, int y, int z, byte meta) : this(x, y, z, meta, 0) { }
+            public Check(int x, int y, int z, byte meta, short time)
             {
-                this.time = 0;
+                this.time = time;
                 this.meta = meta;
                 this.x = x; this.y = y; this.z = z;
-            }
-            public Check(Point3 a, byte type, byte meta)
-            {
-                this.time = 0;
-                this.meta = meta;
-                this.x = (int)a.x; this.y = (int)a.y; this.z = (int)a.z;
             }
         }
     }

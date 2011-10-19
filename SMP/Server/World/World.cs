@@ -173,8 +173,8 @@ namespace SMP
         public static void UnloadChunk(int x, int z, World w)
         {
             Point pt = new Point(x, z);
-            w.physics.RemoveChunkChecks(x, z);
             SaveChunk(x, z, w);
+            w.physics.RemoveChunkChecks(x, z);
             lock (w.chunkData)
                 if (w.chunkData.ContainsKey(pt))
                 {
@@ -297,6 +297,8 @@ namespace SMP
                 w.time = long.Parse(sw.ReadLine());
             }
 
+            w.physics = new Physics(w);
+
             try
             {
                 Parallel.For(-3, 3, x =>
@@ -332,7 +334,6 @@ namespace SMP
             w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
             w.blockflush.Start();
 
-            w.physics = new Physics(w);
             w.physics.Start();
 
             if (World.WorldLoad != null)

@@ -106,33 +106,48 @@ namespace SMP
             string file = String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
             if (File.Exists(file))
             {
-                Chunk ch = new Chunk(x, z);
-                using (MemoryStream ms = new MemoryStream())
+                try
                 {
-                    using (FileStream fs = new FileStream(file, FileMode.Open))
+                    Chunk ch = new Chunk(x, z);
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        byte[] comp;
-                        ms.SetLength(fs.Length);
-                        fs.Read(ms.GetBuffer(), 0, (int)fs.Length);
-                        comp = ms.GetBuffer().Decompress();
-                        ms.Write(comp, 0, comp.Length);
-                    }
-                    byte[] bytes = ms.ToArray();
-                    Array.Copy(bytes, ch.blocks, 32768);
-                    Array.Copy(bytes, 32768, ch.meta, 0, 16384);
-                    Array.Copy(bytes, 49152, ch.SkyL, 0, 16384);
-                    Array.Copy(bytes, 65536, ch.Light, 0, 16384);
-                    int index = 81922;
-                    short extraCount = BitConverter.ToInt16(bytes, index - 2);
-                    lock (ch.extra)
-                        for (int i = 0; i < extraCount; i++)
+                        using (FileStream fs = new FileStream(file, FileMode.Open))
                         {
-                            ch.extra.Add(BitConverter.ToInt32(bytes, index), BitConverter.ToUInt16(bytes, index + 4));
-                            index += 6;
+                            byte[] comp;
+                            ms.SetLength(fs.Length);
+                            fs.Read(ms.GetBuffer(), 0, (int)fs.Length);
+                            comp = ms.GetBuffer().Decompress();
+                            ms.Write(comp, 0, comp.Length);
                         }
+                        byte[] bytes = ms.ToArray();
+                        Array.Copy(bytes, ch.blocks, 32768);
+                        Array.Copy(bytes, 32768, ch.meta, 0, 16384);
+                        Array.Copy(bytes, 49152, ch.SkyL, 0, 16384);
+                        Array.Copy(bytes, 65536, ch.Light, 0, 16384);
+                        int index = 81922;
+                        short extraCount = BitConverter.ToInt16(bytes, index - 2);
+                        lock (ch.extra)
+                            for (int i = 0; i < extraCount; i++)
+                            {
+                                ch.extra.Add(BitConverter.ToInt32(bytes, index), BitConverter.ToUInt16(bytes, index + 4));
+                                index += 6;
+                            }
+                        short physCount = BitConverter.ToInt16(bytes, index);
+                        index += 2;
+                        for (int i = 0; i < physCount; i++)
+                        {
+                            w.physics.AddCheck(new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12)));
+                            index += 15;
+                        }
+                    }
+                    //Console.WriteLine("LOADED " + x + " " + z);
+                    return ch;
                 }
-                //Console.WriteLine("LOADED " + x + " " + z);
-                return ch;
+                catch (Exception ex)
+                {
+                    Server.ServerLogger.Log("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
+                    Server.ServerLogger.LogError(ex);
+                }
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
             if (thread)
@@ -160,6 +175,16 @@ namespace SMP
                         data.Write(BitConverter.GetBytes((int)kvp.Key), 0, 4);
                         data.Write(BitConverter.GetBytes((ushort)kvp.Value), 0, 2);
                     }
+                List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
+                data.Write(BitConverter.GetBytes((short)physChecks.Count), 0, 2);
+                foreach (Physics.Check check in physChecks)
+                {
+                    data.Write(BitConverter.GetBytes(check.x), 0, 4);
+                    data.Write(BitConverter.GetBytes(check.y), 0, 4);
+                    data.Write(BitConverter.GetBytes(check.z), 0, 4);
+                    data.Write(BitConverter.GetBytes(check.time), 0, 2);
+                    data.WriteByte(check.meta);
+                }
 
                 byte[] bytes;
                 bytes = data.ToArray().Compress();

@@ -126,17 +126,26 @@ namespace SMP
         /// <param name="e"></param>
         public void LogErrorToFile(Exception e)
         {
-            if (!Directory.Exists(Environment.CurrentDirectory + "/logs/errors"))
-                Directory.CreateDirectory(Environment.CurrentDirectory + "/logs/errors");
-
-            using(StreamWriter fh = File.AppendText(ErrorFile))
+            retry:
+            int retred = 0;
+            try
             {
-            fh.WriteLine(FormatTime() + "  " + e.Message);
-            fh.WriteLine(e.StackTrace);
-            fh.Write(e.StackTrace);
-            fh.WriteLine();
+                if (retred == 5) return;
+                if (!Directory.Exists(Environment.CurrentDirectory + "/logs/errors"))
+                    Directory.CreateDirectory(Environment.CurrentDirectory + "/logs/errors");
+
+                using (StreamWriter fh = File.AppendText(ErrorFile))
+                {
+                    fh.WriteLine(FormatTime() + "  " + e.Message);
+                    fh.WriteLine(e.StackTrace);
+                    fh.Write(e.StackTrace);
+                    fh.WriteLine();
+                }
             }
-          
+            catch (System.IO.IOException) { retred++; goto retry; }
+
+            // saved for lulz
+            // Console.WriteLine("There was an error in the error. ERRORCEPTION!");
         }
         
         /// <summary>
