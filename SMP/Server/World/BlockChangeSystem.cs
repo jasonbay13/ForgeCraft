@@ -141,7 +141,7 @@ namespace SMP
 			LeftClicked.Add((short)Blocks.ButtonStone, new BCD(HitButton));
 			//LeftClicked.Add((short)Blocks.Jukebox, new BCD(EjectCd)); // NO!
 			LeftClicked.Add((short)Blocks.Trapdoor, new BCD(OpenTrapdoor));
-            LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
+            //LeftClicked.Add((short)Blocks.Torch, new BCD(DestroyTorch));
 
 			//Block Delete Delegates (Holds Delegates for when specific items are DELETED)
 			Destroyed.Add((short)Blocks.Dispenser, new BCD(DestroyDispenser)); //Drop all Item's from the dispenser
@@ -1028,6 +1028,8 @@ namespace SMP
 		}
 		public static bool HitButton(Player a, BCS b)
 		{
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.ButtonStone, (byte)(meta | 0x8));
 			return false;
 		}
 		public static bool EjectCd(Player a, BCS b)

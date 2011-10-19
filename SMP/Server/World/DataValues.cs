@@ -463,6 +463,7 @@ namespace SMP
 		BrewingStand = 379,
 		Cauldron = 380,
 		EyeOfEnder = 381,
+        GlisteringMelon = 382,
 		
 		GoldMusicDisc = 2256,
 		GreenMusicDisc = 2257,

@@ -142,6 +142,7 @@ namespace SMP
             Properties.Load("properties/server.properties");
 			Command.InitCore();
 			BlockChange.InitAll();
+            Physics.Handlers.InitAll();
 			Plugin.Load();
 			
 			//load groups

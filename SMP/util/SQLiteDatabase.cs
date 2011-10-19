@@ -724,7 +724,8 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(378, 0, 'magmacream');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(379, 0, 'brewingstand');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(380, 0, 'cauldron');");
-			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(381, 0, 'eyeofender');");			
+			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(381, 0, 'eyeofender');");
+            this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(382, 0, 'glisteringmelon');");
 				
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2256, 0, 'goldmusicdisc');");
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2557, 0, 'greenmusicdisc');");

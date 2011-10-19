@@ -73,7 +73,8 @@
     <Compile Include="Mojang\Server\World\Explosion.cs" />
     <Compile Include="Server\World\Chunker.cs" />
     <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
-    <Compile Include="Server\World\Physics\PhysicsHandlers.cs" />
+    <Compile Include="Server\World\Physics\Physics.Handlers.cs" />
+    <Compile Include="Server\World\Physics\Physics.Helper.cs" />
     <Compile Include="Server\World\World.Light.cs" />
     <Compile Include="util\Extensions.cs" />
     <Compile Include="util\MathHelper.cs" />

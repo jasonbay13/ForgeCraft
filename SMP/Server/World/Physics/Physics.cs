@@ -9,10 +9,11 @@ namespace SMP
         public bool paused = false;
         public int speed = 50;
         public PSetting setting;
-        private World w;
+        public World w;
         private Thread physthread;
         private List<Check> Checks = new List<Check>();
-        private int wait = 0;
+        private List<Update> Updates = new List<Update>();
+        private int wait = 0, lastCheck = 0, lastUpdate = 0;
         private Random random;
         #region Accessors
         public World world
@@ -26,7 +27,14 @@ namespace SMP
         {
             get
             {
-                return Checks.Count;
+                return this.lastCheck;
+            }
+        }
+        public int UpdateCount
+        {
+            get
+            {
+                return this.lastUpdate;
             }
         }
         #endregion
@@ -75,7 +83,8 @@ namespace SMP
                 {
                     //Player.players.ForEach(delegate(Player p) { Console.WriteLine(p.rot[0]); });
                     if (wait > 0) Thread.Sleep(wait);
-                    if (paused || setting == PSetting.None || Checks.Count == 0)
+                    lastCheck = Checks.Count;
+                    if (paused || setting == PSetting.None || lastCheck == 0)
                     {
                         wait = speed;
                         continue;
@@ -102,152 +111,23 @@ namespace SMP
         {
             try
             {
+                byte type;
                 Checks.ForEach(delegate(Check C)
                 {
                     try
                     {
-                        #region Physics Calculations
-                        switch (w.GetBlock(C.x, C.y, C.z))
+                        type = w.GetBlock(C.x, C.y, C.z);
+                        if (Handlers.handlers.ContainsKey(type))
                         {
-                            case (byte)Blocks.AWater:
-                            case (byte)Blocks.SWater:
-                                if (setting >= PSetting.Normal)
-                                {
-                                    if (C.time < 5) { C.time++; break; }
-
-                                    byte meta = w.GetMeta(C.x, C.y, C.z);
-                                    if (!HigherLiquidCheck(C.x, C.y, C.z, 8, meta) && !HigherLiquidCheck(C.x, C.y, C.z, 9, meta))
-                                    {
-                                        if ((meta & 0x7) >= 0x7)
-                                            w.BlockChange(C.x, C.y, C.z, 0, 0);
-                                        else
-                                        {
-                                            w.BlockChange(C.x, C.y, C.z, 8, (byte)Math.Min(meta + 2, 0x7));
-                                            if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9)) { C.time = 0; break; }
-                                        }
-                                    }
-                                    else if ((meta & 0x8) != 0)
-                                    {
-                                        if (!WaterFlowCheck(C.x, C.y - 1, C.z)) { meta = 0; goto flowOut; }
-                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
-                                    }
-                                    else if ((meta & 0x7) < 0x7)
-                                    {
-                                        goto flowOut;
-                                    }
-                                    else
-                                    {
-                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
-                                    }
-                                    C.time = short.MaxValue;
-                                    break;
-
-                                    flowOut:
-                                    if (WaterFlowCheck(C.x, C.y - 1, C.z))
-                                    {
-                                        WaterFlow(C.x, C.y - 1, C.z, 0x8);
-                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 8) && !AdjacentLiquidCheck(C.x, C.y, C.z, 9))
-                                        {
-                                            WaterFlow(C.x + 1, C.y, C.z, 0x7);
-                                            WaterFlow(C.x - 1, C.y, C.z, 0x7);
-                                            WaterFlow(C.x, C.y, C.z + 1, 0x7);
-                                            WaterFlow(C.x, C.y, C.z - 1, 0x7);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        meta++;
-                                        WaterFlow(C.x + 1, C.y, C.z, meta);
-                                        WaterFlow(C.x - 1, C.y, C.z, meta);
-                                        WaterFlow(C.x, C.y, C.z + 1, meta);
-                                        WaterFlow(C.x, C.y, C.z - 1, meta);
-                                    }
-                                }
+                            if ((bool)Handlers.handlers[type].DynamicInvoke(this, C))
+                            {
                                 C.time = short.MaxValue;
-                                break;
-                            case (byte)Blocks.SLava:
-                            case (byte)Blocks.ALava:
-                                if (setting >= PSetting.Normal)
-                                {
-                                    if (C.time < 30) { C.time++; break; }
-
-                                    byte meta = w.GetMeta(C.x, C.y, C.z);
-                                    if (!HigherLiquidCheck(C.x, C.y, C.z, 10, meta) && !HigherLiquidCheck(C.x, C.y, C.z, 11, meta))
-                                    {
-                                        if ((meta & 0x7) >= 0x6)
-                                            w.BlockChange(C.x, C.y, C.z, 0, 0);
-                                        else
-                                        {
-                                            w.BlockChange(C.x, C.y, C.z, 10, (byte)Math.Min(meta + 2, 0x6));
-                                            if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11)) { C.time = 0; break; }
-                                        }
-                                    }
-                                    else if ((meta & 0x8) != 0)
-                                    {
-                                        if (!LavaFlowCheck(C.x, C.y - 1, C.z)) { meta = 0; goto flowOut; }
-                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
-                                    }
-                                    else if ((meta & 0x7) < 0x6)
-                                    {
-                                        goto flowOut;
-                                    }
-                                    else
-                                    {
-                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
-                                    }
-                                    C.time = short.MaxValue;
-                                    break;
-
-                                    flowOut:
-                                    if (LavaFlowCheck(C.x, C.y - 1, C.z))
-                                    {
-                                        LavaFlow(C.x, C.y - 1, C.z, 0x8);
-                                        if (!AdjacentLiquidCheck(C.x, C.y, C.z, 10) && !AdjacentLiquidCheck(C.x, C.y, C.z, 11))
-                                        {
-                                            LavaFlow(C.x + 1, C.y, C.z, 0x6);
-                                            LavaFlow(C.x - 1, C.y, C.z, 0x6);
-                                            LavaFlow(C.x, C.y, C.z + 1, 0x6);
-                                            LavaFlow(C.x, C.y, C.z - 1, 0x6);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (AdjacentLiquidCheck(C.x, C.y, C.z, 8) || AdjacentLiquidCheck(C.x, C.y, C.z, 9))
-                                        {
-                                            if ((meta & 0x7) == 0)
-                                                w.BlockChange(C.x, C.y, C.z, 49, 0);
-                                            else
-                                                w.BlockChange(C.x, C.y, C.z, 4, 0);
-                                            Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
-                                            //Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 2000, 4, w);
-                                        }
-                                        else
-                                        {
-                                            meta += 2;
-                                            LavaFlow(C.x + 1, C.y, C.z, meta);
-                                            LavaFlow(C.x - 1, C.y, C.z, meta);
-                                            LavaFlow(C.x, C.y, C.z + 1, meta);
-                                            LavaFlow(C.x, C.y, C.z - 1, meta);
-
-                                            if (w.GetBlock(C.x, C.y - 1, C.z) == 8 || w.GetBlock(C.x, C.y - 1, C.z) == 9)
-                                            {
-                                                w.BlockChange(C.x, C.y - 1, C.z, 4, 0);
-                                                Player.GlobalSoundEffect(C.x, (byte)C.y, C.z, 1004, w);
-                                            }
-                                        }
-                                    }
-                                }
-                                C.time = short.MaxValue;
-                                break;
-                            case (byte)Blocks.Sponge:
-                                SpongePlaced(C.x, C.y, C.z);
-                                C.time = short.MaxValue;
-                                break;
-                            default:
-                                C.time = short.MaxValue;
-                                break;
+                            }
                         }
-                        #endregion
+                        else
+                        {
+                            C.time = short.MaxValue;
+                        }
                     }
                     catch (Exception e)
                     {
@@ -257,6 +137,20 @@ namespace SMP
                     }
                 });
                 Checks.RemoveAll(Check => Check.time == short.MaxValue);
+
+                lastUpdate = Updates.Count;
+                Updates.ForEach(delegate(Update U)
+                {
+                    try
+                    {
+                        w.BlockChange(U.x, U.y, U.z, U.type, U.meta);
+                    }
+                    catch
+                    {
+                        Server.ServerLogger.Log("Physics update error.");
+                    }
+                });
+                Updates.Clear();
             }
             catch (Exception e)
             {
@@ -307,6 +201,10 @@ namespace SMP
         {
             AddCheck(x, y, z, meta, false);
         }
+        public void AddCheck(int x, int y, int z, bool overRide)
+        {
+            AddCheck(x, y, z, 0, overRide);
+        }
         public void AddCheck(int x, int y, int z)
         {
             AddCheck(x, y, z, 0, false);
@@ -319,6 +217,37 @@ namespace SMP
         public void RemoveChunkChecks(int x, int z)
         {
             Checks.RemoveAll(Check => (Check != null && (Check.x >> 4) == x && (Check.z >> 4) == z));
+        }
+
+        public bool AddUpdate(Update update, bool overRide = false)
+        {
+            try
+            {
+                if (!Updates.Exists(Update => (Update != null && Update.x == update.x && Update.y == update.y && Update.z == update.z)))
+                {
+                    Updates.Add(update);
+                    return true;
+                }
+                else
+                {
+                    if (overRide)
+                    {
+                        Updates.RemoveAll(Update => (Update != null && Update.x == update.x && Update.y == update.y && Update.z == update.z));
+                        Updates.Add(update);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Server.ServerLogger.LogError(e);
+            }
+            return false;
+        }
+
+        public void AddUpdate(int x, int y, int z, byte type, byte meta, bool overRide = false)
+        {
+            AddUpdate(new Update(x, y, z, type, meta), overRide);
         }
 
         public class Check
@@ -334,6 +263,19 @@ namespace SMP
                 this.time = time;
                 this.meta = meta;
                 this.x = x; this.y = y; this.z = z;
+            }
+        }
+
+        public class Update
+        {
+            public int x, y, z;
+            public byte type, meta;
+
+            public Update(int x, int y, int z, byte type, byte meta)
+            {
+                this.x = x; this.y = y; this.z = z;
+                this.type = type;
+                this.meta = meta;
             }
         }
     }
