@@ -56,8 +56,10 @@ namespace SMP
         [MTAThread]
         public static void Main(string[] args)
         {
-			if(RunningInMono())
+            if(RunningInMono())
 				Console.WriteLine("Mono Framework detected!");
+            if (!Server.useGUI)
+                Console.Title = "ForgeCraft v" + Server.Version.ToString();
 			
             StartServer();
             
