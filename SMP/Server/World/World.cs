@@ -174,13 +174,17 @@ namespace SMP
         {
             Point pt = new Point(x, z);
             SaveChunk(x, z, w);
-            w.physics.RemoveChunkChecks(x, z);
-            lock (w.chunkData)
-                if (w.chunkData.ContainsKey(pt))
-                {
-                    w.chunkData[pt].Dispose();
-                    w.chunkData.Remove(pt);
-                }
+
+            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunk!
+            {
+                w.physics.RemoveChunkChecks(x, z);
+                lock (w.chunkData)
+                    if (w.chunkData.ContainsKey(pt))
+                    {
+                        w.chunkData[pt].Dispose();
+                        w.chunkData.Remove(pt);
+                    }
+            }
         }
 
         public void SaveChunk(int x, int z)

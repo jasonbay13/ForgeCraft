@@ -275,7 +275,7 @@ namespace SMP
 			if (InBound(x, y, z))
 			{
 				int index = PosToInt(x, y, z);
-				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]); // Why did Notch make metadata a nibble? WHY!?
+				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]);
 			}
             this._dirty = true;
 		}
@@ -333,7 +333,7 @@ namespace SMP
 
 		public bool InBound(int x, int y, int z)
 		{
-			if (x < 0 || y < 0 || z < 0 || x >= 16 || z >= 16 || y >= 128)
+            if (x < 0 || y < 0 || z < 0 || x >= Width || z >= Depth || y >= Height)
 				return false;
 			return true;
 		}

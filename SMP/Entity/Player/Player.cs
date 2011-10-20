@@ -841,15 +841,14 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(pitch).CopyTo(tosend, 36);
 				tosend[40] = onground;
 				SendRaw(0x0D, tosend);
-
-                e.UpdateChunks(true, true);
 			}
             public void Teleport_Spawn()
             {
                 int y;
                 for (y = 127; y >= 0; y--)
                     if (level.GetBlock((int)level.SpawnX, y, (int)level.SpawnZ) != 0) break;
-                Teleport_Player(level.SpawnX, ++y, level.SpawnZ, 0, 0);
+                if (y < 0) y = 126;
+                Teleport_Player(level.SpawnX + 0.5D, ++y, level.SpawnZ + 0.5D, 0, 0);
             }
 			#endregion
 			#region Login Stuffs
@@ -857,14 +856,13 @@ namespace SMP
 			{
 				try
 				{
-					long seed = 0;
 					short length = (short)Server.name.Length;
 					byte[] bytes = new byte[(length * 2) + 22];
 
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
 					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4); //String
 					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
-					util.EndianBitConverter.Big.GetBytes(seed).CopyTo(bytes, bytes.Length - 16); 
+					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16); 
 					bytes[bytes.Length - 5] = Server.mode;
 					bytes[bytes.Length - 4] = dimension;
                     bytes[bytes.Length - 3] = 1;
@@ -1043,11 +1041,11 @@ namespace SMP
 				//Console.WriteLine(username + " " + p.username);
 				try
 				{
-					if (p == null)
+					/*if (p == null) // WHAT THE FUCK
 					{
 						if(VisibleEntities.Contains(p.id)) VisibleEntities.Remove(p.id);
 						return;
-					}
+					}*/
 					if (!LoggedIn)
 					{
 						if(VisibleEntities.Contains(p.id)) VisibleEntities.Remove(p.id);
@@ -1257,7 +1255,7 @@ namespace SMP
 				bytes[1] = mode;
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
-				util.BigEndianBitConverter.Big.GetBytes((long)0).CopyTo(bytes, 5);
+				util.BigEndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, 5);
                 SendRaw(0x09, bytes);
             }
 			#endregion
@@ -1402,6 +1400,8 @@ namespace SMP
             for (int i = 0; i <= 9; i++)
                 sb.Replace("%" + i, Color.Signal + i);
             for (char c = 'a'; c <= 'f'; c++)
+                sb.Replace("%" + c, Color.Signal + c);
+            for (char c = 'A'; c <= 'F'; c++)
                 sb.Replace("%" + c, Color.Signal + c);
 
             sb.Replace("$name", this.username);
