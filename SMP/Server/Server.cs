@@ -150,8 +150,8 @@ namespace SMP
             }
             else
             {
-                //mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
-                mainlevel = new World(0, 127, 0, "main", (int)(DateTime.Now.Ticks & 0xffffffff)) { ChunkLimit = int.MaxValue }; // Perlin
+                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
+                //mainlevel = new World(0, 127, 0, "main", (int)(DateTime.Now.Ticks & 0xffffffff)) { ChunkLimit = int.MaxValue }; // Perlin
                 World.worlds.Add(mainlevel);
             } //changed to seed 0 for now
             ml = new MainLoop("server");
