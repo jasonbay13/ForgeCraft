@@ -35,7 +35,7 @@ namespace SMP
 		public static Socket listen;
 		public static World mainlevel;
 		public static int protocolversion = 18;
-		public static string Version = "0.1";
+        public static Version Version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 		

@@ -32,8 +32,8 @@ namespace SMP
         public abstract void Unload(bool shutdown);
         public abstract string name { get; }
         public abstract string website { get; }
-        public abstract string ForgeCraft_Version { get; }
-        public abstract int build { get; }
+        public abstract Version Version { get; }
+        public abstract Version ForgeCraft_Version { get; }
         public abstract string welcome { get; }
 	    public abstract string creator { get; }
 	    public abstract bool LoadAtStartup { get; }
@@ -80,7 +80,7 @@ namespace SMP
             try
             {
                 object instance = Activator.CreateInstance(Assembly.LoadFrom(pluginname).GetTypes()[0]);
-                if (((Plugin)instance).ForgeCraft_Version != Server.Version && ((Plugin)instance).ForgeCraft_Version != "")
+                if (((Plugin)instance).ForgeCraft_Version > Server.Version)
                 {
                     Server.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
                     Thread.Sleep(1000);
@@ -98,7 +98,7 @@ namespace SMP
 	        	if (((Plugin)instance).LoadAtStartup)
 				{
                     ((Plugin)instance).Load(startup);
-                    Server.Log("Plugin: " + ((Plugin)instance).name + " loaded...build: " + ((Plugin)instance).build);
+                    Server.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).Version.ToString() + " loaded.");
 				}
 				else
 		    		Server.Log("Plugin: " + ((Plugin)instance).name + " was not loaded, you can load it with /pload");
