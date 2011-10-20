@@ -122,7 +122,7 @@ namespace SMP
 				IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
 				listen = new Socket(endpoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 				listen.Bind(endpoint);
-				listen.Listen((int)SocketOptionName.MaxConnections);
+				listen.Listen(int.MaxValue);
 				
 				listen.BeginAccept(new AsyncCallback(Accept), null);
 				
