@@ -520,8 +520,8 @@ namespace SMP
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
+                // TODO: Put lighting updates in a separate thread.
                 chunk.RecalculateLight(x & 0xf, z & 0xf);
-                //chunk.SpreadLight();
                 SpreadLight(x, y, z);
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
