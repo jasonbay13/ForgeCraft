@@ -57,7 +57,9 @@
   <ItemGroup>
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
     <Compile Include="Command\Commands\Build\CmdTree.cs" />
+    <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
+    <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,6 +77,7 @@
     <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
     <Compile Include="Server\World\Physics\Physics.Handlers.cs" />
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />
+    <Compile Include="Server\World\Points.cs" />
     <Compile Include="Server\World\World.Light.cs" />
     <Compile Include="util\Extensions.cs" />
     <Compile Include="util\MathHelper.cs" />

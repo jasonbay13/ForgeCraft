@@ -136,7 +136,7 @@ namespace SMP
 
                 using (StreamWriter fh = File.AppendText(ErrorFile))
                 {
-                    fh.WriteLine(FormatTime() + "  " + e.Message);
+                    fh.WriteLine(FormatTime() + " " + e.GetType().Name + ": " + e.Message);
                     fh.WriteLine(e.StackTrace);
                     fh.Write(e.StackTrace);
                     fh.WriteLine();

@@ -24,5 +24,8 @@ namespace SMP
 {
 	public interface McObject
 	{
+        int id { get; }
+        byte type { get; }
+        Point3 pos { get; set; }
 	}
 }

@@ -44,7 +44,7 @@ namespace SMP
 				if(isPlayer) return p.pos;
 				if(isItem) return I.pos;
 				if(isAI) return ai.pos;
-				//if(isObject) return obj.pos;
+				if(isObject) return obj.pos;
 
 				return Point3.Zero;
 			}
@@ -238,6 +238,12 @@ namespace SMP
 							p.SpawnMob(e);
 							continue;
 						}
+                        else if (e.isObject)
+                        {
+                            p.VisibleEntities.Add(e.id);
+                            p.SendObjectSpawn(e);
+                            continue;
+                        }
 					}
 				}
 			}

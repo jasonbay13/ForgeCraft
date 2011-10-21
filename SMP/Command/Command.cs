@@ -46,6 +46,7 @@ namespace SMP
         public static void InitCore()
         {
 			#region please put in alphabetical order and use core.add now not all.add
+            core.Add(new CmdAbout());
             core.Add(new CmdAFK());
             core.Add(new CmdCheckPort());
             core.Add(new CmdChunks());
@@ -68,6 +69,7 @@ namespace SMP
             core.Add(new CmdLoadLVL());
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());
+            core.Add(new CmdMetaData());
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());

@@ -50,10 +50,12 @@ namespace SMP
 		public Point3 pos;
 		public Point3 oldpos = Point3.Zero;
 		public float[] rot;
+        public float[] oldrot = new float[2];
 		byte onground;
 		public int id { get { return e.id; } }
 		byte dimension = 0;
         private DateTime pingdate = new DateTime();
+        private DateTime lastPosSync = new DateTime();
         public short Ping = 500;
 
 		public Chunk chunk { get { return e.CurrentChunk; } }
@@ -206,7 +208,7 @@ namespace SMP
 				// Get the length of the message by checking the first byte
 				switch (msg)
 				{
-                    case 0x00: length = 4; if (util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
+                    case 0x00: length = 4; if (buffer.Length < 5 || util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
 					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
@@ -390,47 +392,63 @@ namespace SMP
 				e.UpdateEntities();
 				if (!LoggedIn) return;
 
-				Point3 diff = oldpos - pos;
-				int diff1 = (int)oldpos.mdiff(pos);
+                bool forceTp = false;
+                if ((DateTime.Now - lastPosSync).TotalSeconds >= 10)
+                {
+                    lastPosSync = DateTime.Now;
+                    forceTp = true;
+                }
 
-				//TODO Fix oldpos and move this
+                Point3 temppos = (pos * 32) / new Point3(32), tempoldpos = (oldpos * 32) / new Point3(32);
+                Point3 diff = temppos - tempoldpos;
+                double diff1 = temppos.mdiff(tempoldpos);
+
+				//TODO move this?
 				if(isFlying) FlyCode();
 
-				if (diff1 == 0)
+                if ((int)(diff1 * 32) == 0 && !forceTp)
 				{
-					byte[] bytes = new byte[6];
-					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-					bytes[4] = (byte)(rot[0] / 1.40625);
-					bytes[5] = (byte)(rot[1] / 1.40625);
-					foreach (int i in VisibleEntities.ToArray())
-					{
-						Entity e1 = Entity.Entities[i];
-						if (!e1.isPlayer) continue;
-						if (!e1.p.MapLoaded) continue;
-						e1.p.SendRaw(0x20, bytes);
-					}
+                    if (rot[0] - oldrot[0] != 0 || rot[1] - oldrot[1] != 0)
+                    {
+                        byte[] bytes = new byte[6];
+                        util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                        bytes[4] = (byte)(rot[0] / 1.40625);
+                        bytes[5] = (byte)(rot[1] / 1.40625);
+                        foreach (int i in VisibleEntities.ToArray())
+                        {
+                            Entity e1 = Entity.Entities[i];
+                            if (!e1.isPlayer) continue;
+                            if (e1.p == this) continue;
+                            if (!e1.p.MapLoaded) continue;
+                            e1.p.SendRaw(0x20, bytes);
+                        }
+                        rot.CopyTo(oldrot, 0);
+                    }
 				}
-				else if (diff1 <= 4)
+                else if ((int)(diff1 * 32) <= 127 && !forceTp)
 				{
+                    Point3 sendme = diff * 32;
 					byte[] bytes = new byte[9];
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-					bytes[4] = (byte)diff.x;
-					bytes[5] = (byte)diff.y;
-					bytes[6] = (byte)diff.z;
+                    bytes[4] = (byte)sendme.x;
+                    bytes[5] = (byte)sendme.y;
+                    bytes[6] = (byte)sendme.z;
 					bytes[7] = (byte)(rot[0] / 1.40625);
 					bytes[8] = (byte)(rot[1] / 1.40625);
 					foreach (int i in VisibleEntities.ToArray())
 					{
 						Entity e1 = Entity.Entities[i];
 						if (!e1.isPlayer) continue;
+                        if (e1.p == this) continue;
 						if (!e1.p.MapLoaded) continue;
 						e1.p.SendRaw(0x21, bytes);
 					}
-					//oldpos = pos;
+					oldpos = pos;
+                    rot.CopyTo(oldrot, 0);
 				}
 				else
 				{
-					Point3 sendme = pos * 32;
+                    Point3 sendme = pos * 32;
 					byte[] bytes = new byte[18];
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
@@ -443,10 +461,12 @@ namespace SMP
 						if(!Entity.Entities.ContainsKey(i)) continue;
 						Entity e1 = Entity.Entities[i];
 						if (!e1.isPlayer) continue;
+                        if (e1.p == this) continue;
 						if (!e1.p.MapLoaded) continue;
 						e1.p.SendRaw(0x22, bytes);
 					}
-					//oldpos = pos;
+					oldpos = pos;
+                    rot.CopyTo(oldrot, 0);
 				}
 			}
 			#endregion
@@ -1086,6 +1106,32 @@ namespace SMP
 					Server.Log(e.StackTrace);
 				}
 			}
+            public void SendObjectSpawn(Entity e1)
+            {
+                if (!MapLoaded)
+                {
+                    if (VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
+                    return;
+                }
+
+                SendRaw(0x1E, util.EndianBitConverter.Big.GetBytes(e1.id));
+
+                byte[] bytes = new byte[21]; // 27 bytes if ghast fireball?
+                util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
+                bytes[4] = e1.obj.type;
+                Point3 sendme = e1.obj.pos * 32;
+                util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 5);
+                util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 9);
+                util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 13);
+                util.EndianBitConverter.Big.GetBytes(0).CopyTo(bytes, 17); // TODO: Fireball thrower's entity ID.
+
+                if (bytes.Length == 27) // Seems to be used in calculation of the fireball's position?
+                {
+                    util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 21);
+                    util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 23);
+                    util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 25);
+                }
+            }
 			public void SendPickupSpawn(Entity e1)
 			{
 				if (!MapLoaded)
@@ -1265,9 +1311,9 @@ namespace SMP
 				byte[] bytes = new byte[17];
 				util.EndianBitConverter.Big.GetBytes(EntityId).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(true).CopyTo(bytes, 4);
-				util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 5);
-				util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 9);
-				util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 13);
+                util.EndianBitConverter.Big.GetBytes(x * 32).CopyTo(bytes, 5);
+                util.EndianBitConverter.Big.GetBytes(y * 32).CopyTo(bytes, 9);
+                util.EndianBitConverter.Big.GetBytes(z * 32).CopyTo(bytes, 13);
 				SendRaw(0x47, bytes);
 			}
 			public void SendRain(bool on)

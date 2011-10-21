@@ -126,6 +126,7 @@ namespace SMP
                             C.time = short.MaxValue;
                         }
                     }
+                    catch (ThreadAbortException) { }
                     catch (Exception e)
                     {
                         Server.ServerLogger.Log("Physics error on " + w.name + "!");
@@ -142,6 +143,7 @@ namespace SMP
                     {
                         w.BlockChange(U.x, U.y, U.z, U.type, U.meta);
                     }
+                    catch (ThreadAbortException) { }
                     catch
                     {
                         Server.ServerLogger.Log("Physics update error on " + w.name + "!");
