@@ -57,6 +57,7 @@ namespace SMP
         public static System.Timers.Timer keepAliveTimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
+        public static System.Timers.Timer worldsavetimer = new System.Timers.Timer(60000);
 		public static MainLoop ml;
 		public static byte mode = 0; //0=survival, 1=creative
 
@@ -137,23 +138,6 @@ namespace SMP
         {
             //load any extra stuff, announce any thing after every things has been loaded
 
-            Log("Setting up on port: " + port);
-            Log("Server Started");
-        }
-
-        private void loadLevels()
-        {
-            // TODO: autoload.txt
-            if (Directory.Exists("main"))
-            {
-                mainlevel = World.LoadLVL("main");
-            }
-            else
-            {
-                mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
-                //mainlevel = new World(0, 127, 0, "main", (int)(DateTime.Now.Ticks & 0xffffffff)) { ChunkLimit = int.MaxValue }; // Perlin
-                World.worlds.Add(mainlevel);
-            } //changed to seed 0 for now
             ml = new MainLoop("server");
             #region updatetimer
             ml.Queue(delegate
@@ -179,6 +163,16 @@ namespace SMP
             });
             ml.Queue(delegate
             {
+                worldsavetimer.Elapsed += delegate
+                {
+                    World.worlds.ForEach(delegate(World w)
+                    {
+                        w.SaveLVL();
+                    });
+                }; worldsavetimer.Start();
+            });
+            ml.Queue(delegate
+            {
                 World.chunker.Start();
             });
             #endregion
@@ -187,6 +181,26 @@ namespace SMP
             //Setup();
 
             //new Creeper(new Point3(0, 72, 0), mainlevel);
+
+
+            Log("Setting up on port: " + port);
+            Log("Server Started");
+        }
+
+        private void loadLevels()
+        {
+            // TODO: autoload.txt
+            if (Directory.Exists("main"))
+            {
+                mainlevel = World.LoadLVL("main");
+            }
+            else
+            {
+                //mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
+                mainlevel = new World(0, 127, 0, "main", new java.util.Random().nextLong()) { ChunkLimit = int.MaxValue }; // Perlin
+                mainlevel.SaveLVL();
+                World.worlds.Add(mainlevel);
+            } //changed to seed 0 for now
         }
 
         private void LoadFiles()
@@ -249,11 +263,11 @@ namespace SMP
 		{
             s.shuttingDown = true;
 
-			foreach(World w in World.worlds)
-			{
+            World.worlds.ForEach(delegate(World w)
+            {
                 w.physics.Stop();
-				w.SaveLVL();
-			}
+                w.SaveLVL();
+            });
 			
             Plugin.Unload();
 			

@@ -60,9 +60,9 @@ namespace SMP
 				Console.WriteLine("Mono Framework detected!");
             if (!Server.useGUI)
                 Console.Title = "ForgeCraft v" + Server.Version.ToString();
-			
+
+            MathHelper.Init();
             StartServer();
-            
             StartInput();
         }
 

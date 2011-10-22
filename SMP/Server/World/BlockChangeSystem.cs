@@ -576,7 +576,7 @@ namespace SMP
                     if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
                     {
                         Point3 pos2 = BlockclickedPos(a, b);
-                        GenTrees.Normal(a.level, (int)pos2.x, (int)pos2.y, (int)pos2.z, a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z));
+                        new GenTrees().Normal(a.level, (int)pos2.x, (int)pos2.y, (int)pos2.z, a.level.GetMeta((int)pos2.x, (int)pos2.y, (int)pos2.z));
                         return true;
                     }
                     return false;

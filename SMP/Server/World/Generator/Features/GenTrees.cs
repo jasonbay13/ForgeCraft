@@ -5,14 +5,31 @@ using System.Text;
 
 namespace SMP
 {
-    public class GenTrees
+    public class GenTrees : GenFeatures
     {
-        private static Random rand = new Random();
+        private int Field_947_a;
+        private java.util.Random Rand;
+        private World Field_35530_d;
 
-        public static void Normal(World w, int x, int y, int z, byte type)
+        protected override int field_947_a { get { return Field_947_a; } set { Field_947_a = value; } }
+        protected override java.util.Random rand { get { return Rand; } set { Rand = value; } }
+        protected override World field_35530_d { get { return Field_35530_d; } set { Field_35530_d = value; } }
+
+
+        public GenTrees()
+            : base()
+        {
+        }
+        public GenTrees(long seed)
+            : base()
+        {
+            rand = new java.util.Random(seed);
+        }
+
+        public void Normal(World w, int x, int y, int z, byte type)
         {
             byte dist, tile;
-            byte height = (byte)rand.Next(3, 7);
+            byte height = (byte)(rand.nextInt(4) + 3);
             byte top = (byte)(height - 2);
             short xx, yy, zz;
             int xxx, yyy, zzz;
@@ -43,7 +60,7 @@ namespace SMP
                         if (Math.Abs(xx) == dist && Math.Abs(zz) == dist)
                         {
                             if (yy > height) continue;
-                            if (rand.Next(2) == 0)
+                            if (rand.nextInt(2) == 0)
                                 w.BlockChange(xxx, yyy, zzz, (byte)Blocks.Leaves, type);
                         }
                         else

@@ -31,6 +31,15 @@
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IKVM.OpenJDK.Core">
+      <HintPath>.\IKVM.OpenJDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util">
+      <HintPath>.\IKVM.OpenJDK.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime">
+      <HintPath>.\IKVM.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -60,6 +69,10 @@
     <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\GenCaves.cs" />
+    <Compile Include="Server\World\Generator\Noise\Noise.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Noise\NoiseOctaves.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Noise\NoisePerlin.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +87,7 @@
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
     <Compile Include="Mojang\Server\World\Explosion.cs" />
     <Compile Include="Server\World\Chunker.cs" />
+    <Compile Include="Server\World\Generator\Features\GenFeatures.cs" />
     <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
     <Compile Include="Server\World\Physics\Physics.Handlers.cs" />
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />
@@ -104,7 +118,7 @@
     <Compile Include="Server\World\DataValues.cs" />
     <Compile Include="Server\World\Chunk.Light.cs" />
     <Compile Include="Server\World\Chunk.cs" />
-    <Compile Include="Server\World\Generator\GenStandard.cs" />
+    <Compile Include="Mojang\Server\World\Generator\GenStandard.cs" />
     <Compile Include="Server\World\Generator\ChunkGen.cs" />
     <Compile Include="util\WordWrap.cs" />
     <Compile Include="util\Logger.cs" />
@@ -329,7 +343,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Mojang\Server\World\Generator\" />
     <Folder Include="Server\Economy\Commands\" />
   </ItemGroup>
   <ItemGroup>

@@ -34,8 +34,8 @@ namespace SMP
 		public float SpawnPitch;
 		public string Map_Name;
 		public string name;
-        private int Seed;
-        public int seed { get { return Seed; } set { Seed = value; if (generator != null) generator.SetSeed(value); } }
+        private long Seed;
+        public long seed { get { return Seed; } set { Seed = value; if (generator != null) generator.SetSeed(value); } }
 		public long time;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
@@ -79,19 +79,19 @@ namespace SMP
 		/// <param name='spawnz'>
 		/// Spawnz. The z spawn pos.
 		/// </param>
-		public World (double spawnx, double spawny, double spawnz, string name, int seed)
+		public World (double spawnx, double spawny, double spawnz, string name, long seed)
 		{
             this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
-            generator = new GenStandard(seed);
+            generator = new GenStandard(this, true);
             this.name = name;
 			Server.Log("Generating...");
 
-			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
+			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 3.5
 			{
-	            Parallel.For(-3, 3, delegate(int x)
+	            Parallel.For(-3, 4, delegate(int x)
 	            {
-	                Parallel.For(-3, 3, delegate(int z)
+	                Parallel.For(-3, 4, delegate(int z)
 	                {
                         LoadChunk(x, z, false);
 	                });
@@ -101,9 +101,9 @@ namespace SMP
 			}
 			catch(NotImplementedException)
 			{
-				for (int x = -3; x <= 3; x++)
+				for (int x = -3; x < 4; x++)
 				{
-				    for (int z = -3; z <= 3; z++)
+				    for (int z = -3; z < 4; z++)
 				    {
                         LoadChunk(x, z, false);
 				    }
@@ -172,17 +172,18 @@ namespace SMP
         }
         public static void UnloadChunk(int x, int z, World w)
         {
-            Point pt = new Point(x, z);
             SaveChunk(x, z, w);
 
-            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunk!
+            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
             {
+                Point pt = new Point(x, z);
                 w.physics.RemoveChunkChecks(x, z);
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
                     {
-                        w.chunkData[pt].Dispose();
+                        Chunk ch = w.chunkData[pt];
                         w.chunkData.Remove(pt);
+                        ch.Dispose();
                     }
             }
         }
@@ -228,7 +229,7 @@ namespace SMP
             //TODO make loading/saving better.
             //if (WorldLoad != null)
             //	WorldLoad(this);
-            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), generator = new GenStandard(0), name = filename };
+            World w = new World() { chunkData = new Dictionary<Point, Chunk>(), name = filename };
             Server.Log("Loading...");
 
             /*using (MemoryStream ms = new MemoryStream())
@@ -293,7 +294,7 @@ namespace SMP
 
             using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
             {
-                w.seed = int.Parse(sw.ReadLine());
+                w.seed = long.Parse(sw.ReadLine());
                 w.SpawnX = int.Parse(sw.ReadLine());
                 w.SpawnY = int.Parse(sw.ReadLine());
                 w.SpawnZ = int.Parse(sw.ReadLine());
@@ -301,13 +302,14 @@ namespace SMP
                 w.time = long.Parse(sw.ReadLine());
             }
 
+            w.generator = new GenStandard(w, true);
             w.physics = new Physics(w);
 
             try
             {
-                Parallel.For(-3, 3, x =>
+                Parallel.For(-3, 4, x =>
                 {
-                    Parallel.For(-3, 3, z =>
+                    Parallel.For(-3, 4, z =>
                     {
                         w.LoadChunk(x, z, false);
                     });
@@ -315,9 +317,9 @@ namespace SMP
             }
             catch (NotImplementedException)
             {
-                for (int x = -3; x < 3; x++)
+                for (int x = -3; x < 4; x++)
                 {
-                    for (int z = -3; z < 3; z++)
+                    for (int z = -3; z < 4; z++)
                     {
                         w.LoadChunk(x, z, false);
                     }

@@ -866,9 +866,9 @@ namespace SMP
             {
                 int y;
                 for (y = 127; y >= 0; y--)
-                    if (level.GetBlock((int)level.SpawnX, y, (int)level.SpawnZ) != 0) break;
+                    if (level.GetBlock((int)level.SpawnX - 1, y, (int)level.SpawnZ - 1) != 0) break;
                 if (y < 0) y = 126;
-                Teleport_Player(level.SpawnX + 0.5D, ++y, level.SpawnZ + 0.5D, 0, 0);
+                Teleport_Player(level.SpawnX - 0.5D, ++y, level.SpawnZ - 0.5D, 0, 0);
             }
 			#endregion
 			#region Login Stuffs
@@ -997,6 +997,7 @@ namespace SMP
 				SendLoginDone();
 				SendInventory();
 				MapLoaded = true;
+                Teleport_Spawn();
 				
 			}
 			/// <summary>
