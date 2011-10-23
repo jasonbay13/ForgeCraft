@@ -17,7 +17,7 @@ namespace SMP
             rand = new java.util.Random();
         }
 
-        public void generate(World world, int i, int j, byte[] abyte0)
+        public virtual void generate(World world, int i, int j, byte[] abyte0)
         {
             int k = field_947_a;
             field_35530_d = world;
@@ -38,7 +38,7 @@ namespace SMP
 
         }
 
-        protected void recursiveGenerate(World world, int i, int j, int k, int l, byte[] abyte0)
+        protected virtual void recursiveGenerate(World world, int i, int j, int k, int l, byte[] abyte0)
         {
         }
     }

@@ -24,7 +24,7 @@ namespace SMP {
     /// Default terrain generator.
     /// </summary>
     public class GenStandard : ChunkGen {
-        private object blarg = new object();
+        private readonly object blarg = new object();
         
         java.util.Random random;
         public World worldObj;
@@ -37,10 +37,10 @@ namespace SMP {
         public NoiseOctaves mobSpawnerNoise;
 
         private GenCaves caveGenerator;
-        /*public MapGenStronghold field_35559_d;
-        public MapGenVillage field_35560_e;
-        public MapGenMineshaft field_35558_f;
-        private MapGenBase field_35564_x;*/
+        //public MapGenStronghold field_35559_d;
+        //public MapGenVillage field_35560_e;
+        //public MapGenMineshaft field_35558_f;
+        private GenRavine field_35564_x;
         //private BiomeGenBase[] biomesForGeneration;
 
         bool field_35563_t;
@@ -60,10 +60,10 @@ namespace SMP {
             random = new java.util.Random(w.seed);
             field_35562_v = new double[256];
             caveGenerator = new GenCaves();
-            /*field_35559_d = new MapGenStronghold();
-            field_35560_e = new MapGenVillage();
-            field_35558_f = new MapGenMineshaft();
-            field_35564_x = new MapGenRavine();*/
+            //field_35559_d = new MapGenStronghold();
+            //field_35560_e = new MapGenVillage();
+            //field_35558_f = new MapGenMineshaft();
+            field_35564_x = new GenRavine();
             //unusedIntArray32x32 = new int[32][32];
             field_35563_t = flag;
             field_705_k = new NoiseOctaves(random, 16);
@@ -109,13 +109,13 @@ namespace SMP {
                     //biomesForGeneration = worldObj.getWorldChunkManager().loadBlockGeneratorData(biomesForGeneration, i * 16, j * 16, 16, 16);
                     replaceBlocksForBiome(c.x, c.z, c.blocks/*, biomesForGeneration*/);
                     caveGenerator.generate(worldObj, c.x, c.z, c.blocks);
-                    /*if (field_35563_t)
+                    if (field_35563_t)
                     {
-                        field_35559_d.generate(this, worldObj, i, j, abyte0);
-                        field_35558_f.generate(this, worldObj, i, j, abyte0);
-                        field_35560_e.generate(this, worldObj, i, j, abyte0);
+                        //field_35559_d.generate(this, worldObj, i, j, abyte0);
+                        //field_35558_f.generate(this, worldObj, i, j, abyte0);
+                        //field_35560_e.generate(this, worldObj, i, j, abyte0);
                     }
-                    field_35564_x.generate(this, worldObj, i, j, abyte0);*/
+                    field_35564_x.generate(worldObj, c.x, c.z, c.blocks);
                 }
             }
             //TimeSpan took = DateTime.Now - start;

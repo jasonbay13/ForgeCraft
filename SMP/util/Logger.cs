@@ -138,8 +138,6 @@ namespace SMP
                 {
                     fh.WriteLine(FormatTime() + " " + e.GetType().Name + ": " + e.Message);
                     fh.WriteLine(e.StackTrace);
-                    fh.Write(e.StackTrace);
-                    fh.WriteLine();
                 }
             }
             catch (System.IO.IOException) { retred++; goto retry; }

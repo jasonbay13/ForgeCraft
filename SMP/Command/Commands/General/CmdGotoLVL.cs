@@ -52,12 +52,16 @@ namespace SMP
 		}
 		public override void Use (Player p, params string[] args)
 		{
-			if (World.Find(args[0]) != null && p.level.name != args[0])
+            if (args.Length < 1)
+                Help(p);
+
+            string level = args[0].ToLower();
+            if (World.Find(level) != null && p.level.name.ToLower() != level)
 			{
 				Player.players.ForEach(delegate(Player p1) { if (p1.level == p.level) p1.SendDespawn(p.id); p.SendDespawn(p1.id); });
 				foreach (Chunk c in p.level.chunkData.Values) { p.SendPreChunk(c, 0); }
-				p.level = World.Find(args[0]);
-				p.Teleport_Player(p.level.SpawnX, p.level.SpawnY, p.level.SpawnZ);
+                p.level = World.Find(level);
+                p.Teleport_Spawn();
 				foreach (Chunk c in p.level.chunkData.Values) { p.SendPreChunk(c, 1); System.Threading.Thread.Sleep(10); p.SendChunk(c); c.RecalculateLight(); }
 				p.VisibleChunks.Clear();
 				p.UpdateChunks(true, true);

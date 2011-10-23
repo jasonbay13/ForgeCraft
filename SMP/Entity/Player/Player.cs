@@ -204,6 +204,7 @@ namespace SMP
 		{
 			try
 			{
+                //Console.WriteLine(buffer[0] + " " + (buffer.Length - 1));
 				int length = 0; byte msg = buffer[0];
 				// Get the length of the message by checking the first byte
 				switch (msg)
@@ -292,10 +293,10 @@ namespace SMP
                         case 0x6B: HandleCreativeInventoryAction(message); break;
                         case 0x82: HandleUpdateSign(message); break;
 					}
-					if (buffer.Length > 0)
-						buffer = HandleMessage(buffer);
-					else
-						return new byte[0];
+                    if (buffer.Length > 0)
+                        buffer = HandleMessage(buffer);
+                    else
+                        return new byte[0];
 				}
 			}
 			catch (Exception e)
@@ -902,9 +903,9 @@ namespace SMP
 			{
 			
 				//Server.Log("Handshake out");
-				string st = "-";
+                string st = Server.VerifyNames ? Convert.ToString(new java.util.Random().nextLong(), 16) : "-";
 				byte[] bytes = new byte[(st.Length * 2) + 2];
-				util.EndianBitConverter.Big.GetBytes((ushort)st.Length).CopyTo(bytes, 0);
+				util.EndianBitConverter.Big.GetBytes((short)st.Length).CopyTo(bytes, 0);
 				Encoding.BigEndianUnicode.GetBytes(st).CopyTo(bytes, 2);
 				//foreach (byte b in bytes)
 				//{
@@ -1008,10 +1009,16 @@ namespace SMP
 			/// </param>
 			public void SendChunk(Chunk c)
 			{
+                byte[] CompressedData = c.GetCompressedData();
+                if (CompressedData == null)
+                {
+                    SendPreChunk(c, 0);
+                    return;
+                }
+
 				SendPreChunk(c, 1);
 
 				//Send Chunk Data
-				byte[] CompressedData = c.GetCompressedData();
 				byte[] bytes = new byte[17 + CompressedData.Length];
 				util.EndianBitConverter.Big.GetBytes((int)(c.x * 16)).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes((int)0).CopyTo(bytes, 4);
@@ -1229,14 +1236,18 @@ namespace SMP
                 SendAttachEntity(this.id, eid);
             }
 
-            public void SendEntityMeta(int eid, params object[] data) // This packet isn't fully understood, so this method may or may not work. Needs testing...
+            public void SendEntityMeta(int eid, params object[] data)
             {
                 List<byte> bytes = new List<byte>();
                 bytes.AddRange(util.EndianBitConverter.Big.GetBytes(eid));
                 foreach (object obj in data)
                 {
                     if (obj == null) continue;
-                    if (obj.GetType() == typeof(byte))
+                    if (obj.GetType() == typeof(byte[]))
+                    {
+                        bytes.AddRange((byte[])obj);
+                    }
+                    else if (obj.GetType() == typeof(byte))
                     {
                         bytes.Add(0x00);
                         bytes.Add((byte)obj);
@@ -1259,7 +1270,8 @@ namespace SMP
                     else if (obj.GetType() == typeof(string))
                     {
                         bytes.Add(0x04);
-                        bytes.AddRange(Encoding.ASCII.GetBytes((string)obj));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)((string)obj).Length));
+                        bytes.AddRange(Encoding.BigEndianUnicode.GetBytes((string)obj));
                     }
                     else if (obj.GetType() == typeof(Item))
                     {
@@ -1312,9 +1324,9 @@ namespace SMP
 				byte[] bytes = new byte[17];
 				util.EndianBitConverter.Big.GetBytes(EntityId).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(true).CopyTo(bytes, 4);
-                util.EndianBitConverter.Big.GetBytes(x * 32).CopyTo(bytes, 5);
-                util.EndianBitConverter.Big.GetBytes(y * 32).CopyTo(bytes, 9);
-                util.EndianBitConverter.Big.GetBytes(z * 32).CopyTo(bytes, 13);
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 5);
+                util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 9);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 13);
 				SendRaw(0x47, bytes);
 			}
 			public void SendRain(bool on)
@@ -1627,11 +1639,11 @@ namespace SMP
         }
         public void SpawnMob(Entity e)
         {
-			if (e == null)
+			/*if (e == null) // What is this I don't even...
 			{
 				if (VisibleEntities.Contains(e.id)) VisibleEntities.Remove(e.id);
 				return;
-			}
+			}*/
 			if (!LoggedIn)
 			{
 				if (VisibleEntities.Contains(e.id)) VisibleEntities.Remove(e.id);
@@ -1993,7 +2005,7 @@ namespace SMP
 		/// </summary>
 		public string GetName()
 		{
-			if(this.NickName == "" || this.NickName == null)
+			if(String.IsNullOrEmpty(this.NickName))
 				return this.username;
 			else
 				return "~" + this.NickName;

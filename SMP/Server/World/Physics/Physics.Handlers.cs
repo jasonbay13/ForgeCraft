@@ -25,7 +25,7 @@ namespace SMP
 
             public static bool WaterFlow(Physics P, Check C)
             {
-                if (C.time < 5) { C.time++; return false; }
+                //if (C.time < 5) { C.time++; return false; }
 
                 byte meta = P.w.GetMeta(C.x, C.y, C.z);
                 if (!P.HigherLiquidCheck(C.x, C.y, C.z, 8, meta) && !P.HigherLiquidCheck(C.x, C.y, C.z, 9, meta))
@@ -78,7 +78,7 @@ namespace SMP
 
             public static bool LavaFlow(Physics P, Check C)
             {
-                if (C.time < 30) { C.time++; return false; }
+                if (C.time < 6) { C.time++; return false; }
 
                 byte meta = P.w.GetMeta(C.x, C.y, C.z);
                 if (!P.HigherLiquidCheck(C.x, C.y, C.z, 10, meta) && !P.HigherLiquidCheck(C.x, C.y, C.z, 11, meta))

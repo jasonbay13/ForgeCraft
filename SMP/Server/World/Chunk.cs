@@ -101,11 +101,21 @@ namespace SMP
 			this.x = x; this.z = z;
 		}
 
+        public Chunk(int x, int z, bool dummy)
+        {
+            this.x = x; this.z = z;
+        }
+
         public static Chunk Load(int x, int z, World w, bool thread = true)
         {
             string file = String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
             if (File.Exists(file))
             {
+                if (thread)
+                {
+                    World.chunker.QueueChunkLoad(x, z, false, w);
+                    return null;
+                }
                 try
                 {
                     Chunk ch = new Chunk(x, z);
@@ -126,19 +136,19 @@ namespace SMP
                         Array.Copy(bytes, 65536, ch.Light, 0, 16384);
                         int index = 81922;
                         short extraCount = BitConverter.ToInt16(bytes, index - 2);
-                        lock (ch.extra)
+                        if (extraCount > 0)
                             for (int i = 0; i < extraCount; i++)
                             {
                                 ch.extra.Add(BitConverter.ToInt32(bytes, index), BitConverter.ToUInt16(bytes, index + 4));
                                 index += 6;
                             }
-                        short physCount = BitConverter.ToInt16(bytes, index);
-                        index += 2;
-                        for (int i = 0; i < physCount; i++)
-                        {
-                            w.physics.AddCheck(new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12)));
-                            index += 15;
-                        }
+                        short physCount = BitConverter.ToInt16(bytes, index); index += 2;
+                        if (physCount > 0)
+                            for (int i = 0; i < physCount; i++)
+                            {
+                                w.physics.AddCheck(new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12)));
+                                index += 15;
+                            }
                     }
                     //Console.WriteLine("LOADED " + x + " " + z);
                     return ch;
@@ -342,26 +352,30 @@ namespace SMP
         /// </summary>
         public byte[] GetCompressedData()
         {
-            byte[] compressed;
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-                using (ZOutputStream zout = new ZOutputStream(ms, zlibConst.Z_BEST_COMPRESSION))
+                byte[] compressed;
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Write block types
-                    zout.Write(blocks, 0, blocks.Length);
+                    using (ZOutputStream zout = new ZOutputStream(ms, zlibConst.Z_BEST_COMPRESSION))
+                    {
+                        // Write block types
+                        zout.Write(blocks, 0, blocks.Length);
 
-                    // Write metadata
-                    zout.Write(meta, 0, meta.Length);
+                        // Write metadata
+                        zout.Write(meta, 0, meta.Length);
 
-                    // Write block light
-                    zout.Write(Light, 0, Light.Length);
+                        // Write block light
+                        zout.Write(Light, 0, Light.Length);
 
-                    // Write sky light
-                    zout.Write(SkyL, 0, SkyL.Length);
+                        // Write sky light
+                        zout.Write(SkyL, 0, SkyL.Length);
+                    }
+                    compressed = ms.ToArray();
                 }
-                compressed = ms.ToArray();
+                return compressed;
             }
-            return compressed;
+            catch { return null; }
         }
 		/// <summary>
 		/// Places the block at a x, y, z.

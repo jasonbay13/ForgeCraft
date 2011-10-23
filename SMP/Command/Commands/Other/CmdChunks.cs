@@ -18,7 +18,10 @@ namespace SMP
         {
             World.worlds.ForEach(delegate(World w)
             {
-                p.SendMessage(w.name + ": " + w.chunkData.Count);
+                p.SendMessage(w.name);
+                p.SendMessage("Chunks: " + w.chunkData.Count);
+                p.SendMessage("Physics: " + w.physics.CheckCount);
+                p.SendMessage("Updates: " + w.physics.UpdateCount);
             });
         }
 

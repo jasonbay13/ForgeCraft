@@ -166,8 +166,9 @@ namespace SMP
 
                             if (p.level.chunkData.ContainsKey(po))
                             {
-                                p.SendChunk(p.level.chunkData[po]);
-                                p.level.chunkData[po].Update(p.level, p);
+                                Chunk ch = p.level.chunkData[po];
+                                p.SendChunk(ch);
+                                ch.Update(p.level, p);
                             }
                             else
                                 World.chunker.QueueChunkSend(po, p);
@@ -180,12 +181,12 @@ namespace SMP
                 {
                     if (!templist.Contains(point))
                     {
-                        p.SendPreChunk(p.level.chunkData[point], 0);
+                        p.SendPreChunk(new Chunk(point.x, point.z, true), 0);
                         p.VisibleChunks.Remove(point);
 
                         bool unloadChunk = true;
                         Player.players.ForEach(delegate(Player pl) { if (pl.VisibleChunks.Contains(point)) { unloadChunk = false; return; } });
-                        if (unloadChunk) p.level.UnloadChunk(point.x, point.z);
+                        if (unloadChunk) World.chunker.QueueChunkLoad(point.x, point.z, true, p.level); //p.level.UnloadChunk(point.x, point.z);
                     }
                 }
             }

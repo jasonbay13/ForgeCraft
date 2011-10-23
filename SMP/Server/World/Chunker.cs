@@ -10,15 +10,17 @@ namespace SMP
     public class Chunker
     {
         private Queue<ChunkGenQueue> genQueue;
+        private List<ChunkLoadQueue> loadQueue;
         private List<ChunkSendQueue> sendQueue;
         private List<ChunkGenQueue> generated;
-        private Thread genThread, sendThread;
+        private Thread genThread, loadThread, sendThread;
 
 
         public Chunker()
         {
             genQueue = new Queue<ChunkGenQueue>();
             sendQueue = new List<ChunkSendQueue>();
+            loadQueue = new List<ChunkLoadQueue>();
             generated = new List<ChunkGenQueue>();
         }
 
@@ -52,6 +54,34 @@ namespace SMP
             }));
             genThread.Start();
 
+            loadThread = new Thread(new ThreadStart(delegate
+            {
+                while (!Server.s.shuttingDown)
+                {
+                    try
+                    {
+                        if (loadQueue.Count < 1) { Thread.Sleep(100); continue; }
+                        loadQueue.ForEach(delegate(ChunkLoadQueue clq)
+                        {
+                            if (clq.unload)
+                            {
+                                if (clq.world.chunkData.ContainsKey(new Point(clq.x, clq.z)))
+                                    clq.world.UnloadChunk(clq.x, clq.z);
+                            }
+                            else
+                            {
+                                if (!clq.world.chunkData.ContainsKey(new Point(clq.x, clq.z)))
+                                    clq.world.LoadChunk(clq.x, clq.z, false);
+                            }
+                            Thread.Sleep(5);
+                        });
+                        loadQueue.Clear();
+                    }
+                    catch { }
+                }
+            }));
+            loadThread.Start();
+
             sendThread = new Thread(new ThreadStart(delegate
             {
                 Point pt;
@@ -62,15 +92,17 @@ namespace SMP
                         if (sendQueue.Count < 1) { Thread.Sleep(100); continue; }
                         sendQueue.ForEach(delegate(ChunkSendQueue csq)
                         {
-                            if (csq.player.level.chunkData.ContainsKey(new Point(csq.x, csq.z)))
+                            pt = new Point(csq.x, csq.z);
+                            if (csq.player.level.chunkData.ContainsKey(pt))
                             {
                                 //Console.WriteLine("SENT " + csq.x + "," + csq.z);
-                                pt = new Point(csq.x, csq.z);
                                 csq.player.SendChunk(csq.player.level.chunkData[pt]);
                                 csq.player.level.chunkData[pt].Update(csq.player.level, csq.player);
                                 sendQueue.Remove(csq);
-                                Thread.Sleep(2);
+                                Thread.Sleep(5);
                             }
+                            if ((DateTime.Now - csq.time).TotalSeconds >= 10 && sendQueue.Contains(csq))
+                                sendQueue.Remove(csq);
                         });
                     }
                     catch { }
@@ -90,6 +122,17 @@ namespace SMP
                 if (generated.Contains(cgq)) return;
             lock (genQueue)
                 genQueue.Enqueue(cgq);
+        }
+
+        public void QueueChunkLoad(Point point, bool unload, World world)
+        {
+            QueueChunkLoad(point.x, point.z, unload, world);
+        }
+        public void QueueChunkLoad(int x, int z, bool unload, World world)
+        {
+            ChunkLoadQueue clq = new ChunkLoadQueue(x, z, unload, world);
+            loadQueue.RemoveAll(CLQ => (CLQ.x == x && CLQ.z == z && CLQ.world == world));
+            loadQueue.Add(clq);
         }
 
         public void QueueChunkSend(Point point, Player player)
@@ -119,10 +162,27 @@ namespace SMP
         }
     }
 
+    public struct ChunkLoadQueue
+    {
+        public bool unload;
+        public int x, z;
+        public World world;
+
+        public ChunkLoadQueue(Point point, bool unload, World world) : this(point.x, point.z, unload, world) { }
+        public ChunkLoadQueue(int x, int z, bool unload, World world)
+        {
+            this.x = x;
+            this.z = z;
+            this.unload = unload;
+            this.world = world;
+        }
+    }
+
     public struct ChunkSendQueue
     {
         public int x, z;
         public Player player;
+        public DateTime time;
 
         public ChunkSendQueue(Point point, Player player) : this(point.x, point.z, player) { }
         public ChunkSendQueue(int x, int z, Player player)
@@ -130,6 +190,7 @@ namespace SMP
             this.x = x;
             this.z = z;
             this.player = player;
+            this.time = DateTime.Now;
         }
     }
 }

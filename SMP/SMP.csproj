@@ -70,6 +70,7 @@
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\GenCaves.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\GenRavine.cs" />
     <Compile Include="Server\World\Generator\Noise\Noise.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoiseOctaves.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoisePerlin.cs" />
@@ -343,6 +344,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Folder Include="Mojang\Server\World\Generator\Biomes\" />
     <Folder Include="Server\Economy\Commands\" />
   </ItemGroup>
   <ItemGroup>

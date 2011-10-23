@@ -7,7 +7,7 @@ namespace SMP
     public partial class Physics
     {
         public bool paused = false;
-        public int speed = 50;
+        public int speed;
         public PSetting setting;
         public World w;
         private Thread physthread;
@@ -16,13 +16,6 @@ namespace SMP
         private int wait = 0, lastCheck = 0, lastUpdate = 0;
         private Random random;
         #region Accessors
-        public World world
-        {
-            get
-            {
-                return this.w;
-            }
-        }
         public int CheckCount
         {
             get
@@ -40,11 +33,13 @@ namespace SMP
         #endregion
 
         public Physics(World w) : this(w, PSetting.Hardcore) { }
-        public Physics(World w, PSetting setting)
+        public Physics(World w, PSetting setting) : this(w, setting, 250) { }
+        public Physics(World w, int speed) : this(w, PSetting.Hardcore, speed) { }
+        public Physics(World w, PSetting setting, int speed)
         {
             this.w = w;
             this.setting = setting;
-            this.wait = this.speed;
+            this.speed = speed;
             this.random = new Random();
         }
 
@@ -77,12 +72,12 @@ namespace SMP
             {
                 try
                 {
-                    //Player.players.ForEach(delegate(Player p) { Console.WriteLine(p.rot[0]); });
                     if (wait > 0) Thread.Sleep(wait);
                     lastCheck = Checks.Count;
                     if (paused || setting == PSetting.None || lastCheck == 0)
                     {
                         wait = speed;
+                        lastUpdate = 0;
                         continue;
                     }
 
@@ -90,11 +85,6 @@ namespace SMP
                     Calculate();
                     TimeSpan Took = DateTime.Now - Start;
                     wait = speed - (int)Took.TotalMilliseconds;
-
-                    /*byte b = 0x3;
-                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));
-                    b = b.SetBits(1, 2, 2);
-                    Console.WriteLine(Convert.ToString(b, 2) + " " + b.GetBits(1, 2));*/
                 }
                 catch
                 {
@@ -171,12 +161,15 @@ namespace SMP
                 {
                     if (overRide)
                     {
-                        foreach (Check C in Checks)
+                        lock (Checks)
                         {
-                            if (C.x == check.x && C.y == check.y && C.z == check.z)
+                            foreach (Check C in Checks)
                             {
-                                C.meta = check.meta;
-                                break;
+                                if (C.x == check.x && C.y == check.y && C.z == check.z)
+                                {
+                                    C.meta = check.meta;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -207,6 +200,16 @@ namespace SMP
         public void AddCheck(int x, int y, int z)
         {
             AddCheck(x, y, z, 0, false);
+        }
+
+        public void AddChecks(List<Check> checks)
+        {
+            AddChecks(checks.ToArray());
+        }
+        public void AddChecks(Check[] checks)
+        {
+            foreach (Check check in checks)
+                AddCheck(check);
         }
 
         public List<Check> GetChunkChecks(int x, int z)

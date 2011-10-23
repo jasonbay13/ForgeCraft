@@ -39,7 +39,7 @@ namespace SMP
 		public long time;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
-		public GenStandard generator;
+		public ChunkGen generator;
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
@@ -181,9 +181,8 @@ namespace SMP
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
                     {
-                        Chunk ch = w.chunkData[pt];
+                        w.chunkData[pt].Dispose();
                         w.chunkData.Remove(pt);
-                        ch.Dispose();
                     }
             }
         }
@@ -347,13 +346,13 @@ namespace SMP
 
             return w;
         }
-		
-		public void SaveLVL()
+
+        public void SaveLVL(bool silent = false)
 		{
-			World.SaveLVL(this);	
+			World.SaveLVL(this, silent);
 		}
 		
-        public static void SaveLVL(World w)
+        public static void SaveLVL(World w, bool silent = false)
         {
             if (w.Save != null)
                 w.Save(w);
@@ -393,18 +392,18 @@ namespace SMP
             {
                 try
                 {
-                    Parallel.ForEach(w.chunkData.Values, delegate(Chunk ch)
+                    Parallel.ForEach(w.chunkData.Keys, delegate(Point pt)
                     {
-                        w.SaveChunk(ch.x, ch.z);
+                        w.SaveChunk(pt.x, pt.z);
                     });
                 }
                 catch (NotImplementedException)
                 {
-                    foreach (Chunk ch in w.chunkData.Values)
-                        w.SaveChunk(ch.x, ch.z);
+                    foreach (Point pt in w.chunkData.Keys)
+                        w.SaveChunk(pt.x, pt.z);
                 }
             }
-            Server.Log(w.name + " Saved.");
+            if (!silent) Server.Log(w.name + " Saved.");
         }
         public static void CompressData(byte[] inData, out byte[] outData)
         {
@@ -455,7 +454,7 @@ namespace SMP
 			foreach (Player p in Player.players.ToArray())
 				if (p.MapLoaded && !p.disconnected)
 					if (p.pos.mdiff(new Point3(x, y, z)) <= distance)
-						p.SendLightning(x, y, z, e.id);
+                        p.SendLightning(x * 32, y * 32, z * 32, e.id);
 
 			//Not sure if lightning needs depsawned, seems to not require it.
 		}

@@ -74,6 +74,7 @@ namespace SMP
         public static int port = 25565;
         public static string ConsoleName = "Console";
         public static byte genThreads = 1;
+        public static bool VerifyNames = true;
         //---------------//
         public static bool usewhitelist = false;
 		public static bool useviplist = false;
@@ -167,7 +168,7 @@ namespace SMP
                 {
                     World.worlds.ForEach(delegate(World w)
                     {
-                        w.SaveLVL();
+                        w.SaveLVL(true);
                     });
                 }; worldsavetimer.Start();
             });
