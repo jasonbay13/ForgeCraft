@@ -177,8 +177,11 @@ namespace SMP
                 case (short)Items.IronHoe:
                 case (short)Items.StoneHoe:
                 case (short)Items.WoodenHoe:
-					a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.FarmLand, 0);
-					a.inventory.current_item.meta++; //damage of the item
+                    if (a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z) == 0)
+                    {
+                        a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.FarmLand, 0);
+                        a.inventory.current_item.meta++; //damage of the item
+                    }
                     return false;
             }
 			return true;

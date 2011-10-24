@@ -35,7 +35,7 @@ namespace SMP
         public Dictionary<int, ushort> extra;
 		public int x;
 		public int z;
-		public bool mountain = true;
+		public bool mountain = true; //???
         private bool _dirty = false;
 
 		public Point point { get { return new Point(x, z); } }

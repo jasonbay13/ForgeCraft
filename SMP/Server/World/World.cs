@@ -124,7 +124,7 @@ namespace SMP
             blockflush.Start();
 
             this.physics = new Physics(this);
-            this.physics.Start();
+            //this.physics.Start();
 
             if (World.WorldLoad != null)
                 World.WorldLoad(this);
@@ -339,7 +339,7 @@ namespace SMP
             w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
             w.blockflush.Start();
 
-            w.physics.Start();
+            //w.physics.Start();
 
             if (World.WorldLoad != null)
                 World.WorldLoad(w);

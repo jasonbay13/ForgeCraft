@@ -81,6 +81,7 @@ namespace SMP
                 if (C.time < 6) { C.time++; return false; }
 
                 byte meta = P.w.GetMeta(C.x, C.y, C.z);
+                Console.WriteLine(P.HigherLiquidCheck(C.x, C.y, C.z, 10, meta));
                 if (!P.HigherLiquidCheck(C.x, C.y, C.z, 10, meta) && !P.HigherLiquidCheck(C.x, C.y, C.z, 11, meta))
                 {
                     if ((meta & 0x7) >= 0x6)
