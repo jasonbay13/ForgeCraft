@@ -232,19 +232,21 @@ namespace SMP
         {
             byte bType, bMeta;
             ushort bExtra;
+            int xxx, zzz;
             for (int xx = 0; xx < Width; xx++)
                 for (int zz = 0; zz < Depth; zz++)
                     for (int yy = 0; yy < Height; yy++)
                     {
+                        xxx = (x << 4) + xx; zzz = (z << 4) + zz;
                         bType = GetBlock(xx, yy, zz);
 
                         if (bType == (byte)Blocks.SignPost || bType == (byte)Blocks.SignWall)
-                            p.SendUpdateSign(xx, (short)yy, zz, w.GetSign(xx, yy, zz));
+                            p.SendUpdateSign(xxx, (short)yy, zzz, w.GetSign(xxx, yy, zzz));
                         if (bType == (byte)Blocks.Jukebox)
                         {
                             bExtra = GetExtraData(xx, yy, zz);
                             if (bExtra >= 2256 && bExtra <= 2266)
-                                p.SendSoundEffect(xx, (byte)yy, zz, 1005, bExtra);
+                                p.SendSoundEffect(xxx, (byte)yy, zzz, 1005, bExtra);
                         }
                     }
         }

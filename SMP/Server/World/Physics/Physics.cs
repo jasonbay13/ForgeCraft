@@ -140,9 +140,10 @@ namespace SMP
                         w.BlockChange(U.x, U.y, U.z, U.type, U.meta);
                     }
                     catch (ThreadAbortException) { }
-                    catch
+                    catch (Exception e)
                     {
                         Server.ServerLogger.Log("Physics update error on " + w.name + "!");
+                        Server.ServerLogger.LogError(e);
                     }
                 });
                 Updates.Clear();
