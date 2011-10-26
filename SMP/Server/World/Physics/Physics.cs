@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SMP
 {
@@ -31,6 +32,11 @@ namespace SMP
             }
         }
         #endregion
+        #region Custom Command / Plugin Events
+        public delegate bool OnPhysics(World world, int x, int y, int z, byte type, byte meta);
+        public static event OnPhysics WorldPhysicsUpdate;
+        public event OnPhysics PhysicsUpdate;
+        #endregion
 
         public Physics(World w) : this(w, PSetting.Hardcore) { }
         public Physics(World w, PSetting setting) : this(w, setting, 250) { }
@@ -46,7 +52,13 @@ namespace SMP
         public void Start()
         {
             if (physthread != null) return;
-            physthread = new Thread(new ThreadStart(RunLoop));
+            physthread = new Thread(new ThreadStart(delegate
+            {
+                Parallel.For(0, 1, delegate(int idk)
+                {
+                    RunLoop();
+                });
+            }));
             physthread.Start();
             Server.ServerLogger.Log("Physics started on " + w.name + ".");
         }
@@ -131,6 +143,13 @@ namespace SMP
                 {
                     try
                     {
+                        if (WorldPhysicsUpdate != null)
+                            if (!WorldPhysicsUpdate(w, U.x, U.y, U.z, U.type, U.meta))
+                                return;
+                        if (PhysicsUpdate != null)
+                            if (!PhysicsUpdate(w, U.x, U.y, U.z, U.type, U.meta))
+                                return;
+
                         w.BlockChange(U.x, U.y, U.z, U.type, U.meta);
                     }
                     catch (ThreadAbortException) { }

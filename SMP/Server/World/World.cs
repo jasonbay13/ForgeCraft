@@ -87,7 +87,7 @@ namespace SMP
             this.name = name;
 			Server.Log("Generating...");
 
-			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 3.5
+			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
 			{
 	            Parallel.For(-3, 4, delegate(int x)
 	            {
@@ -96,7 +96,6 @@ namespace SMP
                         LoadChunk(x, z, false);
 	                });
 	                Server.Log(x + " Row Generated.");
-	
 	            });
 			}
 			catch(NotImplementedException)
@@ -124,7 +123,7 @@ namespace SMP
             blockflush.Start();
 
             this.physics = new Physics(this);
-            //this.physics.Start();
+            this.physics.Start();
 
             if (World.WorldLoad != null)
                 World.WorldLoad(this);
@@ -339,7 +338,7 @@ namespace SMP
             w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
             w.blockflush.Start();
 
-            //w.physics.Start();
+            w.physics.Start();
 
             if (World.WorldLoad != null)
                 World.WorldLoad(w);

@@ -35,7 +35,7 @@ namespace SMP
 			int radius;
 			try
 			{
-				radius = Convert.ToInt16(args[0]);
+				radius = Convert.ToInt32(args[0]);
 			}
 			catch
 			{
@@ -47,6 +47,11 @@ namespace SMP
 				p.SendMessage("Radius too big");
 				return;
 			}
+            if (radius < 3)
+            {
+                p.SendMessage("Radius too small");
+                return;
+            }
 			p.viewdistance = radius;
 		}
 

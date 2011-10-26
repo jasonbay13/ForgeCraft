@@ -75,6 +75,7 @@ namespace SMP
         public static string ConsoleName = "Console";
         public static byte genThreads = 1;
         public static bool VerifyNames = false;
+        public static int ViewDistance = 3;
         //---------------//
         public static bool usewhitelist = false;
 		public static bool useviplist = false;

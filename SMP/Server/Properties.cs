@@ -38,30 +38,29 @@ namespace SMP
                         string value = "";
                         if (line.IndexOf('=') >= 0)
                             value = line.Substring(line.IndexOf('=') + 1).Trim(); // allowing = in the values
-						
-                        switch (key.ToLower())
+
+                        try
                         {
-                            case "server-name":
-                                if (ValidString(value, "![]:.,{}~-+()?_/\\ "))
-                                {
-                                    Server.name = value;
-                                }
-                                else { Server.Log("server-name invalid! setting to default."); }
-                                break;
-                            case "motd":
-                                if (ValidString(value, "=![]&:.,{}~-+()?_/\\ ")) // allow = in the motd
-                                {
-                                    Server.Motd = value;
-                                }
-                                else { Server.Log("motd invalid! setting to default."); }
-                                break;
-                            case "port":
-                                try { Server.port = Convert.ToInt32(value); }
-                                catch { Server.Log("port invalid! setting to default."); }
-                                break;
-                            case "max-players":
-                                try
-                                {
+                            switch (key.ToLower())
+                            {
+                                case "server-name":
+                                    if (ValidString(value, "![]:.,{}~-+()?_/\\ "))
+                                    {
+                                        Server.name = value;
+                                    }
+                                    else { throw new Exception(); }
+                                    break;
+                                case "motd":
+                                    if (ValidString(value, "=![]&:.,{}~-+()?_/\\ ")) // allow = in the motd
+                                    {
+                                        Server.Motd = value;
+                                    }
+                                    else { throw new Exception(); }
+                                    break;
+                                case "port":
+                                    Server.port = Convert.ToInt32(value);
+                                    break;
+                                case "max-players":
                                     if (Convert.ToByte(value) > 128)
                                     {
                                         value = "128"; Server.Log("Max players has been lowered to 128.");
@@ -71,59 +70,63 @@ namespace SMP
                                         value = "1"; Server.Log("Max players has been increased to 1.");
                                     }
                                     Server.MaxPlayers = Convert.ToByte(value);
-                                }
-                                catch { Server.Log("max-players invalid! setting to default."); }
-                                break;
-                            case "use-whitelist":
-                                Server.usewhitelist = (value.ToLower() == "true");
-                                break;
-							case "use-viplist":
-                                Server.useviplist = (value.ToLower() == "true");
-                                break;
-							case "defaultcolor":
-								if (value.Length == 2)
-								{
-									if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == "\x00A7")
-									{
-										if (Color.IsColorValid(Convert.ToChar(value.Substring(1,1))))
-									    {
-											Color.ServerDefaultColor = value;
-										}
-										else Server.ServerLogger.Log(LogLevel.Warning, "Invalid defaultcolor, setting to default.");
-									}
-								}
-								else Server.ServerLogger.Log(LogLevel.Warning, "Invalid defaultcolor, setting to default.");
-								break;
-							case "irc-color":
-								if (value.Length == 2)
-									{
-										if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == "\x00A7")
-										{
-											if (Color.IsColorValid(Convert.ToChar(value.Substring(1,1))))
-										    {
-												Color.IRCColor = value;
-											}
-											else Server.ServerLogger.Log(LogLevel.Warning, "Invalid irc-color, setting to default.");
-										}
-									}
-								else Server.ServerLogger.Log(LogLevel.Warning, "Invalid irc-color, setting to default.");
-								break;
-                            case "generator-threads":
-                                try
-                                {
+                                    break;
+                                case "verify-names":
+                                    Server.VerifyNames = Convert.ToBoolean(value);
+                                    break;
+                                case "view-distance":
+                                    if (Convert.ToInt32(value) > 15)
+                                    {
+                                        value = "15"; Server.Log("View distance has been lowered to 15.");
+                                    }
+                                    else if (Convert.ToInt32(value) < 3)
+                                    {
+                                        value = "3"; Server.Log("View distance has been increased to 3.");
+                                    }
+                                    Server.ViewDistance = Convert.ToInt32(value);
+                                    break;
+                                case "use-whitelist":
+                                    Server.usewhitelist = Convert.ToBoolean(value);
+                                    break;
+                                case "use-viplist":
+                                    Server.useviplist = Convert.ToBoolean(value);
+                                    break;
+                                case "defaultcolor":
+                                    if (value.Length == 2)
+                                    {
+                                        if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == "\x00A7")
+                                        {
+                                            if (Color.IsColorValid(Convert.ToChar(value.Substring(1, 1))))
+                                            {
+                                                Color.ServerDefaultColor = value;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    throw new Exception();
+                                case "irc-color":
+                                    if (value.Length == 2)
+                                    {
+                                        if (value.Substring(0, 1) == "%" || value.Substring(0, 1) == "&" || value.Substring(0, 1) == Color.Signal)
+                                        {
+                                            if (Color.IsColorValid(Convert.ToChar(value.Substring(1, 1))))
+                                            {
+                                                Color.IRCColor = value;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    throw new Exception();
+                                case "generator-threads":
                                     if (Convert.ToByte(value) < 1)
                                     {
                                         value = "1"; Server.Log("Generator threads has been increased to 1.");
                                     }
                                     Server.genThreads = Convert.ToByte(value);
-                                }
-                                catch
-                                {
-                                    Server.ServerLogger.Log(LogLevel.Warning, "Invalid generator-threads, setting to default.");
-                                }
-                                break;
+                                    break;
+                            }
                         }
-
+                        catch { Server.ServerLogger.Log(LogLevel.Warning, "Invalid " + key.ToLower() + "! Setting to default."); }
                     }
                 }
                 Server.s.SettingsUpdate();
@@ -167,6 +170,8 @@ namespace SMP
             w.WriteLine("motd = " + Server.Motd);
             w.WriteLine("port = " + Server.port.ToString());
             w.WriteLine("max-players = " + Server.MaxPlayers.ToString());
+            w.WriteLine("verify-names = " + Server.VerifyNames.ToString().ToLower());
+            w.WriteLine("view-distance = " + Server.ViewDistance.ToString());
             w.WriteLine("use-whitelist = " + Server.usewhitelist.ToString().ToLower());
 			w.WriteLine("use-VIPlist = " + Server.useviplist.ToString().ToLower());
             w.WriteLine("defaultColor = " + Color.ServerDefaultColor);
