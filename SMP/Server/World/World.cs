@@ -622,7 +622,7 @@ namespace SMP
         {
             string[] text = new string[4];
             for (int i = 0; i < 4; i++)
-                text[i] = Server.SQLiteDB.ExecuteScalar(String.Format("SELECT Line{0} FROM Sign WHERE X = '{1}' AND Y = '{2}' AND Z = '{3}' AND World = '{4}'", i + 1, x, y, z, this.name)); ;
+                text[i] = Server.SQLiteDB.ExecuteScalar(String.Format("SELECT Line{0} FROM Sign WHERE X = {1} AND Y = {2} AND Z = {3} AND World = '{4}'", i + 1, x, y, z, this.name)); ;
             return text;
         }
         public void SetSign(int x, int y, int z, params string[] text)
@@ -630,14 +630,14 @@ namespace SMP
             if (text.Length != 4)
                 throw new ArgumentException("Text must be 4 strings.");
 
-            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = '{0}' AND Y = '{1}' AND Z = '{2}' AND World = '{3}'", x, y, z, this.name));
-            Server.SQLiteDB.ExecuteNonQuery(String.Format("INSERT INTO Sign VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')", x, y, z, this.name, text[0], text[1], text[2], text[3]));
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("INSERT INTO Sign VALUES({0}, {1}, {2}, '{3}', '{4}', '{5}', '{6}', '{7}')", x, y, z, this.name, text[0], text[1], text[2], text[3]));
 
             Player.GlobalUpdateSign(this, x, (short)y, z, text);
         }
         public void UnsetSign(int x, int y, int z)
         {
-            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = '{0}' AND Y = '{1}' AND Z = '{2}' AND World = '{3}'", x, y, z, this.name));
+            Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
 
             Player.GlobalUpdateSign(this, x, (short)y, z, String.Empty, String.Empty, String.Empty, String.Empty);
         }
