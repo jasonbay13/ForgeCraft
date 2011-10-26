@@ -45,6 +45,7 @@ namespace SMP
                             lock (cgq.world.chunkData)
                                 if (!cgq.world.chunkData.ContainsKey(pt))
                                     cgq.world.chunkData.Add(pt, ch);
+                            ch.PostLoad(cgq.world);
                             lock (generated)
                                 generated.Remove(cgq);
                         }

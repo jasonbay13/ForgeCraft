@@ -166,9 +166,12 @@ namespace SMP
 
                             if (p.level.chunkData.ContainsKey(po))
                             {
-                                Chunk ch = p.level.chunkData[po];
-                                p.SendChunk(ch);
-                                ch.Update(p.level, p);
+                                try
+                                {
+                                    p.SendChunk(p.level.chunkData[po]);
+                                    p.level.chunkData[po].Update(p.level, p);
+                                }
+                                catch { p.SendPreChunk(new Chunk(po.x, po.z, true), 0); }
                             }
                             else
                                 World.chunker.QueueChunkSend(po, p);

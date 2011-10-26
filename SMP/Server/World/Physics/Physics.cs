@@ -52,13 +52,7 @@ namespace SMP
         public void Start()
         {
             if (physthread != null) return;
-            physthread = new Thread(new ThreadStart(delegate
-            {
-                Parallel.For(0, 1, delegate(int idk)
-                {
-                    RunLoop();
-                });
-            }));
+            physthread = new Thread(new ThreadStart(RunLoop));
             physthread.Start();
             Server.ServerLogger.Log("Physics started on " + w.name + ".");
         }
@@ -117,16 +111,9 @@ namespace SMP
                         if (C == null) { Checks.Remove(C); return; }
                         type = w.GetBlock(C.x, C.y, C.z);
                         if (Handlers.handlers.ContainsKey(type))
-                        {
-                            if ((bool)Handlers.handlers[type].DynamicInvoke(this, C))
-                            {
-                                C.time = short.MaxValue;
-                            }
-                        }
-                        else
-                        {
-                            C.time = short.MaxValue;
-                        }
+                            if (!(bool)Handlers.handlers[type].DynamicInvoke(this, C))
+                                return;
+                        C.time = short.MaxValue;
                     }
                     catch (ThreadAbortException) { }
                     catch (Exception e)
@@ -233,7 +220,12 @@ namespace SMP
 
         public List<Check> GetChunkChecks(int x, int z)
         {
-            return Checks.FindAll(Check => (Check != null && (Check.x >> 4) == x && (Check.z >> 4) == z));
+            return Checks.FindAll(Check => (Check != null && Check.time != short.MaxValue && (Check.x >> 4) == x && (Check.z >> 4) == z));
+        }
+        public void AddChunkChecks(Check[] checks)
+        {
+            foreach (Check check in checks)
+                Checks.Add(check);
         }
         public void RemoveChunkChecks(int x, int z)
         {

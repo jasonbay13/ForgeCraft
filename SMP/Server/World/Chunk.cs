@@ -37,6 +37,7 @@ namespace SMP
 		public int z;
 		public bool mountain = true; //???
         private bool _dirty = false;
+        private Physics.Check[] physChecks; // Temporary array used for loading physics data!
 
 		public Point point { get { return new Point(x, z); } }
         public bool Dirty { get { return this._dirty; } }
@@ -144,11 +145,14 @@ namespace SMP
                             }
                         short physCount = BitConverter.ToInt16(bytes, index); index += 2;
                         if (physCount > 0)
+                        {
+                            ch.physChecks = new Physics.Check[physCount];
                             for (int i = 0; i < physCount; i++)
                             {
-                                w.physics.AddCheck(new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12)));
+                                ch.physChecks[i] = new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12));
                                 index += 15;
                             }
+                        }
                     }
                     //Console.WriteLine("LOADED " + x + " " + z);
                     return ch;
@@ -205,6 +209,15 @@ namespace SMP
             }
             this._dirty = false;
             //Console.WriteLine("SAVED " + x + " " + z);
+        }
+
+        public void PostLoad(World w)
+        {
+            if (physChecks != null)
+            {
+                w.physics.AddChunkChecks(physChecks);
+                physChecks = null;
+            }
         }
 
         public void GlobalUpdate(World w)
