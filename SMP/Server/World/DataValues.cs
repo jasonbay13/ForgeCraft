@@ -511,7 +511,7 @@ namespace SMP
 	public enum Vines : byte {Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8}
 	public enum FenceGate : byte {West = 0x0, North = 0x1, East = 0x2, South = 0x3}
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
-    public enum Material { Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Dirt, Unknown };
+    public enum Material { Air, Iron, Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Dirt, Water, Lava, Leaves, Unknown };
 	
 	public static class BlockData
 	{
@@ -759,6 +759,8 @@ namespace SMP
         {
             switch (a)
             {
+                case 0:
+                    return Material.Air;
                 case 3:
                     return Material.Dirt;
                 case 20:
@@ -768,7 +770,6 @@ namespace SMP
                     return Material.Glass;
                 case 2:
                 case 6:
-                case 18:
                 case 19:
                 case 31:
                 case 32:
@@ -876,6 +877,14 @@ namespace SMP
                 case 81:
                 case 92:
                     return Material.Wool;
+                case 8:
+                case 9:
+                    return Material.Water;
+                case 10:
+                case 11:
+                    return Material.Lava;
+                case 18:
+                    return Material.Leaves;
             }
             return Material.Unknown;
         }
@@ -1090,6 +1099,107 @@ namespace SMP
                     return 0.5F;
             }
             return 0;
+        }
+
+        public static bool IsGroundCover(byte a)
+        {
+            switch (a)
+            {
+                case 78:
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool IsOpaqueCube(byte a)
+        {
+            return Chunk.LightOpacity[a] == 0xf;
+        }
+
+        public static bool IsCube(byte a)
+        {
+            switch (a)
+            {
+                case 0:
+                case 6:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 37:
+                case 38:
+                case 39:
+                case 40:
+                case 44:
+                case 50:
+                case 51:
+                case 53:
+                case 54:
+                case 55:
+                case 59:
+                case 60:
+                case 63:
+                case 64:
+                case 65:
+                case 66:
+                case 67:
+                case 68:
+                case 69:
+                case 70:
+                case 71:
+                case 72:
+                case 75:
+                case 76:
+                case 77:
+                case 78:
+                case 81:
+                case 83:
+                case 85:
+                case 90:
+                case 92:
+                case 93:
+                case 94:
+                case 96:
+                case 101:
+                case 102:
+                case 104:
+                case 105:
+                case 106:
+                case 107:
+                case 108:
+                case 109:
+                case 111:
+                case 113:
+                case 114:
+                case 115:
+                    return false;
+            }
+            return true;
+        }
+
+        public static bool IsSolid(byte a)
+        {
+            return !CanWalkThrough(a);
+        }
+
+        public static bool IsLiquid(byte a)
+        {
+            switch (BlockMaterial(a))
+            {
+                case Material.Water:
+                case Material.Lava:
+                    return true;
+            }
+            return false;
         }
 	}
 }

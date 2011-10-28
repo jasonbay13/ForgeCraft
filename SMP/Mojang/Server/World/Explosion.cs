@@ -37,7 +37,7 @@ namespace SMP
                         double d = ((float)j / ((float)i - 1.0F)) * 2.0F - 1.0F;
                         double d1 = ((float)l / ((float)i - 1.0F)) * 2.0F - 1.0F;
                         double d2 = ((float)j1 / ((float)i - 1.0F)) * 2.0F - 1.0F;
-                        double d3 = Math.Sqrt(d * d + d1 * d1 + d2 * d2);
+                        double d3 = java.lang.Math.sqrt(d * d + d1 * d1 + d2 * d2);
                         d /= d3;
                         d1 /= d3;
                         d2 /= d3;

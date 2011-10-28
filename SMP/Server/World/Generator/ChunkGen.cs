@@ -22,14 +22,14 @@ namespace SMP {
     /// <summary>
     /// This class is used to tie together all chunk generators.
     /// </summary>
-    public abstract class ChunkGen {
-
+    public abstract class ChunkGen
+    {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="w"></param>
         /// <param name="c"></param>
-        public abstract void Generate( World w, Chunk c );
-        public abstract void SetSeed( long seed );
+        public abstract void Generate(Chunk c);
+        public abstract void Populate(Chunk c);
     }
 }

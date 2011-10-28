@@ -32,10 +32,13 @@ namespace SMP
 		public byte[] Light;
 		public byte[] SkyL;
 		public byte[] meta;
+        public byte[] heightMap;
         public Dictionary<int, ushort> extra;
 		public int x;
 		public int z;
 		public bool mountain = true; //???
+        public bool generated = true;
+        public bool generating = false;
         private bool _dirty = false;
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
 
@@ -71,12 +74,13 @@ namespace SMP
 		/// <param name='z'>
 		/// Z. The z position of the chunk
 		/// </param>
-		public Chunk (int x, int z)
+        public Chunk(int x, int z)
 		{
-			blocks = new byte[32768];
-			Light = new byte[16384];
-			SkyL = new byte[16384];
-			meta = new byte[16384];
+            blocks = new byte[32768];
+            Light = new byte[16384];
+            SkyL = new byte[16384];
+            meta = new byte[16384];
+            heightMap = new byte[256];
             extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
@@ -98,6 +102,7 @@ namespace SMP
 			Light = new byte[BlockCount / 2];
 			SkyL = new byte[BlockCount / 2];
 			meta = new byte[BlockCount / 2];
+            heightMap = new byte[256];
             extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
@@ -107,12 +112,12 @@ namespace SMP
             this.x = x; this.z = z;
         }
 
-        public static Chunk Load(int x, int z, World w, bool thread = true)
+        public static Chunk Load(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true)
         {
             string file = String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
             if (File.Exists(file))
             {
-                if (thread)
+                if (threadLoad)
                 {
                     World.chunker.QueueChunkLoad(x, z, false, w);
                     return null;
@@ -131,11 +136,13 @@ namespace SMP
                             ms.Write(comp, 0, comp.Length);
                         }
                         byte[] bytes = ms.ToArray();
-                        Array.Copy(bytes, ch.blocks, 32768);
-                        Array.Copy(bytes, 32768, ch.meta, 0, 16384);
-                        Array.Copy(bytes, 49152, ch.SkyL, 0, 16384);
-                        Array.Copy(bytes, 65536, ch.Light, 0, 16384);
-                        int index = 81922;
+                        ch.generated = BitConverter.ToBoolean(bytes, 0);
+                        Array.Copy(bytes, 1, ch.blocks, 0, 32768);
+                        Array.Copy(bytes, 32768 + 1, ch.meta, 0, 16384);
+                        Array.Copy(bytes, 49152 + 1, ch.SkyL, 0, 16384);
+                        Array.Copy(bytes, 65536 + 1, ch.Light, 0, 16384);
+                        Array.Copy(bytes, 81922 + 1, ch.heightMap, 0, 256);
+                        int index = 82178 + 1;
                         short extraCount = BitConverter.ToInt16(bytes, index - 2);
                         if (extraCount > 0)
                             for (int i = 0; i < extraCount; i++)
@@ -164,11 +171,13 @@ namespace SMP
                 }
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
-            if (thread)
-                World.chunker.QueueChunk(x, z, w);
-            else
-                return w.GenerateChunk(x, z);
-            return null;
+            if (generate)
+            {
+                if (thread) World.chunker.QueueChunk(x, z, w);
+                else w.GenerateChunk(x, z);
+                return null;
+            }
+            return new Chunk(x, z) { generated = false };
         }
 
         public void Save(World w)
@@ -178,10 +187,12 @@ namespace SMP
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using (MemoryStream data = new MemoryStream())
             {
+                data.Write(BitConverter.GetBytes(generated), 0, 1);
                 data.Write(blocks, 0, blocks.Length);
                 data.Write(meta, 0, meta.Length);
                 data.Write(SkyL, 0, SkyL.Length);
                 data.Write(Light, 0, Light.Length);
+                data.Write(heightMap, 0, heightMap.Length);
                 data.Write(BitConverter.GetBytes((short)extra.Count), 0, 2);
                 lock (extra)
                     foreach (KeyValuePair<int, ushort> kvp in extra)
@@ -211,6 +222,25 @@ namespace SMP
             //Console.WriteLine("SAVED " + x + " " + z);
         }
 
+        public void GenerateHeightMap()
+        {
+            int i = 128 - 1;
+            for (int j = 0; j < 16; j++)
+            {
+                for (int l = 0; l < 16; l++)
+                {
+                    int j1 = 128 - 1;
+                    int k1;
+                    for (k1 = j << 11 | l << 7; j1 > 0 && Chunk.LightOpacity[blocks[(k1 + j1) - 1] & 0xff] == 0; j1--) { }
+                    heightMap[l << 4 | j] = (byte)j1;
+                    if (j1 < i)
+                    {
+                        i = j1;
+                    }
+                }
+            }
+        }
+
         public void PostLoad(World w)
         {
             if (physChecks != null)
@@ -218,6 +248,12 @@ namespace SMP
                 w.physics.AddChunkChecks(physChecks);
                 physChecks = null;
             }
+        }
+
+        public void PostGenerate(World w)
+        {
+            // TODO
+            this._dirty = true;
         }
 
         public void GlobalUpdate(World w)
@@ -249,6 +285,15 @@ namespace SMP
                                 p.SendSoundEffect(xxx, (byte)yy, zzz, 1005, bExtra);
                         }
                     }
+        }
+
+        public bool CanBlockSeeSky(int x, int y, int z)
+        {
+            return y >= (heightMap[z << 4 | x] & 0xff);
+        }
+        public int GetHeightValue(int x, int z)
+        {
+            return heightMap[z << 4 | x] & 0xff;
         }
 
         public void SetBlockLight(int x, int y, int z, byte light)
@@ -482,9 +527,12 @@ namespace SMP
 		//{
 		//        return Server.mainlevel.chunkData[new Point(x, z)];
 		//}
-        public static Chunk GetChunk(int x, int z, World world)
+        public static Chunk GetChunk(int x, int z, World world, bool overRide = false)
         {
             Point po = new Point(x, z);
+            if (overRide && !world.chunkData.ContainsKey(po))
+                lock (world.chunkData)
+                    world.chunkData.Add(po, Load(x, z, world, false, false, false));
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];
             return null;
@@ -496,6 +544,8 @@ namespace SMP
             meta = null;
             SkyL = null;
             Light = null;
+            heightMap = null;
+            Entities.Clear();
             Entities = null;
             extra.Clear();
             extra = null;

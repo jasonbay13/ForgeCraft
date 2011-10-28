@@ -35,11 +35,13 @@ namespace SMP
 		public string Map_Name;
 		public string name;
         private long Seed;
-        public long seed { get { return Seed; } set { Seed = value; if (generator != null) generator.SetSeed(value); } }
+        public long seed { get { return Seed; } set { Seed = value; } }
 		public long time;
+        private object genLock = new object();
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
 		public ChunkGen generator;
+        public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
@@ -83,9 +85,15 @@ namespace SMP
 		{
             this.seed = seed;
 			chunkData = new Dictionary<Point, Chunk>();
+            physics = new Physics(this);
             generator = new GenStandard(this, true);
+            chunkManager = new WorldChunkManager(this);
             this.name = name;
 			Server.Log("Generating...");
+
+            float count = 0, total = 7 * 7;
+            Console.SetCursorPosition(24, Console.CursorTop - 1);
+            Console.Write("0%");
 
 			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
 			{
@@ -93,9 +101,11 @@ namespace SMP
 	            {
 	                Parallel.For(-3, 4, delegate(int z)
 	                {
-                        LoadChunk(x, z, false);
+                        LoadChunk(x, z, false, false);
+                        Console.SetCursorPosition(24, Console.CursorTop);
+                        count++; Console.Write((int)((count / total) * 100) + "%");
 	                });
-	                Server.Log(x + " Row Generated.");
+	                //Server.Log(x + " Row Generated.");
 	            });
 			}
 			catch(NotImplementedException)
@@ -104,11 +114,15 @@ namespace SMP
 				{
 				    for (int z = -3; z < 4; z++)
 				    {
-                        LoadChunk(x, z, false);
+                        LoadChunk(x, z, false, false);
+                        Console.SetCursorPosition(24, Console.CursorTop);
+                        count++; Console.Write((int)((count / total) * 100) + "%");
 				    }
-			    	Server.Log(x + " Row Generated.");
+			    	//Server.Log(x + " Row Generated.");
 				}		
 			}
+
+            Console.Write("\r");
 
             Server.Log("Look distance = 3");
 			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
@@ -122,8 +136,7 @@ namespace SMP
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();
 
-            this.physics = new Physics(this);
-            this.physics.Start();
+            physics.Start();
 
             if (World.WorldLoad != null)
                 World.WorldLoad(this);
@@ -149,19 +162,28 @@ namespace SMP
 		}
 
         #region Chunk Saving/Loading
-        public void LoadChunk(int x, int z, bool thread = true)
+        public void LoadChunk(int x, int z, bool thread = true, bool threadLoad = true)
         {
-            LoadChunk(x, z, this, thread);
+            LoadChunk(x, z, this, thread, threadLoad);
         }
-        public static void LoadChunk(int x, int z, World w, bool thread = true)
+        public static void LoadChunk(int x, int z, World w, bool thread = true, bool threadLoad = true)
         {
-            Chunk ch = Chunk.Load(x, z, w, thread);
+            Chunk ch = Chunk.Load(x, z, w, thread, threadLoad);
             if (ch != null)
             {
                 Point pt = new Point(x, z);
                 lock (w.chunkData)
-                    if (!w.chunkData.ContainsKey(pt))
+                    if (!w.chunkData.ContainsKey(pt) || !w.chunkData[pt].generated)
+                    {
+                        if (w.chunkData.ContainsKey(pt))
+                            w.chunkData.Remove(pt);
                         w.chunkData.Add(pt, ch);
+                    }
+                if (!ch.generated)
+                {
+                    if (thread) World.chunker.QueueChunk(x, z, w);
+                    else w.GenerateChunk(x, z);
+                }
                 ch.PostLoad(w);
             }
         }
@@ -172,11 +194,13 @@ namespace SMP
         }
         public static void UnloadChunk(int x, int z, World w)
         {
-            SaveChunk(x, z, w);
+            Point pt = new Point(x, z);
+            try { if (w.chunkData.ContainsKey(pt) && w.chunkData[pt].generating) return; }
+            catch { return; }
 
+            SaveChunk(x, z, w);
             if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
             {
-                Point pt = new Point(x, z);
                 w.physics.RemoveChunkChecks(x, z);
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
@@ -301,8 +325,13 @@ namespace SMP
                 w.time = long.Parse(sw.ReadLine());
             }
 
-            w.generator = new GenStandard(w, true);
             w.physics = new Physics(w);
+            w.generator = new GenStandard(w, true);
+            w.chunkManager = new WorldChunkManager(w);
+
+            float count = 0, total = 7 * 7;
+            Console.SetCursorPosition(21, Console.CursorTop - 1);
+            Console.Write("0%");
 
             try
             {
@@ -310,7 +339,9 @@ namespace SMP
                 {
                     Parallel.For(-3, 4, z =>
                     {
-                        w.LoadChunk(x, z, false);
+                        w.LoadChunk(x, z, false, false);
+                        Console.SetCursorPosition(21, Console.CursorTop);
+                        count++; Console.Write((int)((count / total) * 100) + "%");
                     });
                 });
             }
@@ -320,10 +351,14 @@ namespace SMP
                 {
                     for (int z = -3; z < 4; z++)
                     {
-                        w.LoadChunk(x, z, false);
+                        w.LoadChunk(x, z, false, false);
+                        Console.SetCursorPosition(21, Console.CursorTop);
+                        count++; Console.Write((int)((count / total) * 100) + "%");
                     }
                 }
             }
+
+            Console.WriteLine();
 
             World.worlds.Add(w);
             Server.Log(filename + " Loaded.");
@@ -423,9 +458,9 @@ namespace SMP
             using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream))
             using (MemoryStream inMemoryStream = new MemoryStream(inData))
             {
-                Console.WriteLine("z0"); CopyStream(inMemoryStream, outZStream); Console.WriteLine("z1");
-                outZStream.finish(); Console.WriteLine("z2");
-                outData = outMemoryStream.ToArray(); Console.WriteLine("z3");
+                CopyStream(inMemoryStream, outZStream);
+                outZStream.finish();
+                outData = outMemoryStream.ToArray();
             }
         }
 
@@ -459,22 +494,33 @@ namespace SMP
 			//Not sure if lightning needs depsawned, seems to not require it.
 		}
 
-		public Chunk GenerateChunk(int x, int z)
+		public void GenerateChunk(int x, int z)
 		{
-            Chunk c = new Chunk(x, z);
-            generator.Generate(this, c);
-            //generator.PerlinChunk(c);
-            //generator.RandMap(c, seed);
-            c.RecalculateLight();
-            //c.SpreadLight();
+            DateTime start; Chunk c; Point pt = new Point(x, z);
+            lock (this.genLock)
+            {
+                start = DateTime.Now;
+                if (chunkData.ContainsKey(pt)) { c = chunkData[pt]; }
+                else c = new Chunk(x, z) { generated = false };
+                c.generating = true;
+                generator.Generate(c);
+                c.RecalculateLight();
+                lock (chunkData) {
+                    if (chunkData.ContainsKey(pt))
+                        chunkData.Remove(pt);
+                    chunkData.Add(pt, c);
+                }
+                //generator.Populate(c);
+                c.generating = false;
+            }
+            c.generated = true;
+            TimeSpan took = DateTime.Now - start;
+            //Console.WriteLine(took.TotalMilliseconds);
+
             if (GeneratedChunk != null)
                 GeneratedChunk(this, c, x, z);
             if (WorldGenerateChunk != null)
                 WorldGenerateChunk(this, c, x, z);
-            /*lock (chunkData)
-                if (!chunkData.ContainsKey(new Point(x, z)))
-                    chunkData.Add(new Point(x, z), c);*/
-            return c;
 		}
         public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
         {
@@ -523,6 +569,7 @@ namespace SMP
             {
                 if (y < 0 || y > ChunkHeight - 1) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return;
                 byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 // TODO: Put lighting updates in a separate thread.
@@ -557,12 +604,30 @@ namespace SMP
             }
             catch { return; }
 		}
+        public void SetBlock(int x, int y, int z, byte type)
+        {
+            SetBlock(x, y, z, type, 0);
+        }
+        public void SetBlock(int x, int y, int z, byte type, byte meta)
+        {
+            try
+            {
+                if (y < 0 || y > ChunkHeight - 1) return;
+                int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this, true);
+                if (chunk == null) return;
+                chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
+                chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
+            }
+            catch { }
+        }
 		public byte GetBlock(int x, int y, int z)
 		{
+            DateTime start = DateTime.Now;
             try
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return 0;
                 return chunk.SGB(x & 0xf, y, z & 0xf);
             }
             catch { return 0; }
@@ -573,6 +638,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return 0;
                 return chunk.GetMetaData(x & 0xf, y, z & 0xf);
             }
             catch { return 0; }
@@ -583,6 +649,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return;
                 chunk.SetMetaData(x & 0xf, y, z & 0xf, data);
             }
             catch { return; }
@@ -593,6 +660,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return 0;
                 return chunk.GetExtraData(x & 0xf, y, z & 0xf);
             }
             catch { return 0; }
@@ -603,6 +671,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return;
                 chunk.SetExtraData(x & 0xf, y, z & 0xf, data);
             }
             catch { return; }
@@ -613,6 +682,7 @@ namespace SMP
             {
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
+                if (chunk == null) return;
                 chunk.UnsetExtraData(x & 0xf, y, z & 0xf);
             }
             catch { return; }
@@ -640,6 +710,159 @@ namespace SMP
             Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
 
             Player.GlobalUpdateSign(this, x, (short)y, z, String.Empty, String.Empty, String.Empty, String.Empty);
+        }
+
+        public int GetHeightValue(int x, int z)
+        {
+            try
+            {
+                if (x < unchecked((int)0xfe363c80) || z < unchecked((int)0xfe363c80) || x >= 0x1c9c380 || z >= 0x1c9c380)
+                {
+                    return 0;
+                }
+                else
+                {
+                    Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                    return chunk.GetHeightValue(x & 0xf, z & 0xf);
+                }
+            }
+            catch { return 0; }
+        }
+
+        public bool IsAirBlock(int x, int y, int z)
+        {
+            return GetBlock(x, y, z) == 0;
+        }
+        public bool CanBlockSeeSky(int x, int y, int z)
+        {
+            try
+            {
+                return Chunk.GetChunk(x >> 4, z >> 4, this).CanBlockSeeSky(x & 0xf, y, z & 0xf);
+            }
+            catch { return false; }
+        }
+        public bool CanBlockStay(byte b, int x, int y, int z)
+        {
+            byte b2;
+            switch (b)
+            {
+                // TODO: Light checking on stuff once lighting works correctly.
+                case (byte)Blocks.FlowerRose:
+                case (byte)Blocks.FlowerDandelion:
+                case (byte)Blocks.TallGrass:
+                    b2 = GetBlock(x, y - 1, z);
+                    return (b2 == (byte)Blocks.Grass || b2 == (byte)Blocks.Dirt || b2 == (byte)Blocks.FarmLand) && CanBlockSeeSky(x, y, z);
+                case (byte)Blocks.DeadShrubs:
+                    b2 = GetBlock(x, y - 1, z);
+                    return b2 == (byte)Blocks.Sand && CanBlockSeeSky(x, y, z);
+                case (byte)Blocks.SugarCane:
+                    return CanPlaceAt(b, x, y, z);
+                case (byte)Blocks.Cactus:
+                    if (BlockData.IsSolid(GetBlock(x - 1, y, z)))
+                    {
+                        return false;
+                    }
+                    if (BlockData.IsSolid(GetBlock(x + 1, y, z)))
+                    {
+                        return false;
+                    }
+                    if (BlockData.IsSolid(GetBlock(x, y, z - 1)))
+                    {
+                        return false;
+                    }
+                    if (BlockData.IsSolid(GetBlock(x, y, z + 1)))
+                    {
+                        return false;
+                    } else
+                    {
+                        int l = GetBlock(x, y - 1, z);
+                        return l == (byte)Blocks.Cactus || l == (byte)Blocks.Sand;
+                    }
+                case (byte)Blocks.MushroomBrown:
+                case (byte)Blocks.MushroomRed:
+                    label0:
+                    {
+                        bool label0 = false;
+                        if(y >= 0)
+                        {
+                            if(y < 128)
+                            {
+                                label0 = true;
+                            }
+                        }
+                        if (!label0) return false;
+                    }
+                    return /*world.getFullBlockLightValue(i, j, k) < 13 &&*/ BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
+            }
+            return true;
+        }
+        public bool CanPlaceAt(byte b, int x, int y, int z)
+        {
+            byte l;
+            switch (b)
+            {
+                case (byte)Blocks.SugarCane:
+                    l = GetBlock(x, y - 1, z);
+                    if (l == b)
+                    {
+                        return true;
+                    }
+                    if (l != (byte)Blocks.Grass && l != (byte)Blocks.Dirt && l != (byte)Blocks.Sand)
+                    {
+                        return false;
+                    }
+                    if (BlockData.BlockMaterial(GetBlock(x - 1, y - 1, z)) == Material.Water)
+                    {
+                        return true;
+                    }
+                    if (BlockData.BlockMaterial(GetBlock(x + 1, y - 1, z)) == Material.Water)
+                    {
+                        return true;
+                    }
+                    if (BlockData.BlockMaterial(GetBlock(x, y - 1, z - 1)) == Material.Water)
+                    {
+                        return true;
+                    }
+                    return BlockData.BlockMaterial(GetBlock(x, y - 1, z + 1)) == Material.Water;
+                case (byte)Blocks.Pumpkin:
+                case (byte)Blocks.JackOLantern:
+                    l = GetBlock(x, y, z);
+                    return (l == 0 || BlockData.IsGroundCover(l)) && IsNormalCube(x, y - 1, z);
+                case (byte)Blocks.MushroomBrown:
+                case (byte)Blocks.MushroomRed:
+                    return BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
+            }
+            return true;
+        }
+        public bool IsNormalCube(int x, int y, int z)
+        {
+            byte b = GetBlock(x, y, z);
+            return BlockData.IsOpaqueCube(b) && BlockData.IsCube(b);
+        }
+
+        public int FindTopSolidBlock(int x, int z)
+        {
+            try
+            {
+                Chunk chunk = Chunk.GetChunk(x, z, this);
+                int k = 127;
+                x &= 0xf;
+                z &= 0xf;
+                while (k > 0)
+                {
+                    byte l = chunk.SGB(x, k, z);
+                    if (l == 0 || !BlockData.IsSolid(l) || BlockData.BlockMaterial(l) == Material.Leaves)
+                    {
+                        k--;
+                    }
+                    else
+                    {
+                        return k + 1;
+                    }
+                }
+                return -1;
+            }
+            catch { return -1; }
         }
 	}
 

@@ -30,7 +30,7 @@ namespace SMP
             SIN_TABLE = new float[0x10000];
             for(int i = 0; i < 0x10000; i++)
             {
-                SIN_TABLE[i] = (float)Math.Sin(((double)i * 3.1415926535897931D * 2D) / 65536D);
+                SIN_TABLE[i] = (float)java.lang.Math.sin(((double)i * 3.1415926535897931D * 2D) / 65536D);
             }
         }
 
@@ -64,12 +64,12 @@ namespace SMP
 
         public static float sqrt_float(float f)
         {
-            return (float)Math.Sqrt(f);
+            return (float)java.lang.Math.sqrt(f);
         }
 
         public static float sqrt_double(double d)
         {
-            return (float)Math.Sqrt(d);
+            return (float)java.lang.Math.sqrt(d);
         }
 
         public static float cos(float f)

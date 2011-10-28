@@ -27,6 +27,19 @@ namespace SMP
 	/// </summary>
 	public partial class Chunk
 	{
+        public void QuickRecalculateLight(int x, int y, int z)
+        {
+            sbyte curLight = (sbyte)GetSkyLight(x, y, z); byte block;
+            for (; y >= 0; y--)
+            {
+                block = blocks[Chunk.PosToInt(x, y, z)];
+                curLight -= Math.Min(LightOpacity[block], curLight);
+                if (curLight <= 0) break;
+                SetSkyLight(x, y, z, (byte)curLight);
+                SetBlockLight(x, y, z, (byte)LightOutput[block]);
+            }
+        }
+
 		public void RecalculateLight(int x, int z)
 		{
 			sbyte curLight = 0xf; byte block;

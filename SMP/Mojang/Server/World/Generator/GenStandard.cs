@@ -1,21 +1,4 @@
-﻿/*
-	Copyright 2011 ForgeCraft team
-	
-	Dual-licensed under the	Educational Community License, Version 2.0 and
-	the GNU General Public License, Version 3 (the "Licenses"); you may
-	not use this file except in compliance with the Licenses. You may
-	obtain a copy of the Licenses at
-	
-	http://www.opensource.org/licenses/ecl2.php
-	http://www.gnu.org/licenses/gpl-3.0.html
-	
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the Licenses are distributed on an "AS IS"
-	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-	or implied. See the Licenses for the specific language governing
-	permissions and limitations under the Licenses.
-*/
-using System;
+﻿using System;
 //using LibNoise;
 
 namespace SMP {
@@ -41,7 +24,7 @@ namespace SMP {
         //public MapGenVillage field_35560_e;
         //public MapGenMineshaft field_35558_f;
         private GenRavine field_35564_x;
-        //private BiomeGenBase[] biomesForGeneration;
+        private BiomeGenBase[] biomesForGeneration;
 
         bool field_35563_t;
         private double[] field_4224_q;
@@ -79,14 +62,13 @@ namespace SMP {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="w"></param>
         /// <param name="c"></param>
-        public override void Generate(World w, Chunk c)
+        public override void Generate(Chunk c)
         {
             //DateTime start = DateTime.Now;
             //int cx = c.x << 4, cz = c.z << 4;
             //int waterLevel = 64 + 15 / 2 - 4;
-            if (w.seed == 0)
+            if (worldObj.seed == 0)
             {
                 for (int x = 0; x < 16; ++x)
                     for (int z = 0; z < 16; ++z)
@@ -106,8 +88,8 @@ namespace SMP {
                 {
                     random.setSeed((long)c.x * 0x4f9939f508L + (long)c.z * 0x1ef1565bd5L);
                     generateTerrain(c.x, c.z, c.blocks);
-                    //biomesForGeneration = worldObj.getWorldChunkManager().loadBlockGeneratorData(biomesForGeneration, i * 16, j * 16, 16, 16);
-                    replaceBlocksForBiome(c.x, c.z, c.blocks/*, biomesForGeneration*/);
+                    biomesForGeneration = worldObj.chunkManager.loadBlockGeneratorData(biomesForGeneration, c.x * 16, c.z * 16, 16, 16);
+                    replaceBlocksForBiome(c.x, c.z, c.blocks, biomesForGeneration);
                     caveGenerator.generate(worldObj, c.x, c.z, c.blocks);
                     if (field_35563_t)
                     {
@@ -116,15 +98,61 @@ namespace SMP {
                         //field_35560_e.generate(this, worldObj, i, j, abyte0);
                     }
                     field_35564_x.generate(worldObj, c.x, c.z, c.blocks);
+                    c.GenerateHeightMap();
                 }
             }
             //TimeSpan took = DateTime.Now - start;
             //Console.WriteLine(took.TotalMilliseconds);
         }
 
-        public override void SetSeed(long seed)
+        public override void Populate(Chunk c)
         {
-            random.setSeed(seed);
+            lock (this.blarg)
+            {
+                //BlockSand.fallInstantly = true;
+                int k = c.x * 16;
+                int l = c.z * 16;
+                BiomeGenBase biomegenbase = worldObj.chunkManager.getBiomeGenAt(k + 16, l + 16);
+                random.setSeed(worldObj.seed);
+                long l1 = (random.nextLong() / 2L) * 2L + 1L;
+                long l2 = (random.nextLong() / 2L) * 2L + 1L;
+                random.setSeed((long)c.x * l1 + (long)c.z * l2 ^ worldObj.seed);
+                bool flag = false;
+                /*if (field_35563_t)
+                {
+                    field_35559_d.func_35532_a(worldObj, rand, i, j);
+                    field_35558_f.func_35532_a(worldObj, rand, i, j);
+                    flag = field_35560_e.func_35532_a(worldObj, rand, i, j);
+                }*/
+                if (!flag && random.nextInt(4) == 0)
+                {
+                    int i1 = k + random.nextInt(16) + 8;
+                    int i2 = random.nextInt(128);
+                    int i3 = l + random.nextInt(16) + 8;
+                    (new WorldGenLakes((byte)Blocks.SWater)).generate(worldObj, random, i1, i2, i3);
+                }
+                if (!flag && random.nextInt(8) == 0)
+                {
+                    int j1 = k + random.nextInt(16) + 8;
+                    int j2 = random.nextInt(random.nextInt(128 - 8) + 8);
+                    int j3 = l + random.nextInt(16) + 8;
+                    if (j2 < 63 || random.nextInt(10) == 0)
+                    {
+                        (new WorldGenLakes((byte)Blocks.SLava)).generate(worldObj, random, j1, j2, j3);
+                    }
+                }
+                for (int k1 = 0; k1 < 8; k1++)
+                {
+                    int k2 = k + random.nextInt(16) + 8;
+                    int k3 = random.nextInt(128);
+                    int l3 = l + random.nextInt(16) + 8;
+                    if (!(new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) ;
+                }
+
+                biomegenbase.func_35513_a(worldObj, random, k, l);
+                //SpawnerAnimals.func_35573_a(worldObj, biomegenbase, k + 8, l + 8, 16, 16, rand);
+                //BlockSand.fallInstantly = false;
+            }
         }
 
 
@@ -136,7 +164,7 @@ namespace SMP {
             int l = byte0 + 1;
             int i1 = 128 / 8 + 1;
             int j1 = byte0 + 1;
-            //biomesForGeneration = worldObj.getWorldChunkManager().func_35142_b(biomesForGeneration, i * 4 - 2, j * 4 - 2, l + 5, j1 + 5);
+            biomesForGeneration = worldObj.chunkManager.func_35142_b(biomesForGeneration, i * 4 - 2, j * 4 - 2, l + 5, j1 + 5);
             field_4224_q = func_4058_a(field_4224_q, i * byte0, 0, j * byte0, l, i1, j1);
             for (int k1 = 0; k1 < byte0; k1++)
             {
@@ -200,7 +228,7 @@ namespace SMP {
             }
         }
 
-        public void replaceBlocksForBiome(int i, int j, byte[] abyte0/*, BiomeGenBase[] abiomegenbase*/)
+        public void replaceBlocksForBiome(int i, int j, byte[] abyte0, BiomeGenBase[] abiomegenbase)
         {
             byte byte0 = 63;
             double d = 0.03125D;
@@ -209,13 +237,11 @@ namespace SMP {
             {
                 for (int l = 0; l < 16; l++)
                 {
-                    //BiomeGenBase biomegenbase = abiomegenbase[l + k * 16];
+                    BiomeGenBase biomegenbase = abiomegenbase[l + k * 16];
                     int i1 = (int)(field_35562_v[k + l * 16] / 3D + 3D + random.nextDouble() * 0.25D);
                     int j1 = -1;
-                    //byte byte1 = biomegenbase.topBlock;
-                    //byte byte2 = biomegenbase.fillerBlock;
-                    byte byte1 = (byte)Blocks.Grass;
-                    byte byte2 = (byte)Blocks.Dirt;
+                    byte byte1 = biomegenbase.topBlock;
+                    byte byte2 = biomegenbase.fillerBlock;
                     for (int k1 = 127; k1 >= 0; k1--)
                     {
                         int l1 = (l * 16 + k) * 128 + k1;
@@ -244,10 +270,8 @@ namespace SMP {
                             else
                                 if (k1 >= byte0 - 4 && k1 <= byte0 + 1)
                                 {
-                                    /*byte1 = biomegenbase.topBlock;
-                                    byte2 = biomegenbase.fillerBlock;*/
-                                    byte1 = (byte)Blocks.Grass;
-                                    byte2 = (byte)Blocks.Dirt;
+                                    byte1 = biomegenbase.topBlock;
+                                    byte2 = biomegenbase.fillerBlock;
                                 }
                             if (k1 < byte0 && byte1 == 0)
                             {
@@ -320,22 +344,19 @@ namespace SMP {
                     float f2 = 0.0F;
                     float f3 = 0.0F;
                     byte byte0 = 2;
-                    //BiomeGenBase biomegenbase = biomesForGeneration[k2 + 2 + (l2 + 2) * (l + 5)];
+                    BiomeGenBase biomegenbase = biomesForGeneration[k2 + 2 + (l2 + 2) * (l + 5)];
                     for(int i3 = -byte0; i3 <= byte0; i3++)
                     {
                         for(int j3 = -byte0; j3 <= byte0; j3++)
                         {
-                            //BiomeGenBase biomegenbase1 = biomesForGeneration[k2 + i3 + 2 + (l2 + j3 + 2) * (l + 5)];
-                            //float f4 = field_35561_l[i3 + 2 + (j3 + 2) * 5] / (biomegenbase1.field_35527_q + 2.0F);
-                            float f4 = field_35561_l[i3 + 2 + (j3 + 2) * 5] / (0.1F + 2.0F);
-                            /*if(biomegenbase1.field_35527_q > biomegenbase.field_35527_q)
+                            BiomeGenBase biomegenbase1 = biomesForGeneration[k2 + i3 + 2 + (l2 + j3 + 2) * (l + 5)];
+                            float f4 = field_35561_l[i3 + 2 + (j3 + 2) * 5] / (biomegenbase1.field_35527_q + 2.0F);
+                            if(biomegenbase1.field_35527_q > biomegenbase.field_35527_q)
                             {
                                 f4 /= 2.0F;
-                            }*/
-                            //f1 += biomegenbase1.field_35526_r * f4;
-                            //f2 += biomegenbase1.field_35527_q * f4;
-                            f1 += 0.3F * f4;
-                            f2 += 0.1F * f4;
+                            }
+                            f1 += biomegenbase1.field_35526_r * f4;
+                            f2 += biomegenbase1.field_35527_q * f4;
                             f3 += f4;
                         }
 

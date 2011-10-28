@@ -109,6 +109,7 @@ namespace SMP
                     try
                     {
                         if (C == null) { Checks.Remove(C); return; }
+                        if (!w.chunkData.ContainsKey(new Point(C.x >> 4, C.z >> 4)) || !w.chunkData[new Point(C.x >> 4, C.z >> 4)].generated) return;
                         type = w.GetBlock(C.x, C.y, C.z);
                         if (Handlers.handlers.ContainsKey(type))
                             if (!(bool)Handlers.handlers[type].DynamicInvoke(this, C))
