@@ -32,22 +32,21 @@ namespace SMP
             sbyte curLight = (sbyte)GetSkyLight(x, y, z); byte block;
             for (; y >= 0; y--)
             {
-                block = blocks[Chunk.PosToInt(x, y, z)];
+                block = blocks[PosToInt(x, y, z)];
                 curLight -= Math.Min(LightOpacity[block], curLight);
+                SetBlockLight(x, y, z, (byte)LightOutput[block]);
                 if (curLight <= 0) break;
                 SetSkyLight(x, y, z, (byte)curLight);
-                SetBlockLight(x, y, z, (byte)LightOutput[block]);
             }
         }
 
 		public void RecalculateLight(int x, int z)
 		{
 			sbyte curLight = 0xf; byte block;
-			for (int y = Chunk.Height - 1; y >= 0; y--)
+			for (int y = Height - 1; y >= 0; y--)
 			{
-				block = blocks[Chunk.PosToInt(x, y, z)];
+				block = blocks[PosToInt(x, y, z)];
                 curLight -= Math.Min(LightOpacity[block], curLight);
-                //if (curLight <= 0) break; // It's not that simple...
 				SetSkyLight(x, y, z, (byte)curLight);
                 SetBlockLight(x, y, z, (byte)LightOutput[block]);
 			}
@@ -55,9 +54,9 @@ namespace SMP
 
 		public void RecalculateLight()
 		{
-			for (int x = 0; x < Chunk.Width; x++)
+			for (int x = 0; x < Width; x++)
 			{
-				for (int z = 0; z < Chunk.Depth; z++)
+				for (int z = 0; z < Depth; z++)
 				{
 					RecalculateLight(x, z);
 				}

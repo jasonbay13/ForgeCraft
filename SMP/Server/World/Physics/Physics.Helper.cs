@@ -10,12 +10,12 @@ namespace SMP
         public void BlockUpdate(int x, int y, int z, byte oldBlock, byte oldMeta)
         {
             if (Handlers.handlers.ContainsKey(w.GetBlock(x, y, z))) AddCheck(x, y, z);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x + 1, y, z))) AddCheck(x + 1, y, z);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x - 1, y, z))) AddCheck(x - 1, y, z);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x, y + 1, z))) AddCheck(x, y + 1, z);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x, y - 1, z))) AddCheck(x, y - 1, z);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x, y, z + 1))) AddCheck(x, y, z + 1);
-            if (Handlers.handlers.ContainsKey(w.GetBlock(x, y, z - 1))) AddCheck(x, y, z - 1);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x + 1, y, z)) && Handlers.handlers.ContainsKey(w.GetBlock(x + 1, y, z))) AddCheck(x + 1, y, z);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x - 1, y, z)) && Handlers.handlers.ContainsKey(w.GetBlock(x - 1, y, z))) AddCheck(x - 1, y, z);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x, y + 1, z)) && Handlers.handlers.ContainsKey(w.GetBlock(x, y + 1, z))) AddCheck(x, y + 1, z);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x, y - 1, z)) && Handlers.handlers.ContainsKey(w.GetBlock(x, y - 1, z))) AddCheck(x, y - 1, z);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x, y, z + 1)) && Handlers.handlers.ContainsKey(w.GetBlock(x, y, z + 1))) AddCheck(x, y, z + 1);
+            if (!Handlers.noAdjacent.Contains(w.GetBlock(x, y, z - 1)) && Handlers.handlers.ContainsKey(w.GetBlock(x, y, z - 1))) AddCheck(x, y, z - 1);
 
             // Extra stuff should be added for specific blocks.
             if (oldBlock == 19)

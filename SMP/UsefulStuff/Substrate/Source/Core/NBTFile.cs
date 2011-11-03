@@ -4,7 +4,6 @@ using System.Text;
 using System.IO;
 //using Ionic.Zlib;
 using Substrate.Nbt;
-using zlib;
 using System.IO.Compression;
 
 

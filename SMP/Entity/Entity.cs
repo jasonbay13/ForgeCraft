@@ -26,13 +26,14 @@ namespace SMP
 {
 	public class Entity
 	{
+        private static int nextId = 0;
 		public static Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
 
 		public Chunk c
 		{
 			get
 			{
-				return Chunk.GetChunk((int)(pos.x / 16), (int)(pos.z / 16), level);
+				return Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level);
 			}
 		}
 		public Chunk CurrentChunk;
@@ -103,10 +104,10 @@ namespace SMP
 			id = FreeId();
 		}
 
-        public void UpdateChunks(bool force, bool forcesend)
+        public void UpdateChunks(bool force, bool forcesend, bool forcequeue = false)
         {
             if (c == null)
-                level.LoadChunk((int)(pos.x / 16), (int)(pos.z / 16));
+                level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4);
             if (c == null || (c == CurrentChunk && !force))
                 return;
 
@@ -118,7 +119,7 @@ namespace SMP
             }
             catch
             {
-                Server.Log("Error Updating chunk for " + isPlayer.ToString() + " " + isItem.ToString() + " " + isAI.ToString() + " " + id);
+                Server.Log("Error updating chunk: " + this.ToString());
             }
             if (isPlayer && p.LoggedIn)
             {
@@ -166,10 +167,20 @@ namespace SMP
 
                             try
                             {
-                                if (p.level.chunkData.ContainsKey(po) && p.level.chunkData[po].generated)
+                                if (p.level.chunkData.ContainsKey(po))
                                 {
-                                    p.SendChunk(p.level.chunkData[po]);
-                                    p.level.chunkData[po].Update(p.level, p);
+                                    if (!p.level.chunkData[po].generated || !p.level.chunkData[po].populated)
+                                    {
+                                        World.chunker.QueueChunk(po, p.level, !p.level.chunkData[po].generated, !p.level.chunkData[po].populated);
+                                        World.chunker.QueueChunkSend(po, p);
+                                    }
+                                    else if (forcequeue)
+                                        World.chunker.QueueChunkSend(po, p);
+                                    else
+                                    {
+                                        p.SendChunk(p.level.chunkData[po]);
+                                        p.level.chunkData[po].Update(p.level, p);
+                                    }
                                 }
                                 else
                                     World.chunker.QueueChunkSend(po, p);
@@ -325,11 +336,26 @@ namespace SMP
 		
 		public static int FreeId()
 		{
-			int i = 0;
+			/*int i = 0;
 			do {
 			i = random.Next();
 			} while(Entities.ContainsKey(i));
-			return i;
+			return i;*/
+
+            return nextId++;
 		}
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Entity{").Append(id).Append(':').Append((int)pos.x).Append(',').Append((int)pos.y).Append(',').Append((int)pos.z).Append(':');
+            if (isPlayer) sb.Append(p.GetName());
+            else if (isItem) sb.Append("Item{").Append(I.item).Append(":").Append(I.count).Append(":").Append(I.meta).Append('}');
+            else if (isAI) sb.Append(ai.GetType().Name);
+            else if (isObject) sb.Append(obj.GetType().Name);
+            else sb.Append("UNKNOWN");
+            sb.Append('}');
+            return sb.ToString();
+        }
 	}
 }

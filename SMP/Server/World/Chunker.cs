@@ -30,7 +30,7 @@ namespace SMP
             {
                 Parallel.For(0, Server.genThreads, delegate(int wtf) // The int is so the compiler will shut up.
                 {
-                    ChunkGenQueue cgq; /*Chunk ch;*/ Point pt;
+                    ChunkGenQueue cgq; Chunk ch; Point pt;
                     while (!Server.s.shuttingDown)
                     {
                         try
@@ -40,16 +40,12 @@ namespace SMP
                                 cgq = genQueue.Dequeue();
                             lock (generated)
                                 generated.Add(cgq);
-                            /*ch =*/ cgq.world.GenerateChunk(cgq.x, cgq.z);
+                            ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
                             pt = new Point(cgq.x, cgq.z);
-                            /*lock (cgq.world.chunkData)
+                            lock (cgq.world.chunkData)
                                 if (!cgq.world.chunkData.ContainsKey(pt))
-                                    cgq.world.chunkData.Add(pt, ch);*/
-                            if (cgq.world.chunkData.ContainsKey(pt))
-                            {
-                                cgq.world.chunkData[pt].PostGenerate(cgq.world);
-                                cgq.world.chunkData[pt].PostLoad(cgq.world);
-                            }
+                                    cgq.world.chunkData.Add(pt, ch);
+                            ch.PostLoad(cgq.world);
                             lock (generated)
                                 generated.Remove(cgq);
                         }
@@ -98,15 +94,18 @@ namespace SMP
                         sendQueue.ForEach(delegate(ChunkSendQueue csq)
                         {
                             pt = new Point(csq.x, csq.z);
-                            if (csq.player.level.chunkData.ContainsKey(pt) && csq.player.level.chunkData[pt].generated)
+                            if (!csq.player.LoggedIn || (DateTime.Now - csq.time).TotalSeconds >= 60)
+                            {
+                                csq.sent = true;
+                                return;
+                            }
+                            if (csq.player.level.chunkData.ContainsKey(pt) && csq.player.level.chunkData[pt].generated && csq.player.level.chunkData[pt].populated)
                             {
                                 //Console.WriteLine("SENT " + csq.x + "," + csq.z);
                                 csq.player.SendChunk(csq.player.level.chunkData[pt]);
                                 csq.player.level.chunkData[pt].Update(csq.player.level, csq.player);
                                 csq.sent = true;
                             }
-                            if ((DateTime.Now - csq.time).TotalSeconds >= 60 && sendQueue.Contains(csq))
-                                csq.sent = true;
                             Thread.Sleep(5);
                         });
                         sendQueue.RemoveAll(csq => csq.sent);
@@ -117,13 +116,13 @@ namespace SMP
             sendThread.Start();
         }
 
-        public void QueueChunk(Point point, World world)
+        public void QueueChunk(Point point, World world, bool generate = true, bool populate = true)
         {
             QueueChunk(point.x, point.z, world);
         }
-        public void QueueChunk(int x, int z, World world)
+        public void QueueChunk(int x, int z, World world, bool generate = true, bool populate = true)
         {
-            ChunkGenQueue cgq = new ChunkGenQueue(x, z, world);
+            ChunkGenQueue cgq = new ChunkGenQueue(x, z, world, generate, populate);
             lock (generated)
                 if (generated.Contains(cgq)) return;
             lock (genQueue)
@@ -156,12 +155,15 @@ namespace SMP
 
     public struct ChunkGenQueue
     {
+        public bool generate, populate;
         public int x, z;
         public World world;
 
-        public ChunkGenQueue(Point point, World world) : this(point.x, point.z, world) { }
-        public ChunkGenQueue(int x, int z, World world)
+        public ChunkGenQueue(Point point, World world, bool generate = true, bool populate = true) : this(point.x, point.z, world) { }
+        public ChunkGenQueue(int x, int z, World world, bool generate = true, bool populate = true)
         {
+            this.generate = generate;
+            this.populate = populate;
             this.x = x;
             this.z = z;
             this.world = world;

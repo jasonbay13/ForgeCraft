@@ -77,14 +77,6 @@ namespace SMP
             return SIN_TABLE[(int)(f * 10430.38F + 16384F) & 0xffff];
         }
 
-        public static long pow(long x, long n)
-        {
-            if (n == 0) return 1;
-            if (n == 1) return x;
-
-            return x;
-        }
-
         public static long RandomLong(Random random)
         {
             return (long)((random.NextDouble() * 2.0 - 1.0) * long.MaxValue);

@@ -18,7 +18,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using zlib;
+using Ionic.Zlib;
 
 namespace SMP
 {
@@ -37,7 +37,7 @@ namespace SMP
 		public int x;
 		public int z;
 		public bool mountain = true; //???
-        public bool generated = true;
+        public bool generated = false, populated = false;
         public bool generating = false;
         private bool _dirty = false;
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
@@ -112,9 +112,9 @@ namespace SMP
             this.x = x; this.z = z;
         }
 
-        public static Chunk Load(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true)
+        public static Chunk Load(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true, bool dummy = true)
         {
-            string file = String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
+            string file = CreatePath(w, x, z);
             if (File.Exists(file))
             {
                 if (threadLoad)
@@ -137,12 +137,13 @@ namespace SMP
                         }
                         byte[] bytes = ms.ToArray();
                         ch.generated = BitConverter.ToBoolean(bytes, 0);
-                        Array.Copy(bytes, 1, ch.blocks, 0, 32768);
-                        Array.Copy(bytes, 32768 + 1, ch.meta, 0, 16384);
-                        Array.Copy(bytes, 49152 + 1, ch.SkyL, 0, 16384);
-                        Array.Copy(bytes, 65536 + 1, ch.Light, 0, 16384);
-                        Array.Copy(bytes, 81922 + 1, ch.heightMap, 0, 256);
-                        int index = 82178 + 1;
+                        ch.populated = BitConverter.ToBoolean(bytes, 1);
+                        Array.Copy(bytes, 2, ch.blocks, 0, 32768);
+                        Array.Copy(bytes, 32768 + 2, ch.meta, 0, 16384);
+                        Array.Copy(bytes, 49152 + 2, ch.SkyL, 0, 16384);
+                        Array.Copy(bytes, 65536 + 2, ch.Light, 0, 16384);
+                        Array.Copy(bytes, 81922 + 2, ch.heightMap, 0, 256);
+                        int index = 82178 + 2;
                         short extraCount = BitConverter.ToInt16(bytes, index - 2);
                         if (extraCount > 0)
                             for (int i = 0; i < extraCount; i++)
@@ -166,8 +167,8 @@ namespace SMP
                 }
                 catch (Exception ex)
                 {
-                    Server.ServerLogger.Log("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
-                    Server.ServerLogger.LogError(ex);
+                    Server.ServerLogger.LogToFile("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
+                    Server.ServerLogger.LogErrorToFile(ex);
                 }
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
@@ -177,17 +178,19 @@ namespace SMP
                 else w.GenerateChunk(x, z);
                 return null;
             }
-            return new Chunk(x, z) { generated = false };
+            if (dummy) return new Chunk(x, z);
+            return null;
         }
 
         public void Save(World w)
         {
-            string path = String.Format("{0}/chunks/{1}/{2}", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16));
-            string file = String.Format("{0}/{1}.{2}.chunk", path, x.ToString(), z.ToString());
+            string path = CreatePath(w, x, z, true);
+            string file = CreatePath(w, x, z);
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             using (MemoryStream data = new MemoryStream())
             {
                 data.Write(BitConverter.GetBytes(generated), 0, 1);
+                data.Write(BitConverter.GetBytes(populated), 0, 1);
                 data.Write(blocks, 0, blocks.Length);
                 data.Write(meta, 0, meta.Length);
                 data.Write(SkyL, 0, SkyL.Length);
@@ -212,7 +215,7 @@ namespace SMP
                 }
 
                 byte[] bytes;
-                bytes = data.ToArray().Compress();
+                bytes = data.ToArray().Compress(Ionic.Zlib.CompressionLevel.BestCompression);
                 using (FileStream fs = new FileStream(file, FileMode.Create))
                 {
                     fs.Write(bytes, 0, (int)bytes.Length);
@@ -243,6 +246,19 @@ namespace SMP
 
         public void PostLoad(World w)
         {
+            try
+            {
+                if (!populated && w.ChunkExists(x + 1, z + 1) && w.ChunkExists(x, z + 1) && w.ChunkExists(x + 1, z))
+                    w.PopulateChunk(x, z);
+                if (w.ChunkExists(x - 1, z) && !GetChunk(x - 1, z, w).populated && w.ChunkExists(x - 1, z + 1) && w.ChunkExists(x, z + 1))
+                    w.PopulateChunk(x - 1, z);
+                if (w.ChunkExists(x, z - 1) && !GetChunk(x, z - 1, w).populated && w.ChunkExists(x + 1, z - 1) && w.ChunkExists(x + 1, z))
+                    w.PopulateChunk(x, z - 1);
+                if (w.ChunkExists(x - 1, z - 1) && !GetChunk(x - 1, z - 1, w).populated && w.ChunkExists(x, z - 1) && w.ChunkExists(x - 1, z))
+                    w.PopulateChunk(x - 1, z - 1);
+            }
+            catch { }
+
             if (physChecks != null)
             {
                 w.physics.AddChunkChecks(physChecks);
@@ -252,7 +268,10 @@ namespace SMP
 
         public void PostGenerate(World w)
         {
-            // TODO
+            this._dirty = true;
+        }
+        public void PostPopulate(World w)
+        {
             this._dirty = true;
         }
 
@@ -302,8 +321,8 @@ namespace SMP
 			{
 				int index = PosToInt(x, y, z);
 				SetHalf(index, light, ref Light[index / 2]);
+                this._dirty = true;
 			}
-            this._dirty = true;
 		}
 		public byte GetBlockLight(int x, int y, int z)
 		{
@@ -324,8 +343,8 @@ namespace SMP
 			{
 				int index = PosToInt(x, y, z);
 				SetHalf(index, light, ref SkyL[index / 2]);
+                this._dirty = true;
 			}
-            this._dirty = true;
 		}
 		public byte GetSkyLight(int x, int y, int z)
 		{
@@ -346,8 +365,8 @@ namespace SMP
 			{
 				int index = PosToInt(x, y, z);
 				SetHalf(index, data, ref meta[PosToInt(x, y, z) / 2]);
+                this._dirty = true;
 			}
-            this._dirty = true;
 		}
 		public byte GetMetaData(int x, int y, int z)
 		{
@@ -364,22 +383,35 @@ namespace SMP
 		}
         public void SetExtraData(int x, int y, int z, ushort data)
         {
-            int index = PosToInt(x, y, z);
-            if (!extra.ContainsKey(index)) extra.Add(index, data);
-            else extra[index] = data;
-            this._dirty = true;
+            if (InBound(x, y, z))
+            {
+                int index = PosToInt(x, y, z);
+                if (!extra.ContainsKey(index)) extra.Add(index, data);
+                else extra[index] = data;
+                this._dirty = true;
+            }
         }
         public void UnsetExtraData(int x, int y, int z)
         {
-            int index = PosToInt(x, y, z);
-            if (extra.ContainsKey(index)) extra.Remove(index);
-            this._dirty = true;
+            if (InBound(x, y, z))
+            {
+                int index = PosToInt(x, y, z);
+                if (extra.ContainsKey(index)) extra.Remove(index);
+                this._dirty = true;
+            }
         }
         public ushort GetExtraData(int x, int y, int z)
         {
-            int index = PosToInt(x, y, z);
-            if (!extra.ContainsKey(index)) return 0;
-            return extra[index];
+            if (InBound(x, y, z))
+            {
+                int index = PosToInt(x, y, z);
+                if (!extra.ContainsKey(index)) return 0;
+                return extra[index];
+            }
+            else
+            {
+                return 0xFFFF;
+            }
         }
 		private void SetHalf(int index, byte value, ref byte data)
 		{
@@ -417,7 +449,7 @@ namespace SMP
                 byte[] compressed;
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    using (ZOutputStream zout = new ZOutputStream(ms, zlibConst.Z_BEST_COMPRESSION))
+                    using (ZlibStream zout = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression, true))
                     {
                         // Write block types
                         zout.Write(blocks, 0, blocks.Length);
@@ -462,8 +494,8 @@ namespace SMP
 			{
 				blocks[PosToInt(x, y, z)] = id;
 				SetMetaData(x, y, z, meta);
+                this._dirty = true;
 			}
-            this._dirty = true;
 		}
 		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id)
 		{
@@ -530,12 +562,22 @@ namespace SMP
         public static Chunk GetChunk(int x, int z, World world, bool overRide = false)
         {
             Point po = new Point(x, z);
-            if (overRide && !world.chunkData.ContainsKey(po))
+            if (overRide)
                 lock (world.chunkData)
-                    world.chunkData.Add(po, Load(x, z, world, false, false, false));
+                    if (!world.chunkData.ContainsKey(po))
+                    {
+                        world.chunkData.Add(po, Load(x, z, world, false, false));
+                        world.chunkData[po].PostLoad(world);
+                    }
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];
             return null;
+        }
+
+        public static string CreatePath(World w, int x, int z, bool folderOnly = false)
+        {
+            if (folderOnly) return String.Format("{0}/chunks/{1}/{2}/", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16));
+            return String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
         }
 
         public void Dispose()

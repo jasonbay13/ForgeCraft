@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SMP
 {
@@ -63,7 +60,7 @@ namespace SMP
             if (l == 3 && i1 == 1)
             {
                 world.SetBlock(i, j, k, (byte)liquidBlockId);
-                //world.physics.AddCheck(i, j, k);
+                world.physics.AddCheck(i, j, k, true);
                 //world.scheduledUpdatesAreImmediate = true;
                 //Block.blocksList[liquidBlockId].updateTick(world, i, j, k, random);
                 //world.scheduledUpdatesAreImmediate = false;

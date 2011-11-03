@@ -14,7 +14,7 @@ namespace SMP
 		public static List<Player> players = new List<Player>();
 		public Socket socket;
 		public World level { get { return e.level; } set { e.level = value; } }
-		public int viewdistance = 3;
+		public int viewdistance = Server.ViewDistance;
 		byte mode = Server.mode;
         #region Mode Thingy
         public byte Mode
@@ -53,7 +53,6 @@ namespace SMP
         public float[] oldrot = new float[2];
 		byte onground;
 		public int id { get { return e.id; } }
-		byte dimension = 0;
         private DateTime pingdate = new DateTime();
         private DateTime lastPosSync = new DateTime();
         public short Ping = 500;
@@ -409,7 +408,7 @@ namespace SMP
 
                 if ((int)(diff1 * 32) == 0 && !forceTp)
 				{
-                    if (rot[0] - oldrot[0] != 0 || rot[1] - oldrot[1] != 0)
+                    if ((int)(rot[0] - oldrot[0]) != 0 || (int)(rot[1] - oldrot[1]) != 0)
                     {
                         byte[] bytes = new byte[6];
                         util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
@@ -444,7 +443,9 @@ namespace SMP
 						if (!e1.p.MapLoaded) continue;
 						e1.p.SendRaw(0x21, bytes);
 					}
-					oldpos = pos;
+					if (Math.Abs(sendme.x) > 0) oldpos.x = pos.x;
+                    if (Math.Abs(sendme.y) > 0) oldpos.y = pos.y;
+                    if (Math.Abs(sendme.z) > 0) oldpos.z = pos.z;
                     rot.CopyTo(oldrot, 0);
 				}
 				else
@@ -687,7 +688,7 @@ namespace SMP
                 util.EndianBitConverter.Big.GetBytes(radius).CopyTo(bytes, 24);
                 util.EndianBitConverter.Big.GetBytes(records.Length).CopyTo(bytes, 28);
 
-                Point3 record, position = new Point3(x, y, z);
+                Point3 record, position = new Point3((int)x, (int)y, (int)z);
                 for (int i = 0; i < records.Length; i++)
                 {
                     record = records[i] - position;
@@ -849,6 +850,10 @@ namespace SMP
 			{
 				Teleport_Player(a.x, a.y, a.z, rot[0], rot[1]);
 			}
+            public void Teleport_Player(Point3 a, float yaw, float pitch)
+            {
+                Teleport_Player(a.x, a.y, a.z, yaw, pitch);
+            }
 			public void Teleport_Player(double x, double y, double z, float yaw, float pitch)
 			{
 				if (!MapLoaded) return;
@@ -865,11 +870,7 @@ namespace SMP
 			}
             public void Teleport_Spawn()
             {
-                int y;
-                for (y = 127; y >= 0; y--)
-                    if (level.GetBlock((int)level.SpawnX - 1, y, (int)level.SpawnZ - 1) != 0) break;
-                if (y < 0) y = 126;
-                Teleport_Player(level.SpawnX - 0.5D, ++y, level.SpawnZ - 0.5D, 0, 0);
+                Teleport_Player(level.SpawnPos, 0, 0);
             }
 			#endregion
 			#region Login Stuffs
@@ -885,7 +886,7 @@ namespace SMP
 					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
 					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16); 
 					bytes[bytes.Length - 5] = Server.mode;
-					bytes[bytes.Length - 4] = dimension;
+					bytes[bytes.Length - 4] = (byte)level.dimension;
                     bytes[bytes.Length - 3] = 1;
 					bytes[bytes.Length - 2] = level.height;
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
@@ -949,30 +950,30 @@ namespace SMP
 				}
 				SendWindow(0, 45, data.ToArray());
 			}
-			public void SendItem(short slot, short Item) { SendItem(slot, Item, 1, 0); }
-			public void SendItem(short slot, short Item, byte count, short use)
+            public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
+            public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
+            public void SendItem(byte windowID, short slot, Item item) { SendItem(windowID, slot, item.item, item.count, item.meta); }
+            public void SendItem(byte windowID, short slot, short id, byte count, short use)
 			{
-				if (!FindBlocks.ValidItem(Item))
+				if (!FindBlocks.ValidItem(id))
 					return;
 			
 				if (!MapLoaded) return;
 
 				byte[] tosend;
-				if (Item == -1)
-					tosend = new byte[5];
-				else
-					tosend = new byte[8];
-				tosend[0] = 0;
+				if (id == -1) tosend = new byte[5];
+				else tosend = new byte[8];
+				tosend[0] = windowID;
 				util.EndianBitConverter.Big.GetBytes(slot).CopyTo(tosend, 1);
-				util.EndianBitConverter.Big.GetBytes(Item).CopyTo(tosend, 3);
-				if (Item != -1)
+				util.EndianBitConverter.Big.GetBytes(id).CopyTo(tosend, 3);
+				if (id != -1)
 				{
 					tosend[5] = count;
 					util.EndianBitConverter.Big.GetBytes(use).CopyTo(tosend, 6);
 				}
 				SendRaw(0x67, tosend);
 			}
-			void SendWindow(byte windowID, short count, byte[] items)
+			public void SendWindow(byte windowID, short count, byte[] items)
 			{
 				byte[] data = new byte[3 + items.Length];
 				data[0] = windowID;
@@ -980,6 +981,22 @@ namespace SMP
 				items.CopyTo(data, 3);
 				SendRaw(0x68, data);
 			}
+            public void SendUpdateProgressBar(byte windowID, short bar, short value)
+            {
+                byte[] bytes = new byte[5];
+                bytes[0] = windowID;
+                util.EndianBitConverter.Big.GetBytes(bar).CopyTo(bytes, 1);
+                util.EndianBitConverter.Big.GetBytes(value).CopyTo(bytes, 3);
+                SendRaw(0x69, bytes);
+            }
+            public void SendTransaction(byte windowID, short action, bool accepted)
+            {
+                byte[] bytes = new byte[4];
+                bytes[0] = windowID;
+                util.BigEndianBitConverter.Big.GetBytes(action).CopyTo(bytes, 1);
+                util.BigEndianBitConverter.Big.GetBytes(accepted).CopyTo(bytes, 3);
+                SendRaw(0x6A, bytes);
+            }
 			#endregion
 			#region Map Stuff
 			void SendMap()
@@ -993,12 +1010,13 @@ namespace SMP
 				//}
 				//Server.Log(i + " Chunks sent");
 
-				e.UpdateChunks(true, false);
+                pos = level.SpawnPos;
 				SendSpawnPoint();
 				SendLoginDone();
 				SendInventory();
+                SendChunk(e.c);
+                e.UpdateChunks(true, false, true);
 				MapLoaded = true;
-                Teleport_Spawn();
 				
 			}
 			/// <summary>
@@ -1009,12 +1027,10 @@ namespace SMP
 			/// </param>
 			public void SendChunk(Chunk c)
 			{
+                if (c == null) return;
+
                 byte[] CompressedData = c.GetCompressedData();
-                if (CompressedData == null)
-                {
-                    SendPreChunk(c, 0);
-                    return;
-                }
+                if (CompressedData == null) { SendPreChunk(c, 0); return; }
 
 				SendPreChunk(c, 1);
 
@@ -1231,10 +1247,6 @@ namespace SMP
                 util.EndianBitConverter.Big.GetBytes(eid2).CopyTo(bytes, 4);
                 SendRaw(0x27, bytes);
             }
-            public void SendAttachEntity(int eid)
-            {
-                SendAttachEntity(this.id, eid);
-            }
 
             public void SendEntityMeta(int eid, params object[] data)
             {
@@ -1310,7 +1322,7 @@ namespace SMP
             {
                 byte[] bytes = new byte[13];
 
-                bytes[0] = dimension;
+                bytes[0] = (byte)level.dimension;
 				bytes[1] = mode;
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);

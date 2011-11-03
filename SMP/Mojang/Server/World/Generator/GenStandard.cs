@@ -1,5 +1,4 @@
 ﻿using System;
-//using LibNoise;
 
 namespace SMP {
 
@@ -7,7 +6,7 @@ namespace SMP {
     /// Default terrain generator.
     /// </summary>
     public class GenStandard : ChunkGen {
-        private readonly object blarg = new object();
+        private readonly object Lock = new object();
         
         java.util.Random random;
         public World worldObj;
@@ -17,7 +16,7 @@ namespace SMP {
         private NoiseOctaves field_702_n;
         public NoiseOctaves field_715_a;
         public NoiseOctaves field_714_b;
-        public NoiseOctaves mobSpawnerNoise;
+        //public NoiseOctaves mobSpawnerNoise;
 
         private GenCaves caveGenerator;
         //public MapGenStronghold field_35559_d;
@@ -55,7 +54,7 @@ namespace SMP {
             field_702_n = new NoiseOctaves(random, 4);
             field_715_a = new NoiseOctaves(random, 10);
             field_714_b = new NoiseOctaves(random, 16);
-            mobSpawnerNoise = new NoiseOctaves(random, 8);
+            //mobSpawnerNoise = new NoiseOctaves(random, 8);
         }
 
 
@@ -84,7 +83,7 @@ namespace SMP {
             }
             else
             {
-                lock (this.blarg) // We have to do this otherwise shit gets fucked.
+                lock (this.Lock) // We have to do this otherwise shit gets fucked.
                 {
                     random.setSeed((long)c.x * 0x4f9939f508L + (long)c.z * 0x1ef1565bd5L);
                     generateTerrain(c.x, c.z, c.blocks);
@@ -107,51 +106,56 @@ namespace SMP {
 
         public override void Populate(Chunk c)
         {
-            lock (this.blarg)
+            if (worldObj.seed != 0)
             {
-                //BlockSand.fallInstantly = true;
-                int k = c.x * 16;
-                int l = c.z * 16;
-                BiomeGenBase biomegenbase = worldObj.chunkManager.getBiomeGenAt(k + 16, l + 16);
-                random.setSeed(worldObj.seed);
-                long l1 = (random.nextLong() / 2L) * 2L + 1L;
-                long l2 = (random.nextLong() / 2L) * 2L + 1L;
-                random.setSeed((long)c.x * l1 + (long)c.z * l2 ^ worldObj.seed);
-                bool flag = false;
-                /*if (field_35563_t)
+                lock (this.Lock)
                 {
-                    field_35559_d.func_35532_a(worldObj, rand, i, j);
-                    field_35558_f.func_35532_a(worldObj, rand, i, j);
-                    flag = field_35560_e.func_35532_a(worldObj, rand, i, j);
-                }*/
-                if (!flag && random.nextInt(4) == 0)
-                {
-                    int i1 = k + random.nextInt(16) + 8;
-                    int i2 = random.nextInt(128);
-                    int i3 = l + random.nextInt(16) + 8;
-                    (new WorldGenLakes((byte)Blocks.SWater)).generate(worldObj, random, i1, i2, i3);
-                }
-                if (!flag && random.nextInt(8) == 0)
-                {
-                    int j1 = k + random.nextInt(16) + 8;
-                    int j2 = random.nextInt(random.nextInt(128 - 8) + 8);
-                    int j3 = l + random.nextInt(16) + 8;
-                    if (j2 < 63 || random.nextInt(10) == 0)
+                    DateTime start = DateTime.Now;
+                    //BlockSand.fallInstantly = true;
+                    int k = c.x * 16;
+                    int l = c.z * 16;
+                    BiomeGenBase biomegenbase = worldObj.chunkManager.getBiomeGenAt(k + 16, l + 16);
+                    random.setSeed(worldObj.seed);
+                    long l1 = (random.nextLong() / 2L) * 2L + 1L;
+                    long l2 = (random.nextLong() / 2L) * 2L + 1L;
+                    random.setSeed((long)c.x * l1 + (long)c.z * l2 ^ worldObj.seed);
+                    bool flag = false;
+                    if (field_35563_t)
                     {
-                        (new WorldGenLakes((byte)Blocks.SLava)).generate(worldObj, random, j1, j2, j3);
+                        //field_35559_d.func_35532_a(worldObj, rand, i, j);
+                        //field_35558_f.func_35532_a(worldObj, rand, i, j);
+                        //flag = field_35560_e.func_35532_a(worldObj, rand, i, j);
                     }
-                }
-                for (int k1 = 0; k1 < 8; k1++)
-                {
-                    int k2 = k + random.nextInt(16) + 8;
-                    int k3 = random.nextInt(128);
-                    int l3 = l + random.nextInt(16) + 8;
-                    if (!(new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) ;
-                }
+                    if (!flag && random.nextInt(4) == 0)
+                    {
+                        int i1 = k + random.nextInt(16) + 8;
+                        int i2 = random.nextInt(128);
+                        int i3 = l + random.nextInt(16) + 8;
+                        (new WorldGenLakes((byte)Blocks.SWater)).generate(worldObj, random, i1, i2, i3);
+                    }
+                    if (!flag && random.nextInt(8) == 0)
+                    {
+                        int j1 = k + random.nextInt(16) + 8;
+                        int j2 = random.nextInt(random.nextInt(128 - 8) + 8);
+                        int j3 = l + random.nextInt(16) + 8;
+                        if (j2 < 63 || random.nextInt(10) == 0)
+                        {
+                            (new WorldGenLakes((byte)Blocks.SLava)).generate(worldObj, random, j1, j2, j3);
+                        }
+                    }
+                    for (int k1 = 0; k1 < 8; k1++)
+                    {
+                        int k2 = k + random.nextInt(16) + 8;
+                        int k3 = random.nextInt(128);
+                        int l3 = l + random.nextInt(16) + 8;
+                        if (!(new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) ;
+                        //if ((new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) Console.WriteLine("Dungeon @ {0},{1},{2}", k2, k3, l3);
+                    }
 
-                biomegenbase.func_35513_a(worldObj, random, k, l);
-                //SpawnerAnimals.func_35573_a(worldObj, biomegenbase, k + 8, l + 8, 16, 16, rand);
-                //BlockSand.fallInstantly = false;
+                    biomegenbase.func_35513_a(worldObj, random, k, l);
+                    //SpawnerAnimals.func_35573_a(worldObj, biomegenbase, k + 8, l + 8, 16, 16, rand);
+                    //BlockSand.fallInstantly = false;
+                }
             }
         }
 

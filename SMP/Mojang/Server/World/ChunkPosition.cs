@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SMP
 {
@@ -16,7 +13,7 @@ namespace SMP
 
         public override bool Equals(object obj)
         {
-            if(obj.GetType() == typeof(ChunkPosition))
+            if(obj is ChunkPosition)
             {
                 ChunkPosition chunkposition = (ChunkPosition)obj;
                 return chunkposition.x == x && chunkposition.y == y && chunkposition.z == z;

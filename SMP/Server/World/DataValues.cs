@@ -478,6 +478,32 @@ namespace SMP
 		elevenMusicDisc = 2266
 		
 	};
+    public enum Mob : byte
+    {
+        Creeper = 50,
+        Skeleton = 51,
+        Spider = 52,
+        GiantZombie = 53,
+        Zombie = 54,
+        Slime = 55,
+        Ghast = 56,
+        ZombiePigman = 57,
+        Enderman = 58,
+        CaveSpider = 59,
+        Silverfish = 60,
+        Blaze = 61,
+        MagmaCube = 62,
+        EnderDragon = 63,
+        Pig = 90,
+        Sheep = 91,
+        Cow = 92,
+        Chicken = 93,
+        Squid = 94,
+        Wolf = 95,
+        Mooshroom = 96,
+        SnowGolem = 97,
+        Villager = 120
+    }
 	/// <summary>
 	/// Goes for wood types AND leaves
 	/// </summary>
@@ -506,10 +532,10 @@ namespace SMP
 	public enum TrapDoors : byte { West = 0x0, East = 0x1, South = 0x2, North = 0x3, Open = 0x4 };
 	public enum Piston : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, On = 0x8 };
 	public enum PistonExtension : byte { Down = 0x0, Up = 0x1, East = 0x2, West = 0x3, North = 0x4, South = 0x5, Sticky = 0x8 };
-	public enum StoneBrick : byte {Normal = 0x0, Mossy = 0x2, Cracked = 0x3}
-	//public enum HugeMushroom : byte {Fleshy = 0x0, Corner = 0x1, Side = 0x2 ??? }
-	public enum Vines : byte {Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8}
-	public enum FenceGate : byte {West = 0x0, North = 0x1, East = 0x2, South = 0x3}
+	public enum StoneBrick : byte { Normal = 0x0, Mossy = 0x1, Cracked = 0x2 }
+	public enum HugeMushroom : byte { Fleshy = 0x0, CornerNorthWest = 0x1, SideNorth = 0x2, CornerNorthEast = 0x3, SideWest = 0x4, Top = 0x5, SideEast = 0x6, CornerSouthWest = 0x7, SideSouth = 0x8, CornerSouthEast = 0x9, Stem = 0xA }
+	public enum Vines : byte { Top = 0x0, West = 0x1, North = 0x2, East = 0x4, South = 0x8 }
+	public enum FenceGate : byte { West = 0x0, North = 0x1, East = 0x2, South = 0x3, Open = 0x4 }
 	public enum Directions : byte { Bottom = 0, Top = 1, East = 2, West = 3, North = 4, South = 5 };
     public enum Material { Air, Iron, Wool, Grass, Gravel, Sand, Snow, Stone, Wood, Glass, Dirt, Water, Lava, Leaves, Unknown };
 	
@@ -900,6 +926,7 @@ namespace SMP
                 case 11:
                 case 51:
                 case 78:
+                case 106:
                     return true;
             }
             return false;

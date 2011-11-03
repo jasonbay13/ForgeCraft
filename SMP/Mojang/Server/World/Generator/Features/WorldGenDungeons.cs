@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SMP
 {
@@ -204,28 +201,27 @@ namespace SMP
 
         private int pickMobSpawner(java.util.Random random)
         {
-            return random.nextInt(4);
-            /*int i = random.nextInt(4);
+            int i = random.nextInt(4);
             if (i == 0)
             {
-                return "Skeleton";
+                return (int)Mob.Skeleton;
             }
             if (i == 1)
             {
-                return "Zombie";
+                return (int)Mob.Zombie;
             }
             if (i == 2)
             {
-                return "Zombie";
+                return (int)Mob.Zombie;
             }
             if (i == 3)
             {
-                return "Spider";
+                return (int)Mob.Spider;
             }
             else
             {
-                return "";
-            }*/
+                return 0;
+            }
         }
     }
 }

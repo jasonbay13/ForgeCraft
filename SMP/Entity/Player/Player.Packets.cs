@@ -507,7 +507,7 @@ namespace SMP
 			}
 
 
-            if (level.GetBlock(blockX, blockY, blockZ) != 78) // You can place stuff IN snow, not on it.
+            if (level.GetBlock(blockX, blockY, blockZ) != 78 && level.GetBlock(blockX, blockY, blockZ) != 106) // You can place stuff IN snow, not on it.
             {
                 switch (direction)
                 {

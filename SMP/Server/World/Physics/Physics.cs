@@ -175,6 +175,7 @@ namespace SMP
                             {
                                 if (C.x == check.x && C.y == check.y && C.z == check.z)
                                 {
+                                    C.time = check.time;
                                     C.meta = check.meta;
                                     break;
                                 }

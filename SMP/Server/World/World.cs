@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using zlib;
+using Ionic.Zlib;
 
 namespace SMP
 {
@@ -37,10 +37,13 @@ namespace SMP
         private long Seed;
         public long seed { get { return Seed; } set { Seed = value; } }
 		public long time;
+        public sbyte dimension = 0;
         private object genLock = new object();
+        private bool initialized = false;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
+        public System.Timers.Timer timeincrement = new System.Timers.Timer(50);
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
-		public ChunkGen generator;
+		private ChunkGen generator;
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
@@ -68,6 +71,36 @@ namespace SMP
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		#endregion
 
+        public Point3 SpawnPos
+        {
+            get
+            {
+                Point3 pos = new Point3(SpawnX + 0.5, SpawnY, SpawnZ + 0.5);
+
+                /*java.util.Random random = new java.util.Random(seed);
+                int i = 0;
+                do
+                {
+                    if (GetFirstUncoveredBlock((int)pos.x, (int)pos.z) == (byte)Blocks.Grass)
+                    {
+                        break;
+                    }
+                    pos.x += random.nextInt(64) - random.nextInt(64);
+                    pos.z += random.nextInt(64) - random.nextInt(64);
+                }
+                while (++i < 1000);*/
+
+                pos.y = FindTopSolidBlock((int)pos.x, (int)pos.z);
+
+                /*for (; pos.y >= 0; pos.y--)
+                    if (GetBlock((int)pos.x, (int)pos.y, (int)pos.z) != 0) break;
+                if (pos.y < 0) pos.y = 126;
+                pos.y++;*/
+
+                return pos;
+            }
+        }
+
         public World() { }
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.World"/> class and generates 49 chunks.
@@ -83,36 +116,41 @@ namespace SMP
 		/// </param>
 		public World (double spawnx, double spawny, double spawnz, string name, long seed)
 		{
+            this.name = name;
             this.seed = seed;
+            this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
 			chunkData = new Dictionary<Point, Chunk>();
             physics = new Physics(this);
             generator = new GenStandard(this, true);
             chunkManager = new WorldChunkManager(this);
-            this.name = name;
 			Server.Log("Generating...");
 
-            float count = 0, total = 7 * 7;
+            float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
             Console.SetCursorPosition(24, Console.CursorTop - 1);
             Console.Write("0%");
 
+            object derpLock = new object();
 			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
 			{
-	            Parallel.For(-3, 4, delegate(int x)
+                Parallel.For(((int)SpawnX >> 4) - Server.ViewDistance, ((int)SpawnX >> 4) + Server.ViewDistance + 1, delegate(int x)
 	            {
-	                Parallel.For(-3, 4, delegate(int z)
+                    Parallel.For(((int)SpawnZ >> 4) - Server.ViewDistance, ((int)SpawnZ >> 4) + Server.ViewDistance + 1, delegate(int z)
 	                {
                         LoadChunk(x, z, false, false);
-                        Console.SetCursorPosition(24, Console.CursorTop);
-                        count++; Console.Write((int)((count / total) * 100) + "%");
+                        lock (derpLock)
+                        {
+                            Console.SetCursorPosition(24, Console.CursorTop);
+                            count++; Console.Write((int)((count / total) * 100) + "%");
+                        }
 	                });
 	                //Server.Log(x + " Row Generated.");
 	            });
 			}
 			catch(NotImplementedException)
 			{
-				for (int x = -3; x < 4; x++)
+                for (int x = ((int)SpawnX >> 4) - Server.ViewDistance; x < ((int)SpawnX >> 4) + Server.ViewDistance + 1; x++)
 				{
-				    for (int z = -3; z < 4; z++)
+                    for (int z = ((int)SpawnZ >> 4) - Server.ViewDistance; z < ((int)SpawnZ >> 4) + Server.ViewDistance + 1; z++)
 				    {
                         LoadChunk(x, z, false, false);
                         Console.SetCursorPosition(24, Console.CursorTop);
@@ -124,18 +162,9 @@ namespace SMP
 
             Console.Write("\r");
 
-            Server.Log("Look distance = 3");
-			this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
-			timeupdate.Elapsed += delegate {
-				time += 20;
-				if (time > 24000)
-					time = 0;
-				Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == this) p.SendTime(); });
-			};
-			timeupdate.Start();
-            blockflush.Elapsed += delegate { FlushBlockChanges(); };
-            blockflush.Start();
+            Server.Log("Look distance = " + Server.ViewDistance);
 
+            Init();
             physics.Start();
 
             if (World.WorldLoad != null)
@@ -162,24 +191,24 @@ namespace SMP
 		}
 
         #region Chunk Saving/Loading
-        public void LoadChunk(int x, int z, bool thread = true, bool threadLoad = true)
+        public void LoadChunk(int x, int z, bool thread = true, bool threadLoad = true, bool generate = true, bool dummy = true)
         {
-            LoadChunk(x, z, this, thread, threadLoad);
+            LoadChunk(x, z, this, thread, threadLoad, generate, dummy);
         }
-        public static void LoadChunk(int x, int z, World w, bool thread = true, bool threadLoad = true)
+        public static void LoadChunk(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true, bool dummy = true)
         {
-            Chunk ch = Chunk.Load(x, z, w, thread, threadLoad);
+            Chunk ch = Chunk.Load(x, z, w, thread, threadLoad, generate, dummy);
             if (ch != null)
             {
                 Point pt = new Point(x, z);
                 lock (w.chunkData)
-                    if (!w.chunkData.ContainsKey(pt) || !w.chunkData[pt].generated)
+                    if (!w.chunkData.ContainsKey(pt) || !w.chunkData[pt].generated || !w.chunkData[pt].populated)
                     {
                         if (w.chunkData.ContainsKey(pt))
                             w.chunkData.Remove(pt);
                         w.chunkData.Add(pt, ch);
                     }
-                if (!ch.generated)
+                if (!ch.generated || !ch.populated)
                 {
                     if (thread) World.chunker.QueueChunk(x, z, w);
                     else w.GenerateChunk(x, z);
@@ -199,7 +228,7 @@ namespace SMP
             catch { return; }
 
             SaveChunk(x, z, w);
-            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
+            if (((int)w.SpawnX + 1 >> 4) != x || ((int)w.SpawnZ + 1 >> 4) != z) // Don't unload the spawn chunks!
             {
                 w.physics.RemoveChunkChecks(x, z);
                 lock (w.chunkData)
@@ -329,27 +358,31 @@ namespace SMP
             w.generator = new GenStandard(w, true);
             w.chunkManager = new WorldChunkManager(w);
 
-            float count = 0, total = 7 * 7;
+            float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
             Console.SetCursorPosition(21, Console.CursorTop - 1);
             Console.Write("0%");
 
+            object derpLock = new object();
             try
             {
-                Parallel.For(-3, 4, x =>
+                Parallel.For(((int)w.SpawnX >> 4) - Server.ViewDistance, ((int)w.SpawnX >> 4) + Server.ViewDistance + 1, x =>
                 {
-                    Parallel.For(-3, 4, z =>
+                    Parallel.For(((int)w.SpawnZ >> 4) - Server.ViewDistance, ((int)w.SpawnZ >> 4) + Server.ViewDistance + 1, z =>
                     {
                         w.LoadChunk(x, z, false, false);
-                        Console.SetCursorPosition(21, Console.CursorTop);
-                        count++; Console.Write((int)((count / total) * 100) + "%");
+                        lock (derpLock)
+                        {
+                            Console.SetCursorPosition(21, Console.CursorTop);
+                            count++; Console.Write((int)((count / total) * 100) + "%");
+                        }
                     });
                 });
             }
             catch (NotImplementedException)
             {
-                for (int x = -3; x < 4; x++)
+                for (int x = ((int)w.SpawnX >> 4) - Server.ViewDistance; x < ((int)w.SpawnX >> 4) + Server.ViewDistance + 1; x++)
                 {
-                    for (int z = -3; z < 4; z++)
+                    for (int z = ((int)w.SpawnZ >> 4) - Server.ViewDistance; z < ((int)w.SpawnZ >> 4) + Server.ViewDistance + 1; z++)
                     {
                         w.LoadChunk(x, z, false, false);
                         Console.SetCursorPosition(21, Console.CursorTop);
@@ -362,18 +395,9 @@ namespace SMP
 
             World.worlds.Add(w);
             Server.Log(filename + " Loaded.");
-            Server.Log("Look distance = 3");
-            w.timeupdate.Elapsed += delegate
-            {
-                w.time += 20;
-                if (w.time > 24000)
-                    w.time = 0;
-                Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == w) p.SendTime(); });
-            };
-            w.timeupdate.Start();
-            w.blockflush.Elapsed += delegate { w.FlushBlockChanges(); };
-            w.blockflush.Start();
+            Server.Log("Look distance = " + Server.ViewDistance);
 
+            w.Init();
             w.physics.Start();
 
             if (World.WorldLoad != null)
@@ -440,14 +464,15 @@ namespace SMP
             }
             if (!silent) Server.Log(w.name + " Saved.");
         }
-        public static void CompressData(byte[] inData, out byte[] outData)
+
+        #region Useless compression methods, use byte[].Compress() and byte[].Decompress()
+        /*public static void CompressData(byte[] inData, out byte[] outData)
         {
             using (MemoryStream outMemoryStream = new MemoryStream())
-            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_DEFAULT_COMPRESSION))
+            using (ZlibStream outZStream = new ZlibStream(outMemoryStream, CompressionMode.Compress, CompressionLevel.BestCompression, true))
             using (Stream inMemoryStream = new MemoryStream(inData))
             {
                 CopyStream(inMemoryStream, outZStream);
-                outZStream.finish();
                 outData = outMemoryStream.ToArray();
             }
         }
@@ -455,11 +480,10 @@ namespace SMP
         public static void DecompressData(byte[] inData, out byte[] outData)
         {
             using (MemoryStream outMemoryStream = new MemoryStream())
-            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream))
+            using (ZlibStream outZStream = new ZlibStream(outMemoryStream, CompressionMode.Decompress))
             using (MemoryStream inMemoryStream = new MemoryStream(inData))
             {
                 CopyStream(inMemoryStream, outZStream);
-                outZStream.finish();
                 outData = outMemoryStream.ToArray();
             }
         }
@@ -473,9 +497,23 @@ namespace SMP
                 output.Write(buffer, 0, len);
             }
             output.Flush();
-        }   
+        }*/
+        #endregion
 
-		public void Rain(bool rain)
+        public void Init()
+        {
+            if (initialized)
+                throw new Exception("World aready initialized.");
+            initialized = true;
+            timeupdate.Elapsed += delegate { Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == this) p.SendTime(); }); };
+            timeupdate.Start();
+            timeincrement.Elapsed += delegate { time++; if (time > 24000) time = 0; };
+            timeincrement.Start();
+            blockflush.Elapsed += delegate { FlushBlockChanges(); };
+            blockflush.Start();
+        }
+        
+        public void Rain(bool rain)
 		{
 			foreach (Player p in Player.players)
 			    if (p.MapLoaded && !p.disconnected)
@@ -494,34 +532,55 @@ namespace SMP
 			//Not sure if lightning needs depsawned, seems to not require it.
 		}
 
-		public void GenerateChunk(int x, int z)
+        public bool ChunkExists(int x, int z)
+        {
+            Point pt = new Point(x, z);
+            if (chunkData.ContainsKey(pt)) return true;
+            LoadChunk(x, z, false, false, false, false);
+            return chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated;
+        }
+
+		public Chunk GenerateChunk(int x, int z)
 		{
-            DateTime start; Chunk c; Point pt = new Point(x, z);
-            lock (this.genLock)
+            Chunk c; Point pt = new Point(x, z);
+
+            lock (chunkData)
             {
-                start = DateTime.Now;
                 if (chunkData.ContainsKey(pt)) { c = chunkData[pt]; }
-                else c = new Chunk(x, z) { generated = false };
-                c.generating = true;
-                generator.Generate(c);
-                c.RecalculateLight();
-                lock (chunkData) {
-                    if (chunkData.ContainsKey(pt))
-                        chunkData.Remove(pt);
-                    chunkData.Add(pt, c);
-                }
-                //generator.Populate(c);
-                c.generating = false;
+                else c = new Chunk(x, z);
             }
+
+            c.generating = true;
+            generator.Generate(c);
+            c.RecalculateLight();
             c.generated = true;
-            TimeSpan took = DateTime.Now - start;
-            //Console.WriteLine(took.TotalMilliseconds);
+            c.PostGenerate(this);
+            c.generating = false;
 
             if (GeneratedChunk != null)
                 GeneratedChunk(this, c, x, z);
             if (WorldGenerateChunk != null)
                 WorldGenerateChunk(this, c, x, z);
+
+            return c;
 		}
+        public void PopulateChunk(int x, int z)
+        {
+            Chunk c; Point pt = new Point(x, z);
+
+            lock (chunkData)
+            {
+                if (!chunkData.ContainsKey(pt)) return;
+                c = chunkData[pt];
+            }
+
+            c.generating = true;
+            generator.Populate(c);
+            c.populated = true;
+            c.PostPopulate(this);
+            c.generating = false;
+        }
+
         public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
         {
             Point pt = new Point(x >> 4, z >> 4);
@@ -552,9 +611,10 @@ namespace SMP
                 {
                     foreach (Player p in Player.players.ToArray())
                     {
-                        if (!p.MapLoaded || !p.VisibleChunks.Contains(kvp.Key)) continue;
-                        if (p.level == this)
-                            p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
+                        if (chunkData.ContainsKey(kvp.Key))
+                            if (!chunkData[kvp.Key].generated && !chunkData[kvp.Key].populated) continue;
+                        if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(kvp.Key)) continue;
+                        p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
                     }
                 }
             }
@@ -593,9 +653,8 @@ namespace SMP
 
                         foreach (Player p in Player.players.ToArray())
                         {
-                            if (!p.VisibleChunks.Contains(chunk.point)) continue;
-                            if (p.level == this)
-                                p.SendBlockChange(x, (byte)y, z, type, meta);
+                            if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(chunk.point)) continue;
+                            p.SendBlockChange(x, (byte)y, z, type, meta);
                         }
                         
                         lastBlockChange = DateTime.Now;
@@ -617,12 +676,17 @@ namespace SMP
                 if (chunk == null) return;
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
+
+                foreach (Player p in Player.players.ToArray())
+                {
+                    if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(chunk.point)) continue;
+                    p.SendBlockChange(x, (byte)y, z, type, meta);
+                }
             }
             catch { }
         }
 		public byte GetBlock(int x, int y, int z)
 		{
-            DateTime start = DateTime.Now;
             try
             {
                 int cx = x >> 4, cz = z >> 4;
@@ -712,6 +776,12 @@ namespace SMP
             Player.GlobalUpdateSign(this, x, (short)y, z, String.Empty, String.Empty, String.Empty, String.Empty);
         }
 
+        public int GetFirstUncoveredBlock(int x, int z)
+        {
+            int y; for (y = 63; !IsAirBlock(x, y + 1, z); y++) ;
+            return GetBlock(x, y, z);
+        }
+
         public int GetHeightValue(int x, int z)
         {
             try
@@ -723,8 +793,22 @@ namespace SMP
                 else
                 {
                     Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                    if (chunk == null) return 0;
                     return chunk.GetHeightValue(x & 0xf, z & 0xf);
                 }
+            }
+            catch { return 0; }
+        }
+
+        private byte GetFullLightValue(int x, int y, int z)
+        {
+            try
+            {
+                Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                if (chunk == null) return 0;
+                byte skylight = chunk.GetSkyLight(x & 0xf, y, z & 0xf);
+                if (skylight > 0) skylight--;
+                return Math.Max(skylight, chunk.GetBlockLight(x & 0xf, y, z & 0xf));
             }
             catch { return 0; }
         }
@@ -792,10 +876,11 @@ namespace SMP
                         }
                         if (!label0) return false;
                     }
-                    return /*world.getFullBlockLightValue(i, j, k) < 13 &&*/ BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
+                    return GetFullLightValue(x, y, z) < 13 && BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
             }
             return true;
         }
+
         public bool CanPlaceAt(byte b, int x, int y, int z)
         {
             byte l;
@@ -844,8 +929,9 @@ namespace SMP
         {
             try
             {
-                Chunk chunk = Chunk.GetChunk(x, z, this);
+                Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
                 int k = 127;
+                if (chunk == null) return k;
                 x &= 0xf;
                 z &= 0xf;
                 while (k > 0)

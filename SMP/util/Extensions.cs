@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.IO.Compression;
+//using System.IO.Compression;
+using Ionic.Zlib;
 
 namespace SMP
 {
@@ -32,27 +33,47 @@ namespace SMP
             return (byte)(data | (value << index));
         }
 
+        /// <summary>
+        /// Compresses a byte array using zlib.
+        /// </summary>
+        /// <param name="bytes">The byte array to be compressed.</param>
+        /// <returns>Compressed byte array.</returns>
         public static byte[] Compress(this byte[] bytes)
         {
-            using (MemoryStream ms = new MemoryStream())
+            return bytes.Compress(CompressionLevel.Default);
+        }
+
+        /// <summary>
+        /// Compresses a byte array using zlib.
+        /// </summary>
+        /// <param name="bytes">The byte array to be compressed.</param>
+        /// <param name="level">Amount of compression to use.</param>
+        /// <returns>Compressed byte array.</returns>
+        public static byte[] Compress(this byte[] bytes, CompressionLevel level)
+        {
+            using (MemoryStream memory = new MemoryStream())
             {
-                using (GZipStream gs = new GZipStream(ms, CompressionMode.Compress, true))
-                {
-                    gs.Write(bytes, 0, bytes.Length);
-                }
-                ms.Position = 0;
-                bytes = new byte[ms.Length];
-                ms.Read(bytes, 0, (int)ms.Length);
+                using (ZlibStream stream = new ZlibStream(memory, CompressionMode.Compress, level, true))
+                    stream.Write(bytes, 0, bytes.Length);
+                memory.Position = 0;
+                bytes = new byte[memory.Length];
+                memory.Read(bytes, 0, (int)memory.Length);
             }
             return bytes;
         }
+
+        /// <summary>
+        /// Decompresses a byte array using zlib.
+        /// </summary>
+        /// <param name="bytes">The byte array to be decompressed.</param>
+        /// <returns>Decompressed byte array.</returns>
         public static byte[] Decompress(this byte[] bytes)
         {
             int size = 4096;
             byte[] buffer = new byte[size];
             using (MemoryStream memory = new MemoryStream())
             {
-                using (GZipStream stream = new GZipStream(new MemoryStream(bytes), CompressionMode.Decompress))
+                using (ZlibStream stream = new ZlibStream(new MemoryStream(bytes), CompressionMode.Decompress))
                 {
                     int count = 0;
                     while ((count = stream.Read(buffer, 0, size)) > 0)

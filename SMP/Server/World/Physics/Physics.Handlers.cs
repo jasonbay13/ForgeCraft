@@ -12,6 +12,11 @@ namespace SMP
             public delegate bool PHD(Physics P, Check C); //PhysicsHandlerDelegate
             public static Dictionary<byte, PHD> handlers = new Dictionary<byte, PHD>();
 
+            public static List<byte> noAdjacent = new List<byte>()
+            { 
+                (byte)Blocks.ButtonStone
+            };
+
             public static void InitAll()
             {
                 // The method should return false to keep the check in the list, true to have it removed from the list.
@@ -20,9 +25,19 @@ namespace SMP
                 handlers.Add((byte)Blocks.ALava, new PHD(LavaFlow));
                 handlers.Add((byte)Blocks.SLava, new PHD(LavaFlow));
                 handlers.Add((byte)Blocks.Sponge, new PHD(SpongeSoak));
+                handlers.Add((byte)Blocks.ButtonStone, new PHD(ButtonRelease));
             }
 
 
+            public static bool ButtonRelease(Physics P, Check C)
+            {
+                if (C.time < 4) { C.time++; return false; }
+
+                if ((P.w.GetMeta(C.x, C.y, C.z) & 0x8) != 0)
+                    P.AddUpdate(C.x, C.y, C.z, (byte)Blocks.ButtonStone, (byte)(P.w.GetMeta(C.x, C.y, C.z) ^ 0x8));
+                return true;
+            }
+            
             public static bool WaterFlow(Physics P, Check C)
             {
                 //if (C.time < 5) { C.time++; return false; }

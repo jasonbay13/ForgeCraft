@@ -47,7 +47,7 @@ namespace SMP
                             }
                             w.SaveLVL();
                             w.chunkData = null;
-                            w.generator = null;
+                            //w.generator = null;
                             w.lightningTimer.Dispose();
                             w.timeupdate.Dispose();
                             w.ToGenerate.Clear();

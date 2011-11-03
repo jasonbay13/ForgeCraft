@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SMP
 {
@@ -209,13 +206,13 @@ namespace SMP
             }
             byte byte1 = otherCoordPairs[j];
             byte byte2 = otherCoordPairs[j + 3];
-            byte byte3;
+            sbyte byte3;
             if(ai2[j] > 0)
             {
                 byte3 = 1;
             } else
             {
-                byte3 = unchecked((byte)-1);
+                byte3 = -1;
             }
             double d = (double)ai2[byte1] / (double)ai2[j];
             double d1 = (double)ai2[byte2] / (double)ai2[j];
@@ -323,13 +320,13 @@ namespace SMP
             }
             byte byte1 = otherCoordPairs[i];
             byte byte2 = otherCoordPairs[i + 3];
-            byte byte3;
+            sbyte byte3;
             if(ai2[i] > 0)
             {
                 byte3 = 1;
             } else
             {
-                byte3 = unchecked((byte)-1);
+                byte3 = -1;
             }
             double d = (double)ai2[byte1] / (double)ai2[i];
             double d1 = (double)ai2[byte2] / (double)ai2[i];

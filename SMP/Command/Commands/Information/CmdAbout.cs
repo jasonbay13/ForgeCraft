@@ -34,6 +34,7 @@ namespace SMP
             p.SendMessage("Position: " + x + "," + y + "," + z);
             p.SendMessage("Type: " + p.level.GetBlock(x, y, z));
             p.SendMessage("Meta: " + p.level.GetMeta(x, y, z));
+            p.SendMessage("Extra: " + p.level.GetExtra(x, y, z));
         }
     }
 }

@@ -27,7 +27,7 @@ namespace SMP
 
         public override bool Equals(object obj)
         {
-            if(obj.GetType() != typeof(PlayerHashEntry))
+            if(!(obj is PlayerHashEntry))
             {
                 return false;
             }
