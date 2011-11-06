@@ -28,30 +28,18 @@ namespace SMP
         {
             genThread = new Thread(new ThreadStart(delegate
             {
-                Parallel.For(0, Server.genThreads, delegate(int wtf) // The int is so the compiler will shut up.
+                try
                 {
-                    ChunkGenQueue cgq; Chunk ch; Point pt;
-                    while (!Server.s.shuttingDown)
+                    Parallel.For(0, Server.genThreads, delegate(int wtf) // The int is so the compiler will shut up.
                     {
-                        try
-                        {
-                            if (genQueue.Count < 1) { Thread.Sleep(100); continue; }
-                            lock (genQueue)
-                                cgq = genQueue.Dequeue();
-                            lock (generated)
-                                generated.Add(cgq);
-                            ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
-                            pt = new Point(cgq.x, cgq.z);
-                            lock (cgq.world.chunkData)
-                                if (!cgq.world.chunkData.ContainsKey(pt))
-                                    cgq.world.chunkData.Add(pt, ch);
-                            ch.PostLoad(cgq.world);
-                            lock (generated)
-                                generated.Remove(cgq);
-                        }
-                        catch { }
-                    }
-                });
+                        GeneratorLoop();
+                    });
+                }
+                catch (NotImplementedException)
+                {
+                    Server.ServerLogger.Log("Parallel.For() is not implemented, chunk generation will be single-threaded.");
+                    GeneratorLoop();
+                }
             }));
             genThread.Start();
 
@@ -99,11 +87,11 @@ namespace SMP
                                 csq.sent = true;
                                 return;
                             }
-                            if (csq.player.level.chunkData.ContainsKey(pt) && csq.player.level.chunkData[pt].generated && csq.player.level.chunkData[pt].populated)
+                            if (csq.player.level.chunkData.ContainsKey(pt) && csq.player.level.chunkData[pt].generated)
                             {
                                 //Console.WriteLine("SENT " + csq.x + "," + csq.z);
                                 csq.player.SendChunk(csq.player.level.chunkData[pt]);
-                                csq.player.level.chunkData[pt].Update(csq.player.level, csq.player);
+                                //csq.player.level.chunkData[pt].Update(csq.player.level, csq.player);
                                 csq.sent = true;
                             }
                             Thread.Sleep(5);
@@ -149,6 +137,42 @@ namespace SMP
             ChunkSendQueue csq = new ChunkSendQueue(x, z, player);
             if (sendQueue.Contains(csq)) return;
             sendQueue.Add(csq);
+        }
+
+
+        private void GeneratorLoop()
+        {
+            ChunkGenQueue cgq; Chunk ch = null; Point pt;
+            while (!Server.s.shuttingDown)
+            {
+                try
+                {
+                    if (genQueue.Count < 1) { Thread.Sleep(100); continue; }
+                    lock (genQueue)
+                        cgq = genQueue.Dequeue();
+                    lock (generated)
+                        generated.Add(cgq);
+                    pt = new Point(cgq.x, cgq.z);
+                    if (cgq.generate)
+                    {
+                        ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
+                        lock (cgq.world.chunkData)
+                            if (!cgq.world.chunkData.ContainsKey(pt))
+                                cgq.world.chunkData.Add(pt, ch);
+                    }
+                    else
+                    {
+                        lock (cgq.world.chunkData)
+                            if (cgq.world.chunkData.ContainsKey(pt))
+                                ch = cgq.world.chunkData[pt];
+                    }
+                    if (ch != null) ch.PostLoad(cgq.world);
+                    ch = null;
+                    lock (generated)
+                        generated.Remove(cgq);
+                }
+                catch { }
+            }
         }
     }
 

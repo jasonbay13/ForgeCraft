@@ -78,7 +78,7 @@ namespace SMP
             text += startCol;
 
 
-            List<string> lines = Wrap(text, 64 - sb.Length);
+            List<string> lines = Wrap(text, 119 - sb.Length);
             WrapColors(lines);
 
             for (int i = 1; i < lines.Count; i++)
@@ -100,7 +100,7 @@ namespace SMP
 
         private static List<string> GetFixedSpaceText(string text)
         {
-            List<string> lines = Wrap(text, 58);
+            List<string> lines = Wrap(text, 113);
             WrapColors(lines);
 
             for (int i = 1; i < lines.Count; i++)
@@ -122,7 +122,7 @@ namespace SMP
 
         private static List<string> GetChatText(string text)
         {
-            List<string> lines = Wrap(text, 59);
+            List<string> lines = Wrap(text, 114);
             WrapColors(lines);
 
             for (int i = 1; i < lines.Count; i++)
@@ -144,7 +144,7 @@ namespace SMP
         /// Wraps the specified text into
         /// lines of the specified length.
         /// </summary>
-        private static List<string> Wrap(string text, int limit = 64)
+        private static List<string> Wrap(string text, int limit = 119)
         {
             int start = 0, end;
             var lines = new List<string>();

@@ -35,7 +35,7 @@ namespace SMP
 		public static Socket listen;
 		public static World mainlevel;
 		public static int protocolversion = 18;
-        public static Version Version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
+        public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 		
@@ -59,6 +59,7 @@ namespace SMP
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer worldsavetimer = new System.Timers.Timer(60000);
 		public static MainLoop ml;
+        public static byte difficulty = 0; // 0 thru 3 for Peaceful, Easy, Normal, Hard
 		public static byte mode = 0; //0=survival, 1=creative
 
         #region ==SETTINGS==

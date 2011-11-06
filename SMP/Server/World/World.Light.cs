@@ -10,11 +10,11 @@ namespace SMP
         public void SpreadLight(int x, int y, int z)
         {
             // TODO: Make this actually work worth a shit!
-            //SpreadLightInternal(x, y, z, 0);
-            //SpreadBlockLightInternal(x, y, z, 0);
+            //SpreadLightInternal(x, y, z);
+            //SpreadBlockLightInternal(x, y, z);
         }
 
-        private void SpreadLightInternal(int x, int y, int z, int dist)
+        private void SpreadLightInternal(int x, int y, int z, int dist = 0)
         {
             if (dist > 0xf) return;
             Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
@@ -32,7 +32,7 @@ namespace SMP
                 }
             });
         }
-        private void SpreadBlockLightInternal(int x, int y, int z, int dist)
+        private void SpreadBlockLightInternal(int x, int y, int z, int dist = 0)
         {
             if (dist > 0xf) return;
             Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);

@@ -38,7 +38,7 @@ namespace SMP
 		public int z;
 		public bool mountain = true; //???
         public bool generated = false, populated = false;
-        public bool generating = false;
+        public bool generating = false, populating = false;
         private bool _dirty = false;
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
 
@@ -215,11 +215,9 @@ namespace SMP
                 }
 
                 byte[] bytes;
-                bytes = data.ToArray().Compress(Ionic.Zlib.CompressionLevel.BestCompression);
+                bytes = data.ToArray().Compress(CompressionLevel.BestCompression);
                 using (FileStream fs = new FileStream(file, FileMode.Create))
-                {
                     fs.Write(bytes, 0, (int)bytes.Length);
-                }
             }
             this._dirty = false;
             //Console.WriteLine("SAVED " + x + " " + z);
@@ -272,7 +270,19 @@ namespace SMP
         }
         public void PostPopulate(World w)
         {
-            this._dirty = true;
+            byte bType, bMeta;
+            ushort bExtra;
+            int xxx, zzz;
+            for (int xx = 0; xx < Width; xx++)
+                for (int zz = 0; zz < Depth; zz++)
+                    for (int yy = 0; yy < Height; yy++)
+                    {
+                        xxx = (x << 4) + xx; zzz = (z << 4) + zz;
+                        bType = GetBlock(xx, yy, zz);
+
+                        if (!w.CanBlockStay(bType, xxx, yy, zzz))
+                            PlaceBlock(xx, yy, zz, 0, 0);
+                    }
         }
 
         public void GlobalUpdate(World w)
@@ -446,26 +456,23 @@ namespace SMP
         {
             try
             {
-                byte[] compressed;
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    using (ZlibStream zout = new ZlibStream(ms, CompressionMode.Compress, CompressionLevel.BestCompression, true))
-                    {
-                        // Write block types
-                        zout.Write(blocks, 0, blocks.Length);
+                    // Write block types
+                    ms.Write(blocks, 0, blocks.Length);
 
-                        // Write metadata
-                        zout.Write(meta, 0, meta.Length);
+                    // Write metadata
+                    ms.Write(meta, 0, meta.Length);
 
-                        // Write block light
-                        zout.Write(Light, 0, Light.Length);
+                    // Write block light
+                    ms.Write(Light, 0, Light.Length);
 
-                        // Write sky light
-                        zout.Write(SkyL, 0, SkyL.Length);
-                    }
-                    compressed = ms.ToArray();
+                    // Write sky light
+                    ms.Write(SkyL, 0, SkyL.Length);
+
+                    // Compress the data
+                    return ms.ToArray().Compress(CompressionLevel.BestCompression);
                 }
-                return compressed;
             }
             catch { return null; }
         }
@@ -567,7 +574,7 @@ namespace SMP
                     if (!world.chunkData.ContainsKey(po))
                     {
                         world.chunkData.Add(po, Load(x, z, world, false, false));
-                        world.chunkData[po].PostLoad(world);
+                        //world.chunkData[po].PostLoad(world);
                     }
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];

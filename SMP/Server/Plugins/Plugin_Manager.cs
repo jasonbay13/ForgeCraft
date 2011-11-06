@@ -80,7 +80,7 @@ namespace SMP
             try
             {
                 object instance = Activator.CreateInstance(Assembly.LoadFrom(pluginname).GetTypes()[0]);
-                if (((Plugin)instance).ForgeCraft_Version > Server.Version)
+                if (((Plugin)instance).ForgeCraft_Version > Server.version)
                 {
                     Server.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
                     Thread.Sleep(1000);

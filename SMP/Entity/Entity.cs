@@ -169,17 +169,21 @@ namespace SMP
                             {
                                 if (p.level.chunkData.ContainsKey(po))
                                 {
-                                    if (!p.level.chunkData[po].generated || !p.level.chunkData[po].populated)
+                                    if (!p.level.chunkData[po].generated)
                                     {
-                                        World.chunker.QueueChunk(po, p.level, !p.level.chunkData[po].generated, !p.level.chunkData[po].populated);
+                                        World.chunker.QueueChunk(po, p.level);
                                         World.chunker.QueueChunkSend(po, p);
                                     }
                                     else if (forcequeue)
+                                    {
+                                        if (!p.level.chunkData[po].generated) World.chunker.QueueChunk(po, p.level, false);
                                         World.chunker.QueueChunkSend(po, p);
+                                    }
                                     else
                                     {
+                                        if (!p.level.chunkData[po].generated) World.chunker.QueueChunk(po, p.level, false);
                                         p.SendChunk(p.level.chunkData[po]);
-                                        p.level.chunkData[po].Update(p.level, p);
+                                        //p.level.chunkData[po].Update(p.level, p);
                                     }
                                 }
                                 else
@@ -349,7 +353,7 @@ namespace SMP
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("Entity{").Append(id).Append(':').Append((int)pos.x).Append(',').Append((int)pos.y).Append(',').Append((int)pos.z).Append(':');
-            if (isPlayer) sb.Append(p.GetName());
+            if (isPlayer) sb.Append(p.username);
             else if (isItem) sb.Append("Item{").Append(I.item).Append(":").Append(I.count).Append(":").Append(I.meta).Append('}');
             else if (isAI) sb.Append(ai.GetType().Name);
             else if (isObject) sb.Append(obj.GetType().Name);

@@ -73,12 +73,13 @@ namespace SMP
             byte[] buffer = new byte[size];
             using (MemoryStream memory = new MemoryStream())
             {
-                using (ZlibStream stream = new ZlibStream(new MemoryStream(bytes), CompressionMode.Decompress))
-                {
-                    int count = 0;
-                    while ((count = stream.Read(buffer, 0, size)) > 0)
-                        memory.Write(buffer, 0, count);
-                }
+                using (MemoryStream memory2 = new MemoryStream(bytes))
+                    using (ZlibStream stream = new ZlibStream(memory2, CompressionMode.Decompress))
+                    {
+                        int count = 0;
+                        while ((count = stream.Read(buffer, 0, size)) > 0)
+                            memory.Write(buffer, 0, count);
+                    }
                 return memory.ToArray();
             }
         }

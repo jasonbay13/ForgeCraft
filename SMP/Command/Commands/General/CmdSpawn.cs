@@ -23,8 +23,8 @@ namespace SMP
     public class CmdSpawn : Command
     {
         public override string Name { get { return "spawn"; } }
-        public override List<String> Shortcuts { get { return new List<string> { "respawnme" }; } }
-        public override string Category { get { return "Mod"; } }
+        public override List<String> Shortcuts { get { return new List<string> { "respawnme", "respawn" }; } }
+        public override string Category { get { return "general"; } }
         public override bool ConsoleUseable { get { return false; } }
         public override string Description { get { return "Spawns you at spawn"; } } //used for displaying what the commands does when using /help
         public override string PermissionNode { get { return "core.mod.spawn"; } }

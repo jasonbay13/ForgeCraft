@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
     <Compile Include="Command\Commands\Build\CmdTree.cs" />
+    <Compile Include="Command\Commands\General\CmdReveal.cs" />
     <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />

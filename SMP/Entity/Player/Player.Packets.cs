@@ -44,16 +44,16 @@ namespace SMP
 			
 			/*if (version > Server.protocolversion)  //left commented during development
             {
-                Kick("Outdated server");
+                Kick("Outdated server!");
                 return;
             }
-            else if (version < Server.protocolversion)
+            if (version < Server.protocolversion)
             {
-                Kick("Outdated client");
+                Kick("Outdated client!");
                 return;
             }*/
 			
-			if (ip != "127.0.0.1")
+			if (!IPInPrivateRange(ip))
 			{
 				if (Player.players.Count >= Server.MaxPlayers)
 				{
@@ -61,9 +61,9 @@ namespace SMP
 					{
 						for(int i = players.Count - 1; i >= 0; i--) // kick the last joined non-vip
 						{
-							if (!Server.VIPList.Contains(username.ToLower()))
+							if (!Server.VIPList.Contains(players[i].username.ToLower()))
 							{
-								players[i].Kick("You have been kicked for a VIP");
+								players[i].Kick("You have been kicked for a VIP.");
 								break;
 							}
 						}
@@ -73,7 +73,7 @@ namespace SMP
 						Kick(Server.VIPListMessage);
 					}
 					else if (!Server.useviplist)
-						Kick("Server is Full");	
+						Kick("Server is full!");	
 				}
 				
 				if (Server.BanList.Contains(username.ToLower())) 

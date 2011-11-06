@@ -52,6 +52,7 @@ namespace SMP
 		public float[] rot;
         public float[] oldrot = new float[2];
 		byte onground;
+        public bool OnGround { get { return onground == 1; } set { onground = (byte)(value ? 1 : 0); } }
 		public int id { get { return e.id; } }
         private DateTime pingdate = new DateTime();
         private DateTime lastPosSync = new DateTime();
@@ -887,7 +888,7 @@ namespace SMP
 					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16); 
 					bytes[bytes.Length - 5] = Server.mode;
 					bytes[bytes.Length - 4] = (byte)level.dimension;
-                    bytes[bytes.Length - 3] = 1;
+                    bytes[bytes.Length - 3] = Server.difficulty;
 					bytes[bytes.Length - 2] = level.height;
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
@@ -1015,7 +1016,7 @@ namespace SMP
 				SendLoginDone();
 				SendInventory();
                 SendChunk(e.c);
-                e.UpdateChunks(true, false, true);
+                //e.UpdateChunks(true, false, true);
 				MapLoaded = true;
 				
 			}
@@ -1046,7 +1047,9 @@ namespace SMP
 				CompressedData.CopyTo(bytes, 17);
 				SendRaw(0x33, bytes);
 
-				VisibleChunks.Add(c.point);
+                c.Update(level, this);
+
+				if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
 			}
 			/// <summary>
 			/// Prepare the client before sending the chunk
@@ -1072,11 +1075,11 @@ namespace SMP
 			/// Force. Force it to update the current chunk
 			/// </param>
 			/// <param name='forcesend'>
-			/// Forcesend. For it to send all the chunk, even if the player already see's it (Good for map switching)
+			/// Forcesend. Force it to send all the chunk, even if the player already see's it (Good for map switching)
 			/// </param>
 			public void UpdateChunks(bool force, bool forcesend)
 			{
-				e.UpdateChunks(force, forcesend);
+                e.UpdateChunks(force, forcesend);
 			}
 			#endregion
 			#region Entity Handling
@@ -1085,12 +1088,12 @@ namespace SMP
 				//Console.WriteLine(username + " " + p.username);
 				try
 				{
-					/*if (p == null) // WHAT THE FUCK
-					{
-						if(VisibleEntities.Contains(p.id)) VisibleEntities.Remove(p.id);
-						return;
-					}*/
-					if (!LoggedIn)
+                    if (p == null)
+                    {
+                        //if(VisibleEntities.Contains(p.id)) VisibleEntities.Remove(p.id); // WHAT THE FUCK
+                        return;
+                    }
+                    if (!LoggedIn)
 					{
 						if(VisibleEntities.Contains(p.id)) VisibleEntities.Remove(p.id);
 						return;
@@ -1117,7 +1120,7 @@ namespace SMP
 					bytes[(22 + (length * 2)) - 4] = (byte)(rot[0] / 1.40625);
 					bytes[(22 + (length * 2)) - 3] = (byte)(rot[1] / 1.40625);
 
-					util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, (22 + (length * 2)) - 2);
+                    util.EndianBitConverter.Big.GetBytes((short)(p.current_block_holding.item == -1 ? 0 : p.current_block_holding.item)).CopyTo(bytes, (22 + (length * 2)) - 2);
 
 					SendRaw(0x14, bytes);
 
@@ -1323,7 +1326,7 @@ namespace SMP
                 byte[] bytes = new byte[13];
 
                 bytes[0] = (byte)level.dimension;
-				bytes[1] = mode;
+				bytes[1] = Server.difficulty;
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
 				util.BigEndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, 5);
@@ -1348,7 +1351,7 @@ namespace SMP
 			#endregion
 		#endregion
 		#region INCOMING
-			void HandleCommand(string cmd, string message)
+		public void HandleCommand(string cmd, string message)
 		{
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
@@ -1359,8 +1362,8 @@ namespace SMP
                 return;
             }
 				
-	            if (Group.CheckPermission(this, command.PermissionNode))
-	            {
+	        if (Group.CheckPermission(this, command.PermissionNode))
+	        {
 	            List<string> args = new List<string>();
 	            while (true)
 	            {
@@ -1368,7 +1371,7 @@ namespace SMP
 	                {
 	                    message = message.Substring(message.IndexOf(' ') + 1);
 	                    if (message.IndexOf(' ') != -1)
-	                    args.Add(message.Substring(0, message.IndexOf(' ')));
+	                        args.Add(message.Substring(0, message.IndexOf(' ')));
 	                    else
 	                    {
 	                        args.Add(message);
@@ -1378,15 +1381,15 @@ namespace SMP
 	                else if (message.IndexOf(' ') == -1)
 	                    break;
 	            }
-	
-	            command.Use(this, args.ToArray());
+
+                command.Use(this, args.ToArray());
 	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
-	            }
-	            else
-	            {
-	                Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
-	                SendMessage(Color.Purple + "HelpBot V12: You don't have access to command /" + cmd + ".");
-				}
+	        }
+	        else
+	        {
+	            Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
+	            SendMessage(Color.Purple + "HelpBot V12: You don't have access to command /" + cmd + ".");
+			}
 		}
 		#endregion
 		#region Messaging
@@ -1974,6 +1977,29 @@ namespace SMP
             if (returnNull == true) return null;
             if (tempPlayer != null) return tempPlayer;
             return null;
+        }
+
+        public static bool IPInPrivateRange(string ip)
+        {
+            //Official loopback is 127.0.0.1/8
+            if (ip.StartsWith("127.0.0.") || ip.StartsWith("192.168.") || ip.StartsWith("10."))
+                return true;
+
+            if (ip.StartsWith("172."))
+            {
+                string[] split = ip.Split('.');
+                if (split.Length >= 2)
+                {
+                    try
+                    {
+                        int secondPart = Convert.ToInt32(split[1]);
+                        return (secondPart >= 16 && secondPart <= 31);
+                    }
+                    catch { return false; }
+                }
+            }
+
+            return false;
         }
 		
 		public string GetPrefix()

@@ -123,10 +123,11 @@ namespace SMP
             physics = new Physics(this);
             generator = new GenStandard(this, true);
             chunkManager = new WorldChunkManager(this);
-			Server.Log("Generating...");
+            Server.Log("Generating " + this.name + "...");
 
+            int cursorH = 25 + this.name.Length;
             float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
-            Console.SetCursorPosition(24, Console.CursorTop - 1);
+            Console.SetCursorPosition(cursorH, Console.CursorTop - 1);
             Console.Write("0%");
 
             object derpLock = new object();
@@ -139,7 +140,7 @@ namespace SMP
                         LoadChunk(x, z, false, false);
                         lock (derpLock)
                         {
-                            Console.SetCursorPosition(24, Console.CursorTop);
+                            Console.SetCursorPosition(cursorH, Console.CursorTop);
                             count++; Console.Write((int)((count / total) * 100) + "%");
                         }
 	                });
@@ -153,7 +154,7 @@ namespace SMP
                     for (int z = ((int)SpawnZ >> 4) - Server.ViewDistance; z < ((int)SpawnZ >> 4) + Server.ViewDistance + 1; z++)
 				    {
                         LoadChunk(x, z, false, false);
-                        Console.SetCursorPosition(24, Console.CursorTop);
+                        Console.SetCursorPosition(cursorH, Console.CursorTop);
                         count++; Console.Write((int)((count / total) * 100) + "%");
 				    }
 			    	//Server.Log(x + " Row Generated.");
@@ -175,7 +176,7 @@ namespace SMP
 		{
 			World tempLevel = null; bool returnNull = false;
 
-            foreach (World world in worlds)
+            foreach (World world in worlds.ToArray())
             {
                 if (world.name.ToLower() == name) return world;
                 if (world.name.ToLower().IndexOf(name.ToLower()) != -1)
@@ -191,13 +192,13 @@ namespace SMP
 		}
 
         #region Chunk Saving/Loading
-        public void LoadChunk(int x, int z, bool thread = true, bool threadLoad = true, bool generate = true, bool dummy = true)
+        public void LoadChunk(int x, int z, bool thread = true, bool threadLoad = true, bool generate = true)
         {
-            LoadChunk(x, z, this, thread, threadLoad, generate, dummy);
+            LoadChunk(x, z, this, thread, threadLoad, generate);
         }
-        public static void LoadChunk(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true, bool dummy = true)
+        public static void LoadChunk(int x, int z, World w, bool thread = true, bool threadLoad = true, bool generate = true)
         {
-            Chunk ch = Chunk.Load(x, z, w, thread, threadLoad, generate, dummy);
+            Chunk ch = Chunk.Load(x, z, w, thread, threadLoad, generate, false);
             if (ch != null)
             {
                 Point pt = new Point(x, z);
@@ -224,7 +225,7 @@ namespace SMP
         public static void UnloadChunk(int x, int z, World w)
         {
             Point pt = new Point(x, z);
-            try { if (w.chunkData.ContainsKey(pt) && w.chunkData[pt].generating) return; }
+            try { if (w.chunkData.ContainsKey(pt) && (w.chunkData[pt].generating || w.ChunkPopulatingCheck(x, z))) return; }
             catch { return; }
 
             SaveChunk(x, z, w);
@@ -282,7 +283,7 @@ namespace SMP
             //if (WorldLoad != null)
             //	WorldLoad(this);
             World w = new World() { chunkData = new Dictionary<Point, Chunk>(), name = filename };
-            Server.Log("Loading...");
+            Server.Log("Loading " + w.name + "...");
 
             /*using (MemoryStream ms = new MemoryStream())
             {
@@ -344,22 +345,28 @@ namespace SMP
 				}
             }*/
 
-            using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
+            try
             {
-                w.seed = long.Parse(sw.ReadLine());
-                w.SpawnX = int.Parse(sw.ReadLine());
-                w.SpawnY = int.Parse(sw.ReadLine());
-                w.SpawnZ = int.Parse(sw.ReadLine());
-                w.ChunkLimit = int.Parse(sw.ReadLine());
-                w.time = long.Parse(sw.ReadLine());
+                using (StreamReader sw = new StreamReader(filename + "/" + filename + ".ini"))
+                {
+                    w.seed = long.Parse(sw.ReadLine());
+                    w.SpawnX = int.Parse(sw.ReadLine());
+                    w.SpawnY = int.Parse(sw.ReadLine());
+                    w.SpawnZ = int.Parse(sw.ReadLine());
+                    w.ChunkLimit = int.Parse(sw.ReadLine());
+                    w.time = long.Parse(sw.ReadLine());
+                    w.dimension = sbyte.Parse(sw.ReadLine());
+                }
             }
+            catch { /*Server.ServerLogger.Log("Error loading world configuration!");*/ }
 
             w.physics = new Physics(w);
             w.generator = new GenStandard(w, true);
             w.chunkManager = new WorldChunkManager(w);
 
+            int cursorH = 22 + w.name.Length;
             float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
-            Console.SetCursorPosition(21, Console.CursorTop - 1);
+            Console.SetCursorPosition(cursorH, Console.CursorTop - 1);
             Console.Write("0%");
 
             object derpLock = new object();
@@ -372,7 +379,7 @@ namespace SMP
                         w.LoadChunk(x, z, false, false);
                         lock (derpLock)
                         {
-                            Console.SetCursorPosition(21, Console.CursorTop);
+                            Console.SetCursorPosition(cursorH, Console.CursorTop);
                             count++; Console.Write((int)((count / total) * 100) + "%");
                         }
                     });
@@ -385,7 +392,7 @@ namespace SMP
                     for (int z = ((int)w.SpawnZ >> 4) - Server.ViewDistance; z < ((int)w.SpawnZ >> 4) + Server.ViewDistance + 1; z++)
                     {
                         w.LoadChunk(x, z, false, false);
-                        Console.SetCursorPosition(21, Console.CursorTop);
+                        Console.SetCursorPosition(cursorH, Console.CursorTop);
                         count++; Console.Write((int)((count / total) * 100) + "%");
                     }
                 }
@@ -427,6 +434,7 @@ namespace SMP
                 sw.WriteLine(w.SpawnZ);
                 sw.WriteLine(w.ChunkLimit);
                 sw.WriteLine(w.time);
+                sw.WriteLine(w.dimension);
             }
             /*using (MemoryStream blocks = new MemoryStream())
             {
@@ -536,8 +544,9 @@ namespace SMP
         {
             Point pt = new Point(x, z);
             if (chunkData.ContainsKey(pt)) return true;
-            LoadChunk(x, z, false, false, false, false);
-            return chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated;
+            LoadChunk(x, z, false, false, false);
+            //Console.WriteLine(chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated);
+            return chunkData.ContainsKey(pt) && chunkData[pt].generated;
         }
 
 		public Chunk GenerateChunk(int x, int z)
@@ -572,13 +581,34 @@ namespace SMP
             {
                 if (!chunkData.ContainsKey(pt)) return;
                 c = chunkData[pt];
+                c.populating = true;
             }
 
-            c.generating = true;
+            //Console.WriteLine((x << 4) + "," + (z << 4));
             generator.Populate(c);
             c.populated = true;
             c.PostPopulate(this);
-            c.generating = false;
+            c.populating = false;
+        }
+
+        public bool ChunkPopulatingCheck(int x, int z)
+        {
+            lock (chunkData)
+            {
+                Point pt = new Point(x, z);
+                if (chunkData.ContainsKey(pt) && chunkData[pt].populating)
+                    return true;
+                pt.x--;
+                if (chunkData.ContainsKey(pt) && chunkData[pt].populating)
+                    return true;
+                pt.z--;
+                if (chunkData.ContainsKey(pt) && chunkData[pt].populating)
+                    return true;
+                pt.x++;
+                if (chunkData.ContainsKey(pt) && chunkData[pt].populating)
+                    return true;
+                return false;
+            }
         }
 
         public void QueueBlockChange(int x, int y, int z, byte type, byte meta)
@@ -611,8 +641,6 @@ namespace SMP
                 {
                     foreach (Player p in Player.players.ToArray())
                     {
-                        if (chunkData.ContainsKey(kvp.Key))
-                            if (!chunkData[kvp.Key].generated && !chunkData[kvp.Key].populated) continue;
                         if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(kvp.Key)) continue;
                         p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
                     }
@@ -661,7 +689,7 @@ namespace SMP
                     }
                 }
             }
-            catch { return; }
+            catch { }
 		}
         public void SetBlock(int x, int y, int z, byte type)
         {

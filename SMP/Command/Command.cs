@@ -75,6 +75,7 @@ namespace SMP
 			core.Add(new CmdNewLVL());
 			core.Add(new CmdPromote());
             core.Add(new CmdRain());
+            core.Add(new CmdReveal());
             core.Add(new CmdSay());
 			core.Add(new CmdSetRank());
             core.Add(new CmdSpheroid());

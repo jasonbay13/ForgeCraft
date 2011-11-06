@@ -39,7 +39,7 @@ namespace SMP.GUI
         }
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            this.Text = "ForgeCraft v" + Server.Version.ToString();
+            this.Text = "ForgeCraft v" + Server.version.ToString();
         }
 
         private void button1_Click(object sender, EventArgs e)
