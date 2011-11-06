@@ -198,7 +198,7 @@ namespace SMP
 			byte[] bytes = new byte[5 + (length)];
 
 			bytes[0] = 1; //CHANGE THIS! (idk what the byte referances, i dont really see a use for it if its just a byte)
-			bytes[1] = window.type;
+            bytes[1] = 3;
 			util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
 			UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
 			bytes[4 + (length)] = (byte)window.items.Length; //number of slots
@@ -223,10 +223,27 @@ namespace SMP
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
+
 			return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
 		{
+            if (!a.level.windows.ContainsKey(b.pos))
+            {
+                new Windows(1, b.pos, a.level);
+            }
+
+            Windows window = a.level.windows[b.pos];
+            short length = (short)window.name.Length;
+            byte[] bytes = new byte[5 + (length)];
+
+            bytes[0] = 2;
+            bytes[1] = 1;
+            util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
+            UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
+            bytes[4 + (length)] = (byte)window.items.Length;
+
+            a.SendRaw(0x64, bytes);
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)

@@ -35,62 +35,62 @@ namespace SMP
 
         public void Start()
         {
-            try
-            {
-                IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
-                listen = new Socket(endpoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                listen.Bind(endpoint);
-                listen.Listen((int)SocketOptionName.MaxConnections);
+            //try
+            //{
+            //    IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
+            //    listen = new Socket(endpoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            //    listen.Bind(endpoint);
+            //    listen.Listen((int)SocketOptionName.MaxConnections);
 
-                listen.BeginAccept(new AsyncCallback(Accept), null);
-                Server.Log("Remote Server Started on port: " + port.ToString());
-            }
-            catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
-            catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
+            //    listen.BeginAccept(new AsyncCallback(Accept), null);
+            //    Server.Log("Remote Server Started on port: " + port.ToString());
+            //}
+            //catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
+            //catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
         }
 
-        void Accept(IAsyncResult result)
-        {
-            if (Server.s.shuttingDown == false)
-            {
-                Remote p = null;
-                bool begin = false;
-                try
-                {
-                    p = new Remote();
+        //void Accept(IAsyncResult result)
+        //{
+        //    if (Server.s.shuttingDown == false)
+        //    {
+        //        Remote p = null;
+        //        bool begin = false;
+        //        try
+        //        {
+        //            p = new Remote();
 
-                    p.socket = listen.EndAccept(result);
-                    new Thread(new ThreadStart(p.Start)).Start();
+        //            p.socket = listen.EndAccept(result);
+        //            new Thread(new ThreadStart(p.Start)).Start();
 
-                    listen.BeginAccept(new AsyncCallback(Accept), null);
-                    begin = true;
+        //            listen.BeginAccept(new AsyncCallback(Accept), null);
+        //            begin = true;
 
                    
 
-                }
-                catch (SocketException)
-                {
-                    if (p != null)
-                        p.Disconnect();
-                    if (!begin)
-                        listen.BeginAccept(new AsyncCallback(Accept), null);
-                }
-                catch (Exception e)
-                {
-                    Server.Log(e.Message);
-                    Server.Log(e.StackTrace);
-                    if (p != null)
-                        p.Disconnect();
-                    if (!begin)
-                        listen.BeginAccept(new AsyncCallback(Accept), null);
-                }
-            }
-        }
+        //        }
+        //        catch (SocketException)
+        //        {
+        //            if (p != null)
+        //                p.Disconnect();
+        //            if (!begin)
+        //                listen.BeginAccept(new AsyncCallback(Accept), null);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Server.Log(e.Message);
+        //            Server.Log(e.StackTrace);
+        //            if (p != null)
+        //                p.Disconnect();
+        //            if (!begin)
+        //                listen.BeginAccept(new AsyncCallback(Accept), null);
+        //        }
+        //    }
+        //}
         
         
-        static void Close()
-        {
-            shutdown = true;
-        }
+        //static void Close()
+        //{
+        //    shutdown = true;
+        //}
     }
 }
