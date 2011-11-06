@@ -1,70 +1,70 @@
-/*
-	Copyright 2011 ForgeCraft team
+///*
+//    Copyright 2011 ForgeCraft team
 	
-	Dual-licensed under the	Educational Community License, Version 2.0 and
-	the GNU General Public License, Version 3 (the "Licenses"); you may
-	not use this file except in compliance with the Licenses. You may
-	obtain a copy of the Licenses at
+//    Dual-licensed under the	Educational Community License, Version 2.0 and
+//    the GNU General Public License, Version 3 (the "Licenses"); you may
+//    not use this file except in compliance with the Licenses. You may
+//    obtain a copy of the Licenses at
 	
-	http://www.opensource.org/licenses/ecl2.php
-	http://www.gnu.org/licenses/gpl-3.0.html
+//    http://www.opensource.org/licenses/ecl2.php
+//    http://www.gnu.org/licenses/gpl-3.0.html
 	
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the Licenses are distributed on an "AS IS"
-	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-	or implied. See the Licenses for the specific language governing
-	permissions and limitations under the Licenses.
-*/
-using System;
-using System.Text;
+//    Unless required by applicable law or agreed to in writing,
+//    software distributed under the Licenses are distributed on an "AS IS"
+//    BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+//    or implied. See the Licenses for the specific language governing
+//    permissions and limitations under the Licenses.
+//*/
+//using System;
+//using System.Text;
 
-//for console commands mainly and removes color codes from text
+////for console commands mainly and removes color codes from text
 
-namespace SMP {
+//namespace SMP {
 
-    /// <summary>
-    /// Pseudo-player for handling console commands.
-    /// </summary>
-    public class RemotePlayer : Player
-    {
+//    /// <summary>
+//    /// Pseudo-player for handling console commands.
+//    /// </summary>
+//    public class RemotePlayer : Player
+//    {
 
-        public RemotePlayer(Server server)
-            : base()
-        {
-            this.group = new ConsoleGroup();
-            username = Remote.getUsername();
-            ip = Remote.getIp();
-        }
+//        public RemotePlayer(Server server)
+//            : base()
+//        {
+//            this.group = new ConsoleGroup();
+//            username = Remote.getUsername();
+//            ip = Remote.getIp();
+//        }
 
-        protected override void SendMessageInternal(string message)
-        {
-            Server.ServerLogger.Log(LogLevel.Info, ParseColors(message) );
-        }
+//        protected override void SendMessageInternal(string message)
+//        {
+//            Server.ServerLogger.Log(LogLevel.Info, ParseColors(message) );
+//        }
 
-        /// <summary>
-        /// Removes color codes from a string.
-        /// </summary>
-        private static string ParseColors(string text)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (text[i] == '§' && text.Length > i + 1 && ((text[i + 1] >= 'a' && text[i + 1] <= 'f') ||
-                    (text[i + 1] >= 'A' && text[i + 1] <= 'F') || (text[i + 1] >= '0' && text[i + 1] <= '9')))
-                {
-                    i++;
-                }
-                else
-                {
-                    sb.Append(text[i]);
-                }
-            }
-            return sb.ToString();
-        }
+//        /// <summary>
+//        /// Removes color codes from a string.
+//        /// </summary>
+//        private static string ParseColors(string text)
+//        {
+//            StringBuilder sb = new StringBuilder();
+//            for (int i = 0; i < text.Length; i++)
+//            {
+//                if (text[i] == '§' && text.Length > i + 1 && ((text[i + 1] >= 'a' && text[i + 1] <= 'f') ||
+//                    (text[i + 1] >= 'A' && text[i + 1] <= 'F') || (text[i + 1] >= '0' && text[i + 1] <= '9')))
+//                {
+//                    i++;
+//                }
+//                else
+//                {
+//                    sb.Append(text[i]);
+//                }
+//            }
+//            return sb.ToString();
+//        }
 		
-		public void SetUsername(string name)
-		{
-			 username = name;
-		}
-    }
-}
+//        public void SetUsername(string name)
+//        {
+//             username = name;
+//        }
+//    }
+//}
