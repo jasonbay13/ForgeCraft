@@ -705,11 +705,11 @@ namespace SMP
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
 
-                foreach (Player p in Player.players.ToArray())
+                /*foreach (Player p in Player.players.ToArray())
                 {
                     if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(chunk.point)) continue;
                     p.SendBlockChange(x, (byte)y, z, type, meta);
-                }
+                }*/
             }
             catch { }
         }
