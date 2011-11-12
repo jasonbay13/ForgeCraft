@@ -674,11 +674,11 @@ namespace SMP
 		{
 			if (OpenWindow)
 			{
-				window.HandleClick(this, message);
+				//window.HandleClick(this, message);
 			}
 			else
 			{
-				inventory.HandleClick(message);
+				//inventory.HandleClick(message);
 			}
 
 			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
@@ -748,14 +748,14 @@ namespace SMP
 			{
 				if (slot < 5)
 				{
-                    GlobalMessage(GetName() + " " + window.items[1].item);
+                   // GlobalMessage(GetName() + " " + window.items[1].item);
 				}
 			}
 			else if (window.type == 1)
 			{
 				if (slot < 10)
 				{
-                    GlobalMessage(GetName() + inventory.items[1].item);
+                   // GlobalMessage(GetName() + inventory.items[1].item);
 				}
 			}
 		}
