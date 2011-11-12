@@ -666,6 +666,7 @@ namespace SMP
 		
 		public void HandleWindowClose(byte[] message)
 		{
+            OpenWindow = false;
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
 
@@ -743,18 +744,18 @@ namespace SMP
 				}
 			}
 
-			if (!OpenWindow)
+			if (OpenWindow)
 			{
 				if (slot < 5)
 				{
-					//UPDATE CRAFTING
+                    GlobalMessage(GetName() + " " + window.items[1].item);
 				}
 			}
 			else if (window.type == 1)
 			{
 				if (slot < 10)
 				{
-					//UPDATE CRAFTING
+                    GlobalMessage(GetName() + inventory.items[1].item);
 				}
 			}
 		}

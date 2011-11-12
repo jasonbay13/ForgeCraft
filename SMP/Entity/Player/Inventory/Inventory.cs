@@ -189,7 +189,7 @@ namespace SMP
 				p.OnMouse = Item.Nothing;
 				return;
 			}
-
+            
 			if (Shift)
 			{
 				if (slot >= 36)

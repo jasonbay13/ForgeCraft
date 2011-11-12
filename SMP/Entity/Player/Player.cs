@@ -1,3 +1,20 @@
+/*
+	Copyright 2011 ForgeCraft team
+	
+	Dual-licensed under the	Educational Community License, Version 2.0 and
+	the GNU General Public License, Version 3 (the "Licenses"); you may
+	not use this file except in compliance with the Licenses. You may
+	obtain a copy of the Licenses at
+	
+	http://www.opensource.org/licenses/ecl2.php
+	http://www.gnu.org/licenses/gpl-3.0.html
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the Licenses are distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the Licenses for the specific language governing
+	permissions and limitations under the Licenses.
+*/
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -222,7 +239,7 @@ namespace SMP
 					case 0x0D: length = 41; break; //Pos and look incoming
 
 					case 0x0E: length = 11; break; //Digging
-					case 0x0F: if (util.EndianBitConverter.Big.ToInt16(buffer, 11) >= 0) length = 15; else length = 12; break; //Block Placement
+					case 0x0F: length = (util.EndianBitConverter.Big.ToInt16(buffer, 11) >= 0) ?  15 : 12; break; //Block Placement
 					case 0x10: length = 2; break; //Holding Change
 					case 0x12: length = 5; break; //Animation Change
                     case 0x13: length = 5; break; //Entity Action

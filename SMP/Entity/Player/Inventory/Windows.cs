@@ -162,7 +162,6 @@ namespace SMP
 				p.inventory.ClickHandler((short)((slot - items.Length) + 9), click, ActionID, Shift, ItemID, Count, Meta);
 				return;
 			}
-
 			if (Shift)
 			{
 				if (type == 3) return;
@@ -251,6 +250,8 @@ namespace SMP
 						{
 							if (click == ClickType.RightClick)
 							{
+                               
+
 								if (p.OnMouse.item == items[slot].item)
 								{
 									if (p.OnMouse.item < 255)

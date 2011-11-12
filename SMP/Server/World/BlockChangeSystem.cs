@@ -196,13 +196,11 @@ namespace SMP
 			Windows window = a.level.windows[b.pos];
 			short length = (short)window.name.Length;
 			byte[] bytes = new byte[5 + (length)];
-
-			bytes[0] = 1; //CHANGE THIS! (idk what the byte referances, i dont really see a use for it if its just a byte)
+			bytes[0] = 1;
             bytes[1] = 3;
 			util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
 			UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
-			bytes[4 + (length)] = (byte)window.items.Length; //number of slots
-
+            bytes[4 + (length)] = (byte)window.items.Length;
 			a.SendRaw(0x64, bytes);
 			return false;
 		}
@@ -230,7 +228,7 @@ namespace SMP
 		{
             if (!a.level.windows.ContainsKey(b.pos))
             {
-                new Windows(1, b.pos, a.level);
+               a.window = new Windows(1, b.pos, a.level);
             }
 
             Windows window = a.level.windows[b.pos];
@@ -244,6 +242,7 @@ namespace SMP
             bytes[4 + (length)] = (byte)window.items.Length;
 
             a.SendRaw(0x64, bytes);
+            a.OpenWindow = true;
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)
