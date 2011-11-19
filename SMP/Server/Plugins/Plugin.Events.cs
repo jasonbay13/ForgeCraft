@@ -39,6 +39,42 @@ namespace SMP
             return true;
         }
         /// <summary>
+        /// Cancel a window event
+        /// </summary>
+        /// <param name="e">The event to cancel</param>
+        /// <param name="w">The window</param>
+        /// <returns></returns>
+        public static void CancelEvent(WindowEvent e, Windows w)
+        {
+            switch (e)
+            {
+                case WindowEvent.Click:
+                    w.cancelclick = true;
+                    break;
+                case WindowEvent.RightClick:
+                    w.cancelright = true;
+                    break;
+            }
+        }
+        /// <summary>
+        /// Check to see if a event is canceled
+        /// </summary>
+        /// <param name="e">The event to check</param>
+        /// <param name="w">The window</param>
+        /// <returns></returns>
+        public static bool IsEventCancled(WindowEvent e, Windows w)
+        {
+            switch (e)
+            {
+                case WindowEvent.Click:
+                    return w.cancelclick;
+                case WindowEvent.RightClick:
+                    return w.cancelright;
+                default:
+                    return false;
+            }
+        }
+        /// <summary>
         /// Check to see if a Player event is stopped
         /// </summary>
         /// <param name="e">The event to check</param>

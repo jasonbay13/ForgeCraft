@@ -38,6 +38,11 @@ namespace SMP
         BlockDestory,
         Respawn
     }
+    public enum WindowEvent
+    {
+        RightClick,
+        Click
+    }
     public enum LevelEvent
     {
         LevelBlockChange,
