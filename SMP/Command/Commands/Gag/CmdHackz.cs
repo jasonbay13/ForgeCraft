@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 // for LULZ
 //Epic Win, we should have the MCLawl /hacks message for teh lulz. 
-namespace SMP
+namespace SMP.Commands
 {
 	public class CmdHackz : Command
 	{

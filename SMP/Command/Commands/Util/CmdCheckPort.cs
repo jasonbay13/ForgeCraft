@@ -4,7 +4,7 @@ using System.Net;
 using System.Web;
 using System.Net.Sockets;
 using System.IO;
-namespace SMP
+namespace SMP.Commands
 {
     public class CmdCheckPort : Command
     {

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 
 //TODO Maybe add rotation and yaw
-namespace SMP
+namespace SMP.Commands
 {
 	public class CmdWarp : Command
 	{

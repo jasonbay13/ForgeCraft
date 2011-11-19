@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SMP
+namespace SMP.Commands
 {
 	public class CmdGive : Command
 	{

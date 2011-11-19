@@ -26,9 +26,16 @@ namespace SMP
     {
         PlayerCommand,
         PlayerChat,
-        PlayerBlockChange,
         PlayerMove,
-        PlayerDig
+        PlayerDig,
+        PlayerKick,
+        WindowClose,
+        EXPGain,
+        EXPLost,
+        RightClick,
+        LeftClick,
+        BlockPlace,
+        BlockDestory
     }
     public enum LevelEvent
     {
@@ -40,6 +47,6 @@ namespace SMP
     public enum ServerEvent
     {
         ServerLog,
-        ServerErrorLog,
+        ServerErrorLog
     }
 }

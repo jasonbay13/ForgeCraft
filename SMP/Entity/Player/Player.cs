@@ -23,6 +23,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using SMP.Commands;
 
 namespace SMP
 {
@@ -101,18 +102,69 @@ namespace SMP
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public event OnPlayerCommand OnCommand;
         public static event OnPlayerCommand PlayerCommand;
-        public delegate void OnPlayerDisconnect(Player p, string reason);
+        public delegate void OnPlayerDisconnect(Player p);
         public static event OnPlayerDisconnect PlayerDisconnect;
         public event OnPlayerDisconnect OnDisconnect;
+        public delegate void OnPlayerKicked(Player p, string reason);
+        public static event OnPlayerKicked PlayerKicked;
+        public event OnPlayerKicked OnKicked;
+        public delegate void OnCrouchChange(Player p);
+        public event OnCrouchChange OnCrouch;
+        public static event OnCrouchChange PlayerCrouch;
+        public delegate void OnSpritChange(Player p);
+        public event OnSpritChange OnSprint;
+        public static event OnSpritChange PlayerSprint;
         public delegate void OnPlayerRespawn(Player p);
         public static event OnPlayerRespawn PlayerRespawn;
         public event OnPlayerRespawn OnRespawn;
+        public delegate void OnEXPGain(Player p, short expgain);
+        public event OnEXPGain EXPGain;
+        public static event OnEXPGain PlayerEXPGain;
+        public delegate void OnEXPLost(Player p, short expgain);
+        public event OnEXPLost EXPLost;
+        public static event OnEXPLost PlayerEXPLost;
+        public delegate void OnWindowClose(Player p);
+        public event OnWindowClose WindowClose;
+        public static event OnWindowClose PlayerWindowClose;
         //Other things for plugins ----------
-        public bool cancelBlock = false;
-        public bool cancelchat = false;
-        public bool cancelcommand = false;
-        public bool cancelmove = false;
-        public bool canceldig = false;
+        internal bool cancelchat = false;
+        internal bool cancelcommand = false;
+        internal bool cancelmove = false;
+        internal bool canceldig = false;
+        internal bool cancelkick = false;
+        internal bool cancelgain = false;
+        internal bool cancellost = false;
+        internal bool cancelclose = false;
+        internal bool cancelleft = false;
+        internal bool cancelright = false;
+        internal bool cancelplace = false;
+        internal bool canceldestroy = false;
+        internal bool CheckEXPGain(short exp)
+        {
+            if (EXPGain != null)
+                EXPGain(this, exp);
+            if (PlayerEXPGain != null)
+                PlayerEXPGain(this, exp);
+            if (cancelgain)
+            {
+                cancelgain = false;
+                return true;
+            }
+            return false;
+        }
+        internal bool CheckEXPLost(short exp)
+        {
+            if (EXPLost != null)
+                EXPLost(this, exp);
+            if (PlayerEXPLost != null)
+                PlayerEXPLost(this, exp);
+            if (cancellost)
+            {
+                cancellost = false;
+                return true;
+            }
+            return false;
+        }
         //Other things for plugins ----------
         //Events for Custom Command and Plugins -------------------------------------
         #endregion
@@ -1370,6 +1422,15 @@ namespace SMP
 		#region INCOMING
 		public void HandleCommand(string cmd, string message)
 		{
+            if (OnCommand != null)
+                OnCommand(cmd, message, this);
+            if (PlayerCommand != null)
+                PlayerCommand(cmd, message, this);
+            if (cancelcommand)
+            {
+                cancelcommand = false;
+                return;
+            }
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
             {
@@ -1593,6 +1654,15 @@ namespace SMP
 			//	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
+            if (OnKicked != null)
+                OnKicked(this, message);
+            if (PlayerKicked != null)
+                PlayerKicked(this, message);
+            if (cancelkick)
+            {
+                cancelkick = false;
+                return;
+            }
             if (LoggedIn)
                 GlobalMessage("§5" + username +" §fhas been kicked from the server!");
 			

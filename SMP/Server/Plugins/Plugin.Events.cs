@@ -48,8 +48,6 @@ namespace SMP
         {
             switch (e)
             {
-                case PlayerEvents.PlayerBlockChange:
-                    return p.cancelBlock;
                 case PlayerEvents.PlayerChat:
                     return p.cancelchat;
                 case PlayerEvents.PlayerCommand:
@@ -58,6 +56,14 @@ namespace SMP
                     return p.cancelmove;
                 case PlayerEvents.PlayerDig:
                     return p.canceldig;
+                case PlayerEvents.PlayerKick:
+                    return p.cancelkick;
+                case PlayerEvents.WindowClose:
+                    return p.cancelclose;
+                case PlayerEvents.EXPGain:
+                    return p.cancelgain;
+                case PlayerEvents.EXPLost:
+                    return p.cancellost;
                 default:
                     return false;
             }
@@ -80,9 +86,6 @@ namespace SMP
             //Add some more events to be canceled
             switch (e)
             {
-                case PlayerEvents.PlayerBlockChange:
-                    p.cancelBlock = true;
-                    break;
                 case PlayerEvents.PlayerChat:
                     p.cancelchat = true;
                     break;
@@ -94,6 +97,18 @@ namespace SMP
                     break;
                 case PlayerEvents.PlayerDig:
                     p.canceldig = true;
+                    break;
+                case PlayerEvents.PlayerKick:
+                    p.cancelkick = true;
+                    break;
+                case PlayerEvents.EXPGain:
+                    p.cancelgain = true;
+                    break;
+                case PlayerEvents.EXPLost:
+                    p.cancellost = true;
+                    break;
+                case PlayerEvents.WindowClose:
+                    p.cancelclose = true;
                     break;
             }
         }

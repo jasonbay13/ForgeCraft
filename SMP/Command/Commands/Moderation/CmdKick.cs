@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP
+namespace SMP.Commands
 {
     public class CmdKick : Command
     {

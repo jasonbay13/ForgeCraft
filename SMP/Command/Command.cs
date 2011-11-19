@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SMP
+namespace SMP.Commands
 {
     public abstract class Command
     {

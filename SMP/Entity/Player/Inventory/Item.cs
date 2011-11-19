@@ -23,7 +23,6 @@ namespace SMP
     {
         #region Enchantable Items List
         public static readonly System.Collections.Generic.List<short> ENCHANTABLE_ITEMS = new System.Collections.Generic.List<short> {
-            0x103, //Flint and steel
             0x15A, //Fishing rod
             0x167, //Shears
 

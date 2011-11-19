@@ -103,6 +103,8 @@ namespace SMP
 			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
+            if (OnAuth != null)
+                OnAuth(this);
 		}
 
         private void UpdateShi(Player p)
@@ -173,6 +175,15 @@ namespace SMP
 				}
 			}
 
+            if (OnChat != null)
+                OnChat(m, this);
+            if (PlayerChat != null)
+                PlayerChat(m, this);
+            if (cancelchat)
+            {
+                cancelchat = false;
+                return;
+            }
             // TODO: Rank coloring
             //GlobalMessage(this.PlayerColor + "{1}§f: {2}", WrapMethod.Chat, this.Prefix, Username, message);
 			if (!DoNotDisturb)
@@ -489,7 +500,10 @@ namespace SMP
             }*/
 
             //Console.WriteLine(blockID + " " + amount + " " + damage);
+            if (Item.ENCHANTABLE_ITEMS.Contains(blockID))
+            {
 
+            }
             if (OnBlockChange != null)
             {
                 OnBlockChange(this, blockX, blockY, blockZ, blockID);
@@ -666,6 +680,15 @@ namespace SMP
 		
 		public void HandleWindowClose(byte[] message)
 		{
+            if (WindowClose != null)
+                WindowClose(this);
+            if (PlayerWindowClose != null)
+                PlayerWindowClose(this);
+            if (cancelclose)
+            {
+                cancelclose = false;
+                return;
+            }
             OpenWindow = false;
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
@@ -764,6 +787,10 @@ namespace SMP
 		{
 			Server.Log(username + " Disconnected.");
 			GlobalMessage(username + " Left.");
+            if (OnDisconnect != null)
+                OnDisconnect(this);
+            if (PlayerDisconnect != null)
+                PlayerDisconnect(this);
 			socket.Close();
 			Disconnect();
 			foreach (int i in VisibleEntities.ToArray())
@@ -780,10 +807,18 @@ namespace SMP
 		{
 			if (message[4] == 1)
 			{
+                if (OnCrouch != null)
+                    OnCrouch(this);
+                if (PlayerCrouch != null)
+                    PlayerCrouch(this);
 				crouch(true);
 			}
 			else if (message[4] == 2)
 			{
+                if (OnCrouch != null)
+                    OnCrouch(this);
+                if (PlayerCrouch != null)
+                    PlayerCrouch(this);
 				crouch(false);
 			}
 			else if (message[4] == 4)
@@ -797,6 +832,10 @@ namespace SMP
 		}
         public void HandleRespawn(byte[] message)
         {
+            if (OnRespawn != null)
+                OnRespawn(this);
+            if (PlayerRespawn != null)
+                PlayerRespawn(this);
 			Teleport_Player(level.SpawnX, level.SpawnY, level.SpawnZ, level.SpawnYaw, level.SpawnPitch);
             SendRespawn();
         }

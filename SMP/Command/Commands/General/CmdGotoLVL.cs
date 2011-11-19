@@ -16,7 +16,7 @@
 	permissions and limitations under the Licenses.
 */
 using System;
-namespace SMP
+namespace SMP.Commands
 {
 	public class CmdGotoLVL : Command
 	{

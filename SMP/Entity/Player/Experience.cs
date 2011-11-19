@@ -38,6 +38,8 @@ namespace SMP
         /// <param name="exp">The ammount of experience to add</param>
         public void Add(Player p, short exp)
         {
+            if (p.CheckEXPGain(exp))
+                return;
             byte oldlevel = _Level;
             for (int i = 0; i < exp; i++)
             {
@@ -73,6 +75,8 @@ namespace SMP
         /// <param name="exp">The ammount of experience to remove</param>
         public void Remove(Player p, short exp)
         {
+            if (p.CheckEXPLost(exp))
+                return;
             byte oldlevel = _Level;
             for (int i = 0; i < exp; i++)
             {

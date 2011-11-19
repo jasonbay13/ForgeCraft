@@ -17,7 +17,7 @@
 */
 using System;
 
-namespace SMP
+namespace SMP.Commands
 {
 	public class CmdSetTime : Command
 	{

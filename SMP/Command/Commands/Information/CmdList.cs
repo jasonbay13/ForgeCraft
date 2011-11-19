@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 //TODO: group players by rank
 
-namespace SMP
+namespace SMP.Commands
 {
     public class CmdList : Command
     {

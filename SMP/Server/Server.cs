@@ -24,6 +24,8 @@ using System.Net.Sockets;
 using MonoTorrent.Client;
 using System.Threading;
 using System.IO;
+using SMP.Commands;
+
 
 namespace SMP
 {
@@ -34,7 +36,7 @@ namespace SMP
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static int protocolversion = 18;
+		public static int protocolversion = 22;
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
