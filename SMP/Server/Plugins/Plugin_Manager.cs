@@ -148,40 +148,40 @@ namespace SMP
             catch (Exception)
             {
                 //Server.ErrorLog(e);
-				Server.Log("The plugin " + pluginname + " failed to load!");
-				if (creator != "")
-					Server.Log("You can go bug " + creator + " about it");
-				Thread.Sleep(1000);
+		Server.Log("The plugin " + pluginname + " failed to load!");
+		if (creator != "")
+			Server.Log("You can go bug " + creator + " about it");
+		Thread.Sleep(1000);
             }
         }
-		/// <summary>
-		/// Unload the specified p and shutdown.
-		/// </summary>
-		/// <param name='p'>
-		/// P. The plugin object you want to unload
-		/// </param>
-		/// <param name='shutdown'>
-		/// Shutdown. Is the server shutting down?
-		/// </param>
+	/// <summary>
+	/// Unload the specified p and shutdown.
+	/// </summary>
+	/// <param name='p'>
+	/// P. The plugin object you want to unload
+	/// </param>
+	/// <param name='shutdown'>
+	/// Shutdown. Is the server shutting down?
+	/// </param>
         public static void Unload(Plugin p, bool shutdown)
         {
             p.Unload(shutdown);
             all.Remove(p);
             Server.Log(p.name + " was unloaded.");
         }
-		/// <summary>
-		/// Unload all plugins.
-		/// </summary>
-		public static void Unload()8
+	/// <summary>
+	/// Unload all plugins.
+	/// </summary>
+	public static void Unload()
+	{
+		all.ForEach(delegate(Plugin p)
 		{
-			all.ForEach(delegate(Plugin p)
-			{
-				Unload(p, true);
-			});
-		}
-		/// <summary>
-		/// Load all plugins.
-		/// </summary>
+			Unload(p, true);
+		});
+	}
+	/// <summary>
+	/// Load all plugins.
+	/// </summary>
         public static void Load()
         {
             if (Directory.Exists("plugins"))
