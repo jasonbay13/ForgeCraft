@@ -836,6 +836,11 @@ namespace SMP
                 OnRespawn(this);
             if (PlayerRespawn != null)
                 PlayerRespawn(this);
+            if (cancelrespawn)
+            {
+                cancelrespawn = false;
+                return;
+            }
 			Teleport_Player(level.SpawnX, level.SpawnY, level.SpawnZ, level.SpawnYaw, level.SpawnPitch);
             SendRespawn();
         }

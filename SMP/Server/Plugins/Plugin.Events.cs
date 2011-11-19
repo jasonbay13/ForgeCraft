@@ -64,6 +64,16 @@ namespace SMP
                     return p.cancelgain;
                 case PlayerEvents.EXPLost:
                     return p.cancellost;
+                case PlayerEvents.Respawn:
+                    return p.cancelrespawn;
+                case PlayerEvents.RightClick:
+                    return p.cancelright;
+                case PlayerEvents.LeftClick:
+                    return p.cancelleft;
+                case PlayerEvents.BlockPlace:
+                    return p.cancelplace;
+                case PlayerEvents.BlockDestory:
+                    return p.canceldestroy;
                 default:
                     return false;
             }
@@ -109,6 +119,21 @@ namespace SMP
                     break;
                 case PlayerEvents.WindowClose:
                     p.cancelclose = true;
+                    break;
+                case PlayerEvents.Respawn:
+                    p.cancelrespawn = true;
+                    break;
+                case PlayerEvents.RightClick:
+                    p.cancelright = true;
+                    break;
+                case PlayerEvents.LeftClick:
+                    p.cancelleft = true;
+                    break;
+                case PlayerEvents.BlockPlace:
+                    p.cancelplace = true;
+                    break;
+                case PlayerEvents.BlockDestory:
+                    p.canceldestroy = true;
                     break;
             }
         }

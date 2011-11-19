@@ -35,7 +35,8 @@ namespace SMP
         RightClick,
         LeftClick,
         BlockPlace,
-        BlockDestory
+        BlockDestory,
+        Respawn
     }
     public enum LevelEvent
     {
