@@ -98,7 +98,7 @@ namespace SMP
                 {
                     foreach (Type t in lib.GetTypes())
                     {
-                        if (t.BaseType.ToString() == "SMP.Plugin")
+                        if (t.BaseType == typeof(Plugin))
                         {
                             instance = Activator.CreateInstance(lib.GetTypes()[0]);
                             break;
@@ -172,7 +172,7 @@ namespace SMP
 		/// <summary>
 		/// Unload all plugins.
 		/// </summary>
-		public static void Unload()
+		public static void Unload()8
 		{
 			all.ForEach(delegate(Plugin p)
 			{
