@@ -31,12 +31,10 @@ namespace SMP
         public abstract void Load(bool startup);
         public abstract void Unload(bool shutdown);
         public abstract string name { get; }
-        public abstract string website { get; }
         public abstract Version Version { get; }
         public abstract Version ForgeCraft_Version { get; }
         public abstract string welcome { get; }
 	    public abstract string creator { get; }
-	    public abstract bool LoadAtStartup { get; }
         public abstract void Help(Player p);
 		/// <summary>
 		/// Find a Plugin with a name
@@ -79,8 +77,41 @@ namespace SMP
 	    String creator = "";
             try
             {
-                object instance = Activator.CreateInstance(Assembly.LoadFrom(pluginname).GetTypes()[0]);
-                if (((Plugin)instance).ForgeCraft_Version > Server.version)
+                object instance = null;
+                Assembly lib = null;
+                using (FileStream fs = File.Open(pluginname, FileMode.Open))
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        byte[] buffer = new byte[1024];
+                        int read = 0;
+                        while ((read = fs.Read(buffer, 0, 1024)) > 0)
+                            ms.Write(buffer, 0, read);
+                        lib = Assembly.Load(ms.ToArray());
+                        ms.Close();
+                        ms.Dispose();
+                    }
+                    fs.Close();
+                    fs.Dispose();
+                }
+                try
+                {
+                    foreach (Type t in lib.GetTypes())
+                    {
+                        if (t.BaseType == typeof(Plugin))
+                        {
+                            instance = Activator.CreateInstance(lib.GetTypes()[0]);
+                            break;
+                        }
+                    }
+                }
+                catch { }
+                if (instance == null)
+                {
+                    Server.Log("The plugin " + pluginname + " couldnt be loaded!");
+                    return;
+                }
+                if (((Plugin)instance).ForgeCraft_Version < Server.version)
                 {
                     Server.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
                     Thread.Sleep(1000);
@@ -95,14 +126,9 @@ namespace SMP
                 here:
                 Plugin.all.Add((Plugin)instance);
 		        creator = ((Plugin)instance).creator;
-	        	if (((Plugin)instance).LoadAtStartup)
-				{
-                    ((Plugin)instance).Load(startup);
-                    Server.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).Version.ToString() + " loaded.");
-				}
-				else
-		    		Server.Log("Plugin: " + ((Plugin)instance).name + " was not loaded, you can load it with /pload");
-                	Server.Log(((Plugin)instance).welcome);
+                ((Plugin)instance).Load(startup);
+                Server.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).Version.ToString() + " loaded.");
+                Server.Log(((Plugin)instance).welcome);
             }
             catch (FileNotFoundException)
             {
@@ -122,40 +148,40 @@ namespace SMP
             catch (Exception)
             {
                 //Server.ErrorLog(e);
-				Server.Log("The plugin " + pluginname + " failed to load!");
-				if (creator != "")
-					Server.Log("You can go bug " + creator + " about it");
-				Thread.Sleep(1000);
+		Server.Log("The plugin " + pluginname + " failed to load!");
+		if (creator != "")
+			Server.Log("You can go bug " + creator + " about it");
+		Thread.Sleep(1000);
             }
         }
-		/// <summary>
-		/// Unload the specified p and shutdown.
-		/// </summary>
-		/// <param name='p'>
-		/// P. The plugin object you want to unload
-		/// </param>
-		/// <param name='shutdown'>
-		/// Shutdown. Is the server shutting down?
-		/// </param>
+	/// <summary>
+	/// Unload the specified p and shutdown.
+	/// </summary>
+	/// <param name='p'>
+	/// P. The plugin object you want to unload
+	/// </param>
+	/// <param name='shutdown'>
+	/// Shutdown. Is the server shutting down?
+	/// </param>
         public static void Unload(Plugin p, bool shutdown)
         {
             p.Unload(shutdown);
             all.Remove(p);
-            Server.Log(p.name + " was unloaded...how ever you cant re-load it until you restart!");
+            Server.Log(p.name + " was unloaded.");
         }
-		/// <summary>
-		/// Unload all plugins.
-		/// </summary>
-		public static void Unload()
+	/// <summary>
+	/// Unload all plugins.
+	/// </summary>
+	public static void Unload()
+	{
+		all.ForEach(delegate(Plugin p)
 		{
-			all.ForEach(delegate(Plugin p)
-			{
-				Unload(p, true);
-			});
-		}
-		/// <summary>
-		/// Load all plugins.
-		/// </summary>
+			Unload(p, true);
+		});
+	}
+	/// <summary>
+	/// Load all plugins.
+	/// </summary>
         public static void Load()
         {
             if (Directory.Exists("plugins"))
@@ -165,6 +191,8 @@ namespace SMP
                     Load(file, true);
                 }
             }
+            else
+                Directory.CreateDirectory("plugins");
         }
     }
 }

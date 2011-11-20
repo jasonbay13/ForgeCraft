@@ -140,6 +140,7 @@ namespace SMP
         internal bool cancelright = false;
         internal bool cancelplace = false;
         internal bool canceldestroy = false;
+        internal bool cancelrespawn = false;
         internal bool CheckEXPGain(short exp)
         {
             if (EXPGain != null)

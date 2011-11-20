@@ -20,42 +20,63 @@ using System.Collections.Generic;
 
 namespace SMP
 {
+    public enum WindowType : byte
+    {
+        Chest = 0,
+        Workbench = 1,
+        Furnace = 2,
+        Dispenser = 3,
+        Other = 4
+    }
 	public class Windows
-	{
-		public byte type; //This holds type information, used in deciding which kind of window we need to send.
+    {
+        #region Events
+        //-----------Events-----------
+        public delegate Item OnRightClick(Player p, int slot);
+        public event OnRightClick RightClick;
+        public delegate void OnClick(Player p, WindowType window, short slot, ClickType click, short ActionID, bool PressingShift, short itemID, byte count, short MetaData);
+        public event OnClick OnWindowClick;
+        internal bool cancelclick = false;
+        internal bool cancelright = false;
+        //-----------Events-----------
+        #endregion
+        byte type; //This holds type information, used in deciding which kind of window we need to send.
+        public WindowType windowtype
+        {
+            get { return (WindowType)type; }
+        }
 		public string name = "Chest";
 		public Point3 pos; //The pos of the block that this window is attached to
 		public World level;
 		public Item[] items; //Hold all the items this window has inside it.
-
-		public Windows(byte Type, Point3 Pos, World Level)
+		public Windows(WindowType Type, Point3 Pos, World Level)
 		{
 			Server.Log("Window Creating.");
 
-			type = Type;
+			type = (byte)Type;
 			pos = Pos;
 			level = Level;
 
-			switch (type)
+			switch (Type)
 			{
-				case 0:
+				case WindowType.Chest:
 					name = "Chest"; //We change this to "Large Chest" Later if it needs it :3
 					items = new Item[27];
 					break;
-				case 1:
+				case WindowType.Dispenser:
 					name = "Workbench";
 					items = new Item[10];
 					break;
-				case 2:
+				case WindowType.Furnace:
 					name = "Furnace";
 					items = new Item[3];
 					break;
-				case 3:
+				case WindowType.Workbench:
 					name = "Dispenser";
 					items = new Item[9];
 					break;
-				default:
-					name = "Chest";
+				case WindowType.Other:
+					name = "Other";
 					items = new Item[27];
 					break;
 			}
@@ -99,6 +120,14 @@ namespace SMP
 
 		public Item Right_Click(Player p, int slot)
 		{
+            Item temp11 = Item.Nothing;
+            if (RightClick != null)
+                temp11 = RightClick(p, slot);
+            if (cancelright)
+            {
+                cancelright = false;
+                return temp11;
+            }
 			if (slot > items.Length)
 			{
 				return p.inventory.Right_Click((slot - items.Length) + 9);
@@ -144,6 +173,8 @@ namespace SMP
 			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
 			byte Count = 1;
 			short Meta = 0;
+            if (OnWindowClick != null)
+                OnWindowClick(p, (WindowType)id, slot, click, ActionID, Shift, ItemID, Count, Meta);
 			if (ItemID != -1)
 			{
 				Count = message[9];

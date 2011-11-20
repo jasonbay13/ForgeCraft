@@ -866,7 +866,12 @@ namespace SMP
                 OnRespawn(this);
             if (PlayerRespawn != null)
                 PlayerRespawn(this);
-            Teleport_Spawn();
+            if (cancelrespawn)
+            {
+                cancelrespawn = false;
+                return;
+            }
+			Teleport_Spawn();
             SendRespawn();
         }
 		public static short BlockDropSwitch(short id)
