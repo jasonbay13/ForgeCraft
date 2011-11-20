@@ -188,21 +188,21 @@ namespace SMP
 		}
 		public static bool OpenDispenser(Player a, BCS b)
 		{
-			if(!a.level.windows.ContainsKey(b.pos))
-			{
-				new Windows(WindowType.Dispenser, b.pos, a.level);
-			}
-			
-			Windows window = a.level.windows[b.pos];
-			short length = (short)window.name.Length;
-			byte[] bytes = new byte[5 + (length)];
-			bytes[0] = 1;
-            bytes[1] = 3;
-			util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
-			UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
-            bytes[4 + (length)] = (byte)window.items.Length;
-			a.SendRaw(0x64, bytes);
-			return false;
+            try
+            {
+                if (!a.level.windows.ContainsKey(b.pos))
+                    a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
+                else if (a.level.windows[b.pos].Type != WindowType.Dispenser)
+                {
+                    a.level.windows.Remove(b.pos);
+                    a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
+                }
+                else a.window = a.level.windows[b.pos];
+
+                a.SendWindowOpen(a.level.windows[b.pos]);
+            }
+            catch (Exception ex) { Server.ServerLogger.Log(ex.Message); Server.ServerLogger.Log(ex.StackTrace); }
+            return false;
 		}
 		public static bool ChangeNoteblock(Player a, BCS b)
 		{
@@ -227,26 +227,27 @@ namespace SMP
 		public static bool OpenCraftingTable(Player a, BCS b)
 		{
             if (!a.level.windows.ContainsKey(b.pos))
-            {
                a.window = new Windows(WindowType.Workbench, b.pos, a.level);
+            if (a.level.windows[b.pos].Type != WindowType.Workbench)
+            {
+                a.level.windows.Remove(b.pos);
+                a.window = new Windows(WindowType.Workbench, b.pos, a.level);
             }
 
-            Windows window = a.level.windows[b.pos];
-            short length = (short)window.name.Length;
-            byte[] bytes = new byte[5 + (length)];
-
-            bytes[0] = 2;
-            bytes[1] = 1;
-            util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 2);
-            UTF8Encoding.UTF8.GetBytes(window.name).CopyTo(bytes, 4);
-            bytes[4 + (length)] = (byte)window.items.Length;
-
-            a.SendRaw(0x64, bytes);
-            a.OpenWindow = true;
+            a.SendWindowOpen(a.level.windows[b.pos]);
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)
 		{
+            if (!a.level.windows.ContainsKey(b.pos))
+                a.window = new Windows(WindowType.Furnace, b.pos, a.level);
+            if (a.level.windows[b.pos].Type != WindowType.Furnace)
+            {
+                a.level.windows.Remove(b.pos);
+                a.window = new Windows(WindowType.Furnace, b.pos, a.level);
+            }
+
+            a.SendWindowOpen(a.level.windows[b.pos]);
 			return false;
 		}
 		public static bool PlayMusic(Player a, BCS b)

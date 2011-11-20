@@ -1046,12 +1046,12 @@ namespace SMP
                             if (this.inventory.items[i].IsDamageable())
                             {
                                 nbt = this.inventory.items[i].GetEnchantmentNBTData();
-                                data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)nbt.Length));
+                                data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)(nbt.Length > 0 ? nbt.Length : -1)));
                                 data.AddRange(nbt);
                             }
 						}		
 				}
-				SendWindow(0, 45, data.ToArray());
+				SendWindowItems(0, 45, data.ToArray());
 			}
             public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
             public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
@@ -1082,13 +1082,13 @@ namespace SMP
 					util.EndianBitConverter.Big.GetBytes(use).CopyTo(tosend, 6);
                     if (BlockData.IsItemDamageable(id))
                     {
-                        util.EndianBitConverter.Big.GetBytes((short)nbtData.Length).CopyTo(tosend, 8);
+                        util.EndianBitConverter.Big.GetBytes((short)(nbtData.Length > 0 ? nbtData.Length : -1)).CopyTo(tosend, 8);
                         nbtData.CopyTo(tosend, 10);
                     }
 				}
 				SendRaw(0x67, tosend);
 			}
-			public void SendWindow(byte windowID, short count, byte[] items)
+			public void SendWindowItems(byte windowID, short count, byte[] items)
 			{
 				byte[] data = new byte[3 + items.Length];
 				data[0] = windowID;
@@ -1096,6 +1096,19 @@ namespace SMP
 				items.CopyTo(data, 3);
 				SendRaw(0x68, data);
 			}
+            public void SendWindowOpen(byte windowID, byte type, string title, byte slots)
+            {
+                byte[] bytes = new byte[5 + (title.Length * 2)];
+                bytes[0] = windowID;
+                bytes[1] = type;
+                MCUtil.Protocol.GetBytes(title).CopyTo(bytes, 2);
+                bytes[4 + (title.Length * 2)] = slots;
+                SendRaw(0x64, bytes);
+            }
+            public void SendWindowOpen(Windows window)
+            {
+                SendWindowOpen(window.id, (byte)window.Type, window.name, (byte)window.items.Length);
+            }
             public void SendUpdateWindowProperty(byte windowID, short property, short value)
             {
                 byte[] bytes = new byte[5];

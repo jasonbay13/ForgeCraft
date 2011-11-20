@@ -191,6 +191,8 @@ namespace SMP
 
         public static byte[] GetEnchantmentNBTData(List<Enchantment> enchantments)
         {
+            if (enchantments.Count < 1) return new byte[0];
+
             NbtTree nbt = new NbtTree();
             TagNodeList list = new TagNodeList(TagType.TAG_COMPOUND);
 

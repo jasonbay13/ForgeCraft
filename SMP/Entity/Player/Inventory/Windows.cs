@@ -40,11 +40,13 @@ namespace SMP
         internal bool cancelright = false;
         //-----------Events-----------
         #endregion
+        private static byte nextId = 1;
         byte type; //This holds type information, used in deciding which kind of window we need to send.
-        public WindowType windowtype
+        public WindowType Type
         {
             get { return (WindowType)type; }
         }
+        public byte id;
 		public string name = "Chest";
 		public Point3 pos; //The pos of the block that this window is attached to
 		public World level;
@@ -53,6 +55,7 @@ namespace SMP
 		{
 			Server.Log("Window Creating.");
 
+            id = FreeId();
 			type = (byte)Type;
 			pos = Pos;
 			level = Level;
@@ -65,7 +68,7 @@ namespace SMP
 					break;
 				case WindowType.Dispenser:
 					name = "Workbench";
-					items = new Item[10];
+					items = new Item[9];
 					break;
 				case WindowType.Furnace:
 					name = "Furnace";
@@ -77,7 +80,7 @@ namespace SMP
 					break;
 				case WindowType.EnchantmentTable:
 					name = "Enchantment Table";
-					items = new Item[27];
+					items = new Item[1];
 					break;
 			}
 			Server.Log("Window adding.");
@@ -174,7 +177,7 @@ namespace SMP
 			byte Count = 1;
 			short Meta = 0;
             if (OnWindowClick != null)
-                OnWindowClick(p, (WindowType)id, slot, click, ActionID, Shift, ItemID, Count, Meta);
+                OnWindowClick(p, Type, slot, click, ActionID, Shift, ItemID, Count, Meta);
 			if (ItemID != -1)
 			{
 				Count = message[9];
@@ -508,6 +511,12 @@ namespace SMP
 					return i;
 			return 255;
 		}
+
+        private static byte FreeId()
+        {
+            if (nextId == 0) nextId++;
+            return nextId++;
+        }
 	}
 }
 

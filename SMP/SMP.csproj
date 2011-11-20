@@ -152,6 +152,7 @@
     <Compile Include="Server\World\World.Light.cs" />
     <Compile Include="util\Extensions.cs" />
     <Compile Include="util\MathHelper.cs" />
+    <Compile Include="util\MCUtil.cs" />
     <Compile Include="util\PreLoaded.cs" />
     <Compile Include="Server\WebserverStuff\Remote.cs" />
     <Compile Include="Entity\AI\AI.cs" />
