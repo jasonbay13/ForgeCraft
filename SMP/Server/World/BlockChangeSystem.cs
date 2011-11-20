@@ -259,12 +259,14 @@ namespace SMP
                     a.level.DropItem((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z, (short)meta);
 
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Jukebox, 0, false);
                 Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
             else if (item >= 2256 && item <= 2266)
             {
                 if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
                 a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (ushort)item);
+                a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Jukebox, 1, false);
                 Player.GlobalSoundEffect(b.pos, 1005, item, a.level);
             }
             return false;

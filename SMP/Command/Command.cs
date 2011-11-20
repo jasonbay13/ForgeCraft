@@ -51,6 +51,7 @@ namespace SMP.Commands
             core.Add(new CmdCheckPort());
             core.Add(new CmdChunks());
             core.Add(new CmdClearInventory());
+            core.Add(new CmdCredits());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
             core.Add(new CmdDevs());

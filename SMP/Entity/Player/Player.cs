@@ -24,6 +24,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using SMP.Commands;
+using Substrate.Nbt;
 
 namespace SMP
 {
@@ -241,33 +242,36 @@ namespace SMP
 			Player p = (Player)result.AsyncState;
 			if (p.disconnected || p.socket == null)
 				return;
-			try
-			{
-				int length = p.socket.EndReceive(result);
-				if (length == 0) { p.Disconnect(); return; }
+            try
+            {
+                int length = p.socket.EndReceive(result);
+                if (length == 0) { p.Disconnect(); return; }
 
-				byte[] b = new byte[p.buffer.Length + length];
-				Buffer.BlockCopy(p.buffer, 0, b, 0, p.buffer.Length);
-				Buffer.BlockCopy(p.tempbuffer, 0, b, p.buffer.Length, length);
+                byte[] b = new byte[p.buffer.Length + length];
+                Buffer.BlockCopy(p.buffer, 0, b, 0, p.buffer.Length);
+                Buffer.BlockCopy(p.tempbuffer, 0, b, p.buffer.Length, length);
 
-				p.buffer = p.HandleMessage(b);
-				p.socket.BeginReceive(p.tempbuffer, 0, p.tempbuffer.Length, SocketFlags.None,
-									  new AsyncCallback(Receive), p);
-			}
-			catch (SocketException)
-			{
-				p.Disconnect();
-			}
-			catch (ObjectDisposedException)
-			{
-				p.Disconnect();
-			}
-			catch (Exception e)
-			{
-				p.Disconnect();
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
-			}
+                p.buffer = p.HandleMessage(b);
+                p.socket.BeginReceive(p.tempbuffer, 0, p.tempbuffer.Length, SocketFlags.None, new AsyncCallback(Receive), p);
+            }
+            catch (SocketException)
+            {
+                p.Disconnect();
+            }
+            catch (ObjectDisposedException)
+            {
+                p.Disconnect();
+            }
+            catch (NullReferenceException)
+            {
+                p.Disconnect();
+            }
+            catch (Exception e)
+            {
+                p.Disconnect();
+                Server.Log(e.Message);
+                Server.Log(e.StackTrace);
+            }
 		}
 		byte[] HandleMessage(byte[] buffer)
 		{
@@ -283,7 +287,7 @@ namespace SMP
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
-					case 0x09: length = 13; break; //respawn
+					case 0x09: length = 13; break; //Respawn
 					
 					case 0x0A: length = 1; break; //OnGround incoming
 					case 0x0B: length = 33; break; //Pos incoming
@@ -291,25 +295,50 @@ namespace SMP
 					case 0x0D: length = 41; break; //Pos and look incoming
 
 					case 0x0E: length = 11; break; //Digging
-					case 0x0F: length = (util.EndianBitConverter.Big.ToInt16(buffer, 11) >= 0) ?  15 : 12; break; //Block Placement
+                    case 0x0F: length = 10 + Item.GetDataLength(buffer, 11); break; //Block Placement
 					case 0x10: length = 2; break; //Holding Change
 					case 0x12: length = 5; break; //Animation Change
                     case 0x13: length = 5; break; //Entity Action
 
 					case 0x65: length = 1; break; //Close Window
-					case 0x66:
-						length = 9;
-						if (util.EndianBitConverter.Big.ToInt16(buffer, 8) != -1) length += 3;
-						break; //Clicked window
-                    case 0x6B: length = 8; break; 
-					case 0x82:
+					case 0x66: //Window click
+                        length = 7 + Item.GetDataLength(buffer, 8);
+						/*if (util.EndianBitConverter.Big.ToInt16(buffer, 7) != -1) length += 3;
+                        if (BlockData.IsItemDamageable(util.EndianBitConverter.Big.ToInt16(buffer, 7)))
+                        {
+                            length += 2;
+                            Console.WriteLine("length " + util.EndianBitConverter.Big.ToInt16(buffer, 12));
+                            if (util.EndianBitConverter.Big.ToInt16(buffer, 12) != -1)
+                            {
+                                length += util.EndianBitConverter.Big.ToInt16(buffer, 12);
+                                for (int i = 0; i < util.EndianBitConverter.Big.ToInt16(buffer, 12); i++)
+                                    Console.Write(buffer[14 + i] + " ");
+                                Console.WriteLine();
+                            }
+                        }*/
+                        /*for (int i = 0; i < util.EndianBitConverter.Big.ToInt16(buffer, 12); i++)
+                            Console.Write(buffer[14 + i] + " ");
+                        Console.WriteLine();*/
+						break;
+                    case 0x6A: length = 4; break; //Transaction
+                    case 0x6B: //Creative inventory action
+                        length = 2 + Item.GetDataLength(buffer, 3);
+                        /*if (util.EndianBitConverter.Big.ToInt16(buffer, 2) != -1) length += 3;
+                        if (BlockData.IsItemDamageable(util.EndianBitConverter.Big.ToInt16(buffer, 2))) {
+                            length += 2;
+                            if (util.EndianBitConverter.Big.ToInt16(buffer, 8) != -1)
+                                length += util.EndianBitConverter.Big.ToInt16(buffer, 8);
+                        }*/
+                        break;
+                    case 0x6C: length = 2; break; //Enchant item
+					case 0x82: //Update sign
                         short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 11) * 2);
                         short b = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 13 + a) * 2);
                         short c = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 15 + a + b) * 2);
                         short d = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 17 + a + b + c) * 2);
                         length = 18 + a + b + c + d;
 						break;
-					case 0xFE: length = 0;
+					case 0xFE: length = 0; //Server list ping
 						Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers);
 						//socket.Close();
 						Disconnect();
@@ -346,14 +375,13 @@ namespace SMP
 							//Server.Log("Chat Message");
 							HandleChatMessagePacket(message);
 							break;
+                        case 0x09: HandleRespawn(message); break; //when user presses respawn button
 						case 0x0A: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerPacket(message); break; //Player onground Incoming
 						case 0x0B: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerPositionPacket(message); break; //Pos incoming
 						case 0x0C: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerLookPacket(message); break; //Look incoming
 						case 0x0D: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerPositionAndLookPacket(message); break; //Pos and look incoming
 						case 0x0E: HandleDigging(message); break; //Digging
 					    case 0x0F: HandleBlockPlacementPacket(message); break; //Block Placement
-						case 0xFF: HandleDC(message); break; //DC
-                        case 0x09: HandleRespawn(message); break; //when user presses respawn button
 						case 0x10: HandleHoldingChange(message); break; //Holding Change
 						case 0x12: HandleAnimation(message); break;
 						case 0x13: HandleEntityAction(message); break;
@@ -361,6 +389,7 @@ namespace SMP
 						case 0x66: HandleWindowClick(message); break; //Window Click
                         case 0x6B: HandleCreativeInventoryAction(message); break;
                         case 0x82: HandleUpdateSign(message); break;
+                        case 0xFF: HandleDC(message); break; //DC
 					}
                     if (buffer.Length > 0)
                         buffer = HandleMessage(buffer);
@@ -896,11 +925,7 @@ namespace SMP
 
             public static void GlobalBreakEffect(int x, byte y, int z, int type, World wld, Player exclude = null)
             {
-                Player.players.ForEach(delegate(Player p1)
-                {
-                    if ((p1 != exclude || Server.mode == 1) && p1.MapLoaded && p1.level == wld && p1.VisibleChunks.Contains(Chunk.GetChunk(x >> 4, z >> 4, p1.level).point))
-                        p1.SendSoundEffect(x, y, z, 2001, type);
-                });
+                GlobalSoundEffect(x, y, z, type, wld, exclude);
             }
             public static void GlobalBreakEffect(Point3 a, int type, World wld, Player exclude = null)
             {
@@ -940,7 +965,7 @@ namespace SMP
 			}
             public void Teleport_Spawn()
             {
-                Teleport_Player(level.SpawnPos, 0, 0);
+                Teleport_Player(level.SpawnPos, level.SpawnYaw, level.SpawnPitch);
             }
 			#endregion
 			#region Login Stuffs
@@ -1007,6 +1032,7 @@ namespace SMP
 			void SendInventory()
 			{
 				List<byte> data = new List<byte>();
+                byte[] nbt;
 				
 				for(int i = 0; i <= 44; i++)
 				{
@@ -1016,23 +1042,36 @@ namespace SMP
 						{
 							data.Add(this.inventory.items[i].count);
 							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
+                            if (this.inventory.items[i].IsDamageable())
+                            {
+                                nbt = this.inventory.items[i].GetEnchantmentNBTData();
+                                data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)nbt.Length));
+                                data.AddRange(nbt);
+                            }
 						}		
 				}
 				SendWindow(0, 45, data.ToArray());
 			}
             public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
             public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
-            public void SendItem(byte windowID, short slot, Item item) { SendItem(windowID, slot, item.item, item.count, item.meta); }
-            public void SendItem(byte windowID, short slot, short id, byte count, short use)
+            public void SendItem(short slot, short id, byte count, short use, List<Enchantment> enchantments) { SendItem(0, slot, id, count, use, enchantments); }
+            public void SendItem(byte windowID, short slot, Item item) { SendItem(windowID, slot, item.item, item.count, item.meta, item.enchantments); }
+            public void SendItem(byte windowID, short slot, short id, byte count, short use) { SendItem(windowID, slot, id, count, use, new List<Enchantment>()); }
+            public void SendItem(byte windowID, short slot, short id, byte count, short use, List<Enchantment> enchantments)
 			{
 				if (!FindBlocks.ValidItem(id))
 					return;
 			
 				if (!MapLoaded) return;
 
+                byte[] nbtData = new byte[0];
+                if (BlockData.IsItemDamageable(id))
+                    nbtData = Item.GetEnchantmentNBTData(enchantments);
+
 				byte[] tosend;
-				if (id == -1) tosend = new byte[5];
-				else tosend = new byte[8];
+                if (id == -1) tosend = new byte[5];
+                else if (BlockData.IsItemDamageable(id)) tosend = new byte[10 + nbtData.Length];
+                else tosend = new byte[8];
 				tosend[0] = windowID;
 				util.EndianBitConverter.Big.GetBytes(slot).CopyTo(tosend, 1);
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(tosend, 3);
@@ -1040,6 +1079,11 @@ namespace SMP
 				{
 					tosend[5] = count;
 					util.EndianBitConverter.Big.GetBytes(use).CopyTo(tosend, 6);
+                    if (BlockData.IsItemDamageable(id))
+                    {
+                        util.EndianBitConverter.Big.GetBytes((short)nbtData.Length).CopyTo(tosend, 8);
+                        nbtData.CopyTo(tosend, 10);
+                    }
 				}
 				SendRaw(0x67, tosend);
 			}
@@ -1051,11 +1095,11 @@ namespace SMP
 				items.CopyTo(data, 3);
 				SendRaw(0x68, data);
 			}
-            public void SendUpdateProgressBar(byte windowID, short bar, short value)
+            public void SendUpdateWindowProperty(byte windowID, short property, short value)
             {
                 byte[] bytes = new byte[5];
                 bytes[0] = windowID;
-                util.EndianBitConverter.Big.GetBytes(bar).CopyTo(bytes, 1);
+                util.EndianBitConverter.Big.GetBytes(property).CopyTo(bytes, 1);
                 util.EndianBitConverter.Big.GetBytes(value).CopyTo(bytes, 3);
                 SendRaw(0x69, bytes);
             }

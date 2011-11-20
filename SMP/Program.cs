@@ -18,6 +18,7 @@
 using System;
 using System.Reflection;
 using System.Threading;
+using SMP.Commands;
 
 /*
 	Copyright 2011 ForgeCraft team

@@ -28,6 +28,14 @@
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="IKVM.OpenJDK.Core">
       <HintPath>.\IKVM.OpenJDK.Core.dll</HintPath>
@@ -59,7 +67,9 @@
     <Compile Include="Command\Commands\General\CmdReveal.cs" />
     <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
+    <Compile Include="Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Entity\Player\Inventory\Enchantment.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCache.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCacheBlock.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenBigMushroom.cs" />

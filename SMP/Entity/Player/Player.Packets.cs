@@ -421,7 +421,7 @@ namespace SMP
                 return;
 
                 doSound:
-                Player.GlobalBreakEffect(x, y, z, rc, level, Server.mode == 1 ? null : this);
+                Player.GlobalBreakEffect(x, y, z, rc, level, this);
 		    }
 			if (message[0] == 2)
 			{
@@ -500,15 +500,6 @@ namespace SMP
             }*/
 
             //Console.WriteLine(blockID + " " + amount + " " + damage);
-            if (Item.ENCHANTABLE_ITEMS.Contains(blockID))
-            {
-
-            }
-            if (OnBlockChange != null)
-            {
-                OnBlockChange(this, blockX, blockY, blockZ, blockID);
-                return;
-            }
 
 			byte rc = level.GetBlock(blockX, blockY, blockZ);
 			if (BlockChange.RightClickedOn.ContainsKey(rc))
@@ -522,7 +513,6 @@ namespace SMP
 
 
             if (level.GetBlock(blockX, blockY, blockZ) != 78 && level.GetBlock(blockX, blockY, blockZ) != 106) // You can place stuff IN snow, not on it.
-            {
                 switch (direction)
                 {
                     case 0: blockY--; break;
@@ -532,7 +522,6 @@ namespace SMP
                     case 4: blockX--; break;
                     case 5: blockX++; break;
                 }
-            }
 
             bool canPlaceOnEntity = (blockID < 0 || (blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID))));
             foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
@@ -594,6 +583,23 @@ namespace SMP
 			{
 				//Players hand is empty
 				//Player right clicked with empty hand!
+                if (OnBlockChange != null)
+                {
+                    if (level.GetBlock(blockX, blockY, blockZ) != 78 && level.GetBlock(blockX, blockY, blockZ) != 106)
+                        switch (direction)
+                        {
+                            case 0: blockY++; break;
+                            case 1: blockY--; break;
+                            case 2: blockY++; break;
+                            case 3: blockZ--; break;
+                            case 4: blockX++; break;
+                            case 5: blockX--; break;
+                        }
+
+                    OnBlockChange(this, blockX, blockY, blockZ, blockID);
+                    return;
+                }
+
 				return;
 			}
 
@@ -606,6 +612,13 @@ namespace SMP
 
 			if (blockID >= 1 && blockID <= 255)
 			{
+                if (OnBlockChange != null)
+                {
+                    OnBlockChange(this, blockX, blockY, blockZ, blockID);
+                    SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    return;
+                }
+
 				if (BlockChange.Placed.ContainsKey(blockID))
 				{
 					if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
@@ -615,12 +628,29 @@ namespace SMP
 						return;
 					}
 				}
-				level.BlockChange(blockX, (int)blockY, blockZ, (byte)blockID, (byte)damage);
+				level.BlockChange(blockX, blockY, blockZ, (byte)blockID, (byte)damage);
                 if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
 				return;
 			}
 			else
 			{
+                if (OnBlockChange != null)
+                {
+                    if (level.GetBlock(blockX, blockY, blockZ) != 78 && level.GetBlock(blockX, blockY, blockZ) != 106)
+                        switch (direction)
+                        {
+                            case 0: blockY++; break;
+                            case 1: blockY--; break;
+                            case 2: blockY++; break;
+                            case 3: blockZ--; break;
+                            case 4: blockX++; break;
+                            case 5: blockX--; break;
+                        }
+
+                    OnBlockChange(this, blockX, blockY, blockZ, blockID);
+                    return;
+                }
+
 				if(BlockChange.ItemRightClick.ContainsKey(blockID))
 				{
                     if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
@@ -633,7 +663,7 @@ namespace SMP
 		}
 		#endregion
 
-		public void HandleHoldingChange(byte[] message)
+		private void HandleHoldingChange(byte[] message)
 		{
 			try { current_slot_holding = (short)(util.EndianBitConverter.Big.ToInt16(message, 0) + 36); }
 			catch { }
@@ -662,11 +692,11 @@ namespace SMP
 
         private void HandleCreativeInventoryAction(byte[] message)
         {
-            if (util.EndianBitConverter.Big.ToInt16(message, 0) == -1) return;
-            inventory.Add(util.EndianBitConverter.Big.ToInt16(message, 2), (byte)util.EndianBitConverter.Big.ToInt16(message, 4), util.EndianBitConverter.Big.ToInt16(message, 6), util.EndianBitConverter.Big.ToInt16(message, 0));
+            if (util.EndianBitConverter.Big.ToInt16(message, 0) == -1 || util.EndianBitConverter.Big.ToInt16(message, 2) == -1) return;
+            inventory.Add(util.EndianBitConverter.Big.ToInt16(message, 2), message[4], util.EndianBitConverter.Big.ToInt16(message, 5), util.EndianBitConverter.Big.ToInt16(message, 0));
         }
-		
-		public void HandleAnimation(byte[] message)
+
+        private void HandleAnimation(byte[] message)
 		{
             int pid = util.EndianBitConverter.Big.ToInt32(message, 0);
             byte type = message[4];
@@ -677,8 +707,8 @@ namespace SMP
                 if (p1 != this && p1.VisibleEntities.Contains(pid))
                     p1.SendAnimation(pid, type);
 		}
-		
-		public void HandleWindowClose(byte[] message)
+
+        private void HandleWindowClose(byte[] message)
 		{
             if (WindowClose != null)
                 WindowClose(this);
@@ -693,7 +723,7 @@ namespace SMP
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
 
-		public void HandleWindowClick(byte[] message)
+        private void HandleWindowClick(byte[] message)
 		{
 			if (OpenWindow)
 			{
@@ -774,7 +804,7 @@ namespace SMP
                    // GlobalMessage(GetName() + " " + window.items[1].item);
 				}
 			}
-			else if (window.type == 1)
+			else
 			{
 				if (slot < 10)
 				{
@@ -803,7 +833,7 @@ namespace SMP
 				catch { /* Ignore Me */ }
 			}
 		}
-		public void HandleEntityAction(byte[] message)
+        private void HandleEntityAction(byte[] message)
 		{
 			if (message[4] == 1)
 			{
@@ -830,13 +860,13 @@ namespace SMP
 				//Stop Sprinting
 			}
 		}
-        public void HandleRespawn(byte[] message)
+        private void HandleRespawn(byte[] message)
         {
             if (OnRespawn != null)
                 OnRespawn(this);
             if (PlayerRespawn != null)
                 PlayerRespawn(this);
-			Teleport_Player(level.SpawnX, level.SpawnY, level.SpawnZ, level.SpawnYaw, level.SpawnPitch);
+            Teleport_Spawn();
             SendRespawn();
         }
 		public static short BlockDropSwitch(short id)

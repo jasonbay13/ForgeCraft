@@ -330,9 +330,10 @@ namespace SMP
 		EnchantmentTable = 116,
 		BrewingStand = 117,
 		Cauldron = 118,
-		AirPortal = 119,
-		AirPortalFrame = 120,
-        WhiteStone = 121
+		EndPortal = 119,
+		EndPortalFrame = 120,
+        EndStone = 121,
+        DragonEgg = 122
 	};
 	public enum Items : short
 	{
@@ -478,7 +479,7 @@ namespace SMP
 		elevenMusicDisc = 2266
 		
 	};
-    public enum Mob : byte
+    public enum Mobs : byte
     {
         Creeper = 50,
         Skeleton = 51,
@@ -503,6 +504,39 @@ namespace SMP
         Mooshroom = 96,
         SnowGolem = 97,
         Villager = 120
+    }
+    public enum Objects : byte
+    {
+        Boat = 1,
+        Minecart = 10,
+        StorageMinecart = 11,
+        PoweredMinecart = 23,
+        ActivatedTNT = 50,
+        EnderCrystal = 51,
+        FiredArrow = 60,
+        ThrownSnowball = 61,
+        ThrownEgg = 62,
+        FallingSand = 70,
+        FallingGravel = 71,
+        EyeOfEnder = 72,
+        FishingFloat = 90
+    }
+    public enum SoundEffect : int
+    {
+        Click2 = 1000,
+        Click1 = 1001,
+        BowFire = 1002,
+        DoorToggle = 1003,
+        Extinguish = 1004,
+        RecordPlay = 1005,
+        GhastFire = 1007,
+        BlazeFire = 1008,
+        BlazeFire2 = 1009,
+        Smoke = 2000,
+        BlockBreak = 2001,
+        SpashPotion = 2002,
+        PortalParticle = 2003,
+        BlazeParticle = 2004
     }
 	/// <summary>
 	/// Goes for wood types AND leaves
@@ -623,7 +657,6 @@ namespace SMP
                 case (94):
                 case (104):
                 case (105):
-                case (106):
                     return true;
             }
             return false;
@@ -1028,6 +1061,7 @@ namespace SMP
                     return 6000;
                 case 8:
                 case 9:
+                case 10:
                 case 11:
                     return 500;
                 case 121:
@@ -1224,6 +1258,32 @@ namespace SMP
             {
                 case Material.Water:
                 case Material.Lava:
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool IsItemDamageable(short id)
+        {
+            if ((id >= 267 && id <= 279) || (id >= 298 && id <= 317)) return true;
+            switch (id)
+            {
+                case 256:
+                case 257:
+                case 258:
+                case 259:
+                case 261:
+                case 346:
+                case 283:
+                case 284:
+                case 285:
+                case 286:
+                case 290:
+                case 291:
+                case 292:
+                case 293:
+                case 294:
+                case 359:
                     return true;
             }
             return false;

@@ -23,7 +23,7 @@ namespace SMP.Commands
     public class CmdClearInventory : Command
     {
         public override string Name { get { return "clearinventory"; } }
-        public override List<string> Shortcuts { get { return new List<string> { "clearinv", "invclear", "ci" }; } }
+        public override List<string> Shortcuts { get { return new List<string> { "inventoryclear", "clearinv", "invclear", "ci" }; } }
         public override string Category { get { return "other"; } }
         public override bool ConsoleUseable { get { return false; } }
         public override string Description { get { return "Clears your inventory."; } }

@@ -64,7 +64,7 @@ namespace SMP
 		}
 
         #region Light spread is now in the World class!
-        /*public void SpreadLight() {
+        public void SpreadLight() {
             for( int x = 0; x < Chunk.Width; x++ ) {
                 for( int z = 0; z < Chunk.Depth; z++ ) {
                     for( int y = 0; y < Chunk.Height; y++ ) {
@@ -80,7 +80,7 @@ namespace SMP
             }
         }
 
-        private void SpreadLightInternal( int x, int y, int z ) {
+        internal void SpreadLightInternal( int x, int y, int z ) {
             var currLight = GetSkyLight(x, y, z);
             if (currLight == 0) return;
 
@@ -110,7 +110,7 @@ namespace SMP
                     SpreadBlockLightInternal(xx, yy, zz);
                 }
             });
-        }*/
+        }
         #endregion
 
         delegate void BlockDel( int x, int y, int z );

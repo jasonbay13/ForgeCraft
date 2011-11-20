@@ -99,6 +99,15 @@ namespace SMP
 
 			Entities.Add(id, this);
 		}
+        public Entity(McObject obj, World l)
+        {
+            this.obj = obj;
+            id = FreeId();
+            isObject = true;
+            level = l;
+
+            Entities.Add(id, this);
+        }
 		public Entity(bool lightning) //Stand in entity for lightning
 		{
 			id = FreeId();

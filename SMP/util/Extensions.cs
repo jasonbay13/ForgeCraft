@@ -27,12 +27,25 @@ namespace SMP
 {
     public static class Extensions
     {
+        /// <summary>
+        /// Truncates a string to the specified maximum length.
+        /// </summary>
+        /// <param name="source">The string to be truncated.</param>
+        /// <param name="maxLength">The maximum length to truncate the string to.</param>
+        /// <returns>The truncated string.</returns>
         public static string Truncate(this string source, int maxLength)
         {
             if (source.Length > maxLength)
                 source = source.Substring(0, maxLength);
             return source;
         }
+
+        /// <summary>
+        /// Truncates an array to the specified maximum length.
+        /// </summary>
+        /// <param name="source">The array to be truncated.</param>
+        /// <param name="maxLength">The maximum length to truncate the array to.</param>
+        /// <returns>The truncated array.</returns>
         public static Array Truncate(this Array source, int maxLength)
         {
             if (source.Length > maxLength)
@@ -40,18 +53,21 @@ namespace SMP
             return source;
         }
 
+        [Obsolete("Learn to use bit operators!", false)]
         public static byte GetBits(this byte data, int index, int count)
         {
             int max = (int)Math.Pow(2, count) - 1;
             return (byte)((data & (max << index)) >> index);
         }
+
+        [Obsolete("Learn to use bit operators!", false)]
         public static byte SetBits(this byte data, int index, int value)
         {
             return (byte)(data | (value << index));
         }
 
         /// <summary>
-        /// Compresses a byte array using zlib.
+        /// Compresses a byte array using Zlib.
         /// </summary>
         /// <param name="bytes">The byte array to be compressed.</param>
         /// <returns>Compressed byte array.</returns>
@@ -61,17 +77,50 @@ namespace SMP
         }
 
         /// <summary>
-        /// Compresses a byte array using zlib.
+        /// Compresses a byte array using Zlib.
         /// </summary>
         /// <param name="bytes">The byte array to be compressed.</param>
         /// <param name="level">Amount of compression to use.</param>
         /// <returns>Compressed byte array.</returns>
         public static byte[] Compress(this byte[] bytes, CompressionLevel level)
         {
+            return bytes.Compress(level, CompressionType.Zlib);
+        }
+
+        /// <summary>
+        /// Compresses a byte array using the specified compression type.
+        /// </summary>
+        /// <param name="bytes">The byte array to be compressed.</param>
+        /// <param name="type">Type of compression to use.</param>
+        /// <returns>Compressed byte array.</returns>
+        public static byte[] Compress(this byte[] bytes, CompressionType type)
+        {
+            return bytes.Compress(CompressionLevel.Default, type);
+        }
+
+        /// <summary>
+        /// Compresses a byte array using the specified compression type.
+        /// </summary>
+        /// <param name="bytes">The byte array to be compressed.</param>
+        /// <param name="level">Amount of compression to use.</param>
+        /// <param name="type">Type of compression to use.</param>
+        /// <returns>Compressed byte array.</returns>
+        public static byte[] Compress(this byte[] bytes, CompressionLevel level, CompressionType type)
+        {
             using (MemoryStream memory = new MemoryStream())
             {
-                using (ZlibStream stream = new ZlibStream(memory, CompressionMode.Compress, level, true))
-                    stream.Write(bytes, 0, bytes.Length);
+                switch (type) {
+                    case CompressionType.Zlib:
+                        using (ZlibStream stream = new ZlibStream(memory, CompressionMode.Compress, level, true))
+                            stream.Write(bytes, 0, bytes.Length);
+                        break;
+                    case CompressionType.GZip:
+                        using (GZipStream stream = new GZipStream(memory, CompressionMode.Compress, level, true))
+                            stream.Write(bytes, 0, bytes.Length);
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid compression type.");
+                }
                 memory.Position = 0;
                 bytes = new byte[memory.Length];
                 memory.Read(bytes, 0, (int)memory.Length);
@@ -80,11 +129,22 @@ namespace SMP
         }
 
         /// <summary>
-        /// Decompresses a byte array using zlib.
+        /// Decompresses a byte array using Zlib.
         /// </summary>
         /// <param name="bytes">The byte array to be decompressed.</param>
         /// <returns>Decompressed byte array.</returns>
         public static byte[] Decompress(this byte[] bytes)
+        {
+            return bytes.Decompress(CompressionType.Zlib);
+        }
+
+        /// <summary>
+        /// Decompresses a byte array using the specified compression type.
+        /// </summary>
+        /// <param name="bytes">The byte array to be decompressed.</param>
+        /// <param name="type">Type of compression to use.</param>
+        /// <returns>Decompressed byte array.</returns>
+        public static byte[] Decompress(this byte[] bytes, CompressionType type)
         {
             int size = 4096;
             byte[] buffer = new byte[size];
@@ -100,5 +160,11 @@ namespace SMP
                 return memory.ToArray();
             }
         }
+    }
+
+    public enum CompressionType
+    {
+        Zlib,
+        GZip
     }
 }

@@ -26,7 +26,6 @@ using System.Threading;
 using System.IO;
 using SMP.Commands;
 
-
 namespace SMP
 {
 	public class Server

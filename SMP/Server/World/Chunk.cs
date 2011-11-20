@@ -217,7 +217,7 @@ namespace SMP
                 byte[] bytes;
                 bytes = data.ToArray().Compress(CompressionLevel.BestCompression);
                 using (FileStream fs = new FileStream(file, FileMode.Create))
-                    fs.Write(bytes, 0, (int)bytes.Length);
+                    fs.Write(bytes, 0, bytes.Length);
             }
             this._dirty = false;
             //Console.WriteLine("SAVED " + x + " " + z);

@@ -204,19 +204,19 @@ namespace SMP
             int i = random.nextInt(4);
             if (i == 0)
             {
-                return (int)Mob.Skeleton;
+                return (int)Mobs.Skeleton;
             }
             if (i == 1)
             {
-                return (int)Mob.Zombie;
+                return (int)Mobs.Zombie;
             }
             if (i == 2)
             {
-                return (int)Mob.Zombie;
+                return (int)Mobs.Zombie;
             }
             if (i == 3)
             {
-                return (int)Mob.Spider;
+                return (int)Mobs.Spider;
             }
             else
             {

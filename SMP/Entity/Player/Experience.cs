@@ -65,7 +65,7 @@ namespace SMP
 
             //Server.Log(_Experience + " " + _Level + " " + _TotalExp);
             //Player.GlobalMessage("Bar= " + _Experience + " level = " + _Level + " totalexp = " + _TotalExp);
-            SendExperience(p, _Experience, _Level, _TotalExp);
+            //SendExperience(p, _Experience, _Level, _TotalExp);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace SMP
                 if (_Experience == (_Level * 10)) { _Experience = (byte)((_Level * 10) - 1); _Level--; }
             }
             if (_Level < oldlevel) p.SendMessage("You have been demoted to level " + _Level);
-            SendExperience(p, _Experience, _Level, _TotalExp);
+            //SendExperience(p, _Experience, _Level, _TotalExp);
         }
 
         void RewardItem(Player p)
@@ -108,12 +108,12 @@ namespace SMP
         /// <param name="expbarval">Value of the experience bar (0-19)</param>
         /// <param name="level">Ecperience level of player</param>
         /// <param name="totalexp">Players total experience</param>
-        public static void SendExperience(Player p, byte expbarval, byte level, short totalexp)
+        public static void SendExperience(Player p, float expbarval, short level, short totalexp)
         {
-            byte[] bytes = new byte[4];
-            bytes[0] = expbarval;
-            bytes[1] = level;
-            util.EndianBitConverter.Big.GetBytes(totalexp).CopyTo(bytes, 2);
+            byte[] bytes = new byte[8];
+            util.EndianBitConverter.Big.GetBytes(expbarval).CopyTo(bytes, 0);
+            util.EndianBitConverter.Big.GetBytes(level).CopyTo(bytes, 4);
+            util.EndianBitConverter.Big.GetBytes(totalexp).CopyTo(bytes, 6);
             p.SendRaw(0x2B, bytes);
         }
     }
