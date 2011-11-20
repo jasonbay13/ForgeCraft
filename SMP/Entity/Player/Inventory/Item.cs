@@ -49,7 +49,7 @@ namespace SMP
 
 		public short item = -1;
 		public byte count = 1;
-        public List<Enchantment> enchantments = new List<Enchantment>() { new Enchantment(17, 1), new Enchantment(5, 1) };
+        public List<Enchantment> enchantments = new List<Enchantment>();
 		private short Mymeta = 0;
 		public short meta
 		{

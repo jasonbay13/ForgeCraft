@@ -190,7 +190,7 @@ namespace SMP
 		{
 			if(!a.level.windows.ContainsKey(b.pos))
 			{
-				new Windows(3, b.pos, a.level);
+				new Windows(WindowType.Dispenser, b.pos, a.level);
 			}
 			
 			Windows window = a.level.windows[b.pos];
@@ -228,7 +228,7 @@ namespace SMP
 		{
             if (!a.level.windows.ContainsKey(b.pos))
             {
-               a.window = new Windows(1, b.pos, a.level);
+               a.window = new Windows(WindowType.Workbench, b.pos, a.level);
             }
 
             Windows window = a.level.windows[b.pos];

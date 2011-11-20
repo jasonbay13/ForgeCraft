@@ -26,7 +26,7 @@ namespace SMP
         Workbench = 1,
         Furnace = 2,
         Dispenser = 3,
-        Other = 4
+        EnchantmentTable = 4
     }
 	public class Windows
     {
@@ -75,8 +75,8 @@ namespace SMP
 					name = "Dispenser";
 					items = new Item[9];
 					break;
-				case WindowType.Other:
-					name = "Other";
+				case WindowType.EnchantmentTable:
+					name = "Enchantment Table";
 					items = new Item[27];
 					break;
 			}
