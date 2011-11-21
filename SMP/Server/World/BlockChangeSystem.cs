@@ -58,6 +58,7 @@ namespace SMP
             RightClickedOn.Add((short)Blocks.DoorIron, new BCD(DoNothing));
             RightClickedOn.Add((short)Blocks.Lever, new BCD(SwitchLever));
             RightClickedOn.Add((short)Blocks.ButtonStone, new BCD(HitButton));
+            RightClickedOn.Add((short)Blocks.EnchantmentTable, new BCD(OpenEnchantmentTable));
 
 			//Item RightClick Deletgates (Holds Delegates for when the player right clicks with specific items)
 			ItemRightClick.Add((short)Items.FlintAndSteel, new BCD(LightFire));
@@ -188,20 +189,16 @@ namespace SMP
 		}
 		public static bool OpenDispenser(Player a, BCS b)
 		{
-            try
+            if (!a.level.windows.ContainsKey(b.pos))
+                a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
+            else if (a.level.windows[b.pos].Type != WindowType.Dispenser)
             {
-                if (!a.level.windows.ContainsKey(b.pos))
-                    a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
-                else if (a.level.windows[b.pos].Type != WindowType.Dispenser)
-                {
-                    a.level.windows.Remove(b.pos);
-                    a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
-                }
-                else a.window = a.level.windows[b.pos];
-
-                a.SendWindowOpen(a.level.windows[b.pos]);
+                a.level.windows.Remove(b.pos);
+                a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
             }
-            catch (Exception ex) { Server.ServerLogger.Log(ex.Message); Server.ServerLogger.Log(ex.StackTrace); }
+            else a.window = a.level.windows[b.pos];
+
+            a.SendWindowOpen(a.window);
             return false;
 		}
 		public static bool ChangeNoteblock(Player a, BCS b)
@@ -221,35 +218,60 @@ namespace SMP
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
+            if (!a.level.windows.ContainsKey(b.pos))
+                a.window = new Windows(WindowType.Chest, b.pos, a.level);
+            else if (a.level.windows[b.pos].Type != WindowType.Chest)
+            {
+                a.level.windows.Remove(b.pos);
+                a.window = new Windows(WindowType.Chest, b.pos, a.level);
+            }
+            else a.window = a.level.windows[b.pos];
 
-			return false;
+            a.SendWindowOpen(a.window);
+            return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
 		{
             if (!a.level.windows.ContainsKey(b.pos))
                a.window = new Windows(WindowType.Workbench, b.pos, a.level);
-            if (a.level.windows[b.pos].Type != WindowType.Workbench)
+            else if (a.level.windows[b.pos].Type != WindowType.Workbench)
             {
                 a.level.windows.Remove(b.pos);
                 a.window = new Windows(WindowType.Workbench, b.pos, a.level);
             }
+            else a.window = a.level.windows[b.pos];
 
-            a.SendWindowOpen(a.level.windows[b.pos]);
+            a.SendWindowOpen(a.window);
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)
 		{
             if (!a.level.windows.ContainsKey(b.pos))
                 a.window = new Windows(WindowType.Furnace, b.pos, a.level);
-            if (a.level.windows[b.pos].Type != WindowType.Furnace)
+            else if (a.level.windows[b.pos].Type != WindowType.Furnace)
             {
                 a.level.windows.Remove(b.pos);
                 a.window = new Windows(WindowType.Furnace, b.pos, a.level);
             }
+            else a.window = a.level.windows[b.pos];
 
-            a.SendWindowOpen(a.level.windows[b.pos]);
+            a.SendWindowOpen(a.window);
 			return false;
 		}
+        public static bool OpenEnchantmentTable(Player a, BCS b)
+        {
+            if (!a.level.windows.ContainsKey(b.pos))
+                a.window = new Windows(WindowType.EnchantmentTable, b.pos, a.level);
+            else if (a.level.windows[b.pos].Type != WindowType.EnchantmentTable)
+            {
+                a.level.windows.Remove(b.pos);
+                a.window = new Windows(WindowType.EnchantmentTable, b.pos, a.level);
+            }
+            else a.window = a.level.windows[b.pos];
+
+            a.SendWindowOpen(a.window);
+            return false;
+        }
 		public static bool PlayMusic(Player a, BCS b)
 		{
             ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
@@ -1281,7 +1303,6 @@ namespace SMP
 		}
 		public static bool DestroyJukebox(Player a, BCS b)
 		{
-            // TODO: Tile entity stuff!
             ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             if (meta != 0)
             {
@@ -1293,6 +1314,7 @@ namespace SMP
                     }
                 }
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+                a.level.SetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0);
                 Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
             }
             return true;

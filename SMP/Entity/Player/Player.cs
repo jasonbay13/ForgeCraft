@@ -196,7 +196,7 @@ namespace SMP
         // This is for commands and stuff
         public object BlockChangeObject;
 		
-		Entity e;
+		Entity e = new Entity(true);
 		public string ip;
 		public string username;
 		bool hidden = false;

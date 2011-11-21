@@ -127,7 +127,7 @@ namespace SMP
                     Chunk ch = new Chunk(x, z);
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        using (FileStream fs = new FileStream(file, FileMode.Open))
+                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
                             byte[] comp;
                             ms.SetLength(fs.Length);
@@ -167,7 +167,7 @@ namespace SMP
                 }
                 catch (Exception ex)
                 {
-                    Server.ServerLogger.LogToFile("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
+                    Server.ServerLogger.Log("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
                     Server.ServerLogger.LogErrorToFile(ex);
                 }
             }
@@ -216,7 +216,7 @@ namespace SMP
 
                 byte[] bytes;
                 bytes = data.ToArray().Compress(CompressionLevel.BestCompression);
-                using (FileStream fs = new FileStream(file, FileMode.Create))
+                using (FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write))
                     fs.Write(bytes, 0, bytes.Length);
             }
             this._dirty = false;

@@ -49,7 +49,6 @@ namespace SMP
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
 		public List<Point> ToGenerate = new List<Point>();
-        public DateTime lastBlockChange = new DateTime(1);
         public Physics physics;
         public bool Raining = false;
 		public byte height = 128;
@@ -628,7 +627,8 @@ namespace SMP
         {
             try
             {
-                if (blockQueue.Count < 1) return;
+                int count = blockQueue.Count;
+                if (count < 1) return;
 
                 Dictionary<Point, List<BlockChangeData>> tempQueue;
                 lock (blockQueue)
@@ -645,6 +645,9 @@ namespace SMP
                         p.SendMultiBlockChange(kvp.Key, kvp.Value.ToArray());
                     }
                 }
+
+                tempQueue.Clear();
+                tempQueue = null;
             }
             catch (Exception ex)
             {
@@ -666,28 +669,8 @@ namespace SMP
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
                     BlockChanged(x, y, z, type, meta);
-
                 if (type != oldBlock || meta != oldMeta) // Don't send block change if it's the same.
-                {
-                    TimeSpan diff = DateTime.Now - lastBlockChange;
-                    if (diff.TotalMilliseconds < 10)
-                    {
-                        QueueBlockChange(x, y, z, type, meta);
-                    }
-                    else
-                    {
-                        if (blockQueue.ContainsKey(chunk.point))
-                            blockQueue[chunk.point].RemoveAll(bl => (bl.x == x && bl.y == y && bl.z == z));
-
-                        foreach (Player p in Player.players.ToArray())
-                        {
-                            if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(chunk.point)) continue;
-                            p.SendBlockChange(x, (byte)y, z, type, meta);
-                        }
-                        
-                        lastBlockChange = DateTime.Now;
-                    }
-                }
+                    QueueBlockChange(x, y, z, type, meta);
             }
             catch { }
 		}
@@ -704,12 +687,7 @@ namespace SMP
                 if (chunk == null) return;
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
-
-                foreach (Player p in Player.players.ToArray())
-                {
-                    if (!p.MapLoaded || p.level != this || !p.VisibleChunks.Contains(chunk.point)) continue;
-                    p.SendBlockChange(x, (byte)y, z, type, meta);
-                }
+                QueueBlockChange(x, y, z, type, meta);
             }
             catch { }
         }

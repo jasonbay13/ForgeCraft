@@ -657,6 +657,8 @@ namespace SMP
                 case (94):
                 case (104):
                 case (105):
+                case (111):
+                case (115):
                     return true;
             }
             return false;

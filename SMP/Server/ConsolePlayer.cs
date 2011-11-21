@@ -17,6 +17,8 @@
 */
 using System;
 using System.Text;
+using System.Net;
+using System.Net.Sockets;
 
 //for console commands mainly and removes color codes from text
 

@@ -79,7 +79,7 @@ namespace SMP
 					items = new Item[9];
 					break;
 				case WindowType.EnchantmentTable:
-					name = "Enchantment Table";
+					name = "Enchant";
 					items = new Item[1];
 					break;
 			}
