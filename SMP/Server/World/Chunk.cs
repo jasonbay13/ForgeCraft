@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Ionic.Zlib;
+using Substrate.Nbt;
 
 namespace SMP
 {
@@ -132,33 +133,35 @@ namespace SMP
                             byte[] comp;
                             ms.SetLength(fs.Length);
                             fs.Read(ms.GetBuffer(), 0, (int)fs.Length);
-                            comp = ms.GetBuffer().Decompress();
+                            comp = ms.GetBuffer().Decompress(CompressionType.GZip);
                             ms.Write(comp, 0, comp.Length);
                         }
-                        byte[] bytes = ms.ToArray();
-                        ch.generated = BitConverter.ToBoolean(bytes, 0);
-                        ch.populated = BitConverter.ToBoolean(bytes, 1);
-                        Array.Copy(bytes, 2, ch.blocks, 0, 32768);
-                        Array.Copy(bytes, 32768 + 2, ch.meta, 0, 16384);
-                        Array.Copy(bytes, 49152 + 2, ch.SkyL, 0, 16384);
-                        Array.Copy(bytes, 65536 + 2, ch.Light, 0, 16384);
-                        Array.Copy(bytes, 81922 + 2, ch.heightMap, 0, 256);
-                        int index = 82178 + 2;
-                        short extraCount = BitConverter.ToInt16(bytes, index - 2);
-                        if (extraCount > 0)
-                            for (int i = 0; i < extraCount; i++)
-                            {
-                                ch.extra.Add(BitConverter.ToInt32(bytes, index), BitConverter.ToUInt16(bytes, index + 4));
-                                index += 6;
-                            }
-                        short physCount = BitConverter.ToInt16(bytes, index); index += 2;
-                        if (physCount > 0)
+
+                        ms.Position = 0;
+                        NbtTree nbt = new NbtTree(ms);
+                        ch.generated = (nbt.Root["generated"].ToTagByte().Data > 0);
+                        ch.populated = (nbt.Root["populated"].ToTagByte().Data > 0);
+                        Array.Copy(nbt.Root["blocks"].ToTagByteArray(), ch.blocks, ch.blocks.Length);
+                        Array.Copy(nbt.Root["meta"].ToTagByteArray(), ch.meta, ch.meta.Length);
+                        Array.Copy(nbt.Root["blocklight"].ToTagByteArray(), ch.Light, ch.Light.Length);
+                        Array.Copy(nbt.Root["skylight"].ToTagByteArray(), ch.SkyL, ch.SkyL.Length);
+                        Array.Copy(nbt.Root["heightmap"].ToTagByteArray(), ch.heightMap, ch.heightMap.Length);
+                        TagNodeCompound nbtCompound;
+                        foreach (TagNode tag in nbt.Root["extra"].ToTagList())
                         {
-                            ch.physChecks = new Physics.Check[physCount];
-                            for (int i = 0; i < physCount; i++)
+                            nbtCompound = tag.ToTagCompound();
+                            ch.extra.Add(nbtCompound["pos"].ToTagInt(), (ushort)nbtCompound["value"].ToTagShort());
+                        }
+                        TagNodeList nbtList = nbt.Root["physics"].ToTagList();
+                        int count = nbtList.Count;
+                        if (count > 0)
+                        {
+                            ch.physChecks = new Physics.Check[count]; TagNodeList nbtList2;
+                            for (int i = 0; i < count; i++)
                             {
-                                ch.physChecks[i] = new Physics.Check(BitConverter.ToInt32(bytes, index), BitConverter.ToInt32(bytes, index + 4), BitConverter.ToInt32(bytes, index + 8), bytes[index + 14], BitConverter.ToInt16(bytes, index + 12));
-                                index += 15;
+                                nbtCompound = nbtList[i].ToTagCompound();
+                                nbtList2 = nbtCompound["pos"].ToTagList();
+                                ch.physChecks[i] = new Physics.Check(nbtList2[0].ToTagInt(), nbtList2[1].ToTagInt(), nbtList2[2].ToTagInt(), nbtCompound["meta"].ToTagByte(), nbtCompound["time"].ToTagShort());
                             }
                         }
                     }
@@ -167,7 +170,7 @@ namespace SMP
                 }
                 catch (Exception ex)
                 {
-                    Server.ServerLogger.Log("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
+                    Server.ServerLogger.LogToFile("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
                     Server.ServerLogger.LogErrorToFile(ex);
                 }
             }
@@ -187,38 +190,59 @@ namespace SMP
             string path = CreatePath(w, x, z, true);
             string file = CreatePath(w, x, z);
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            using (MemoryStream data = new MemoryStream())
-            {
-                data.Write(BitConverter.GetBytes(generated), 0, 1);
-                data.Write(BitConverter.GetBytes(populated), 0, 1);
-                data.Write(blocks, 0, blocks.Length);
-                data.Write(meta, 0, meta.Length);
-                data.Write(SkyL, 0, SkyL.Length);
-                data.Write(Light, 0, Light.Length);
-                data.Write(heightMap, 0, heightMap.Length);
-                data.Write(BitConverter.GetBytes((short)extra.Count), 0, 2);
-                lock (extra)
-                    foreach (KeyValuePair<int, ushort> kvp in extra)
-                    {
-                        data.Write(BitConverter.GetBytes((int)kvp.Key), 0, 4);
-                        data.Write(BitConverter.GetBytes((ushort)kvp.Value), 0, 2);
-                    }
-                List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
-                data.Write(BitConverter.GetBytes((short)physChecks.Count), 0, 2);
-                foreach (Physics.Check check in physChecks)
-                {
-                    data.Write(BitConverter.GetBytes(check.x), 0, 4);
-                    data.Write(BitConverter.GetBytes(check.y), 0, 4);
-                    data.Write(BitConverter.GetBytes(check.z), 0, 4);
-                    data.Write(BitConverter.GetBytes(check.time), 0, 2);
-                    data.WriteByte(check.meta);
-                }
 
-                byte[] bytes;
-                bytes = data.ToArray().Compress(CompressionLevel.BestCompression);
-                using (FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write))
-                    fs.Write(bytes, 0, bytes.Length);
+            NbtTree nbt = new NbtTree();
+            nbt.Root.Add("generated", new TagNodeByte((byte)(generated ? 1 : 0)));
+            nbt.Root.Add("populated", new TagNodeByte((byte)(populated ? 1 : 0)));
+            nbt.Root.Add("blocks", new TagNodeByteArray(blocks));
+            nbt.Root.Add("meta", new TagNodeByteArray(meta));
+            nbt.Root.Add("blocklight", new TagNodeByteArray(Light));
+            nbt.Root.Add("skylight", new TagNodeByteArray(SkyL));
+            nbt.Root.Add("heightmap", new TagNodeByteArray(heightMap));
+            TagNodeList nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+            TagNodeCompound nbtCompound;
+            lock (extra)
+                foreach (KeyValuePair<int, ushort> kvp in extra)
+                {
+                    nbtCompound = new TagNodeCompound();
+                    nbtCompound.Add("pos", new TagNodeInt(kvp.Key));
+                    nbtCompound.Add("value", new TagNodeShort((short)kvp.Value));
+                    nbtList.Add(nbtCompound);
+                }
+            nbt.Root.Add("extra", nbtList);
+            nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+            List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
+            TagNodeList nbtList2;
+            foreach (Physics.Check check in physChecks)
+            {
+                nbtCompound = new TagNodeCompound();
+                nbtList2 = new TagNodeList(TagType.TAG_INT);
+                nbtList2.Add(new TagNodeInt(check.x));
+                nbtList2.Add(new TagNodeInt(check.y));
+                nbtList2.Add(new TagNodeInt(check.z));
+                nbtCompound.Add("pos", nbtList2);
+                nbtCompound.Add("meta", new TagNodeByte(check.meta));
+                nbtCompound.Add("time", new TagNodeShort(check.time));
+                nbtList.Add(nbtCompound);
             }
+            nbt.Root.Add("physics", nbtList);
+
+            try
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    nbt.WriteTo(ms);
+                    byte[] bytes = ms.ToArray().Compress(CompressionLevel.BestCompression, CompressionType.GZip);
+                    using (FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write))
+                        fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+            catch (Exception ex)
+            {
+                Server.ServerLogger.LogToFile("Error saving chunk at " + x + "," + z + "!");
+                Server.ServerLogger.LogErrorToFile(ex);
+            }
+
             this._dirty = false;
             //Console.WriteLine("SAVED " + x + " " + z);
         }
@@ -255,7 +279,7 @@ namespace SMP
                 if (w.ChunkExists(x - 1, z - 1) && !GetChunk(x - 1, z - 1, w).populated && w.ChunkExists(x, z - 1) && w.ChunkExists(x - 1, z))
                     w.PopulateChunk(x - 1, z - 1);
             }
-            catch { }
+            catch { Console.WriteLine("BALLS"); }
 
             if (physChecks != null)
             {
@@ -281,7 +305,7 @@ namespace SMP
                         bType = GetBlock(xx, yy, zz);
 
                         if (!w.CanBlockStay(bType, xxx, yy, zzz))
-                            PlaceBlock(xx, yy, zz, 0, 0);
+                            w.SetBlock(xxx, yy, zzz, 0, 0);
                     }
         }
 
@@ -584,7 +608,7 @@ namespace SMP
         public static string CreatePath(World w, int x, int z, bool folderOnly = false)
         {
             if (folderOnly) return String.Format("{0}/chunks/{1}/{2}/", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16));
-            return String.Format("{0}/chunks/{1}/{2}/{3}.{4}.chunk", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
+            return String.Format("{0}/chunks/{1}/{2}/{3}.{4}.nbt", w.name, Convert.ToString(x & 0x3f, 16), Convert.ToString(z & 0x3f, 16), x.ToString(), z.ToString());
         }
 
         public void Dispose()

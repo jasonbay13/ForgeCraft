@@ -258,7 +258,8 @@ namespace SMP
 		/// <param name="message">
 		/// A <see cref="System.String"/>
 		/// </param>
-		public static void Log(string message)
+        [Obsolete("Replaced by Server.ServerLogger!", false)]
+        public static void Log(string message)
 		{
 			ServerLogger.Log(message);
 		}

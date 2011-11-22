@@ -32,10 +32,12 @@ namespace SMP
         WindowClose,
         EXPGain,
         EXPLost,
-        RightClick,
-        LeftClick,
+        EntityLeftClick,
+        EntityRightClick,
+        BlockRightClick,
+        BlockLeftClick,
         BlockPlace,
-        BlockDestory,
+        BlockBreak,
         Respawn
     }
     public enum WindowEvent

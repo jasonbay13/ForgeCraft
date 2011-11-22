@@ -102,14 +102,18 @@ namespace SMP
                     return p.cancellost;
                 case PlayerEvents.Respawn:
                     return p.cancelrespawn;
-                case PlayerEvents.RightClick:
-                    return p.cancelright;
-                case PlayerEvents.LeftClick:
-                    return p.cancelleft;
+                case PlayerEvents.EntityLeftClick:
+                    return p.cancelentityleft;
+                case PlayerEvents.EntityRightClick:
+                    return p.cancelentityright;
+                case PlayerEvents.BlockRightClick:
+                    return p.cancelblockright;
+                case PlayerEvents.BlockLeftClick:
+                    return p.cancelblockleft;
                 case PlayerEvents.BlockPlace:
                     return p.cancelplace;
-                case PlayerEvents.BlockDestory:
-                    return p.canceldestroy;
+                case PlayerEvents.BlockBreak:
+                    return p.cancelbreak;
                 default:
                     return false;
             }
@@ -159,17 +163,23 @@ namespace SMP
                 case PlayerEvents.Respawn:
                     p.cancelrespawn = true;
                     break;
-                case PlayerEvents.RightClick:
-                    p.cancelright = true;
+                case PlayerEvents.EntityLeftClick:
+                    p.cancelentityleft = true;
                     break;
-                case PlayerEvents.LeftClick:
-                    p.cancelleft = true;
+                case PlayerEvents.EntityRightClick:
+                    p.cancelentityright = true;
+                    break;
+                case PlayerEvents.BlockRightClick:
+                    p.cancelblockright = true;
+                    break;
+                case PlayerEvents.BlockLeftClick:
+                    p.cancelblockleft = true;
                     break;
                 case PlayerEvents.BlockPlace:
                     p.cancelplace = true;
                     break;
-                case PlayerEvents.BlockDestory:
-                    p.canceldestroy = true;
+                case PlayerEvents.BlockBreak:
+                    p.cancelbreak = true;
                     break;
             }
         }

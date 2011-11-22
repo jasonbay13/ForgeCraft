@@ -119,7 +119,7 @@ namespace SMP
                             stream.Write(bytes, 0, bytes.Length);
                         break;
                     default:
-                        throw new ArgumentException("Invalid compression type.");
+                        throw new ArgumentException("Unknown compression type.");
                 }
                 memory.Position = 0;
                 bytes = new byte[memory.Length];
@@ -151,11 +151,26 @@ namespace SMP
             using (MemoryStream memory = new MemoryStream())
             {
                 using (MemoryStream memory2 = new MemoryStream(bytes))
-                    using (ZlibStream stream = new ZlibStream(memory2, CompressionMode.Decompress))
+                    switch (type)
                     {
-                        int count = 0;
-                        while ((count = stream.Read(buffer, 0, size)) > 0)
-                            memory.Write(buffer, 0, count);
+                        case CompressionType.Zlib:
+                            using (ZlibStream stream = new ZlibStream(memory2, CompressionMode.Decompress))
+                            {
+                                int count = 0;
+                                while ((count = stream.Read(buffer, 0, size)) > 0)
+                                    memory.Write(buffer, 0, count);
+                            }
+                            break;
+                        case CompressionType.GZip:
+                            using (GZipStream stream = new GZipStream(memory2, CompressionMode.Decompress))
+                            {
+                                int count = 0;
+                                while ((count = stream.Read(buffer, 0, size)) > 0)
+                                    memory.Write(buffer, 0, count);
+                            }
+                            break;
+                        default:
+                            throw new ArgumentException("Unknown compression type.");
                     }
                 return memory.ToArray();
             }

@@ -687,7 +687,7 @@ namespace SMP
                 if (chunk == null) return;
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
-                QueueBlockChange(x, y, z, type, meta);
+                //QueueBlockChange(x, y, z, type, meta); // Removed until client lag fixed!
             }
             catch { }
         }

@@ -284,6 +284,7 @@ namespace SMP
                 a.level.UnsetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Jukebox, 0, false);
                 Player.GlobalSoundEffect(b.pos, 1005, 0, a.level);
+                return false;
             }
             else if (item >= 2256 && item <= 2266)
             {
@@ -291,8 +292,9 @@ namespace SMP
                 a.level.SetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (ushort)item);
                 a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Jukebox, 1, false);
                 Player.GlobalSoundEffect(b.pos, 1005, item, a.level);
+                return false;
             }
-            return false;
+            return true;
 		}
 		public static bool EatCake(Player a, BCS b)
 		{

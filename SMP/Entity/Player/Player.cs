@@ -127,6 +127,25 @@ namespace SMP
         public delegate void OnWindowClose(Player p);
         public event OnWindowClose WindowClose;
         public static event OnWindowClose PlayerWindowClose;
+        public delegate void OnEntityAttack(Player p, Entity e, int damage);
+        public event OnEntityAttack EntityAttack;
+        public static event OnEntityAttack PlayerEntityAttack;
+        public delegate void OnEntityClick(Player p, Entity e);
+        public event OnEntityClick OnEntityRightClick;
+        public static event OnEntityClick PlayerEntityRightClick;
+        public delegate void OnBlockClick(Player p, int x, int y, int z);
+        public event OnBlockClick OnBlockLeftClick;
+        public static event OnBlockClick PlayerBlockLeftClick;
+        public event OnBlockClick OnBlockRightClick;
+        public static event OnBlockClick PlayerBlockRightClick;
+        public delegate void OnBlockPlaceBreak(Player p, int x, int y, int z, byte type, byte meta);
+        public event OnBlockPlaceBreak OnBlockPlace;
+        public static event OnBlockPlaceBreak PlayerBlockPlace;
+        public event OnBlockPlaceBreak OnBlockBreak;
+        public static event OnBlockPlaceBreak PlayerBlockBreak;
+        public delegate void OnItemUse(Player p, int x, int y, int z, Item item);
+        public event OnItemUse ItemUse;
+        public static event OnItemUse PlayerItemUse;
         //Other things for plugins ----------
         internal bool cancelchat = false;
         internal bool cancelcommand = false;
@@ -136,10 +155,12 @@ namespace SMP
         internal bool cancelgain = false;
         internal bool cancellost = false;
         internal bool cancelclose = false;
-        internal bool cancelleft = false;
-        internal bool cancelright = false;
+        internal bool cancelentityleft = false;
+        internal bool cancelentityright = false;
+        internal bool cancelblockleft = false;
+        internal bool cancelblockright = false;
         internal bool cancelplace = false;
-        internal bool canceldestroy = false;
+        internal bool cancelbreak = false;
         internal bool cancelrespawn = false;
         internal bool CheckEXPGain(short exp)
         {
