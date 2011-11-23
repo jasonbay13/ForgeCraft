@@ -175,6 +175,20 @@ namespace SMP
                 return memory.ToArray();
             }
         }
+
+        /// <summary>
+        /// Capitalizes a string, duh!
+        /// </summary>
+        /// <param name="str">String to be capitalized.</param>
+        /// <returns>The capitalized string.</returns>
+        public static string Capitalize(this string str)
+        {
+            if (String.IsNullOrEmpty(str))
+                return String.Empty;
+            char[] a = str.ToCharArray();
+            a[0] = char.ToUpper(a[0]);
+            return new string(a);
+        }
     }
 
     public enum CompressionType

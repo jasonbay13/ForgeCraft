@@ -102,7 +102,7 @@ namespace SMP
                     return p.cancellost;
                 case PlayerEvents.Respawn:
                     return p.cancelrespawn;
-                case PlayerEvents.EntityLeftClick:
+                case PlayerEvents.EntityAttack:
                     return p.cancelentityleft;
                 case PlayerEvents.EntityRightClick:
                     return p.cancelentityright;
@@ -163,7 +163,7 @@ namespace SMP
                 case PlayerEvents.Respawn:
                     p.cancelrespawn = true;
                     break;
-                case PlayerEvents.EntityLeftClick:
+                case PlayerEvents.EntityAttack:
                     p.cancelentityleft = true;
                     break;
                 case PlayerEvents.EntityRightClick:

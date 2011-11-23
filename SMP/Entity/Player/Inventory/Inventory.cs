@@ -24,20 +24,17 @@ namespace SMP
 	{
 		public Item[] items;
 		public Player p;
-		private Item Mycurrent_item;
-		public Item current_item
-		{
-			get
-			{
-				return Mycurrent_item;
-			}
-			set
-			{
-				Mycurrent_item = value;
-                UpdateVisibleItemInHand(Mycurrent_item.item, Mycurrent_item.meta);
-			}
-		}
-		public short current_index;
+		public Item current_item { get { return items[current_index]; } }
+        private short Mycurrent_index;
+        public short current_index
+        {
+            get { return Mycurrent_index; }
+            set
+            {
+                Mycurrent_index = value;
+                UpdateVisibleItemInHand(current_item.item, current_item.meta);
+            }
+        }
 
 		public Inventory (Player pl)
 		{
@@ -48,7 +45,6 @@ namespace SMP
 			for (int i = 0; i < items.Length; i++)
 				items[i] = Item.Nothing;
 
-			current_item = items[36];
 			current_index = 36;
 		}
 
@@ -123,10 +119,9 @@ namespace SMP
 
 			if (count == 0) return;
 
-			Item I = new Item(item, count, meta, p.level);
+			Item I = new Item(item, count, meta, p.level, true);
 			items[slot] = I;
             //if (slot == current_index) p.current_block_holding = I;
-            if (slot == current_index) current_item = items[slot];
 
 			p.SendItem((short)slot, item, count, meta);
 		}
@@ -140,13 +135,11 @@ namespace SMP
 			if (count >= items[slot].count)
 			{
 				items[slot] = Item.Nothing;
-                if (slot == current_index) current_item = items[slot];
 				p.SendItem((short)slot, -1, 0, 0);
 				return;
 			}
 
 			items[slot].count -= count;
-            if (slot == current_index) current_item = items[slot];
 			p.SendItem((short)slot, items[slot].item, items[slot].count, items[slot].meta);
 		}
 
@@ -548,7 +541,7 @@ namespace SMP
 							else
 							{
 								p.OnMouse.count -= 1;
-								items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level);
+                                items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level, true);
 							}
 						}
 						else
@@ -559,7 +552,6 @@ namespace SMP
 					}
 				}
 				#endregion
-                current_item = items[current_index];
 			}
 			#region Empty Mouse done
 			else //Player has NOTHING on the mouse
@@ -588,7 +580,7 @@ namespace SMP
 		{
 			try
 			{
-				Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level);
+                Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level, true);
 				if (items[slot].count == 1)
 				{
 					temp = items[slot];
@@ -646,7 +638,7 @@ namespace SMP
 		}
 		public static byte isStackable(short id)
 		{
-			if(id >= 1 && id <= 109) //all blocks are stackable and there is no missing id's
+			if(id >= 1 && id <= 122) //all blocks are stackable and there is no missing id's
 				return 64;
 			
 			// may be missing a few

@@ -489,10 +489,10 @@ namespace SMP
 			}
 
 			//short blockID = util.EndianBitConverter.Big.ToInt16(message, 10);
-            short blockID = inventory.current_item.item;
+            short blockID = current_block_holding.item;
 
-            byte amount = inventory.current_item.count;
-            short damage = inventory.current_item.meta;
+            byte amount = current_block_holding.count;
+            short damage = current_block_holding.meta;
             /*if (message.Length == 15)  //incase it is the secondary packet size (THIS LIES, DO NOT USE!!!)
             {
                 amount = message[11];
@@ -629,7 +629,7 @@ namespace SMP
 					}
 				}
 				level.BlockChange(blockX, blockY, blockZ, (byte)blockID, (byte)damage);
-                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
+                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(this, 1); }
 				return;
 			}
 			else
@@ -655,7 +655,7 @@ namespace SMP
 				{
                     if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
                     {
-                        if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); Experience.Add(this, 1); }
+                        if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(this, 1); }
                     }
 				}
 				return;

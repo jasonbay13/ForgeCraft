@@ -538,6 +538,14 @@ namespace SMP
         PortalParticle = 2003,
         BlazeParticle = 2004
     }
+    public enum EntityType : byte
+    {
+        Unknown = 0,
+        Player = 1,
+        AI = 2,
+        Object = 3,
+        Item = 4
+    }
 	/// <summary>
 	/// Goes for wood types AND leaves
 	/// </summary>

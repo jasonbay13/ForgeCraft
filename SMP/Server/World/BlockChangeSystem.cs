@@ -59,6 +59,7 @@ namespace SMP
             RightClickedOn.Add((short)Blocks.Lever, new BCD(SwitchLever));
             RightClickedOn.Add((short)Blocks.ButtonStone, new BCD(HitButton));
             RightClickedOn.Add((short)Blocks.EnchantmentTable, new BCD(OpenEnchantmentTable));
+            RightClickedOn.Add((short)Blocks.BrewingStand, new BCD(OpenBrewingStand));
 
 			//Item RightClick Deletgates (Holds Delegates for when the player right clicks with specific items)
 			ItemRightClick.Add((short)Items.FlintAndSteel, new BCD(LightFire));
@@ -189,16 +190,7 @@ namespace SMP
 		}
 		public static bool OpenDispenser(Player a, BCS b)
 		{
-            if (!a.level.windows.ContainsKey(b.pos))
-                a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
-            else if (a.level.windows[b.pos].Type != WindowType.Dispenser)
-            {
-                a.level.windows.Remove(b.pos);
-                a.window = new Windows(WindowType.Dispenser, b.pos, a.level);
-            }
-            else a.window = a.level.windows[b.pos];
-
-            a.SendWindowOpen(a.window);
+            a.WindowOpen(WindowType.Dispenser, b.pos);
             return false;
 		}
 		public static bool ChangeNoteblock(Player a, BCS b)
@@ -218,58 +210,27 @@ namespace SMP
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
-            if (!a.level.windows.ContainsKey(b.pos))
-                a.window = new Windows(WindowType.Chest, b.pos, a.level);
-            else if (a.level.windows[b.pos].Type != WindowType.Chest)
-            {
-                a.level.windows.Remove(b.pos);
-                a.window = new Windows(WindowType.Chest, b.pos, a.level);
-            }
-            else a.window = a.level.windows[b.pos];
-
-            a.SendWindowOpen(a.window);
+            a.WindowOpen(WindowType.Chest, b.pos);
             return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
 		{
-            if (!a.level.windows.ContainsKey(b.pos))
-               a.window = new Windows(WindowType.Workbench, b.pos, a.level);
-            else if (a.level.windows[b.pos].Type != WindowType.Workbench)
-            {
-                a.level.windows.Remove(b.pos);
-                a.window = new Windows(WindowType.Workbench, b.pos, a.level);
-            }
-            else a.window = a.level.windows[b.pos];
-
-            a.SendWindowOpen(a.window);
+            a.WindowOpen(WindowType.Workbench, b.pos);
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)
 		{
-            if (!a.level.windows.ContainsKey(b.pos))
-                a.window = new Windows(WindowType.Furnace, b.pos, a.level);
-            else if (a.level.windows[b.pos].Type != WindowType.Furnace)
-            {
-                a.level.windows.Remove(b.pos);
-                a.window = new Windows(WindowType.Furnace, b.pos, a.level);
-            }
-            else a.window = a.level.windows[b.pos];
-
-            a.SendWindowOpen(a.window);
+            a.WindowOpen(WindowType.Furnace, b.pos);
 			return false;
 		}
         public static bool OpenEnchantmentTable(Player a, BCS b)
         {
-            if (!a.level.windows.ContainsKey(b.pos))
-                a.window = new Windows(WindowType.EnchantmentTable, b.pos, a.level);
-            else if (a.level.windows[b.pos].Type != WindowType.EnchantmentTable)
-            {
-                a.level.windows.Remove(b.pos);
-                a.window = new Windows(WindowType.EnchantmentTable, b.pos, a.level);
-            }
-            else a.window = a.level.windows[b.pos];
-
-            a.SendWindowOpen(a.window);
+            a.WindowOpen(WindowType.EnchantmentTable, b.pos);
+            return false;
+        }
+        public static bool OpenBrewingStand(Player a, BCS b)
+        {
+            a.WindowOpen(WindowType.BrewingStand, b.pos);
             return false;
         }
 		public static bool PlayMusic(Player a, BCS b)
@@ -916,7 +877,7 @@ namespace SMP
             {
                 a.SendBlockChange(b.pos, 0);
                 a.level.BlockChange((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z, 43, (byte)a.inventory.current_item.meta);
-                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); a.Experience.Add(a, 1); }
+                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); a.experience.Add(a, 1); }
                 return false;
             }
             return true;

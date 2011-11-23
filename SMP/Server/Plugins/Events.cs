@@ -32,10 +32,10 @@ namespace SMP
         WindowClose,
         EXPGain,
         EXPLost,
-        EntityLeftClick,
+        EntityAttack,
         EntityRightClick,
-        BlockRightClick,
         BlockLeftClick,
+        BlockRightClick,
         BlockPlace,
         BlockBreak,
         Respawn

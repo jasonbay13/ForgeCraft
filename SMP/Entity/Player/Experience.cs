@@ -23,6 +23,7 @@ namespace SMP
 {
     public class Experience
     {
+        Player p;
         byte _Experience = 0;
         byte _Level = 0;
         short _TotalExp = 0;
@@ -100,21 +101,6 @@ namespace SMP
                 case 210: p.inventory.Add(358, 1, 0); break;
                 default: break;
             }
-        }
-
-        /// <summary>
-        /// Updates the players experience bar
-        /// </summary>
-        /// <param name="expbarval">Value of the experience bar (0-19)</param>
-        /// <param name="level">Ecperience level of player</param>
-        /// <param name="totalexp">Players total experience</param>
-        public static void SendExperience(Player p, float expbarval, short level, short totalexp)
-        {
-            byte[] bytes = new byte[8];
-            util.EndianBitConverter.Big.GetBytes(expbarval).CopyTo(bytes, 0);
-            util.EndianBitConverter.Big.GetBytes(level).CopyTo(bytes, 4);
-            util.EndianBitConverter.Big.GetBytes(totalexp).CopyTo(bytes, 6);
-            p.SendRaw(0x2B, bytes);
         }
     }
 }

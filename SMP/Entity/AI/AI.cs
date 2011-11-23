@@ -26,8 +26,7 @@ namespace SMP
 	{
 		Entity e { get; }
 		Point3 pos { get; set;}
-		float yaw { get; set; }
-		float pitch { get; set; }
+		float[] rot { get; set; }
 		World level { get; }
 		byte type { get; }
 		byte[] meta { get; set; }

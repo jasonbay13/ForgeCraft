@@ -46,7 +46,8 @@ namespace SMP
 		public Point point { get { return new Point(x, z); } }
         public bool Dirty { get { return this._dirty; } }
 
-		public List<Entity> Entities = new List<Entity>();
+        //public List<Entity> Entities { get { return new List<Entity>(Entity.Entities.Values).FindAll(ent => (((int)ent.pos.x >> 4) == x && ((int)ent.pos.z >> 4) == z)); } }
+        private List<Entity> Entities = new List<Entity>();
 
 		/// <summary>
 		/// When a block is placed then this is called
@@ -139,20 +140,20 @@ namespace SMP
 
                         ms.Position = 0;
                         NbtTree nbt = new NbtTree(ms);
-                        ch.generated = (nbt.Root["generated"].ToTagByte().Data > 0);
-                        ch.populated = (nbt.Root["populated"].ToTagByte().Data > 0);
-                        Array.Copy(nbt.Root["blocks"].ToTagByteArray(), ch.blocks, ch.blocks.Length);
-                        Array.Copy(nbt.Root["meta"].ToTagByteArray(), ch.meta, ch.meta.Length);
-                        Array.Copy(nbt.Root["blocklight"].ToTagByteArray(), ch.Light, ch.Light.Length);
-                        Array.Copy(nbt.Root["skylight"].ToTagByteArray(), ch.SkyL, ch.SkyL.Length);
-                        Array.Copy(nbt.Root["heightmap"].ToTagByteArray(), ch.heightMap, ch.heightMap.Length);
+                        ch.generated = (nbt.Root["Generated"].ToTagByte().Data > 0);
+                        ch.populated = (nbt.Root["Populated"].ToTagByte().Data > 0);
+                        Array.Copy(nbt.Root["Blocks"].ToTagByteArray(), ch.blocks, ch.blocks.Length);
+                        Array.Copy(nbt.Root["Meta"].ToTagByteArray(), ch.meta, ch.meta.Length);
+                        Array.Copy(nbt.Root["BlockLight"].ToTagByteArray(), ch.Light, ch.Light.Length);
+                        Array.Copy(nbt.Root["SkyLight"].ToTagByteArray(), ch.SkyL, ch.SkyL.Length);
+                        Array.Copy(nbt.Root["HeightMap"].ToTagByteArray(), ch.heightMap, ch.heightMap.Length);
                         TagNodeCompound nbtCompound;
-                        foreach (TagNode tag in nbt.Root["extra"].ToTagList())
+                        foreach (TagNode tag in nbt.Root["Extra"].ToTagList())
                         {
                             nbtCompound = tag.ToTagCompound();
-                            ch.extra.Add(nbtCompound["pos"].ToTagInt(), (ushort)nbtCompound["value"].ToTagShort());
+                            ch.extra.Add(nbtCompound["Pos"].ToTagInt(), (ushort)nbtCompound["Value"].ToTagShort());
                         }
-                        TagNodeList nbtList = nbt.Root["physics"].ToTagList();
+                        TagNodeList nbtList = nbt.Root["Physics"].ToTagList();
                         int count = nbtList.Count;
                         if (count > 0)
                         {
@@ -160,8 +161,36 @@ namespace SMP
                             for (int i = 0; i < count; i++)
                             {
                                 nbtCompound = nbtList[i].ToTagCompound();
-                                nbtList2 = nbtCompound["pos"].ToTagList();
-                                ch.physChecks[i] = new Physics.Check(nbtList2[0].ToTagInt(), nbtList2[1].ToTagInt(), nbtList2[2].ToTagInt(), nbtCompound["meta"].ToTagByte(), nbtCompound["time"].ToTagShort());
+                                nbtList2 = nbtCompound["Pos"].ToTagList();
+                                ch.physChecks[i] = new Physics.Check(nbtList2[0].ToTagInt(), nbtList2[1].ToTagInt(), nbtList2[2].ToTagInt(), nbtCompound["Meta"].ToTagByte(), nbtCompound["Time"].ToTagShort());
+                            }
+                        }
+                        AI ai; McObject obj; Item item; TagNodeCompound nbtCompound2;
+                        foreach (TagNode tag in nbt.Root["Entities"].ToTagList())
+                        {
+                            nbtCompound = tag.ToTagCompound();
+                            switch ((EntityType)(byte)nbtCompound["Type"].ToTagByte())
+                            {
+                                case EntityType.AI:
+                                    // TODO
+                                    break;
+                                case EntityType.Object:
+                                    // TODO
+                                    break;
+                                case EntityType.Item:
+                                    nbtCompound2 = nbtCompound["Data"].ToTagCompound();
+                                    item = new Item(nbtCompound2["ID"].ToTagShort(), nbtCompound2["Count"].ToTagByte(), nbtCompound2["Meta"].ToTagShort(), w);
+                                    nbtList = nbtCompound["Motion"].ToTagList();
+                                    item.e.velocity = new double[] { nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble() };
+                                    nbtList = nbtCompound["Pos"].ToTagList();
+                                    item.e.pos = new Point3(nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble());
+                                    nbtList = nbtCompound["Rotation"].ToTagList();
+                                    item.e.rot = new float[] { nbtList[0].ToTagFloat(), nbtList[1].ToTagFloat() };
+                                    item.e.age = nbtCompound["Age"].ToTagInt();
+                                    item.e.onground = nbtCompound["OnGround"].ToTagByte();
+                                    item.e.health = nbtCompound["Health"].ToTagShort();
+                                    item.e.UpdateChunks(false, false);
+                                    break;
                             }
                         }
                     }
@@ -192,40 +221,67 @@ namespace SMP
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             NbtTree nbt = new NbtTree();
-            nbt.Root.Add("generated", new TagNodeByte((byte)(generated ? 1 : 0)));
-            nbt.Root.Add("populated", new TagNodeByte((byte)(populated ? 1 : 0)));
-            nbt.Root.Add("blocks", new TagNodeByteArray(blocks));
-            nbt.Root.Add("meta", new TagNodeByteArray(meta));
-            nbt.Root.Add("blocklight", new TagNodeByteArray(Light));
-            nbt.Root.Add("skylight", new TagNodeByteArray(SkyL));
-            nbt.Root.Add("heightmap", new TagNodeByteArray(heightMap));
+            nbt.Root.Add("Generated", new TagNodeByte((byte)(generated ? 1 : 0)));
+            nbt.Root.Add("Populated", new TagNodeByte((byte)(populated ? 1 : 0)));
+            nbt.Root.Add("Blocks", new TagNodeByteArray(blocks));
+            nbt.Root.Add("Meta", new TagNodeByteArray(meta));
+            nbt.Root.Add("BlockLight", new TagNodeByteArray(Light));
+            nbt.Root.Add("SkyLight", new TagNodeByteArray(SkyL));
+            nbt.Root.Add("HeightMap", new TagNodeByteArray(heightMap));
             TagNodeList nbtList = new TagNodeList(TagType.TAG_COMPOUND);
             TagNodeCompound nbtCompound;
             lock (extra)
                 foreach (KeyValuePair<int, ushort> kvp in extra)
                 {
                     nbtCompound = new TagNodeCompound();
-                    nbtCompound.Add("pos", new TagNodeInt(kvp.Key));
-                    nbtCompound.Add("value", new TagNodeShort((short)kvp.Value));
+                    nbtCompound.Add("Pos", new TagNodeInt(kvp.Key));
+                    nbtCompound.Add("Value", new TagNodeShort((short)kvp.Value));
                     nbtList.Add(nbtCompound);
                 }
-            nbt.Root.Add("extra", nbtList);
+            nbt.Root.Add("Extra", nbtList);
             nbtList = new TagNodeList(TagType.TAG_COMPOUND);
             List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
-            TagNodeList nbtList2;
             foreach (Physics.Check check in physChecks)
             {
                 nbtCompound = new TagNodeCompound();
-                nbtList2 = new TagNodeList(TagType.TAG_INT);
-                nbtList2.Add(new TagNodeInt(check.x));
-                nbtList2.Add(new TagNodeInt(check.y));
-                nbtList2.Add(new TagNodeInt(check.z));
-                nbtCompound.Add("pos", nbtList2);
-                nbtCompound.Add("meta", new TagNodeByte(check.meta));
-                nbtCompound.Add("time", new TagNodeShort(check.time));
+                nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_INT) { new TagNodeInt(check.x), new TagNodeInt(check.y), new TagNodeInt(check.z) });
+                nbtCompound.Add("Meta", new TagNodeByte(check.meta));
+                nbtCompound.Add("Time", new TagNodeShort(check.time));
                 nbtList.Add(nbtCompound);
             }
-            nbt.Root.Add("physics", nbtList);
+            nbt.Root.Add("Physics", nbtList);
+            nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+            List<Entity> entities = Entities; TagNodeCompound nbtCompound2;
+            foreach (Entity e in entities)
+            {
+                if (e.isPlayer) continue;
+                nbtCompound = new TagNodeCompound();
+                nbtCompound.Add("Motion", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.velocity[0]), new TagNodeDouble(e.velocity[1]), new TagNodeDouble(e.velocity[2]) });
+                nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.pos.x), new TagNodeDouble(e.pos.y), new TagNodeDouble(e.pos.z) });
+                nbtCompound.Add("Rotation", new TagNodeList(TagType.TAG_FLOAT) { new TagNodeFloat(e.rot[0]), new TagNodeFloat(e.rot[1]) });
+                nbtCompound.Add("Type", new TagNodeByte((byte)e.Type));
+                nbtCompound.Add("Age", new TagNodeInt(e.age));
+                nbtCompound.Add("OnGround", new TagNodeByte(e.onground));
+                nbtCompound.Add("Health", new TagNodeShort(e.health));
+                nbtCompound2 = new TagNodeCompound();
+                switch (e.Type)
+                {
+                    case EntityType.AI:
+                        nbtCompound2.Add("Type", new TagNodeByte(e.ai.type));
+                        break;
+                    case EntityType.Object:
+                        nbtCompound2.Add("Type", new TagNodeByte(e.obj.type));
+                        break;
+                    case EntityType.Item:
+                        nbtCompound2.Add("ID", new TagNodeShort(e.I.item));
+                        nbtCompound2.Add("Count", new TagNodeByte(e.I.count));
+                        nbtCompound2.Add("Meta", new TagNodeShort(e.I.meta));
+                        break;
+                }
+                nbtCompound.Add("Data", nbtCompound2);
+                nbtList.Add(nbtCompound);
+            }
+            nbt.Root.Add("Entities", nbtList);
 
             try
             {
@@ -245,6 +301,28 @@ namespace SMP
 
             this._dirty = false;
             //Console.WriteLine("SAVED " + x + " " + z);
+        }
+
+        public void AddEntity(Entity e)
+        {
+            if (!Entities.Contains(e))
+            {
+                Entities.Add(e);
+                this._dirty = true;
+            }
+        }
+        public void RemoveEntity(Entity e)
+        {
+            if (Entities.Contains(e))
+            {
+                Entities.Remove(e);
+                this._dirty = true;
+            }
+        }
+        public List<Entity> GetEntities()
+        {
+            lock (Entities)
+                return new List<Entity>(Entities);
         }
 
         public void GenerateHeightMap()
@@ -279,7 +357,7 @@ namespace SMP
                 if (w.ChunkExists(x - 1, z - 1) && !GetChunk(x - 1, z - 1, w).populated && w.ChunkExists(x, z - 1) && w.ChunkExists(x - 1, z))
                     w.PopulateChunk(x - 1, z - 1);
             }
-            catch { Console.WriteLine("BALLS"); }
+            catch { }
 
             if (physChecks != null)
             {
@@ -618,8 +696,8 @@ namespace SMP
             SkyL = null;
             Light = null;
             heightMap = null;
-            Entities.Clear();
-            Entities = null;
+            //Entities.Clear();
+            //Entities = null;
             extra.Clear();
             extra = null;
         }

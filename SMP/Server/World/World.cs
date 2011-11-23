@@ -32,16 +32,16 @@ namespace SMP
 		public double SpawnZ;
 		public float SpawnYaw;
 		public float SpawnPitch;
-		public string Map_Name;
+		//public string Map_Name; // THE FUCK IS THIS SHIT!?
 		public string name;
         private long Seed;
         public long seed { get { return Seed; } set { Seed = value; } }
 		public long time;
-        public sbyte dimension = 0;
+        public sbyte dimension = 0; // -1: The Nether, 0: The Overworld, 1: The End
         private object genLock = new object();
         private bool initialized = false;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
-        public System.Timers.Timer timeincrement = new System.Timers.Timer(50);
+        public System.Threading.Thread timeincrement;
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
 		private ChunkGen generator;
         public WorldChunkManager chunkManager;
@@ -270,7 +270,7 @@ namespace SMP
             if (!FindBlocks.ValidItem(id)) return;
             if (Server.mode == 0)
             {
-                Item item = new Item(id, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new byte[3] { 1, 1, 1 }, OnGround = true };
+                Item item = new Item(id, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new float[2] { 0, 0 }, OnGround = true };
                 item.e.UpdateChunks(false, false);
             }
         }
@@ -514,7 +514,23 @@ namespace SMP
             initialized = true;
             timeupdate.Elapsed += delegate { Player.players.ForEach(delegate(Player p) { if (p.MapLoaded && p.level == this) p.SendTime(); }); };
             timeupdate.Start();
-            timeincrement.Elapsed += delegate { time++; if (time > 24000) time = 0; };
+            timeincrement = new System.Threading.Thread(new System.Threading.ThreadStart(delegate
+            {
+                int speed = 50, wait = speed;
+                while (!Server.s.shuttingDown)
+                {
+                    try
+                    {
+                        if (wait > 0) System.Threading.Thread.Sleep(wait);
+
+                        DateTime Start = DateTime.Now;
+                        time++; if (time > 24000) time = 0;
+                        TimeSpan Took = DateTime.Now - Start;
+                        wait = speed - (int)Took.TotalMilliseconds;
+                    }
+                    catch { wait = speed; }
+                }
+            }));
             timeincrement.Start();
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();

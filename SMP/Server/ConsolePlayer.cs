@@ -29,6 +29,7 @@ namespace SMP {
     /// </summary>
     public class ConsolePlayer : Player
     {
+        public override bool IsConsole { get { return true; } }
 
         public ConsolePlayer(Server server)
             : base()

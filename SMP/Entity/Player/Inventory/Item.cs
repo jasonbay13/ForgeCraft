@@ -47,6 +47,7 @@ namespace SMP
         public Entity e;
 		public World level { get { return e.level; } set { e.level = value; } }
 
+        public bool isInventory = false;
 		public short item = -1;
 		public byte count = 1;
         public List<Enchantment> enchantments = new List<Enchantment>();
@@ -63,44 +64,49 @@ namespace SMP
 				CheckDamage();
 			}
 		}
-		public bool OnGround; //This is used to tell the server that this item is on the ground.
+        public bool OnGround { get { return e.onground == 1; } set { e.onground = (byte)(value ? 1 : 0); } } //This is used to tell the server that this item is on the ground.
 
 		public static Item Nothing = new Item();
 
-		public Point3 pos;
-		public byte[] rot;
+        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
+        public float[] rot { get { return e.rot; } set { e.rot = value; } }
 
 		private Item() { }
-		public Item (short item, World l)
+		public Item (short item, World l, bool inv = false)
 		{
+            isInventory = inv;
+            e = new Entity(this, l);
 			this.item = item;
 			OnGround = false;
-			e = new Entity(this, l);
 		}
-		public Item(Items item, World l)
+        public Item(Items item, World l, bool inv = false)
 		{
+            isInventory = inv;
+            e = new Entity(this, l);
 			this.item = (short)item;
 			OnGround = false;
-			e = new Entity(this, l);
 		}
-		public Item(short item, byte count, short meta, World l)
+        public Item(short item, byte count, short meta, World l, bool inv = false)
 		{
+            isInventory = inv;
+            e = new Entity(this, l);
 			this.item = (short)item;
 			this.meta = meta;
 			this.count = count;
 			OnGround = false;
-			e = new Entity(this, l);
 		}
-		public Item(short item, byte count, short meta, World l, double[] pos, byte[] rot)
+        public Item(short item, byte count, short meta, World l, double[] pos, float[] rot, double[] velocity, bool inv = false)
 		{
+            isInventory = inv;
+            e = new Entity(this, l);
 			this.item = item;
 			this.count = count;
 			this.meta = meta;
 			this.level = l;
 			this.pos = pos;
 			this.rot = rot;
+            e.velocity = velocity;
 			OnGround = true;
-			e = new Entity(this, l);
 			e.UpdateChunks(false, false);
 		}
 

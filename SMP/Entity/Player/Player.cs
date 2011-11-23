@@ -50,8 +50,10 @@ namespace SMP
         }
         #endregion
 
-        public short current_slot_holding { get { return inventory.current_index; } set { inventory.current_index = value; current_block_holding = inventory.items[value]; } }
-        public Item current_block_holding { get { return inventory.current_item; } set { inventory.current_item = value; SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta); } }
+        public virtual bool IsConsole { get { return false; } }
+
+        public short current_slot_holding { get { return inventory.current_index; } set { if (value >= 36 && value <= 44) inventory.current_index = value; } }
+        public Item current_block_holding { get { return inventory.current_item; } }
 
 		byte[] buffer = new byte[0];
 		byte[] tempbuffer = new byte[0xFF];
@@ -61,20 +63,19 @@ namespace SMP
 		bool MapSent = false;
 		public bool MapLoaded = false;
 		//Health Stuff
-        public short health = 20;
+        public short health { get { return e.health; } set { e.health = value; } }
 		public short food = 20;
 		public float Saturation = 5.0f;
 		//END Health Stuff
 		public double Stance;
-		public Point3 pos;
-		public Point3 oldpos = Point3.Zero;
-		public float[] rot;
-        public float[] oldrot = new float[2];
-		byte onground;
-        public bool OnGround { get { return onground == 1; } set { onground = (byte)(value ? 1 : 0); } }
+        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
+        public Point3 oldpos { get { return e.oldpos; } set { e.oldpos = value; } }
+        public float[] rot { get { return e.rot; } set { e.rot = value; } }
+        public float[] oldrot { get { return e.oldrot; } set { e.oldrot = value; } }
+        byte onground { get { return e.onground; } set { e.onground = value; } }
+        public bool OnGround { get { return e.onground == 1; } set { e.onground = (byte)(value ? 1 : 0); } }
 		public int id { get { return e.id; } }
         private DateTime pingdate = new DateTime();
-        private DateTime lastPosSync = new DateTime();
         public short Ping = 500;
 
 		public Chunk chunk { get { return e.CurrentChunk; } }
@@ -84,7 +85,7 @@ namespace SMP
 		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
-        public Experience Experience = new Experience();
+        public Experience experience = new Experience();
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
@@ -218,6 +219,7 @@ namespace SMP
         public object BlockChangeObject;
 		
 		Entity e = new Entity(true);
+        public Entity E { get { return e; } }
 		public string ip;
 		public string username;
 		bool hidden = false;
@@ -510,87 +512,9 @@ namespace SMP
 			}
 			void UpdatePosition()
 			{
-				e.UpdateEntities();
-				if (!LoggedIn) return;
-
-                bool forceTp = false;
-                if ((DateTime.Now - lastPosSync).TotalSeconds >= 10)
-                {
-                    lastPosSync = DateTime.Now;
-                    forceTp = true;
-                }
-
-                Point3 temppos = (pos * 32) / new Point3(32), tempoldpos = (oldpos * 32) / new Point3(32);
-                Point3 diff = temppos - tempoldpos;
-                double diff1 = temppos.mdiff(tempoldpos);
-
-				//TODO move this?
-				if(isFlying) FlyCode();
-
-                if ((int)(diff1 * 32) == 0 && !forceTp)
-				{
-                    if ((int)(rot[0] - oldrot[0]) != 0 || (int)(rot[1] - oldrot[1]) != 0)
-                    {
-                        byte[] bytes = new byte[6];
-                        util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-                        bytes[4] = (byte)(rot[0] / 1.40625);
-                        bytes[5] = (byte)(rot[1] / 1.40625);
-                        foreach (int i in VisibleEntities.ToArray())
-                        {
-                            Entity e1 = Entity.Entities[i];
-                            if (!e1.isPlayer) continue;
-                            if (e1.p == this) continue;
-                            if (!e1.p.MapLoaded) continue;
-                            e1.p.SendRaw(0x20, bytes);
-                        }
-                        rot.CopyTo(oldrot, 0);
-                    }
-				}
-                else if ((int)(diff1 * 32) <= 127 && !forceTp)
-				{
-                    Point3 sendme = diff * 32;
-					byte[] bytes = new byte[9];
-					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-                    bytes[4] = (byte)sendme.x;
-                    bytes[5] = (byte)sendme.y;
-                    bytes[6] = (byte)sendme.z;
-					bytes[7] = (byte)(rot[0] / 1.40625);
-					bytes[8] = (byte)(rot[1] / 1.40625);
-					foreach (int i in VisibleEntities.ToArray())
-					{
-						Entity e1 = Entity.Entities[i];
-						if (!e1.isPlayer) continue;
-                        if (e1.p == this) continue;
-						if (!e1.p.MapLoaded) continue;
-						e1.p.SendRaw(0x21, bytes);
-					}
-					if (Math.Abs(sendme.x) > 0) oldpos.x = pos.x;
-                    if (Math.Abs(sendme.y) > 0) oldpos.y = pos.y;
-                    if (Math.Abs(sendme.z) > 0) oldpos.z = pos.z;
-                    rot.CopyTo(oldrot, 0);
-				}
-				else
-				{
-                    Point3 sendme = pos * 32;
-					byte[] bytes = new byte[18];
-					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-					util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
-					util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 8);
-					util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 12);
-					bytes[16] = (byte)(rot[0] / 1.40625);
-					bytes[17] = (byte)(rot[1] / 1.40625);
-					foreach (int i in VisibleEntities.ToArray())
-					{
-						if(!Entity.Entities.ContainsKey(i)) continue;
-						Entity e1 = Entity.Entities[i];
-						if (!e1.isPlayer) continue;
-                        if (e1.p == this) continue;
-						if (!e1.p.MapLoaded) continue;
-						e1.p.SendRaw(0x22, bytes);
-					}
-					oldpos = pos;
-                    rot.CopyTo(oldrot, 0);
-				}
+                e.UpdateEntities();
+                if (!LoggedIn) return;
+                e.UpdatePosition();
 			}
 			#endregion
 			#region Misc Packets Sending
@@ -617,6 +541,20 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(Saturation).CopyTo(tosend, 4);
 				SendRaw(0x08, tosend);
 			}
+            /// <summary>
+            /// Updates the players experience bar
+            /// </summary>
+            /// <param name="expbarval">Value of the experience bar (0-19)</param>
+            /// <param name="level">Ecperience level of player</param>
+            /// <param name="totalexp">Players total experience</param>
+            public void SendExperience(float expbarval, short level, short totalexp)
+            {
+                byte[] bytes = new byte[8];
+                util.EndianBitConverter.Big.GetBytes(expbarval).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(level).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes(totalexp).CopyTo(bytes, 6);
+                SendRaw(0x2B, bytes);
+            }
             /// <summary>
             /// Adds effect to player
             /// </summary>
@@ -671,6 +609,19 @@ namespace SMP
 					}
 				}
 			}
+            public void WindowOpen(WindowType type, Point3 pos)
+            {
+                if (!level.windows.ContainsKey(pos))
+                    window = new Windows(type, pos, level);
+                else if (level.windows[pos].Type != type)
+                {
+                    level.windows.Remove(pos);
+                    window = new Windows(type, pos, level);
+                }
+                else window = level.windows[pos];
+
+                SendWindowOpen(window);
+            }
 			public void SetFire(bool onoff)
 			{
 				byte[] bytes2 = new byte[7];
@@ -1333,9 +1284,9 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 9);
 				util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 13);
 				util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 17);
-				bytes[21] = e1.I.rot[0];
-				bytes[22] = e1.I.rot[1];
-				bytes[23] = e1.I.rot[2];
+                bytes[21] = (byte)(e1.velocity[0] * 128D);
+                bytes[22] = (byte)(e1.velocity[1] * 128D);
+                bytes[23] = (byte)(e1.velocity[2] * 128D);
 				SendRaw(0x15, bytes);
 			}
             public void SendPickupAnimation(int eid, int pid)
@@ -1360,6 +1311,10 @@ namespace SMP
                 util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 8);
                 SendRaw(0x1C, bytes);
 			}
+            public void SendEntityVelocity(int eid, short[] a)
+            {
+                SendEntityVelocity(eid, a[0], a[1], a[2]);
+            }
             public void SendEntityVelocity(int eid, Point3 a)
             {
                 SendEntityVelocity(eid, (short)a.x, (short)a.y, (short)a.z);
@@ -1399,6 +1354,10 @@ namespace SMP
                 SendRaw(0x27, bytes);
             }
 
+            public void SendEntityMeta(int eid, byte[] bytes)
+            {
+                SendRaw(0x28, bytes);
+            }
             public void SendEntityMeta(int eid, params object[] data)
             {
                 List<byte> bytes = new List<byte>();
@@ -1454,7 +1413,7 @@ namespace SMP
                     }
                 }
                 bytes.Add(0x7F);
-                SendRaw(0x28, bytes.ToArray());
+                SendEntityMeta(eid, bytes.ToArray());
             }
 
 			public void SendDespawn(int id) //Despawn ALL types of Entities (player mod item)
@@ -1644,7 +1603,7 @@ namespace SMP
         }
 		#endregion
 
-		void FlyCode()
+		internal void FlyCode()
 		{
 			List<Point3> temp = new List<Point3>();
 			Point3 point = pos.RD();
@@ -1776,7 +1735,7 @@ namespace SMP
 				SaveAttributes(false);
 				UpdatePList(false);
 				players.Remove(this);
-				e.CurrentChunk.Entities.Remove(e);
+				//e.CurrentChunk.Entities.Remove(e);
 				Entity.Entities.Remove(id);
                 LoggedIn = false;
 
@@ -1808,17 +1767,15 @@ namespace SMP
             //Server.Log(Ping.ToString());
         } 
         
-        public void hurt(short Amount)
+        public void hurt(short amount)
         {
-            health -= Amount;
-            SendHealth();
-            if (health <= 0) { health = 20; }
+            e.hurt(amount);
         }
         public void hurt()
         {
             hurt(1);
         }
-        public void SpawnMob(Entity e)
+        public void SendMobSpawn(Entity e)
         {
 			/*if (e == null) // What is this I don't even...
 			{
@@ -1846,8 +1803,8 @@ namespace SMP
             util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.x*32)).CopyTo(bytes, 5);
 			util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.y*32)).CopyTo(bytes, 9);
 			util.EndianBitConverter.Big.GetBytes((int)(e.ai.pos.z*32)).CopyTo(bytes, 13);
-			bytes[17] = (byte)(e.ai.yaw / 1.40625);
-			bytes[18] = (byte)(e.ai.pitch / 1.40625);
+			bytes[17] = (byte)(e.ai.rot[0] / 1.40625);
+			bytes[18] = (byte)(e.ai.rot[1] / 1.40625);
 
 			//Add in the metadata
 			metaarray.CopyTo(bytes, 19);
@@ -1868,7 +1825,7 @@ namespace SMP
 					data.Add("Name", username);
 				
 				data.Add("ip", ip);
-				data.Add("Exp", Experience.Total.ToString());
+				data.Add("Exp", experience.Total.ToString());
 				data.Add("NickName", NickName);
 				
 				if (CanBuild)

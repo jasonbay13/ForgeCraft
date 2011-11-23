@@ -39,6 +39,8 @@ namespace SMP
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
+
+        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar" }; //add your names here (must be all lower case!)
 		
 		public static bool unsafe_plugin = false;
 		public static Logger ServerLogger = new Logger();
@@ -59,6 +61,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer worldsavetimer = new System.Timers.Timer(60000);
+        public static Thread entityUpdateThread;
 		public static MainLoop ml;
         public static byte difficulty = 0; // 0 thru 3 for Peaceful, Easy, Normal, Hard
 		public static byte mode = 0; //0=survival, 1=creative
@@ -174,6 +177,26 @@ namespace SMP
                         w.SaveLVL(true);
                     });
                 }; worldsavetimer.Start();
+            });
+            ml.Queue(delegate
+            {
+                entityUpdateThread = new Thread(new ThreadStart(delegate
+                {
+                    int wait = 0, speed = 50;
+                    while (!Server.s.shuttingDown)
+                    {
+                        try
+                        {
+                            if (wait > 0) Thread.Sleep(wait);
+
+                            DateTime Start = DateTime.Now;
+                            Entity.EntityPhysics();
+                            TimeSpan Took = DateTime.Now - Start;
+                            wait = speed - (int)Took.TotalMilliseconds;
+                        }
+                        catch { wait = speed; }
+                    }
+                })); entityUpdateThread.Start();
             });
             ml.Queue(delegate
             {

@@ -17,15 +17,14 @@
 */
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace SMP.Commands
 {
     public class CmdDevs : Command
     {
-        List<string> devs = new List<string> { "Silentneeb", "BizarreCake", "GamezGalaxy (hypereddie10)", "Merlin33069", "headdetect", "The_Legacy", "Dmitchell" }; //add your names here
-
         public override string Name { get { return "devs"; } }
-        public override List<string> Shortcuts { get { return new List<string> {"developers", "authors"}; } }
+        public override List<string> Shortcuts { get { return new List<string> { "developers", "authors" }; } }
         public override string Category { get { return "information"; } }
         public override bool ConsoleUseable { get { return true; } }
         public override string Description { get { return "Shows you who developed ForgeCraft."; } }
@@ -33,26 +32,19 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length > 0 && args[0] == "help")
-            {
-                Help(p);
-                return;
-            }
+            StringBuilder devlist = new StringBuilder();
+            foreach (string dev in Server.devs)
+                devlist.Append(dev.Capitalize()).Append(',').Append(' ');
+            devlist.Remove(devlist.Length - 2, 2);
+            p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist.ToString(), WrapMethod.Chat);  //lol it was ForgetCraft
 
-            string devlist = "";
-            string temp;
-            foreach (string dev in devs)
+            if (!p.IsConsole)
             {
-                temp = dev.Substring(0, 1);
-                temp = temp.ToUpper() + dev.Remove(0, 1);
-                devlist += temp + ", ";
+                short slot = (short)p.inventory.FindEmptySlot();
+                if (slot == -1) return;
+                if (Server.devs.Contains(p.username.ToLower()))
+                    p.inventory.Add(278, 1, 0);
             }
-            devlist = devlist.Remove(devlist.Length - 2);
-            p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist, WrapMethod.Chat);  //lol it was ForgetCraft
-			short slot = (short)p.inventory.FindEmptySlot();
-			if (slot == -1) return;
-			if (devs.Contains(p.username) || p.username == "hypereddie10") //lolwut is this? -EricKilla
-				p.inventory.Add(278, 1, 0);
         }
 
         public override void Help(Player p)

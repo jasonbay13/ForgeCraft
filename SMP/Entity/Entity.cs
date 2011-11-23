@@ -29,6 +29,18 @@ namespace SMP
         private static int nextId = 0;
 		public static Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
 
+        public EntityType Type
+        {
+            get
+            {
+                if (isPlayer) return EntityType.Player;
+                if (isAI) return EntityType.AI;
+                if (isObject) return EntityType.Object;
+                if (isItem) return EntityType.Item;
+                return EntityType.Unknown;
+            }
+        }
+
 		public Chunk c
 		{
 			get
@@ -38,18 +50,14 @@ namespace SMP
 		}
 		public Chunk CurrentChunk;
 
-		public Point3 pos
-		{
-			get
-			{
-				if(isPlayer) return p.pos;
-				if(isItem) return I.pos;
-				if(isAI) return ai.pos;
-				if(isObject) return obj.pos;
+		public Point3 pos = Point3.Zero;
+        public Point3 oldpos = Point3.Zero;
+        public float[] rot = new float[2];
+        public float[] oldrot = new float[2];
+        public double[] velocity = new double[3];
 
-				return Point3.Zero;
-			}
-		}
+        internal byte onground;
+        public bool OnGround { get { return onground == 1; } set { onground = (byte)(value ? 1 : 0); } }
 
 		public Player p; //Only set if this entity is a player, and it referances the player it is
 		public Item I;//Only set if this entity is an item
@@ -67,6 +75,11 @@ namespace SMP
 		public static Random random = new Random();
 		public int id;
 
+        public int age = 0;
+        public short health = 20;
+
+        private DateTime lastPosSync = new DateTime();
+
 		public Entity(Player pl, World l)
 		{
 			p = pl;
@@ -81,14 +94,15 @@ namespace SMP
 		public Entity(Item i, World l)
 		{
 			I = i;
-			id = FreeId();
+            if (!I.isInventory) id = FreeId();
 			isItem = true;
 			level = l;
 
-			if (I.OnGround)
-				UpdateChunks(false, false);
-
-			Entities.Add(id, this);
+            if (!I.isInventory)
+            {
+                UpdateChunks(false, false);
+                Entities.Add(id, this);
+            }
 		}
 		public Entity(AI ai, World l)
 		{
@@ -113,6 +127,17 @@ namespace SMP
 			id = FreeId();
 		}
 
+        public void hurt(short amount)
+        {
+            health -= amount;
+            if (isPlayer) p.SendHealth();
+            if (health <= 0) { health = 20; }
+        }
+        public void hurt()
+        {
+            hurt(1);
+        }
+
         public void UpdateChunks(bool force, bool forcesend, bool forcequeue = false)
         {
             if (c == null)
@@ -122,8 +147,8 @@ namespace SMP
 
             try
             {
-                if (CurrentChunk != null) CurrentChunk.Entities.Remove(this);
-                c.Entities.Add(this);
+                if (CurrentChunk != null) CurrentChunk.RemoveEntity(this);
+                c.AddEntity(this);
                 CurrentChunk = c;
             }
             catch
@@ -225,17 +250,17 @@ namespace SMP
 
 			List<int> tempelist = new List<int>();
 
-            int sx = CurrentChunk.point.x - p.viewdistance; //StartX
-            int ex = CurrentChunk.point.x + p.viewdistance; //EndX
-            int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
-            int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
+            int sx = CurrentChunk.x - p.viewdistance; //StartX
+            int ex = CurrentChunk.x + p.viewdistance; //EndX
+            int sz = CurrentChunk.z - p.viewdistance; //StartZ
+            int ez = CurrentChunk.z + p.viewdistance; //EndZ
 			for (int x = sx; x <= ex; x++)
 			{
 				for (int z = sz; z <= ez; z++)
 				{
 					if (!level.chunkData.ContainsKey(new Point(x, z))) { continue; }
 
-					foreach (Entity e in p.level.chunkData[new Point(x, z)].Entities.ToArray())
+					foreach (Entity e in p.level.chunkData[new Point(x, z)].GetEntities().ToArray())
 					{
 						tempelist.Add(e.id);
 						if (p.VisibleEntities.Contains(e.id))
@@ -263,7 +288,7 @@ namespace SMP
 						else if (e.isAI)
 						{
 							p.VisibleEntities.Add(e.id);
-							p.SpawnMob(e);
+							p.SendMobSpawn(e);
 							continue;
 						}
                         else if (e.isObject)
@@ -301,11 +326,11 @@ namespace SMP
                                 pl.SendPickupAnimation(e.id, p.id);
                         });
 
-						e.CurrentChunk.Entities.Remove(e);
+                        RemoveEntity(e);
 						p.inventory.Add(e.I);
 					}
 				}
-				if (e.isAI)
+				/*if (e.isAI)
 				{
 					Point3 sendme = e.pos * 32;
 					byte[] bytes = new byte[18];
@@ -313,13 +338,13 @@ namespace SMP
 					util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 8);
 					util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 12);
-					bytes[16] = (byte)(e.ai.yaw / 1.40625);
-					bytes[17] = (byte)(e.ai.pitch / 1.40625);
+					bytes[16] = (byte)(e.ai.rot[0] / 1.40625);
+					bytes[17] = (byte)(e.ai.rot[1] / 1.40625);
 
 					if (!p.VisibleEntities.Contains(i)) continue;
 					if (!p.MapLoaded) continue;
 					p.SendRaw(0x22, bytes);
-				}
+				}*/
 			}
 			foreach (int i in p.VisibleEntities.ToArray())
 			{
@@ -337,13 +362,41 @@ namespace SMP
             {
                 try
                 {
-                    e = Entities[i];
+                    if (!Entities.ContainsKey(i)) continue;
+                    e = Entities[i]; e.Tick();
                     if (e.isPlayer) continue; // Players don't have physics.
                     if (e.isObject) continue; // TODO
                     if (e.isAI) e.ai.Update();
                     if (e.isItem) e.I.Physics();
+                    if (!e.isPlayer) e.UpdatePosition();
                 }
                 catch { }
+            }
+        }
+
+        public void Tick()
+        {
+            age++;
+        }
+
+        public static void AddEntity(Entity e)
+        {
+            if (!Entities.ContainsKey(e.id))
+            {
+                Entities.Add(e.id, e);
+                Point pt = new Point((int)e.pos.x >> 4, (int)e.pos.z >> 4);
+                if (e.level.chunkData.ContainsKey(pt))
+                    e.level.chunkData[pt].AddEntity(e);
+            }
+        }
+        public static void RemoveEntity(Entity e)
+        {
+            if (Entities.ContainsKey(e.id))
+            {
+                Entities.Remove(e.id);
+                Point pt = new Point((int)e.pos.x >> 4, (int)e.pos.z >> 4);
+                if (e.level.chunkData.ContainsKey(pt))
+                    e.level.chunkData[pt].RemoveEntity(e);
             }
         }
 		
@@ -369,6 +422,78 @@ namespace SMP
             else sb.Append("UNKNOWN");
             sb.Append('}');
             return sb.ToString();
+        }
+
+        internal void UpdatePosition()
+        {
+            bool forceTp = false;
+            if ((DateTime.Now - lastPosSync).TotalSeconds >= 10)
+            {
+                lastPosSync = DateTime.Now;
+                forceTp = true;
+            }
+
+            Point3 temppos = (pos * 32) / new Point3(32), tempoldpos = (oldpos * 32) / new Point3(32);
+            Point3 diff = temppos - tempoldpos;
+            double diff1 = temppos.mdiff(tempoldpos);
+
+            //TODO move this?
+            if (isPlayer && p.isFlying) p.FlyCode();
+
+            if ((int)(diff1 * 32) == 0 && !forceTp)
+            {
+                if ((int)(rot[0] - oldrot[0]) != 0 || (int)(rot[1] - oldrot[1]) != 0)
+                {
+                    byte[] bytes = new byte[6];
+                    util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                    bytes[4] = (byte)(rot[0] / 1.40625);
+                    bytes[5] = (byte)(rot[1] / 1.40625);
+                    Player.players.ForEach(delegate(Player pl)
+                    {
+                        if (pl != p && pl.MapLoaded && pl.VisibleEntities.Contains(id))
+                            pl.SendRaw(0x20, bytes);
+                    });
+                    rot.CopyTo(oldrot, 0);
+                }
+            }
+            else if ((int)(diff1 * 32) <= 127 && !forceTp)
+            {
+                Point3 sendme = diff * 32;
+                byte[] bytes = new byte[9];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                bytes[4] = (byte)sendme.x;
+                bytes[5] = (byte)sendme.y;
+                bytes[6] = (byte)sendme.z;
+                bytes[7] = (byte)(rot[0] / 1.40625);
+                bytes[8] = (byte)(rot[1] / 1.40625);
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != p && pl.MapLoaded && pl.VisibleEntities.Contains(id))
+                        pl.SendRaw(0x21, bytes);
+                });
+                if (Math.Abs(sendme.x) > 0) oldpos.x = pos.x;
+                if (Math.Abs(sendme.y) > 0) oldpos.y = pos.y;
+                if (Math.Abs(sendme.z) > 0) oldpos.z = pos.z;
+                rot.CopyTo(oldrot, 0);
+            }
+            else
+            {
+                Point3 sendme = pos * 32;
+                byte[] bytes = new byte[18];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
+                util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 8);
+                util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 12);
+                bytes[16] = (byte)(rot[0] / 1.40625);
+                bytes[17] = (byte)(rot[1] / 1.40625);
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != p && pl.MapLoaded && pl.VisibleEntities.Contains(id))
+                        pl.SendRaw(0x22, bytes);
+                });
+                oldpos = pos;
+                rot.CopyTo(oldrot, 0);
+            }
         }
 	}
 }

@@ -26,7 +26,8 @@ namespace SMP
         Workbench = 1,
         Furnace = 2,
         Dispenser = 3,
-        EnchantmentTable = 4
+        EnchantmentTable = 4,
+        BrewingStand = 5
     }
 	public class Windows
     {
@@ -81,6 +82,10 @@ namespace SMP
 				case WindowType.EnchantmentTable:
 					name = "Enchant";
 					items = new Item[1];
+					break;
+                case WindowType.BrewingStand:
+                    name = "Brewing Stand";
+					items = new Item[4];
 					break;
 			}
 			Server.Log("Window adding.");
@@ -139,7 +144,7 @@ namespace SMP
 			{
 				try
 				{
-					Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level);
+                    Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level, true);
 					if (items[slot].count == 1)
 					{
 						temp = items[slot];
@@ -438,7 +443,7 @@ namespace SMP
 								else
 								{
 									p.OnMouse.count -= 1;
-									items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level);
+                                    items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level, true);
 								}
 							}
 							else

@@ -141,8 +141,11 @@ namespace SMP
         public void QueueChunkLoad(int x, int z, bool unload, World world)
         {
             ChunkLoadQueue clq = new ChunkLoadQueue(x, z, unload, world);
-            loadQueue.RemoveAll(CLQ => (CLQ.x == x && CLQ.z == z && CLQ.world == world));
-            loadQueue.Add(clq);
+            lock (loadQueue)
+            {
+                loadQueue.RemoveAll(CLQ => (CLQ.x == x && CLQ.z == z && CLQ.world == world));
+                loadQueue.Add(clq);
+            }
         }
 
         public void QueueChunkSend(Point point, Player player)

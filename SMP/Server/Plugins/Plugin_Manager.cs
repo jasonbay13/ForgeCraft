@@ -31,7 +31,7 @@ namespace SMP
         public abstract void Load(bool startup);
         public abstract void Unload(bool shutdown);
         public abstract string name { get; }
-        public abstract Version Version { get; }
+        public abstract Version version { get; }
         public abstract Version ForgeCraft_Version { get; }
         public abstract string welcome { get; }
 	    public abstract string creator { get; }
@@ -88,11 +88,7 @@ namespace SMP
                         while ((read = fs.Read(buffer, 0, 1024)) > 0)
                             ms.Write(buffer, 0, read);
                         lib = Assembly.Load(ms.ToArray());
-                        ms.Close();
-                        ms.Dispose();
                     }
-                    fs.Close();
-                    fs.Dispose();
                 }
                 try
                 {
@@ -127,7 +123,7 @@ namespace SMP
                 Plugin.all.Add((Plugin)instance);
 		        creator = ((Plugin)instance).creator;
                 ((Plugin)instance).Load(startup);
-                Server.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).Version.ToString() + " loaded.");
+                Server.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).version.ToString() + " loaded.");
                 Server.Log(((Plugin)instance).welcome);
             }
             catch (FileNotFoundException)
