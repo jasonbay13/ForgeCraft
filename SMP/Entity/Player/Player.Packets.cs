@@ -629,7 +629,7 @@ namespace SMP
 					}
 				}
 				level.BlockChange(blockX, blockY, blockZ, (byte)blockID, (byte)damage);
-                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(this, 1); }
+                if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(1); }
 				return;
 			}
 			else
@@ -655,7 +655,7 @@ namespace SMP
 				{
                     if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
                     {
-                        if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(this, 1); }
+                        if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(1); }
                     }
 				}
 				return;

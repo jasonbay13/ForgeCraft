@@ -73,6 +73,7 @@ namespace SMP
 		public bool isObject; //Vehicles and arrows and stuffs
 
 		public static Random random = new Random();
+        public static java.util.Random randomJava = new java.util.Random();
 		public int id;
 
         public int age = 0;

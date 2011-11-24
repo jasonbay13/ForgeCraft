@@ -202,12 +202,8 @@ namespace SMP
             {
                 Point pt = new Point(x, z);
                 lock (w.chunkData)
-                    if (!w.chunkData.ContainsKey(pt) || !w.chunkData[pt].generated || !w.chunkData[pt].populated)
-                    {
-                        if (w.chunkData.ContainsKey(pt))
-                            w.chunkData.Remove(pt);
+                    if (!w.chunkData.ContainsKey(pt))
                         w.chunkData.Add(pt, ch);
-                    }
                 if (!ch.generated || !ch.populated)
                 {
                     if (thread) World.chunker.QueueChunk(x, z, w);
@@ -559,9 +555,8 @@ namespace SMP
         {
             Point pt = new Point(x, z);
             if (chunkData.ContainsKey(pt)) return true;
-            LoadChunk(x, z, false, false, false);
             //Console.WriteLine(chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated);
-            return chunkData.ContainsKey(pt) && chunkData[pt].generated;
+            return File.Exists(Chunk.CreatePath(this, x, z));
         }
 
 		public Chunk GenerateChunk(int x, int z)
@@ -579,6 +574,7 @@ namespace SMP
             c.RecalculateLight();
             c.generated = true;
             c.PostGenerate(this);
+            c._dirty = true;
             c.generating = false;
 
             if (GeneratedChunk != null)
@@ -603,6 +599,7 @@ namespace SMP
             generator.Populate(c);
             c.populated = true;
             c.PostPopulate(this);
+            c._dirty = true;
             c.populating = false;
         }
 

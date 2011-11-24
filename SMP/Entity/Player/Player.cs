@@ -85,7 +85,7 @@ namespace SMP
 		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
-        public Experience experience = new Experience();
+        public Experience experience;
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
@@ -248,6 +248,7 @@ namespace SMP
 				ip = socket.RemoteEndPoint.ToString().Split(':')[0];
 				
 				inventory = new Inventory(this);
+                experience = new Experience(this);
 				players.Add(this);
 				//Event --------------------
 				if (PlayerConnect != null)
@@ -946,20 +947,18 @@ namespace SMP
 			{
 				try
 				{
-					short length = (short)Server.name.Length;
-					byte[] bytes = new byte[(length * 2) + 22];
+					byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(Server.name) + 20];
 
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
-					util.EndianBitConverter.Big.GetBytes(length).CopyTo(bytes, 4); //String
-					Encoding.BigEndianUnicode.GetBytes(Server.name).CopyTo(bytes, 6); //String (actual string)
-					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16); 
+                    MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4);
+					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16);
 					bytes[bytes.Length - 5] = Server.mode;
 					bytes[bytes.Length - 4] = (byte)level.dimension;
                     bytes[bytes.Length - 3] = Server.difficulty;
 					bytes[bytes.Length - 2] = level.height;
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
-					SendRaw(1, bytes);
+					SendRaw(0x01, bytes);
 				}
 				catch(Exception e)
 				{
@@ -971,18 +970,10 @@ namespace SMP
 			void SendHandshake()
 			{
 			
-				//Server.Log("Handshake out");
-                string st = Server.VerifyNames ? Convert.ToString(new java.util.Random().nextLong(), 16) : "-";
-				byte[] bytes = new byte[(st.Length * 2) + 2];
-				util.EndianBitConverter.Big.GetBytes((short)st.Length).CopyTo(bytes, 0);
-				Encoding.BigEndianUnicode.GetBytes(st).CopyTo(bytes, 2);
-				//foreach (byte b in bytes)
-				//{
-				//    Server.Log(b + " <");
-				//}
-				//Server.Log("Handshake out-1");
-				SendRaw(2, bytes);
-				//Server.Log("Handshake out-2");
+                string hash = Server.VerifyNames ? Convert.ToString(Entity.randomJava.nextLong(), 16) : "-";
+                byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(hash)];
+                MCUtil.Protocol.GetBytes(hash).CopyTo(bytes, 0);
+				SendRaw(0x02, bytes);
 			}
 			void SendLoginDone()
 			{
@@ -1736,7 +1727,7 @@ namespace SMP
 				UpdatePList(false);
 				players.Remove(this);
 				//e.CurrentChunk.Entities.Remove(e);
-				Entity.Entities.Remove(id);
+                Entity.RemoveEntity(e);
                 LoggedIn = false;
 
                 // Despawn the player
@@ -1825,7 +1816,7 @@ namespace SMP
 					data.Add("Name", username);
 				
 				data.Add("ip", ip);
-				data.Add("Exp", experience.Total.ToString());
+				data.Add("Exp", experience.TotalExp.ToString());
 				data.Add("NickName", NickName);
 				
 				if (CanBuild)

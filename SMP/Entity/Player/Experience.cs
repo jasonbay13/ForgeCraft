@@ -24,49 +24,47 @@ namespace SMP
     public class Experience
     {
         Player p;
-        byte _Experience = 0;
-        byte _Level = 0;
-        short _TotalExp = 0;
-        public byte Bar { get { return _Experience; } set { _Experience = value; } }
-        public byte Level { get { return _Level; } set { _Level = value; } }
-        public short Total { get { return _TotalExp; } set { _TotalExp = value; } }
+        private short _Level = 0;
+        private short _LevelExp = 0;
+        private short _Experience = 0;
+        public float Bar { get { return (float)MathHelper.Clamp((float)_LevelExp / (float)NeededLevelExp, 0F, 1F); } }
+        public short Level { get { return _Level; } set { _Level = value; } }
+        public short LevelExp { get { return _LevelExp; } set { _LevelExp = value; } }
+        public short NeededExp { get { return (short)(3.5 * (_Level + 1) * (_Level + 2)); } }
+        public short NeededLevelExp { get { return (short)((_Level + 1) * 7); } }
+        public short TotalExp { get { return _Experience; } set { _Experience = value; } }
 
-        //public void Add(Player p, byte level) { Add(p, (short)(((short)level) * 20)); }
+        public Experience(Player p) : this(p, 0) { }
+        public Experience(Player p, short exp)
+        {
+            this.p = p;
+            this._Experience = exp;
+        }
+
         /// <summary>
         /// Adds a number to players experience
         /// </summary>
         /// <param name="p">Player, duh!</param>
         /// <param name="exp">The ammount of experience to add</param>
-        public void Add(Player p, short exp)
+        public void Add(short exp)
         {
             if (p.CheckEXPGain(exp))
                 return;
-            byte oldlevel = _Level;
+
+            short oldLevel = _Level;
             for (int i = 0; i < exp; i++)
             {
-                _TotalExp++;
-                if (_TotalExp > 780) { _Experience = 0; _Level = 12; continue; }
                 _Experience++;
-                if (_Experience == ((_Level + 1) * 10)) { _Experience = 0; _Level++; }
+                _LevelExp++;
+                if (_Experience >= NeededExp)
+                {
+                    _LevelExp = 0;
+                    _Level++;
+                }
             }
-            if (oldlevel < _Level) { p.SendMessage("Congratulations! You are now level " + _Level); /*RewardItem(p);*/ } // The reward is annoying as hell!
-            //if (_Experience > 127) { _Experience = 127; }
 
-            /*switch (_TotalExp)
-            {
-                case 10: p.inventory.Add(277, 1, 0); break;
-                case 30: p.inventory.Add(278, 1, 0); break;
-                case 60: p.inventory.Add(345, 1, 0); break;
-                case 100: p.inventory.Add(347, 1, 0); break;
-                case 210: p.inventory.Add(358, 1, 0); break;
-            }*/
-            //_TotalExp += exp;
-            //_Level = (byte)(_TotalExp / 10);
-            //_Experience = (byte)(_TotalExp - (_Level * 10));
-
-            //Server.Log(_Experience + " " + _Level + " " + _TotalExp);
-            //Player.GlobalMessage("Bar= " + _Experience + " level = " + _Level + " totalexp = " + _TotalExp);
-            //SendExperience(p, _Experience, _Level, _TotalExp);
+            if (_Level > oldLevel) { p.SendMessage("Congratulations! You are now level " + _Level); /*RewardItem(p);*/ } // The reward is annoying as hell!
+            p.SendExperience(Bar, _Level, _Experience);
         }
 
         /// <summary>
@@ -74,25 +72,33 @@ namespace SMP
         /// </summary>
         /// <param name="p">Player, duh!</param>
         /// <param name="exp">The ammount of experience to remove</param>
-        public void Remove(Player p, short exp)
+        public void Remove(short exp)
         {
             if (p.CheckEXPLost(exp))
                 return;
-            byte oldlevel = _Level;
+
+            short oldLevel = _Level;
             for (int i = 0; i < exp; i++)
             {
-                _TotalExp--;
-                if (_TotalExp > 780) { _Experience = 0; _Level = 12; continue; }
                 _Experience--;
-                if (_Experience == (_Level * 10)) { _Experience = (byte)((_Level * 10) - 1); _Level--; }
+                _LevelExp--;
+                _Level--;
+                if (_Experience >= NeededExp) _Level++;
+                else _LevelExp = (short)(NeededLevelExp - 1);
             }
-            if (_Level < oldlevel) p.SendMessage("You have been demoted to level " + _Level);
-            //SendExperience(p, _Experience, _Level, _TotalExp);
+
+            if (_Level < oldLevel) p.SendMessage("You have been demoted to level " + _Level);
+            p.SendExperience(Bar, _Level, _Experience);
+        }
+
+        public void AddLevel(short level)
+        {
+            Add((short)(NeededLevelExp - _LevelExp));
         }
 
         void RewardItem(Player p)
         {
-            switch (_TotalExp)
+            switch (_Experience)
             {
                 case 10: p.inventory.Add(277, 1, 0); break;
                 case 30: p.inventory.Add(278, 1, 0); break;

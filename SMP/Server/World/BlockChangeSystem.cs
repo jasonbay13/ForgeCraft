@@ -877,7 +877,7 @@ namespace SMP
             {
                 a.SendBlockChange(b.pos, 0);
                 a.level.BlockChange((int)b.pos.X, (int)b.pos.Y - 1, (int)b.pos.Z, 43, (byte)a.inventory.current_item.meta);
-                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); a.experience.Add(a, 1); }
+                if (Server.mode == 0) { a.inventory.Remove(a.inventory.current_index, 1); a.experience.Add(1); }
                 return false;
             }
             return true;

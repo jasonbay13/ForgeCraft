@@ -40,7 +40,7 @@ namespace SMP
 		public bool mountain = true; //???
         public bool generated = false, populated = false;
         public bool generating = false, populating = false;
-        private bool _dirty = false;
+        internal bool _dirty = false;
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
 
 		public Point point { get { return new Point(x, z); } }
@@ -671,13 +671,9 @@ namespace SMP
         public static Chunk GetChunk(int x, int z, World world, bool overRide = false)
         {
             Point po = new Point(x, z);
+
             if (overRide)
-                lock (world.chunkData)
-                    if (!world.chunkData.ContainsKey(po))
-                    {
-                        world.chunkData.Add(po, Load(x, z, world, false, false));
-                        //world.chunkData[po].PostLoad(world);
-                    }
+                world.LoadChunk(z, z, false, false);
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];
             return null;
@@ -696,8 +692,8 @@ namespace SMP
             SkyL = null;
             Light = null;
             heightMap = null;
-            //Entities.Clear();
-            //Entities = null;
+            Entities.Clear();
+            Entities = null;
             extra.Clear();
             extra = null;
         }
