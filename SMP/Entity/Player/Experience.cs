@@ -95,7 +95,8 @@ namespace SMP
 
         public void AddLevel(short level)
         {
-            Add((short)(NeededLevelExp - _LevelExp));
+            for (int i = 0; i < level; i++)
+                Add((short)(NeededLevelExp - _LevelExp));
         }
 
         void RewardItem(Player p)
