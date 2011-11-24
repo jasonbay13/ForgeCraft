@@ -23,10 +23,12 @@ namespace SMP
 {
     public class Experience
     {
-        Player p;
+        private Player p;
         private short _Level = 0;
         private short _LevelExp = 0;
         private short _Experience = 0;
+
+        public Player player { get { return p; } }
         public float Bar { get { return (float)MathHelper.Clamp((float)_LevelExp / (float)NeededLevelExp, 0F, 1F); } }
         public short Level { get { return _Level; } set { _Level = value; } }
         public short LevelExp { get { return _LevelExp; } set { _LevelExp = value; } }
