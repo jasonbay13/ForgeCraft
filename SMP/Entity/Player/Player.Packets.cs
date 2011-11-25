@@ -749,16 +749,16 @@ namespace SMP
             int z = util.EndianBitConverter.Big.ToInt32(message, 6);
 
             // String lengths
-            short a = (short)(util.EndianBitConverter.Big.ToInt16(message, 10) * 2);
-            short b = (short)(util.EndianBitConverter.Big.ToInt16(message, 12 + a) * 2);
-            short c = (short)(util.EndianBitConverter.Big.ToInt16(message, 14 + a + b) * 2);
-            short d = (short)(util.EndianBitConverter.Big.ToInt16(message, 16 + a + b + c) * 2);
+            short a = MCUtil.Protocol.GetStringLength(message, 10);
+            short b = MCUtil.Protocol.GetStringLength(message, 10 + a);
+            short c = MCUtil.Protocol.GetStringLength(message, 10 + a + b);
+            short d = MCUtil.Protocol.GetStringLength(message, 10 + a + b + c);
 
             string[] text = new string[4];
-            text[0] = Encoding.BigEndianUnicode.GetString(message, 12, a);
-            text[1] = Encoding.BigEndianUnicode.GetString(message, 14 + a, b);
-            text[2] = Encoding.BigEndianUnicode.GetString(message, 16 + a + b, c);
-            text[3] = Encoding.BigEndianUnicode.GetString(message, 18 + a + b + c, d);
+            text[0] = MCUtil.Protocol.GetString(message, 10);
+            text[1] = MCUtil.Protocol.GetString(message, 10 + a);
+            text[2] = MCUtil.Protocol.GetString(message, 10 + a + b);
+            text[3] = MCUtil.Protocol.GetString(message, 10 + a + b + c);
 
             level.SetSign(x, y, z, text);
         }

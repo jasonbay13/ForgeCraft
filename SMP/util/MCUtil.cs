@@ -35,10 +35,10 @@ namespace SMP
             /// </summary>
             /// <param name="source">The string to get the bytes of.</param>
             /// <returns>Byte array of string.</returns>
-            public static int GetBytesLength(string source)
+            public static short GetBytesLength(string source)
             {
                 if (source.Length > short.MaxValue) throw new ArgumentException("String too big.");
-                return 2 + (source.Length * 2);
+                return (short)(2 + source.Length * 2);
             }
 
             /// <summary>
@@ -47,13 +47,25 @@ namespace SMP
             /// <param name="bytes">Byte array to get string from.</param>
             /// <param name="index">Index to starting read bytes at.</param>
             /// <returns>String read from the byte array.</returns>
-            public static string GetString(byte[] bytes, int index, int maxLength)
+            public static string GetString(byte[] bytes, int index)
+            {
+                return GetString(bytes, index, short.MaxValue);
+            }
+
+            /// <summary>
+            /// Gets a string from a byte array starting at the specified index
+            /// </summary>
+            /// <param name="bytes">Byte array to get string from.</param>
+            /// <param name="index">Index to starting read bytes at.</param>
+            /// <param name="maxLength">Maximum length of the string to read.</param>
+            /// <returns>String read from the byte array.</returns>
+            public static string GetString(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
                 if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, util.EndianBitConverter.Big.ToInt16(bytes, index));
+                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length * 2);
             }
 
             /// <summary>
@@ -62,13 +74,25 @@ namespace SMP
             /// <param name="bytes">Byte array to get string from.</param>
             /// <param name="index">Index to starting read bytes at.</param>
             /// <returns>String read from the byte array.</returns>
-            public static int GetStringLength(byte[] bytes, int index, int maxLength)
+            public static short GetStringLength(byte[] bytes, int index)
+            {
+                return GetStringLength(bytes, index, short.MaxValue);
+            }
+
+            /// <summary>
+            /// Gets the length of a string from a byte array starting at the specified index
+            /// </summary>
+            /// <param name="bytes">Byte array to get string from.</param>
+            /// <param name="index">Index to starting read bytes at.</param>
+            /// <param name="maxLength">Maximum length of the string to read.</param>
+            /// <returns>String read from the byte array.</returns>
+            public static short GetStringLength(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
                 if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return length;
+                return (short)(2 + length * 2);
             }
         }
 

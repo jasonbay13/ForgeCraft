@@ -333,11 +333,11 @@ namespace SMP
                     case 0x6B: length = 2 + Item.GetDataLength(buffer, 3); break; //Creative inventory action
                     case 0x6C: length = 2; break; //Enchant item
 					case 0x82: //Update sign
-                        short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 11) * 2);
-                        short b = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 13 + a) * 2);
-                        short c = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 15 + a + b) * 2);
-                        short d = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 17 + a + b + c) * 2);
-                        length = 18 + a + b + c + d;
+                        short a = MCUtil.Protocol.GetStringLength(buffer, 11);
+                        short b = MCUtil.Protocol.GetStringLength(buffer, 11 + a);
+                        short c = MCUtil.Protocol.GetStringLength(buffer, 11 + a + b);
+                        short d = MCUtil.Protocol.GetStringLength(buffer, 11 + a + b + c);
+                        length = 10 + a + b + c + d;
 						break;
 					case 0xFE: length = 0; //Server list ping
 						Kick(Server.Motd + "§" + (Player.players.Count - 1) + "§" + Server.MaxPlayers);
@@ -776,19 +776,15 @@ namespace SMP
                     for (int i = 0; i < text.Length; i++)
                         text[i] = MessageAdditions(text[i]);
 
-                byte[] bytes = new byte[18 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2) + (text[3].Length * 2)];
+                byte[] bytes = new byte[10 + MCUtil.Protocol.GetBytesLength(text[0]) + MCUtil.Protocol.GetBytesLength(text[1]) + MCUtil.Protocol.GetBytesLength(text[2]) + MCUtil.Protocol.GetBytesLength(text[3])];
                 util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
                 util.EndianBitConverter.Big.GetBytes(y).CopyTo(bytes, 4);
                 util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 6);
 
-                util.EndianBitConverter.Big.GetBytes((short)text[0].Length).CopyTo(bytes, 10);
-                Encoding.BigEndianUnicode.GetBytes(text[0]).CopyTo(bytes, 12);
-                util.EndianBitConverter.Big.GetBytes((short)text[1].Length).CopyTo(bytes, 12 + (text[0].Length * 2));
-                Encoding.BigEndianUnicode.GetBytes(text[1]).CopyTo(bytes, 14 + (text[0].Length * 2));
-                util.EndianBitConverter.Big.GetBytes((short)text[2].Length).CopyTo(bytes, 14 + (text[0].Length * 2) + (text[1].Length * 2));
-                Encoding.BigEndianUnicode.GetBytes(text[2]).CopyTo(bytes, 16 + (text[0].Length * 2) + (text[1].Length * 2));
-                util.EndianBitConverter.Big.GetBytes((short)text[3].Length).CopyTo(bytes, 16 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2));
-                Encoding.BigEndianUnicode.GetBytes(text[3]).CopyTo(bytes, 18 + (text[0].Length * 2) + (text[1].Length * 2) + (text[2].Length * 2));
+                MCUtil.Protocol.GetBytes(text[0]).CopyTo(bytes, 10);
+                MCUtil.Protocol.GetBytes(text[1]).CopyTo(bytes, 10 + MCUtil.Protocol.GetBytesLength(text[0]));
+                MCUtil.Protocol.GetBytes(text[2]).CopyTo(bytes, 10 + MCUtil.Protocol.GetBytesLength(text[0]) + MCUtil.Protocol.GetBytesLength(text[1]));
+                MCUtil.Protocol.GetBytes(text[3]).CopyTo(bytes, 10 + MCUtil.Protocol.GetBytesLength(text[0]) + MCUtil.Protocol.GetBytesLength(text[1]) + MCUtil.Protocol.GetBytesLength(text[2]));
 
                 SendRaw(0x82, bytes);
             }
