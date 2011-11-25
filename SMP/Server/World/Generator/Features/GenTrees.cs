@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SMP
 {
-    public class GenTrees : GenFeatures
+    public class GenTrees : MapGenBase
     {
         private int Field_947_a;
         private java.util.Random Rand;

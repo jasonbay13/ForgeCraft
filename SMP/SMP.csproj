@@ -105,10 +105,10 @@
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeGenSky.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeGenSwamp.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeGenTaiga.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Features\GenCaves.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\MapGenCaves.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenDeadBush.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenerator.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Features\GenRavine.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\MapGenRavine.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenBigTree.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenCactus.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenClay.cs" />
@@ -144,7 +144,7 @@
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
     <Compile Include="Mojang\Server\World\Explosion.cs" />
     <Compile Include="Server\World\Chunker.cs" />
-    <Compile Include="Server\World\Generator\Features\GenFeatures.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\MapGenBase.cs" />
     <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
     <Compile Include="Server\World\Physics\Physics.Handlers.cs" />
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />

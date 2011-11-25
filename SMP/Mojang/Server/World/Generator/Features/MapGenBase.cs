@@ -5,13 +5,13 @@ using System.Text;
 
 namespace SMP
 {
-    public abstract class GenFeatures
+    public abstract class MapGenBase
     {
         protected abstract int field_947_a { get; set; }
         protected abstract java.util.Random rand { get; set; }
         protected abstract World field_35530_d { get; set; }
 
-        public GenFeatures()
+        public MapGenBase()
         {
             field_947_a = 8;
             rand = new java.util.Random();

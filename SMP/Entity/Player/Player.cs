@@ -772,9 +772,11 @@ namespace SMP
                 if (text.Length != 4)
                     throw new ArgumentException("Text must be 4 strings.");
 
-                if (additions)
-                    for (int i = 0; i < text.Length; i++)
-                        text[i] = MessageAdditions(text[i]);
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (additions) text[i] = MessageAdditions(text[i]);
+                    text[i] = text[i].Truncate(15); // Client will error if it recieves a string longer than 15.
+                }
 
                 byte[] bytes = new byte[10 + MCUtil.Protocol.GetBytesLength(text[0]) + MCUtil.Protocol.GetBytesLength(text[1]) + MCUtil.Protocol.GetBytesLength(text[2]) + MCUtil.Protocol.GetBytesLength(text[3])];
                 util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);

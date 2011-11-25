@@ -18,11 +18,11 @@ namespace SMP {
         public NoiseOctaves field_714_b;
         //public NoiseOctaves mobSpawnerNoise;
 
-        private GenCaves caveGenerator;
+        private MapGenCaves caveGenerator;
         //public MapGenStronghold field_35559_d;
         //public MapGenVillage field_35560_e;
         //public MapGenMineshaft field_35558_f;
-        private GenRavine field_35564_x;
+        private MapGenRavine field_35564_x;
         private BiomeGenBase[] biomesForGeneration;
 
         bool field_35563_t;
@@ -41,11 +41,11 @@ namespace SMP {
             worldObj = w;
             random = new java.util.Random(w.seed);
             field_35562_v = new double[256];
-            caveGenerator = new GenCaves();
+            caveGenerator = new MapGenCaves();
             //field_35559_d = new MapGenStronghold();
             //field_35560_e = new MapGenVillage();
             //field_35558_f = new MapGenMineshaft();
-            field_35564_x = new GenRavine();
+            field_35564_x = new MapGenRavine();
             //unusedIntArray32x32 = new int[32][32];
             field_35563_t = flag;
             field_705_k = new NoiseOctaves(random, 16);

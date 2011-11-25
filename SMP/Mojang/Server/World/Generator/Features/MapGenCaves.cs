@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SMP
 {
-    class GenCaves : GenFeatures
+    class MapGenCaves : MapGenBase
     {
         private int Field_947_a;
         private java.util.Random Rand;
@@ -16,7 +16,7 @@ namespace SMP
         protected override World field_35530_d { get { return Field_35530_d; } set { Field_35530_d = value; } }
 
 
-        public GenCaves()
+        public MapGenCaves()
             : base()
         {
 

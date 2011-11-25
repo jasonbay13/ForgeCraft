@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SMP
 {
-    public class GenRavine : GenFeatures
+    public class MapGenRavine : MapGenBase
     {
         private int Field_947_a;
         private java.util.Random Rand;
@@ -18,7 +18,7 @@ namespace SMP
         private float[] field_35540_a;
 
 
-        public GenRavine()
+        public MapGenRavine()
             : base()
         {
             field_35540_a = new float[1024];
