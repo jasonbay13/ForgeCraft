@@ -290,7 +290,7 @@ namespace SMP
 
         public double distance(Point3 a)
         {
-            return Math.Sqrt(Math.Pow(a.x - x, 2) + Math.Pow(a.y - x, 2) + Math.Pow(a.z - z, 2));
+            return Math.Sqrt(Math.Pow(a.x - x, 2) + Math.Pow(a.y - y, 2) + Math.Pow(a.z - z, 2));
         }
 
         static public implicit operator Point3(int[] value)

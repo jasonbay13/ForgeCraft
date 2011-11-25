@@ -188,7 +188,7 @@ namespace SMP
                                     item.e.rot = new float[] { nbtList[0].ToTagFloat(), nbtList[1].ToTagFloat() };
                                     item.e.age = nbtCompound["Age"].ToTagInt();
                                     item.e.onground = nbtCompound["OnGround"].ToTagByte();
-                                    item.e.health = nbtCompound["Health"].ToTagShort();
+                                    item.e.Health = nbtCompound["Health"].ToTagShort();
                                     item.e.UpdateChunks(false, false);
                                     break;
                             }
@@ -262,7 +262,7 @@ namespace SMP
                 nbtCompound.Add("Type", new TagNodeByte((byte)e.Type));
                 nbtCompound.Add("Age", new TagNodeInt(e.age));
                 nbtCompound.Add("OnGround", new TagNodeByte(e.onground));
-                nbtCompound.Add("Health", new TagNodeShort(e.health));
+                nbtCompound.Add("Health", new TagNodeShort(e.Health));
                 nbtCompound2 = new TagNodeCompound();
                 switch (e.Type)
                 {
@@ -273,7 +273,7 @@ namespace SMP
                         nbtCompound2.Add("Type", new TagNodeByte(e.obj.type));
                         break;
                     case EntityType.Item:
-                        nbtCompound2.Add("ID", new TagNodeShort(e.I.item));
+                        nbtCompound2.Add("ID", new TagNodeShort(e.I.id));
                         nbtCompound2.Add("Count", new TagNodeByte(e.I.count));
                         nbtCompound2.Add("Meta", new TagNodeShort(e.I.meta));
                         break;

@@ -32,7 +32,7 @@ namespace SMP
             set
             {
                 Mycurrent_index = value;
-                UpdateVisibleItemInHand(current_item.item, current_item.meta);
+                UpdateVisibleItemInHand(current_item.id, current_item.meta);
             }
         }
 
@@ -54,7 +54,7 @@ namespace SMP
 		}
 		public void Add(Item item)
 		{
-			Add(item.item, item.count, item.meta);
+			Add(item.id, item.count, item.meta);
 		}
 		public void Add(short item, byte count, short meta)
 		{
@@ -65,7 +65,7 @@ namespace SMP
 			for (int i = 36; i < 45; i++)
 			{
 				if (c == 0) return;
-				if (items[i].item == item)
+				if (items[i].id == item)
 				{
 					if (item < 255)
 					{
@@ -88,7 +88,7 @@ namespace SMP
 			for (int i = 9; i <= 35; i++)
 			{
 				if (c == 0) return;
-				if (items[i].item == item)
+				if (items[i].id == item)
 				{
 					if (item < 255)
 					{
@@ -113,10 +113,6 @@ namespace SMP
 		public void Add(short item, byte count, short meta, int slot)
 		{
             if (slot > 44 || slot < 0) return;
-			if (items[slot] == Item.Nothing)
-				if (slot == current_index)
-					UpdateVisibleItemInHand(item, meta);
-
 			if (count == 0) return;
 
 			Item I = new Item(item, count, meta, p.level, true);
@@ -124,6 +120,7 @@ namespace SMP
             //if (slot == current_index) p.current_block_holding = I;
 
 			p.SendItem((short)slot, item, count, meta);
+            if (slot == current_index) UpdateVisibleItemInHand(item, meta);
 		}
 
 		public void Remove(int slot)
@@ -136,11 +133,12 @@ namespace SMP
 			{
 				items[slot] = Item.Nothing;
 				p.SendItem((short)slot, -1, 0, 0);
+                if (slot == current_index) UpdateVisibleItemInHand(-1, 0);
 				return;
 			}
 
 			items[slot].count -= count;
-			p.SendItem((short)slot, items[slot].item, items[slot].count, items[slot].meta);
+			p.SendItem((short)slot, items[slot].id, items[slot].count, items[slot].meta);
 		}
 
         public void Clear()
@@ -190,9 +188,9 @@ namespace SMP
 					for (int i = 9; i <= 35; i++)
 					{
 						Item item = items[i];
-						if (item.item == items[slot].item)
+						if (item.id == items[slot].id)
 						{
-							if (item.item < 255)
+							if (item.id < 255)
 							{
 								if (item.meta != items[slot].meta)
 								{
@@ -200,7 +198,7 @@ namespace SMP
 								}
 								else
 								{
-									byte stacking = isStackable(item.item);
+									byte stacking = isStackable(item.id);
 									byte available = (byte)(stacking - item.count);
 									if (available == 0) return;
 									if (items[slot].count <= available)
@@ -218,7 +216,7 @@ namespace SMP
 							}
 							else
 							{
-								byte stacking = isStackable(item.item);
+								byte stacking = isStackable(item.id);
 								byte available = (byte)(stacking - item.count);
 								if (available == 0) return;
 								if (items[slot].count <= available)
@@ -236,7 +234,7 @@ namespace SMP
 						}
 					}
 					for (int i = 9; i <= 35; i++)
-						if (items[i].item == (short)Items.Nothing)
+						if (items[i].id == (short)Items.Nothing)
 						{
 							items[i] = items[slot];
 							items[slot] = Item.Nothing;
@@ -248,14 +246,14 @@ namespace SMP
 					for (int i = 36; i < 45; i++)
 					{
 						Item item = items[i];
-						if (item.item == items[slot].item)
+						if (item.id == items[slot].id)
 						{
-							if (item.item < 255)
+							if (item.id < 255)
 							{
 								if (item.meta != items[slot].meta) continue;
 								else
 								{
-									byte stacking = isStackable(item.item);
+									byte stacking = isStackable(item.id);
 									byte available = (byte)(stacking - item.count);
 									if (available == 0) return;
 									if (items[slot].count <= available)
@@ -273,7 +271,7 @@ namespace SMP
 							}
 							else
 							{
-								byte stacking = isStackable(item.item);
+								byte stacking = isStackable(item.id);
 								byte available = (byte)(stacking - item.count);
 								if (available == 0) return;
 								if (items[slot].count <= available)
@@ -291,7 +289,7 @@ namespace SMP
 						}
 					}
 					for (int i = 36; i < 45; i++)
-						if (items[i].item == (short)Items.Nothing)
+						if (items[i].id == (short)Items.Nothing)
 						{
 							items[i] = items[slot];
 							items[slot] = Item.Nothing;
@@ -308,13 +306,13 @@ namespace SMP
 					#region Crafting Slot Done
 					if (slot == 0)
 					{
-						if (p.OnMouse.item == items[slot].item)
+						if (p.OnMouse.id == items[slot].id)
 						{
-							if (p.OnMouse.item < 255)
+							if (p.OnMouse.id < 255)
 							{
 								if (p.OnMouse.meta == items[slot].meta)
 								{
-									byte stacking = isStackable(p.OnMouse.item);
+									byte stacking = isStackable(p.OnMouse.id);
 									byte availible = (byte)(stacking - p.OnMouse.count);
 									if (items[slot].count <= availible)
 									{
@@ -330,7 +328,7 @@ namespace SMP
 							}
 							else
 							{
-								byte stacking = isStackable(p.OnMouse.item);
+								byte stacking = isStackable(p.OnMouse.id);
 								byte availible = (byte)(stacking - p.OnMouse.count);
 								if (items[slot].count <= availible)
 								{
@@ -347,11 +345,11 @@ namespace SMP
 					#region Armor Slots Done
 					else if (slot == 5 || slot == 6 || slot == 7 || slot == 8)
 					{
-						if (items[slot].item == p.OnMouse.item) return;
+						if (items[slot].id == p.OnMouse.id) return;
 						switch (slot)
 						{
 							case 5:
-								if (p.OnMouse.item == 298 || p.OnMouse.item == 302 || p.OnMouse.item == 306 || p.OnMouse.item == 310)
+								if (p.OnMouse.id == 298 || p.OnMouse.id == 302 || p.OnMouse.id == 306 || p.OnMouse.id == 310)
 								{
 									Item temp = items[slot];
 									items[slot] = p.OnMouse;
@@ -359,7 +357,7 @@ namespace SMP
 								}
 								break;
 							case 6:
-								if (p.OnMouse.item == 299 || p.OnMouse.item == 303 || p.OnMouse.item == 307 || p.OnMouse.item == 311)
+								if (p.OnMouse.id == 299 || p.OnMouse.id == 303 || p.OnMouse.id == 307 || p.OnMouse.id == 311)
 								{
 									Item temp = items[slot];
 									items[slot] = p.OnMouse;
@@ -367,7 +365,7 @@ namespace SMP
 								}
 								break;
 							case 7:
-								if (p.OnMouse.item == 300 || p.OnMouse.item == 304 || p.OnMouse.item == 308 || p.OnMouse.item == 312)
+								if (p.OnMouse.id == 300 || p.OnMouse.id == 304 || p.OnMouse.id == 308 || p.OnMouse.id == 312)
 								{
 									Item temp = items[slot];
 									items[slot] = p.OnMouse;
@@ -375,7 +373,7 @@ namespace SMP
 								}
 								break;
 							case 8:
-								if (p.OnMouse.item == 301 || p.OnMouse.item == 305 || p.OnMouse.item == 309 || p.OnMouse.item == 313)
+								if (p.OnMouse.id == 301 || p.OnMouse.id == 305 || p.OnMouse.id == 309 || p.OnMouse.id == 313)
 								{
 									Item temp = items[slot];
 									items[slot] = p.OnMouse;
@@ -389,13 +387,13 @@ namespace SMP
 					{
 						if (click == ClickType.RightClick)
 						{
-							if (p.OnMouse.item == items[slot].item)
+							if (p.OnMouse.id == items[slot].id)
 							{
-								if (p.OnMouse.item < 255)
+								if (p.OnMouse.id < 255)
 								{
 									if (p.OnMouse.meta == items[slot].meta)
 									{
-										byte stacking = isStackable(p.OnMouse.item);
+										byte stacking = isStackable(p.OnMouse.id);
 										if (items[slot].count < stacking)
 										{
 											items[slot].count += 1;
@@ -418,7 +416,7 @@ namespace SMP
 								}
 								else
 								{
-									byte stacking = isStackable(p.OnMouse.item);
+									byte stacking = isStackable(p.OnMouse.id);
 									if (items[slot].count < stacking)
 									{
 										items[slot].count += 1;
@@ -436,13 +434,13 @@ namespace SMP
 						}
 						else
 						{
-							if (p.OnMouse.item == items[slot].item)
+							if (p.OnMouse.id == items[slot].id)
 							{
-								if (p.OnMouse.item < 255)
+								if (p.OnMouse.id < 255)
 								{
 									if (p.OnMouse.meta == items[slot].meta)
 									{
-										byte stacking = isStackable(p.OnMouse.item);
+										byte stacking = isStackable(p.OnMouse.id);
 										byte available = (byte)(stacking - items[slot].count);
 										if (available == 0) return;
 										if (p.OnMouse.count <= available)
@@ -465,7 +463,7 @@ namespace SMP
 								}
 								else
 								{
-									byte stacking = isStackable(p.OnMouse.item);
+									byte stacking = isStackable(p.OnMouse.id);
 									byte available = (byte)(stacking - items[slot].count);
 									if (available == 0) return;
 									if (p.OnMouse.count <= available)
@@ -499,28 +497,28 @@ namespace SMP
 						switch (slot)
 						{
 							case 5:
-								if (p.OnMouse.item == 298 || p.OnMouse.item == 302 || p.OnMouse.item == 306 || p.OnMouse.item == 310)
+								if (p.OnMouse.id == 298 || p.OnMouse.id == 302 || p.OnMouse.id == 306 || p.OnMouse.id == 310)
 								{
 									items[slot] = p.OnMouse;
 									p.OnMouse = Item.Nothing;
 								}
 								break;
 							case 6:
-								if (p.OnMouse.item == 299 || p.OnMouse.item == 303 || p.OnMouse.item == 307 || p.OnMouse.item == 311)
+								if (p.OnMouse.id == 299 || p.OnMouse.id == 303 || p.OnMouse.id == 307 || p.OnMouse.id == 311)
 								{
 									items[slot] = p.OnMouse;
 									p.OnMouse = Item.Nothing;
 								}
 								break;
 							case 7:
-								if (p.OnMouse.item == 300 || p.OnMouse.item == 304 || p.OnMouse.item == 308 || p.OnMouse.item == 312)
+								if (p.OnMouse.id == 300 || p.OnMouse.id == 304 || p.OnMouse.id == 308 || p.OnMouse.id == 312)
 								{
 									items[slot] = p.OnMouse;
 									p.OnMouse = Item.Nothing;
 								}
 								break;
 							case 8:
-								if (p.OnMouse.item == 301 || p.OnMouse.item == 305 || p.OnMouse.item == 309 || p.OnMouse.item == 313)
+								if (p.OnMouse.id == 301 || p.OnMouse.id == 305 || p.OnMouse.id == 309 || p.OnMouse.id == 313)
 								{
 									items[slot] = p.OnMouse;
 									p.OnMouse = Item.Nothing;
@@ -541,7 +539,7 @@ namespace SMP
 							else
 							{
 								p.OnMouse.count -= 1;
-                                items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level, true);
+                                items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta, p.level, true);
 							}
 						}
 						else
@@ -580,7 +578,7 @@ namespace SMP
 		{
 			try
 			{
-                Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level, true);
+                Item temp = new Item(items[slot].id, 0, items[slot].meta, p.level, true);
 				if (items[slot].count == 1)
 				{
 					temp = items[slot];
@@ -623,13 +621,13 @@ namespace SMP
 		public int FindEmptySlot()
 		{			
 			for (int i = 36; i < 45; i++)
-				if (items[i].item == (short)Items.Nothing)
+				if (items[i].id == (short)Items.Nothing)
 				{
 					return i;
 				}
 			
 			for (int i = 9; i <= 35; i++)
-				if (items[i].item == (short)Items.Nothing)
+				if (items[i].id == (short)Items.Nothing)
 				{
 					return i;
 				}

@@ -65,7 +65,7 @@ namespace SMP
                 }
             }
 
-            if (_Level > oldLevel) { p.SendMessage("Congratulations! You are now level " + _Level); /*RewardItem(p);*/ } // The reward is annoying as hell!
+            if (_Level > oldLevel) p.SendMessage("Congratulations! You are now level " + _Level); // The reward is annoying as hell!
             p.SendExperience(Bar, _Level, _Experience);
         }
 
@@ -99,17 +99,17 @@ namespace SMP
                 Add((short)(NeededLevelExp - _LevelExp));
         }
 
-        void RewardItem(Player p)
+        /*void RewardItem()
         {
             switch (_Experience)
             {
-                case 10: p.inventory.Add(277, 1, 0); break;
-                case 30: p.inventory.Add(278, 1, 0); break;
-                case 60: p.inventory.Add(345, 1, 0); break;
-                case 100: p.inventory.Add(347, 1, 0); break;
-                case 210: p.inventory.Add(358, 1, 0); break;
+                case 7: p.inventory.Add(277, 1, 0); break;
+                case 21: p.inventory.Add(278, 1, 0); break;
+                case 42: p.inventory.Add(345, 1, 0); break;
+                case 70: p.inventory.Add(347, 1, 0); break;
+                case 105: p.inventory.Add(358, 1, 0); break;
                 default: break;
             }
-        }
+        }*/
     }
 }

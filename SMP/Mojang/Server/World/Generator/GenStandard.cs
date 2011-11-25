@@ -110,7 +110,6 @@ namespace SMP {
             {
                 lock (this.Lock)
                 {
-                    DateTime start = DateTime.Now;
                     //BlockSand.fallInstantly = true;
                     int k = c.x * 16;
                     int l = c.z * 16;

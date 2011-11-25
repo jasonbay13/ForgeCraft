@@ -38,23 +38,25 @@ namespace SMP
         BlockRightClick,
         BlockPlace,
         BlockBreak,
+        ItemUse,
         Respawn
     }
     public enum WindowEvent
     {
         RightClick,
-        Click
+        LeftClick
     }
     public enum LevelEvent
     {
-        LevelBlockChange,
-        LevelLoad,
-        LevelSave,
-        LevelUnload
+        BlockChange,
+        PhysicsUpdate,
+        Load,
+        Save,
+        Unload
     }
     public enum ServerEvent
     {
-        ServerLog,
-        ServerErrorLog
+        Log,
+        ErrorLog
     }
 }

@@ -354,35 +354,36 @@ namespace SMP
 				int z = util.EndianBitConverter.Big.ToInt32(message, 6);
                 byte direction = message[10];
 
-                Point3 face = new Point3(x, y, z);
-                switch (direction)
-                {
-                    case 0: face.y--; break;
-                    case 1: face.y++; break;
-                    case 2: face.z--; break;
-                    case 3: face.z++; break;
-                    case 4: face.x--; break;
-                    case 5: face.x++; break;
-                }
+                Point3 face = BlockData.GetFaceBlock(x, y, z, direction);
 
 				byte rc = level.GetBlock(x,y,z); //block hit
+
+                if (OnBlockChange != null)
+                {
+                    OnBlockChange(this, x, y, z, current_block_holding.id);
+                    return;
+                }
+
+                if (OnBlockLeftClick != null)
+                    OnBlockLeftClick(this, x, y, z, direction);
+                if (PlayerBlockLeftClick != null)
+                    PlayerBlockLeftClick(this, x, y, z, direction);
+                if (cancelblockleft)
+                {
+                    cancelblockleft = false;
+                    return;
+                }
+
 				if(BlockChange.LeftClicked.ContainsKey(rc))
 				{
 					BlockChange.LeftClicked[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0));
 				}
-
-                if (OnBlockChange != null)
-                {
-                    OnBlockChange(this, x, y, z, rc);
-                    return;
-                }
 
                 if (level.GetBlock((int)face.x, (int)face.y, (int)face.z) == 51)
                 {
                     level.BlockChange((int)face.x, (int)face.y, (int)face.z, 0, 0);
                     Player.GlobalSoundEffect(face, 1004, level);
                 }
-
 
                 if (Server.mode == 1)
                 {
@@ -431,20 +432,21 @@ namespace SMP
 				int z = util.EndianBitConverter.Big.ToInt32(message, 6);
                 byte direction = message[10];
 
-                Point3 face = new Point3(x, y, z);
-                switch (direction)
-                {
-                    case 0: face.y--; break;
-                    case 1: face.y++; break;
-                    case 2: face.z--; break;
-                    case 3: face.z++; break;
-                    case 4: face.x--; break;
-                    case 5: face.x++; break;
-                }
+                Point3 face = BlockData.GetFaceBlock(x, y, z, direction);
 
-				short id = e.level.GetBlock(x, y, z);
+				short id = level.GetBlock(x, y, z);
                 short storeId = id;
 				byte count = 1;
+
+                if (OnBlockBreak != null)
+                    OnBlockBreak(this, x, y, z, (byte)id, level.GetMeta(x, y, z));
+                if (PlayerBlockBreak != null)
+                    PlayerBlockBreak(this, x, y, z, (byte)id, level.GetMeta(x, y, z));
+                if (cancelbreak)
+                {
+                    cancelbreak = false;
+                    return;
+                }
 
 				if (BlockChange.Destroyed.ContainsKey(id))
 				{
@@ -489,7 +491,7 @@ namespace SMP
 			}
 
 			//short blockID = util.EndianBitConverter.Big.ToInt16(message, 10);
-            short blockID = current_block_holding.item;
+            short blockID = current_block_holding.id;
 
             byte amount = current_block_holding.count;
             short damage = current_block_holding.meta;
@@ -500,6 +502,16 @@ namespace SMP
             }*/
 
             //Console.WriteLine(blockID + " " + amount + " " + damage);
+
+            if (OnBlockRightClick != null)
+                OnBlockRightClick(this, blockX, blockY, blockZ, direction);
+            if (PlayerBlockRightClick != null)
+                PlayerBlockRightClick(this, blockX, blockY, blockZ, direction);
+            if (cancelblockright)
+            {
+                cancelblockright = false;
+                return;
+            }
 
 			byte rc = level.GetBlock(blockX, blockY, blockZ);
 			if (BlockChange.RightClickedOn.ContainsKey(rc))
@@ -534,7 +546,7 @@ namespace SMP
 				{
 					//Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
-                    SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
+                    SendItem(inventory.current_index, inventory.current_item.id, inventory.current_item.count, inventory.current_item.meta);
                     return;
                     
                     /*if (e1.isItem)
@@ -566,7 +578,7 @@ namespace SMP
                 {
                     //Server.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
-                    SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
+                    SendItem(inventory.current_index, inventory.current_item.id, inventory.current_item.count, inventory.current_item.meta);
                     return;
 
                     /*if (e1.isPlayer)
@@ -606,7 +618,7 @@ namespace SMP
             if (!BlockData.CanPlaceIn(level.GetBlock(blockX, blockY, blockZ)))
             {
                 SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
-                SendItem(inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
+                SendItem(inventory.current_index, inventory.current_item.id, inventory.current_item.count, inventory.current_item.meta);
                 return;
             }
 
@@ -616,6 +628,16 @@ namespace SMP
                 {
                     OnBlockChange(this, blockX, blockY, blockZ, blockID);
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
+                    return;
+                }
+
+                if (OnBlockPlace != null)
+                    OnBlockPlace(this, blockX, blockY, blockZ, (byte)blockID, (byte)damage, direction);
+                if (PlayerBlockPlace != null)
+                    PlayerBlockPlace(this, blockX, blockY, blockZ, (byte)blockID, (byte)damage, direction);
+                if (cancelplace)
+                {
+                    cancelplace = false;
                     return;
                 }
 
@@ -651,6 +673,16 @@ namespace SMP
                     return;
                 }
 
+                if (ItemUse != null)
+                    ItemUse(this, blockX, blockY, blockZ, current_block_holding, direction);
+                if (PlayerItemUse != null)
+                    PlayerItemUse(this, blockX, blockY, blockZ, current_block_holding, direction);
+                if (cancelitemuse)
+                {
+                    cancelitemuse = false;
+                    return;
+                }
+
 				if(BlockChange.ItemRightClick.ContainsKey(blockID))
 				{
                     if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
@@ -668,6 +700,47 @@ namespace SMP
 			try { current_slot_holding = (short)(util.EndianBitConverter.Big.ToInt16(message, 0) + 36); }
 			catch { }
 		}
+
+        private void HandleEntityUse(byte[] message)
+        {
+            //int pid = util.EndianBitConverter.Big.ToInt32(message, 0); // Ignored by server.
+            int eid = util.EndianBitConverter.Big.ToInt32(message, 4);
+            bool leftClick = util.EndianBitConverter.Big.ToBoolean(message, 8);
+
+            if (!Entity.Entities.ContainsKey(eid)) return;
+            Entity ent = Entity.Entities[eid];
+            if (pos.distance(ent.pos) > 4) return; // No distance hax!
+
+            if (leftClick)
+            {
+                short damage = current_block_holding.AttackDamage;
+                if (EntityAttack != null)
+                    EntityAttack(this, ent, damage);
+                if (PlayerEntityAttack != null)
+                    PlayerEntityAttack(this, ent, damage);
+                if (cancelentityleft)
+                {
+                    cancelentityleft = false;
+                    return;
+                }
+
+                ent.hurt(damage);
+            }
+            else
+            {
+                if (OnEntityRightClick != null)
+                    OnEntityRightClick(this, ent);
+                if (PlayerEntityRightClick != null)
+                    PlayerEntityRightClick(this, ent);
+                if (cancelentityright)
+                {
+                    cancelentityright = false;
+                    return;
+                }
+
+                // TODO: Put player in vehicle or something.
+            }
+        }
 
         private void HandleUpdateSign(byte[] message)
         {
@@ -743,7 +816,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 4, inventory.items[5].item, 0);
+						e.p.SendEntityEquipment(id, 4, inventory.items[5].id, 0);
 					}
 				}
 				else if (slot == 6)
@@ -752,7 +825,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 3, inventory.items[6].item, 0);
+						e.p.SendEntityEquipment(id, 3, inventory.items[6].id, 0);
 					}
 				}
 				else if (slot == 7)
@@ -761,7 +834,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 2, inventory.items[7].item, 0);
+						e.p.SendEntityEquipment(id, 2, inventory.items[7].id, 0);
 					}
 				}
 				else if (slot == 8)
@@ -770,7 +843,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 1, inventory.items[8].item, 0);
+						e.p.SendEntityEquipment(id, 1, inventory.items[8].id, 0);
 					}
 				}
 				else if (slot == inventory.current_index)
@@ -779,7 +852,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
+						e.p.SendEntityEquipment(id, 0, inventory.current_item.id, 0);
 					}
 				}
 			}
@@ -792,7 +865,7 @@ namespace SMP
 					{
 						Entity e = Entity.Entities[i];
 						if (!e.isPlayer) continue;
-						e.p.SendEntityEquipment(id, 0, inventory.current_item.item, 0);
+						e.p.SendEntityEquipment(id, 0, inventory.current_item.id, 0);
 					}
 				}
 			}
@@ -853,11 +926,13 @@ namespace SMP
 			}
 			else if (message[4] == 4)
 			{
-				//Start Sprinting
+                e.SetMetaBit(0, 3, true);
+                GlobalMetaUpdate();
 			}
 			else if (message[4] == 5)
 			{
-				//Stop Sprinting
+                e.SetMetaBit(0, 3, false);
+                GlobalMetaUpdate();
 			}
 		}
         private void HandleRespawn(byte[] message)
@@ -871,6 +946,8 @@ namespace SMP
                 cancelrespawn = false;
                 return;
             }
+
+            health = 20;
 			Teleport_Spawn();
             SendRespawn();
         }

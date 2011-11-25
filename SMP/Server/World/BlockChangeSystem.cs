@@ -173,7 +173,7 @@ namespace SMP
         }
 		public static bool Till(Player a, BCS b)
 		{
-			switch (a.inventory.current_item.item) {
+			switch (a.inventory.current_item.id) {
                 case (short)Items.DiamondHoe:
                 case (short)Items.GoldHoe:
                 case (short)Items.IronHoe:
@@ -236,7 +236,7 @@ namespace SMP
 		public static bool PlayMusic(Player a, BCS b)
 		{
             ushort meta = a.level.GetExtra((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
-            short item = a.inventory.current_item.item;
+            short item = a.inventory.current_item.id;
             if (meta != 0)
             {
                 if (meta >= 2256 && meta <= 2266)
@@ -1215,7 +1215,7 @@ namespace SMP
 		{
             if (Server.mode == 0)
             {
-                switch (a.inventory.current_item.item) {
+                switch (a.inventory.current_item.id) {
                     case (short)Items.DiamondShovel:
                     case (short)Items.GoldShovel:
                     case (short)Items.IronShovel:

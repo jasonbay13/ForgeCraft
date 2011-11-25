@@ -1298,5 +1298,20 @@ namespace SMP
             }
             return false;
         }
+
+        public static Point3 GetFaceBlock(int x, int y, int z, byte direction)
+        {
+            Point3 face = new Point3(x, y, z);
+            switch (direction)
+            {
+                case 0: face.y--; break;
+                case 1: face.y++; break;
+                case 2: face.z--; break;
+                case 3: face.z++; break;
+                case 4: face.x--; break;
+                case 5: face.x++; break;
+            }
+            return face;
+        }
 	}
 }

@@ -48,7 +48,7 @@ namespace SMP
 		public World level { get { return e.level; } set { e.level = value; } }
 
         public bool isInventory = false;
-		public short item = -1;
+		public short id = -1;
 		public byte count = 1;
         public List<Enchantment> enchantments = new List<Enchantment>();
 		private short Mymeta = 0;
@@ -76,21 +76,21 @@ namespace SMP
 		{
             isInventory = inv;
             e = new Entity(this, l);
-			this.item = item;
+			this.id = item;
 			OnGround = false;
 		}
         public Item(Items item, World l, bool inv = false)
 		{
             isInventory = inv;
             e = new Entity(this, l);
-			this.item = (short)item;
+			this.id = (short)item;
 			OnGround = false;
 		}
         public Item(short item, byte count, short meta, World l, bool inv = false)
 		{
             isInventory = inv;
             e = new Entity(this, l);
-			this.item = (short)item;
+			this.id = (short)item;
 			this.meta = meta;
 			this.count = count;
 			OnGround = false;
@@ -99,7 +99,7 @@ namespace SMP
 		{
             isInventory = inv;
             e = new Entity(this, l);
-			this.item = item;
+			this.id = item;
 			this.count = count;
 			this.meta = meta;
 			this.level = l;
@@ -124,12 +124,57 @@ namespace SMP
         public void Physics()
         {
             // TODO
+            if (e.age > 6000) Entity.RemoveEntity(this.e);
         }
 
 
         public bool IsDamageable()
         {
-            return BlockData.IsItemDamageable(item);
+            return BlockData.IsItemDamageable(id);
+        }
+
+        public short AttackDamage
+        {
+            get
+            {
+                short damage = 0;
+                switch (id)
+                {
+                    case 276:
+                        damage = 7;
+                        break;
+                    case 267:
+                    case 279:
+                        damage = 6;
+                        break;
+                    case 272:
+                    case 258:
+                    case 278:
+                        damage = 5;
+                        break;
+                    case 268:
+                    case 283:
+                    case 275:
+                    case 257:
+                    case 277:
+                        damage = 4;
+                        break;
+                    case 271:
+                    case 286:
+                    case 274:
+                    case 256:
+                        damage = 3;
+                        break;
+                    case 273:
+                        damage = 2;
+                        break;
+                    default:
+                        damage = 1;
+                        break;
+                }
+
+                return damage;
+            }
         }
 
         public static int GetDataLength(byte[] buffer, int index)
@@ -150,8 +195,8 @@ namespace SMP
 
         public void ReadData(byte[] buffer, int index)
         {
-            item = util.EndianBitConverter.Big.ToInt16(buffer, index);
-            if (item != -1)
+            id = util.EndianBitConverter.Big.ToInt16(buffer, index);
+            if (id != -1)
             {
                 count = buffer[index + 2];
                 meta = util.EndianBitConverter.Big.ToInt16(buffer, index + 3);

@@ -77,9 +77,20 @@ namespace SMP
 		public int id;
 
         public int age = 0;
-        public short health = 20;
+        private short health = 20;
+        public short Health
+        {
+            get { return health; }
+            set
+            {
+                health = value;
+                if (isPlayer) p.SendHealth();
+            }
+        }
+        public object[] metadata = new object[32];
 
         private DateTime lastPosSync = new DateTime();
+        private DateTime lastHurt = new DateTime();
 
 		public Entity(Player pl, World l)
 		{
@@ -130,9 +141,22 @@ namespace SMP
 
         public void hurt(short amount)
         {
-            health -= amount;
-            if (isPlayer) p.SendHealth();
-            if (health <= 0) { health = 20; }
+            if (isPlayer && (p.Mode == 1 || Server.mode == 1)) return;
+            if (Health > 0)
+            {
+                if ((DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
+                lastHurt = DateTime.Now;
+                Health -= Math.Min(amount, Health);
+                foreach (Player pl in Player.players.ToArray())
+                {
+                    pl.SendEntityStatus(id, 2);
+                    if (Health <= 0 && pl != p)
+                    {
+                        if (isPlayer) p.inventory.Clear();
+                        //pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
+                    }
+                }
+            }
         }
         public void hurt()
         {
@@ -317,7 +341,7 @@ namespace SMP
                     //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
-						if (!e.I.OnGround) continue;
+						if (!e.I.OnGround || e.age < 10) continue;
 						e.I.OnGround = false;
 
                         p.SendPickupAnimation(e.id);
@@ -327,8 +351,8 @@ namespace SMP
                                 pl.SendPickupAnimation(e.id, p.id);
                         });
 
-                        RemoveEntity(e);
 						p.inventory.Add(e.I);
+                        RemoveEntity(e);
 					}
 				}
 				/*if (e.isAI)
@@ -359,7 +383,7 @@ namespace SMP
         public static void EntityPhysics()
         {
             Entity e;
-            for (int i = 0; i < Entities.Count; i++)
+            foreach (int i in Entities.Keys.ToArray())
             {
                 try
                 {
@@ -374,6 +398,31 @@ namespace SMP
                 catch { }
             }
         }
+
+        #region META DATA HANDLER
+        public byte[] GetMetaByteArray()
+        {
+            return MCUtil.Entities.GetMetaBytes(metadata);
+        }
+
+        public void SetMeta(byte index, object obj)
+        {
+            metadata[index] = obj;
+        }
+        public void SetMetaBit(byte index, byte bit, bool value)
+        {
+            if (bit < 0) throw new ArgumentOutOfRangeException("Bit cannot be less than 0.");
+            if (bit > 7) throw new ArgumentOutOfRangeException("Bit cannot be greater than 7.");
+            if (metadata[index] != null && metadata[index].GetType() == typeof(byte))
+            {
+                byte b = (byte)metadata[index];
+                if (value) b |= (byte)(1 << bit);
+                else if ((b >> bit & 1) == 1) b ^= (byte)(1 << bit);
+                metadata[index] = b;
+            }
+            else metadata[index] = (byte)(1 << bit);
+        }
+        #endregion
 
         public void Tick()
         {
@@ -417,7 +466,7 @@ namespace SMP
             StringBuilder sb = new StringBuilder();
             sb.Append("Entity{").Append(id).Append(':').Append((int)pos.x).Append(',').Append((int)pos.y).Append(',').Append((int)pos.z).Append(':');
             if (isPlayer) sb.Append(p.username);
-            else if (isItem) sb.Append("Item{").Append(I.item).Append(":").Append(I.count).Append(":").Append(I.meta).Append('}');
+            else if (isItem) sb.Append("Item{").Append(I.id).Append(":").Append(I.count).Append(":").Append(I.meta).Append('}');
             else if (isAI) sb.Append(ai.GetType().Name);
             else if (isObject) sb.Append(obj.GetType().Name);
             else sb.Append("UNKNOWN");

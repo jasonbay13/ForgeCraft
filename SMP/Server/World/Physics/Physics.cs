@@ -27,33 +27,23 @@ namespace SMP
         public bool paused = false;
         public int speed;
         public PSetting setting;
-        public World w;
+        internal World w;
         private Thread physthread;
         private List<Check> Checks = new List<Check>();
         private List<Update> Updates = new List<Update>();
         private int wait = 0, lastCheck = 0, lastUpdate = 0;
         private Random random;
         #region Accessors
-        public int CheckCount
-        {
-            get
-            {
-                return this.lastCheck;
-            }
-        }
-        public int UpdateCount
-        {
-            get
-            {
-                return this.lastUpdate;
-            }
-        }
+        public int CheckCount { get { return this.lastCheck; } }
+        public int UpdateCount { get { return this.lastUpdate; } }
+        public World Level { get { return w; } }
         #endregion
         #region Custom Command / Plugin Events
-        public delegate bool OnPhysics(World world, int x, int y, int z, byte type, byte meta);
+        public delegate void OnPhysics(Physics physics, int x, int y, int z, byte type, byte meta);
         public static event OnPhysics WorldPhysicsUpdate;
         public event OnPhysics PhysicsUpdate;
         #endregion
+        internal bool cancelphysics = false;
 
         public Physics(World w) : this(w, PSetting.Hardcore) { }
         public Physics(World w, PSetting setting) : this(w, setting, 250) { }
@@ -126,7 +116,7 @@ namespace SMP
                     try
                     {
                         if (C == null) { Checks.Remove(C); return; }
-                        if (!w.chunkData.ContainsKey(new Point(C.x >> 4, C.z >> 4)) || !w.chunkData[new Point(C.x >> 4, C.z >> 4)].generated) return;
+                        if (!w.chunkData.ContainsKey(new Point(C.x >> 4, C.z >> 4)) || !w.chunkData[new Point(C.x >> 4, C.z >> 4)].generated || !w.chunkData[new Point(C.x >> 4, C.z >> 4)].populated) return;
                         type = w.GetBlock(C.x, C.y, C.z);
                         if (Handlers.handlers.ContainsKey(type))
                             if (!(bool)Handlers.handlers[type].DynamicInvoke(this, C))
@@ -149,11 +139,14 @@ namespace SMP
                     try
                     {
                         if (WorldPhysicsUpdate != null)
-                            if (!WorldPhysicsUpdate(w, U.x, U.y, U.z, U.type, U.meta))
-                                return;
+                            WorldPhysicsUpdate(this, U.x, U.y, U.z, U.type, U.meta);
                         if (PhysicsUpdate != null)
-                            if (!PhysicsUpdate(w, U.x, U.y, U.z, U.type, U.meta))
-                                return;
+                            PhysicsUpdate(this, U.x, U.y, U.z, U.type, U.meta);
+                        if (cancelphysics)
+                        {
+                            cancelphysics = false;
+                            return;
+                        }
 
                         w.BlockChange(U.x, U.y, U.z, U.type, U.meta);
                     }

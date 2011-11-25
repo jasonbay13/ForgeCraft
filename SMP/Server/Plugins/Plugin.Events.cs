@@ -32,11 +32,17 @@ namespace SMP
 	{
         public static bool IsEventCancled(LevelEvent e, World w)
         {
-            return true;
+            switch (e)
+            {
+                case LevelEvent.PhysicsUpdate:
+                    return w.physics.cancelphysics;
+                default:
+                    return false;
+            }
         }
         public static bool IsEventCancled(ServerEvent e)
         {
-            return true;
+            return false;
         }
         /// <summary>
         /// Cancel a window event
@@ -48,7 +54,7 @@ namespace SMP
         {
             switch (e)
             {
-                case WindowEvent.Click:
+                case WindowEvent.LeftClick:
                     w.cancelclick = true;
                     break;
                 case WindowEvent.RightClick:
@@ -66,7 +72,7 @@ namespace SMP
         {
             switch (e)
             {
-                case WindowEvent.Click:
+                case WindowEvent.LeftClick:
                     return w.cancelclick;
                 case WindowEvent.RightClick:
                     return w.cancelright;
@@ -114,13 +120,20 @@ namespace SMP
                     return p.cancelplace;
                 case PlayerEvents.BlockBreak:
                     return p.cancelbreak;
+                case PlayerEvents.ItemUse:
+                    return p.cancelitemuse;
                 default:
                     return false;
             }
         }
         public static void CancelEvent(LevelEvent e, World w)
         {
-
+            switch (e)
+            {
+                case LevelEvent.PhysicsUpdate:
+                    w.physics.cancelphysics = true;
+                    break;
+            }
         }
         public static void CancelEvent(ServerEvent e)
         {
@@ -180,6 +193,9 @@ namespace SMP
                     break;
                 case PlayerEvents.BlockBreak:
                     p.cancelbreak = true;
+                    break;
+                case PlayerEvents.ItemUse:
+                    p.cancelitemuse = true;
                     break;
             }
         }

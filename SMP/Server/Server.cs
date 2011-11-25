@@ -276,7 +276,7 @@ namespace SMP
 		}
 		
 		/// <summary>
-		/// To be depracted and replaced with ServerLogger
+        /// To be deprecated and replaced with ServerLogger
 		/// </summary>
 		/// <param name="message">
 		/// A <see cref="System.String"/>

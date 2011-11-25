@@ -144,7 +144,7 @@ namespace SMP
 			{
 				try
 				{
-                    Item temp = new Item(items[slot].item, 0, items[slot].meta, p.level, true);
+                    Item temp = new Item(items[slot].id, 0, items[slot].meta, p.level, true);
 					if (items[slot].count == 1)
 					{
 						temp = items[slot];
@@ -249,13 +249,13 @@ namespace SMP
 						#region Crafting/Furnace Output
 						if ((type == 1 && slot == 0) || (type == 2 && slot == 0))
 						{
-							if (p.OnMouse.item == items[slot].item)
+							if (p.OnMouse.id == items[slot].id)
 							{
-								if (p.OnMouse.item < 255)
+								if (p.OnMouse.id < 255)
 								{
 									if (p.OnMouse.meta == items[slot].meta)
 									{
-										byte stacking = Inventory.isStackable(p.OnMouse.item);
+										byte stacking = Inventory.isStackable(p.OnMouse.id);
 										byte availible = (byte)(stacking - p.OnMouse.count);
 										if (items[slot].count <= availible)
 										{
@@ -271,7 +271,7 @@ namespace SMP
 								}
 								else
 								{
-									byte stacking = Inventory.isStackable(p.OnMouse.item);
+									byte stacking = Inventory.isStackable(p.OnMouse.id);
 									byte availible = (byte)(stacking - p.OnMouse.count);
 									if (items[slot].count <= availible)
 									{
@@ -291,13 +291,13 @@ namespace SMP
 							{
                                
 
-								if (p.OnMouse.item == items[slot].item)
+								if (p.OnMouse.id == items[slot].id)
 								{
-									if (p.OnMouse.item < 255)
+									if (p.OnMouse.id < 255)
 									{
 										if (p.OnMouse.meta == items[slot].meta)
 										{
-											byte stacking = Inventory.isStackable(p.OnMouse.item);
+											byte stacking = Inventory.isStackable(p.OnMouse.id);
 											if (items[slot].count < stacking)
 											{
 												items[slot].count += 1;
@@ -320,7 +320,7 @@ namespace SMP
 									}
 									else
 									{
-										byte stacking = Inventory.isStackable(p.OnMouse.item);
+										byte stacking = Inventory.isStackable(p.OnMouse.id);
 										if (items[slot].count < stacking)
 										{
 											items[slot].count += 1;
@@ -338,13 +338,13 @@ namespace SMP
 							}
 							else
 							{
-								if (p.OnMouse.item == items[slot].item)
+								if (p.OnMouse.id == items[slot].id)
 								{
-									if (p.OnMouse.item < 255)
+									if (p.OnMouse.id < 255)
 									{
 										if (p.OnMouse.meta == items[slot].meta)
 										{
-											byte stacking = Inventory.isStackable(p.OnMouse.item);
+											byte stacking = Inventory.isStackable(p.OnMouse.id);
 											byte available = (byte)(stacking - items[slot].count);
 											if (available == 0) return;
 											if (p.OnMouse.count <= available)
@@ -367,7 +367,7 @@ namespace SMP
 									}
 									else
 									{
-										byte stacking = Inventory.isStackable(p.OnMouse.item);
+										byte stacking = Inventory.isStackable(p.OnMouse.id);
 										byte available = (byte)(stacking - items[slot].count);
 										if (available == 0) return;
 										if (p.OnMouse.count <= available)
@@ -401,28 +401,28 @@ namespace SMP
 							switch (slot)
 							{
 								case 5:
-									if (p.OnMouse.item == 298 || p.OnMouse.item == 302 || p.OnMouse.item == 306 || p.OnMouse.item == 310)
+									if (p.OnMouse.id == 298 || p.OnMouse.id == 302 || p.OnMouse.id == 306 || p.OnMouse.id == 310)
 									{
 										items[slot] = p.OnMouse;
 										p.OnMouse = Item.Nothing;
 									}
 									break;
 								case 6:
-									if (p.OnMouse.item == 299 || p.OnMouse.item == 303 || p.OnMouse.item == 307 || p.OnMouse.item == 311)
+									if (p.OnMouse.id == 299 || p.OnMouse.id == 303 || p.OnMouse.id == 307 || p.OnMouse.id == 311)
 									{
 										items[slot] = p.OnMouse;
 										p.OnMouse = Item.Nothing;
 									}
 									break;
 								case 7:
-									if (p.OnMouse.item == 300 || p.OnMouse.item == 304 || p.OnMouse.item == 308 || p.OnMouse.item == 312)
+									if (p.OnMouse.id == 300 || p.OnMouse.id == 304 || p.OnMouse.id == 308 || p.OnMouse.id == 312)
 									{
 										items[slot] = p.OnMouse;
 										p.OnMouse = Item.Nothing;
 									}
 									break;
 								case 8:
-									if (p.OnMouse.item == 301 || p.OnMouse.item == 305 || p.OnMouse.item == 309 || p.OnMouse.item == 313)
+									if (p.OnMouse.id == 301 || p.OnMouse.id == 305 || p.OnMouse.id == 309 || p.OnMouse.id == 313)
 									{
 										items[slot] = p.OnMouse;
 										p.OnMouse = Item.Nothing;
@@ -443,7 +443,7 @@ namespace SMP
 								else
 								{
 									p.OnMouse.count -= 1;
-                                    items[slot] = new Item(p.OnMouse.item, 1, p.OnMouse.meta, p.level, true);
+                                    items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta, p.level, true);
 								}
 							}
 							else
@@ -490,14 +490,14 @@ namespace SMP
 		public byte GetEmptyHotbarSlot(Player p)
 		{
 			for (byte i = 36; i < 45; i++)
-				if (p.inventory.items[i].item == (short)Items.Nothing)
+				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
 			return 255;
 		}
 		public byte GetEmptyHotbarSlotReversed(Player p)
 		{
 			for (byte i = 44; i >= 36; i--)
-				if (p.inventory.items[i].item == (short)Items.Nothing)
+				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
 			return 255;
 		}
@@ -505,14 +505,14 @@ namespace SMP
 		public byte GetEmptyInventorySlot(Player p)
 		{
 			for (byte i = 9; i <= 35; i++)
-				if (p.inventory.items[i].item == (short)Items.Nothing)
+				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
 			return 255;
 		}
 		public byte GetEmptyInvetorySlotReversed(Player p)
 		{
 			for (byte i = 35; i >= 9; i--)
-				if (items[i].item == (short)Items.Nothing)
+				if (items[i].id == (short)Items.Nothing)
 					return i;
 			return 255;
 		}

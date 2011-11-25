@@ -91,11 +91,6 @@ namespace SMP
 
                 pos.y = FindTopSolidBlock((int)pos.x, (int)pos.z);
 
-                /*for (; pos.y >= 0; pos.y--)
-                    if (GetBlock((int)pos.x, (int)pos.y, (int)pos.z) != 0) break;
-                if (pos.y < 0) pos.y = 126;
-                pos.y++;*/
-
                 return pos;
             }
         }
@@ -266,8 +261,8 @@ namespace SMP
             if (!FindBlocks.ValidItem(id)) return;
             if (Server.mode == 0)
             {
-                Item item = new Item(id, w) { count = 1, meta = w.GetMeta(x, y, z), pos = new double[3] { x + .5, y + .5, z + .5 }, rot = new float[2] { 0, 0 }, OnGround = true };
-                item.e.UpdateChunks(false, false);
+                Item item = new Item(id, w) { count = count, meta = meta, pos = new double[3] { x + .5, y + .5, z + .5 }, OnGround = true };
+                item.e.UpdateChunks(true, false);
             }
         }
         #endregion

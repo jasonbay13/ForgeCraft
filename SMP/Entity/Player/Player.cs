@@ -63,7 +63,7 @@ namespace SMP
 		bool MapSent = false;
 		public bool MapLoaded = false;
 		//Health Stuff
-        public short health { get { return e.health; } set { e.health = value; } }
+        public short health { get { return e.Health; } set { e.Health = value; } }
 		public short food = 20;
 		public float Saturation = 5.0f;
 		//END Health Stuff
@@ -128,23 +128,24 @@ namespace SMP
         public delegate void OnWindowClose(Player p);
         public event OnWindowClose WindowClose;
         public static event OnWindowClose PlayerWindowClose;
-        public delegate void OnEntityAttack(Player p, Entity e, int damage);
+        public delegate void OnEntityAttack(Player p, Entity e, short damage);
         public event OnEntityAttack EntityAttack;
         public static event OnEntityAttack PlayerEntityAttack;
         public delegate void OnEntityClick(Player p, Entity e);
         public event OnEntityClick OnEntityRightClick;
         public static event OnEntityClick PlayerEntityRightClick;
-        public delegate void OnBlockClick(Player p, int x, int y, int z);
+        public delegate void OnBlockClick(Player p, int x, int y, int z, byte direction);
         public event OnBlockClick OnBlockLeftClick;
         public static event OnBlockClick PlayerBlockLeftClick;
         public event OnBlockClick OnBlockRightClick;
         public static event OnBlockClick PlayerBlockRightClick;
-        public delegate void OnBlockPlaceBreak(Player p, int x, int y, int z, byte type, byte meta);
-        public event OnBlockPlaceBreak OnBlockPlace;
-        public static event OnBlockPlaceBreak PlayerBlockPlace;
-        public event OnBlockPlaceBreak OnBlockBreak;
-        public static event OnBlockPlaceBreak PlayerBlockBreak;
-        public delegate void OnItemUse(Player p, int x, int y, int z, Item item);
+        public delegate void BlockPlaceHandler(Player p, int x, int y, int z, byte type, byte meta, byte direction);
+        public event BlockPlaceHandler OnBlockPlace;
+        public static event BlockPlaceHandler PlayerBlockPlace;
+        public delegate void BlockBreakHandler(Player p, int x, int y, int z, byte type, byte meta);
+        public event BlockBreakHandler OnBlockBreak;
+        public static event BlockBreakHandler PlayerBlockBreak;
+        public delegate void OnItemUse(Player p, int x, int y, int z, Item item, byte direction);
         public event OnItemUse ItemUse;
         public static event OnItemUse PlayerItemUse;
         //Other things for plugins ----------
@@ -163,6 +164,7 @@ namespace SMP
         internal bool cancelplace = false;
         internal bool cancelbreak = false;
         internal bool cancelrespawn = false;
+        internal bool cancelitemuse = false;
         internal bool CheckEXPGain(short exp)
         {
             if (EXPGain != null)
@@ -326,35 +328,9 @@ namespace SMP
                     case 0x13: length = 5; break; //Entity Action
 
 					case 0x65: length = 1; break; //Close Window
-					case 0x66: //Window click
-                        length = 7 + Item.GetDataLength(buffer, 8);
-						/*if (util.EndianBitConverter.Big.ToInt16(buffer, 7) != -1) length += 3;
-                        if (BlockData.IsItemDamageable(util.EndianBitConverter.Big.ToInt16(buffer, 7)))
-                        {
-                            length += 2;
-                            Console.WriteLine("length " + util.EndianBitConverter.Big.ToInt16(buffer, 12));
-                            if (util.EndianBitConverter.Big.ToInt16(buffer, 12) != -1)
-                            {
-                                length += util.EndianBitConverter.Big.ToInt16(buffer, 12);
-                                for (int i = 0; i < util.EndianBitConverter.Big.ToInt16(buffer, 12); i++)
-                                    Console.Write(buffer[14 + i] + " ");
-                                Console.WriteLine();
-                            }
-                        }*/
-                        /*for (int i = 0; i < util.EndianBitConverter.Big.ToInt16(buffer, 12); i++)
-                            Console.Write(buffer[14 + i] + " ");
-                        Console.WriteLine();*/
-						break;
+					case 0x66: length = 7 + Item.GetDataLength(buffer, 8); break; //Window click
                     case 0x6A: length = 4; break; //Transaction
-                    case 0x6B: //Creative inventory action
-                        length = 2 + Item.GetDataLength(buffer, 3);
-                        /*if (util.EndianBitConverter.Big.ToInt16(buffer, 2) != -1) length += 3;
-                        if (BlockData.IsItemDamageable(util.EndianBitConverter.Big.ToInt16(buffer, 2))) {
-                            length += 2;
-                            if (util.EndianBitConverter.Big.ToInt16(buffer, 8) != -1)
-                                length += util.EndianBitConverter.Big.ToInt16(buffer, 8);
-                        }*/
-                        break;
+                    case 0x6B: length = 2 + Item.GetDataLength(buffer, 3); break; //Creative inventory action
                     case 0x6C: length = 2; break; //Enchant item
 					case 0x82: //Update sign
                         short a = (short)(util.EndianBitConverter.Big.ToInt16(buffer, 11) * 2);
@@ -400,6 +376,7 @@ namespace SMP
 							//Server.Log("Chat Message");
 							HandleChatMessagePacket(message);
 							break;
+                        case 0x07: HandleEntityUse(message); break;
                         case 0x09: HandleRespawn(message); break; //when user presses respawn button
 						case 0x0A: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerPacket(message); break; //Player onground Incoming
 						case 0x0B: if (!MapSent) { MapSent = true; SendMap(); } HandlePlayerPositionPacket(message); break; //Pos incoming
@@ -432,7 +409,7 @@ namespace SMP
 
 		#region OUTGOING
 			#region Raw
-			void SendRaw(byte id)
+			public void SendRaw(byte id)
 			{
 				SendRaw(id, new byte[0]);
 			}
@@ -445,7 +422,7 @@ namespace SMP
 			/// <param name='send'>
 			/// Send. The byte[] information you want to send
 			/// </param>
-			public void SendRaw(byte id, byte[] send)
+            public void SendRaw(byte id, byte[] send)
 			{
 				//if (id != 0 && id != 4 && id != 50 && id != 51 && id != 22) LogPacket(id, send);
 				//Console.WriteLine(id);
@@ -562,53 +539,23 @@ namespace SMP
             /// <param name="effect">See http://mc.kev009.com/Protocol#Entity_Effect_.280x29.29 for values</param>
             public void SendEntityEffect(byte effect, byte amplifier, short duration)
             {
+                SendEntityEffect(id, effect, amplifier, duration);
+            }
+            public void SendEntityEffect(int eid, byte effect, byte amplifier, short duration)
+            {
                 byte[] bytes = new byte[8];
-                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
                 bytes[4] = effect;
                 bytes[5] = amplifier;
                 util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
                 SendRaw(0x29, bytes);
             }
-			void CheckOnFire()
-			{
-				// check for players on fire before join map.
-				for (int i = 0; i < Player.players.Count; i++)
-				{
-					if (players[i].IsOnFire && players[i] != this && VisibleEntities.Contains(players[i].id))
-					{
-						byte[] bytes = new byte[7];
-						util.EndianBitConverter.Big.GetBytes(players[i].id).CopyTo(bytes, 0);
-						bytes[4] = 0x00;
-						bytes[5] = 0x01;
-						bytes[6] = 0x7F;
-						SendRaw(0x28, bytes);
-					}
-				}
-			}
 			void crouch(bool crouching)
 			{
 				if (!MapLoaded) return;
-
 				Crouching = crouching;
-
-				if (!Crouching && IsOnFire) { SetFire(true); }
-				
-				byte[] bytes2 = new byte[7];
-				
-				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes2, 0);
-				bytes2[4] = 0x00;
-				if (Crouching && !IsOnFire) bytes2[5] = 0x02;
-				else if (Crouching) bytes2[5] = 0x03;
-				else bytes2[5] = 0x00;
-				bytes2[6] = 0x7F;
-				
-				for (int i = 0; i < players.Count; i++)
-				{
-					if (players[i] != this && players[i].LoggedIn)
-					{
-						players[i].SendRaw(0x28, bytes2);
-					}
-				}
+                e.SetMetaBit(0, 1, crouching);
+                GlobalMetaUpdate();
 			}
             public void WindowOpen(WindowType type, Point3 pos)
             {
@@ -625,22 +572,16 @@ namespace SMP
             }
 			public void SetFire(bool onoff)
 			{
-				byte[] bytes2 = new byte[7];
-				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes2, 0);
-				bytes2[4] = 0x00;
-				if (onoff) bytes2[5] = 0x01;
-				else bytes2[5] = 0x00;
-				bytes2[6] = 0x7F;
-				for (int i = 0; i < players.Count; i++)
-				{
-					if (players[i] != this && players[i].LoggedIn)
-					{
-						players[i].SendRaw(0x28, bytes2);
-					}
-				}
 				IsOnFire = onoff;
-				//if (Crouching) crouch();
+                e.SetMetaBit(0, 0, onoff);
+                GlobalMetaUpdate();
 			}
+            public void GlobalMetaUpdate()
+            {
+                foreach (Player pl in players.ToArray())
+                    if (pl != this && pl.VisibleEntities.Contains(id))
+                        pl.SendEntityMeta(id, e.metadata);
+            }
 			/// <summary>
 			/// Send the player the spawn point (Only usable after login)
 			/// </summary>
@@ -899,7 +840,7 @@ namespace SMP
 
             public static void GlobalBreakEffect(int x, byte y, int z, int type, World wld, Player exclude = null)
             {
-                GlobalSoundEffect(x, y, z, type, wld, exclude);
+                GlobalSoundEffect(x, y, z, (int)SoundEffect.BlockBreak, type, wld, exclude);
             }
             public static void GlobalBreakEffect(Point3 a, int type, World wld, Player exclude = null)
             {
@@ -1000,9 +941,9 @@ namespace SMP
 				
 				for(int i = 0; i <= 44; i++)
 				{
-					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].item));
+					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].id));
 						
-						if (this.inventory.items[i].item != -1 && this.inventory.items[i].item != 0)
+						if (this.inventory.items[i].id != -1 && this.inventory.items[i].id != 0)
 						{
 							data.Add(this.inventory.items[i].count);
 							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
@@ -1019,7 +960,7 @@ namespace SMP
             public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
             public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
             public void SendItem(short slot, short id, byte count, short use, List<Enchantment> enchantments) { SendItem(0, slot, id, count, use, enchantments); }
-            public void SendItem(byte windowID, short slot, Item item) { SendItem(windowID, slot, item.item, item.count, item.meta, item.enchantments); }
+            public void SendItem(byte windowID, short slot, Item item) { SendItem(windowID, slot, item.id, item.count, item.meta, item.enchantments); }
             public void SendItem(byte windowID, short slot, short id, byte count, short use) { SendItem(windowID, slot, id, count, use, new List<Enchantment>()); }
             public void SendItem(byte windowID, short slot, short id, byte count, short use, List<Enchantment> enchantments)
 			{
@@ -1106,7 +1047,7 @@ namespace SMP
 				SendLoginDone();
 				SendInventory();
                 SendChunk(e.c);
-                //e.UpdateChunks(true, false, true);
+                e.UpdateChunks(true, false, true);
 				MapLoaded = true;
 				
 			}
@@ -1207,14 +1148,14 @@ namespace SMP
 					util.EndianBitConverter.Big.GetBytes((int)(sendme.y)).CopyTo(bytes, (22 + (length * 2)) - 12);
 					util.EndianBitConverter.Big.GetBytes((int)(sendme.z)).CopyTo(bytes, (22 + (length * 2)) - 8);
 
-					bytes[(22 + (length * 2)) - 4] = (byte)(rot[0] / 1.40625);
-					bytes[(22 + (length * 2)) - 3] = (byte)(rot[1] / 1.40625);
+					bytes[(22 + (length * 2)) - 4] = (byte)(p.rot[0] / 1.40625);
+					bytes[(22 + (length * 2)) - 3] = (byte)(p.rot[1] / 1.40625);
 
-                    util.EndianBitConverter.Big.GetBytes((short)(p.current_block_holding.item == -1 ? 0 : p.current_block_holding.item)).CopyTo(bytes, (22 + (length * 2)) - 2);
+                    util.EndianBitConverter.Big.GetBytes((short)(p.current_block_holding.id == -1 ? 0 : p.current_block_holding.id)).CopyTo(bytes, (22 + (length * 2)) - 2);
 
 					SendRaw(0x14, bytes);
 
-					CheckOnFire();
+                    SendEntityMeta(p.id, p.e.metadata);
 					SendEntityEquipment(p);
 				}
 				catch (Exception e)
@@ -1268,7 +1209,7 @@ namespace SMP
 				byte[] bytes = new byte[24];
 				util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
 				//Server.Log(e1.itype + "");
-				util.EndianBitConverter.Big.GetBytes(e1.I.item).CopyTo(bytes, 4);
+				util.EndianBitConverter.Big.GetBytes(e1.I.id).CopyTo(bytes, 4);
 				bytes[6] = e1.I.count;
 				util.EndianBitConverter.Big.GetBytes(e1.I.meta).CopyTo(bytes, 7);
 				Point3 sendme = e1.I.pos * 32;
@@ -1313,11 +1254,11 @@ namespace SMP
 
 			public void SendEntityEquipment(Player p)
 			{
-				SendEntityEquipment(p.id, 4, p.inventory.items[5].item, 0);
-				SendEntityEquipment(p.id, 3, p.inventory.items[6].item, 0);
-				SendEntityEquipment(p.id, 2, p.inventory.items[7].item, 0);
-				SendEntityEquipment(p.id, 1, p.inventory.items[8].item, 0);
-				SendEntityEquipment(p.id, 0, p.current_block_holding.item, 0); //for some reason, this one seems to work when send elsewhere, but not here...
+				SendEntityEquipment(p.id, 4, p.inventory.items[5].id, 0);
+				SendEntityEquipment(p.id, 3, p.inventory.items[6].id, 0);
+				SendEntityEquipment(p.id, 2, p.inventory.items[7].id, 0);
+				SendEntityEquipment(p.id, 1, p.inventory.items[8].id, 0);
+				SendEntityEquipment(p.id, 0, p.current_block_holding.id, 0); //for some reason, this one seems to work when send elsewhere, but not here...
 			}
 			public void SendEntityEquipment(int id, short slot, short ItemId, short a)
 			{
@@ -1345,66 +1286,16 @@ namespace SMP
                 SendRaw(0x27, bytes);
             }
 
-            public void SendEntityMeta(int eid, byte[] bytes)
+            public void SendEntityMeta(int eid, byte[] data)
             {
+                byte[] bytes = new byte[4 + data.Length];
+                util.EndianBitConverter.Big.GetBytes(eid).CopyTo(bytes, 0);
+                data.CopyTo(bytes, 4);
                 SendRaw(0x28, bytes);
             }
-            public void SendEntityMeta(int eid, params object[] data)
+            public void SendEntityMeta(int eid, object[] data)
             {
-                List<byte> bytes = new List<byte>();
-                bytes.AddRange(util.EndianBitConverter.Big.GetBytes(eid));
-                foreach (object obj in data)
-                {
-                    if (obj == null) continue;
-                    if (obj.GetType() == typeof(byte[]))
-                    {
-                        bytes.AddRange((byte[])obj);
-                    }
-                    else if (obj.GetType() == typeof(byte))
-                    {
-                        bytes.Add(0x00);
-                        bytes.Add((byte)obj);
-                    }
-                    else if (obj.GetType() == typeof(short))
-                    {
-                        bytes.Add(0x01);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
-                    }
-                    else if (obj.GetType() == typeof(int))
-                    {
-                        bytes.Add(0x02);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
-                    }
-                    else if (obj.GetType() == typeof(float))
-                    {
-                        bytes.Add(0x03);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
-                    }
-                    else if (obj.GetType() == typeof(string))
-                    {
-                        bytes.Add(0x04);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)((string)obj).Length));
-                        bytes.AddRange(Encoding.BigEndianUnicode.GetBytes((string)obj));
-                    }
-                    else if (obj.GetType() == typeof(Item))
-                    {
-                        Item item = (Item)obj;
-                        bytes.Add(0x05);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.item));
-                        bytes.Add(item.count);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
-                    }
-                    else if (obj.GetType() == typeof(Point3))
-                    {
-                        Point3 point = (Point3)obj;
-                        bytes.Add(0x06);
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
-                    }
-                }
-                bytes.Add(0x7F);
-                SendEntityMeta(eid, bytes.ToArray());
+                SendEntityMeta(eid, MCUtil.Entities.GetMetaBytes(data));
             }
 
 			public void SendDespawn(int id) //Despawn ALL types of Entities (player mod item)
@@ -1784,8 +1675,8 @@ namespace SMP
 				return;
 			}
 
-			byte[] metaarray = GetMetaByteArray(e);
-			byte[] bytes = new byte[20 + metaarray.Length];
+            byte[] metaarray = MCUtil.Entities.GetMetaBytes(e.metadata);
+			byte[] bytes = new byte[19 + metaarray.Length];
 			//byte[] bytes = new byte[20];
 
             util.EndianBitConverter.Big.GetBytes(e.id).CopyTo(bytes, 0);
@@ -1799,7 +1690,6 @@ namespace SMP
 
 			//Add in the metadata
 			metaarray.CopyTo(bytes, 19);
-			bytes[bytes.Length - 1] = 127;
 
 			//LogPacket(0x18, bytes);
 			SendRaw(0x18, bytes);
@@ -1898,7 +1788,7 @@ namespace SMP
 						dict.Add("ID", invid.ToString());
 						for (short i = 0; i <= 44; i++)
 						{
-							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].item, this.inventory.items[i].meta, this.inventory.items[i].count));
+							dict.Add("slot" + i, String.Format("{0}:{1}:{2}", this.inventory.items[i].id, this.inventory.items[i].meta, this.inventory.items[i].count));
 						}
 						Server.SQLiteDB.Update("Inventory", dict, "ID = '" + invid.ToString() + "'");
 					}
@@ -2164,88 +2054,6 @@ namespace SMP
 		}
 		#endregion
 
-		#region META DATA HANDLER
-		byte[] GetMetaByteArray(Entity e)
-		{
-			switch (e.ai.type)
-			{
-				case 50: //Creeper
-					byte[] bytes = new byte[0];
-					bytes = AddVar(e, bytes, (byte)0, 16);
-					bytes = AddVar(e, bytes, (byte)0, 17);
-					return bytes;
-				case 51: //Skeleton
-					break;
-				case 52: //Spider
-					break;
-				case 53: //Giant Zombie
-					break;
-				case 54: //Zombie
-					break;
-				case 55: //Slime
-					break;
-				case 56: //Ghast
-					break;
-				case 57: //Zombie Pigman
-					break;
-				case 90: //Pig
-					break;
-				case 91: //Sheep
-					break;
-				case 92: //Cow
-					break;
-				case 93: //Hen
-					break;
-				case 94: //Squid
-					break;
-				case 95: //Wolf
-					break;
-			}
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, byte a, byte index)
-		{
-			int i = (0 << 5 | index & 0x1f) & 0xff;
-			
-			byte[] NewArray = new byte[Array.Length + 2];
-			Array.CopyTo(NewArray, 0);
-			NewArray[NewArray.Length-2] = (byte)i;
-			NewArray[NewArray.Length-1] = a;
-
-			return NewArray;
-		}
-		byte[] AddVar(Entity e, byte[] Array, short a, byte index)
-		{
-			int i = (1 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, int a, byte index)
-		{
-			int i = (2 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, float a, byte index)
-		{
-			int i = (3 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, string a, byte index)
-		{
-			int i = (4 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, Item a, byte index) //Item Stack
-		{
-			int i = (5 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		byte[] AddVar(Entity e, byte[] Array, Point3 a, byte index) //CHUNK Coordinates
-		{
-			int i = (6 << 5 | index & 0x1f) & 0xff;
-			return null;
-		}
-		#endregion
-
 		void LogPacket(byte id, byte[] packet)
 		{
 			string s = "";
@@ -2273,7 +2081,7 @@ namespace SMP
 			dict.Add("ID", id.ToString());
 			for (short i = 0; i <= 44; i++)
 			{
-				dict.Add("slot" + i, String.Format("{0}:{1}:{2}", inventory.items[i].item, inventory.items[i].meta, inventory.items[0].count));	
+				dict.Add("slot" + i, String.Format("{0}:{1}:{2}", inventory.items[i].id, inventory.items[i].meta, inventory.items[0].count));	
 			}
 			Server.SQLiteDB.Insert("Inventory", dict);
 			
