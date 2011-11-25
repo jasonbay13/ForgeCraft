@@ -580,16 +580,17 @@ namespace SMP
             switch (Blockclicked(a, b))
             {
                 case (byte)Blocks.Sapling:
-                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
                         Point3 pos2 = BlockclickedPos(a, b);
-                        new GenTrees().Normal(a.level, (int)pos2.x, (int)pos2.y, (int)pos2.z, a.level.GetMeta((int)pos2.x, (int)pos2.y, (int)pos2.z));
+                        byte meta = a.level.GetMeta((int)pos2.x, (int)pos2.y, (int)pos2.z);
+                        a.level.GrowTree((int)pos2.x, (int)pos2.y, (int)pos2.z, meta, Entity.randomJava);
                         return true;
                     }
                     return false;
                 case (byte)Blocks.Grass:
                     if (b.Direction != 1) return false;
-                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
                         byte type;
                         for (int x = -3; x <= 3; x++)
@@ -617,7 +618,7 @@ namespace SMP
                     }
                     return false;
                 case (byte)Blocks.Seeds:
-                    if (a.inventory.current_item.meta == (byte)Dye.BoneMeal)
+                    if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
                         Point3 pos2 = BlockclickedPos(a, b);
                         a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, (byte)Blocks.Seeds, 0x7);

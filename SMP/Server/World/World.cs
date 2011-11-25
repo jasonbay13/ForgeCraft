@@ -695,7 +695,7 @@ namespace SMP
                 if (chunk == null) return;
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
-                //QueueBlockChange(x, y, z, type, meta); // Removed until client lag fixed!
+                QueueBlockChange(x, y, z, type, meta); // Causes client lag during level generation?
             }
             catch { }
         }
@@ -788,6 +788,30 @@ namespace SMP
             Server.SQLiteDB.ExecuteNonQuery(String.Format("DELETE FROM Sign WHERE X = {0} AND Y = {1} AND Z = {2} AND World = '{3}'", x, y, z, this.name));
 
             Player.GlobalUpdateSign(this, x, (short)y, z, String.Empty, String.Empty, String.Empty, String.Empty);
+        }
+
+        public void GrowTree(int x, int y, int z, byte type, java.util.Random random)
+        {
+            BlockChange(x, y, z, 0, 0);
+            if (GetBlock(x, y - 1, z) == (byte)Blocks.Grass) BlockChange(x, y - 1, z, (byte)Blocks.Dirt, 0);
+            switch (type)
+            {
+                case (byte)Tree.Normal:
+                    if (Entity.randomJava.nextInt(10) == 0)
+                        new WorldGenBigTree().generate(this, random, x, y, z);
+                    else
+                        new WorldGenTrees().generate(this, random, x, y, z);
+                    break;
+                case (byte)Tree.Spruce:
+                    if (Entity.randomJava.nextInt(3) == 0)
+                        new WorldGenTaiga1().generate(this, random, x, y, z);
+                    else
+                        new WorldGenTaiga2().generate(this, random, x, y, z);
+                    break;
+                case (byte)Tree.Birch:
+                    new WorldGenForest().generate(this, random, x, y, z);
+                    break;
+            }
         }
 
         public int GetFirstUncoveredBlock(int x, int z)

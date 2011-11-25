@@ -145,7 +145,6 @@
     <Compile Include="Mojang\Server\World\Explosion.cs" />
     <Compile Include="Server\World\Chunker.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\MapGenBase.cs" />
-    <Compile Include="Server\World\Generator\Features\GenTrees.cs" />
     <Compile Include="Server\World\Physics\Physics.Handlers.cs" />
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />
     <Compile Include="Server\World\Points.cs" />
@@ -402,6 +401,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Server\Economy\Commands\" />
+    <Folder Include="Server\World\Generator\Features\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mojang\LICENSE.txt" />

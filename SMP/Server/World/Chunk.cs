@@ -672,7 +672,7 @@ namespace SMP
         {
             Point po = new Point(x, z);
 
-            if (overRide)
+            if (overRide && !world.chunkData.ContainsKey(po))
                 world.LoadChunk(z, z, false, false);
             if (world.chunkData.ContainsKey(po))
                 return world.chunkData[po];

@@ -48,7 +48,7 @@ namespace SMP.Commands
         void Blockchange1(Player p, int x, int y, int z, short type)
         {
             p.ClearBlockChange();
-            new GenTrees().Normal(p.level, x, y, z, (byte)p.BlockChangeObject);
+            p.level.GrowTree(x, y, z, (byte)p.BlockChangeObject, Entity.randomJava);
         }
     }
 }
