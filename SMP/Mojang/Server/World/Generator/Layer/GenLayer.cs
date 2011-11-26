@@ -11,12 +11,12 @@ namespace SMP
             obj = new GenLayerIsland(1L, ((GenLayer)(obj)));
             obj = new GenLayerZoom(2001L, ((GenLayer)(obj)));
             obj = new GenLayerIsland(2L, ((GenLayer)(obj)));
+            obj = new GenLayerSnow(2L, ((GenLayer)(obj)));
             obj = new GenLayerZoom(2002L, ((GenLayer)(obj)));
             obj = new GenLayerIsland(3L, ((GenLayer)(obj)));
             obj = new GenLayerZoom(2003L, ((GenLayer)(obj)));
-            obj = new GenLayerIsland(3L, ((GenLayer)(obj)));
-            obj = new GenLayerZoom(2004L, ((GenLayer)(obj)));
-            obj = new GenLayerIsland(3L, ((GenLayer)(obj)));
+            obj = new GenLayerIsland(4L, ((GenLayer)(obj)));
+            obj = new GenLayerMushroomIsland(5L, ((GenLayer)(obj)));
             byte byte0 = 4;
             GenLayer obj1 = obj;
             obj1 = GenLayerZoom.func_35025_a(1000L, ((GenLayer)(obj1)), 0);
@@ -37,6 +37,10 @@ namespace SMP
                 {
                     obj2 = new GenLayerIsland(3L, ((GenLayer)(obj2)));
                 }
+                if (i == 0)
+                {
+                    obj2 = new GenLayerShore(1000L, ((GenLayer)(obj2)));
+                }
                 obj3 = new GenLayerSmoothZoom(1000 + i, ((GenLayer)(obj3)));
                 obj3 = new GenLayerTemperatureMix(((GenLayer)(obj3)), ((GenLayer)(obj2)), i);
                 obj4 = new GenLayerSmoothZoom(1000 + i, ((GenLayer)(obj4)));
@@ -45,6 +49,7 @@ namespace SMP
 
             obj2 = new GenLayerSmooth(1000L, ((GenLayer)(obj2)));
             obj2 = new GenLayerRiverMix(100L, ((GenLayer)(obj2)), ((GenLayer)(obj1)));
+            GenLayerRiverMix genlayerrivermix = ((GenLayerRiverMix)(obj2));
             obj3 = GenLayerSmoothZoom.func_35030_a(1000L, ((GenLayer)(obj3)), 2);
             obj4 = GenLayerSmoothZoom.func_35030_a(1000L, ((GenLayer)(obj4)), 2);
             GenLayerZoomVoronoi genlayerzoomvoronoi = new GenLayerZoomVoronoi(10L, ((GenLayer)(obj2)));
@@ -53,66 +58,66 @@ namespace SMP
             ((GenLayer)(obj4)).func_35015_b(l);
             genlayerzoomvoronoi.func_35015_b(l);
             return (new GenLayer[] {
-                obj2, genlayerzoomvoronoi, obj3, obj4
+                obj2, genlayerzoomvoronoi, obj3, obj4, genlayerrivermix
             });
         }
 
         public GenLayer(long l)
         {
-            field_35020_d = l;
-            field_35020_d *= field_35020_d * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35020_d += l;
-            field_35020_d *= field_35020_d * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35020_d += l;
-            field_35020_d *= field_35020_d * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35020_d += l;
+            baseSeed = l;
+            baseSeed *= baseSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            baseSeed += l;
+            baseSeed *= baseSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            baseSeed += l;
+            baseSeed *= baseSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            baseSeed += l;
         }
 
         public virtual void func_35015_b(long l)
         {
             field_35021_b = l;
-            if (field_35023_a != null)
+            if (parent != null)
             {
-                field_35023_a.func_35015_b(l);
+                parent.func_35015_b(l);
             }
             field_35021_b *= field_35021_b * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35021_b += field_35020_d;
+            field_35021_b += baseSeed;
             field_35021_b *= field_35021_b * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35021_b += field_35020_d;
+            field_35021_b += baseSeed;
             field_35021_b *= field_35021_b * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35021_b += field_35020_d;
+            field_35021_b += baseSeed;
         }
 
         public virtual void func_35017_a(long l, long l1)
         {
-            field_35022_c = field_35021_b;
-            field_35022_c *= field_35022_c * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35022_c += l;
-            field_35022_c *= field_35022_c * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35022_c += l1;
-            field_35022_c *= field_35022_c * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35022_c += l;
-            field_35022_c *= field_35022_c * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35022_c += l1;
+            chunkSeed = field_35021_b;
+            chunkSeed *= chunkSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            chunkSeed += l;
+            chunkSeed *= chunkSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            chunkSeed += l1;
+            chunkSeed *= chunkSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            chunkSeed += l;
+            chunkSeed *= chunkSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            chunkSeed += l1;
         }
 
-        protected virtual int func_35016_a(int i)
+        protected virtual int nextInt(int i)
         {
-            int j = (int)((field_35022_c >> 24) % (long)i);
+            int j = (int)((chunkSeed >> 24) % (long)i);
             if (j < 0)
             {
                 j += i;
             }
-            field_35022_c *= field_35022_c * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
-            field_35022_c += field_35021_b;
+            chunkSeed *= chunkSeed * 0x5851f42d4c957f2dL + 0x14057b7ef767814fL;
+            chunkSeed += field_35021_b;
             return j;
         }
 
         public abstract int[] func_35018_a(int i, int j, int k, int l);
 
         private long field_35021_b;
-        protected GenLayer field_35023_a;
-        private long field_35022_c;
-        private long field_35020_d;
+        protected GenLayer parent;
+        private long chunkSeed;
+        private long baseSeed;
     }
 }

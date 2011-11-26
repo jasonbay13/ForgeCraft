@@ -7,11 +7,11 @@ namespace SMP
     {
         protected WorldChunkManager()
         {
-            field_35145_e = new BiomeCache(this);
-            field_35143_f = new List<BiomeGenBase>();
-            field_35143_f.Add(BiomeGenBase.forest);
-            field_35143_f.Add(BiomeGenBase.swampland);
-            field_35143_f.Add(BiomeGenBase.taiga);
+            biomeCache = new BiomeCache(this);
+            biomesToSpawnIn = new List<BiomeGenBase>();
+            biomesToSpawnIn.Add(BiomeGenBase.forest);
+            biomesToSpawnIn.Add(BiomeGenBase.swampland);
+            biomesToSpawnIn.Add(BiomeGenBase.taiga);
         }
 
         public WorldChunkManager(World world)
@@ -20,13 +20,13 @@ namespace SMP
             GenLayer[] agenlayer = GenLayer.func_35019_a(world.seed);
             field_34907_a = agenlayer[0];
             field_34906_b = agenlayer[1];
-            field_34905_c = agenlayer[2];
-            field_35144_d = agenlayer[3];
+            temperatureLayer = agenlayer[2];
+            rainfallLayer = agenlayer[3];
         }
 
         public List<BiomeGenBase> func_35137_a()
         {
-            return field_35143_f;
+            return biomesToSpawnIn;
         }
 
         public BiomeGenBase getBiomeGenAtChunkCoord(Point chunkcoordintpair)
@@ -36,7 +36,7 @@ namespace SMP
 
         public BiomeGenBase getBiomeGenAt(int i, int j)
         {
-            return field_35145_e.func_35683_a(i, j);
+            return biomeCache.func_35683_a(i, j);
         }
 
         public float[] func_4065_a(float[] af, int i, int j, int k, int l)
@@ -46,7 +46,7 @@ namespace SMP
             {
                 af = new float[k * l];
             }
-            int[] ai = field_35144_d.func_35018_a(i, j, k, l);
+            int[] ai = rainfallLayer.func_35018_a(i, j, k, l);
             for(int i1 = 0; i1 < k * l; i1++)
             {
                 float f = (float)ai[i1] / 65536F;
@@ -60,6 +60,22 @@ namespace SMP
             return af;
         }
 
+        public float func_40579_a(int i, int j, int k)
+        {
+            return func_40577_a(biomeCache.func_40625_c(i, k), j);
+        }
+
+        public float func_40577_a(float f, int i)
+        {
+            return f;
+        }
+
+        public float[] func_40578_a(int i, int j, int k, int l)
+        {
+            field_40580_a = getTemperatures(field_40580_a, i, j, k, l);
+            return field_40580_a;
+        }
+
         public float[] getTemperatures(float[] af, int i, int j, int k, int l)
         {
             IntCache.func_35550_a();
@@ -67,7 +83,7 @@ namespace SMP
             {
                 af = new float[k * l];
             }
-            int[] ai = field_34905_c.func_35018_a(i, j, k, l);
+            int[] ai = temperatureLayer.func_35018_a(i, j, k, l);
             for(int i1 = 0; i1 < k * l; i1++)
             {
                 float f = (float)ai[i1] / 65536F;
@@ -91,7 +107,7 @@ namespace SMP
             int[] ai = field_34907_a.func_35018_a(i, j, k, l);
             for(int i1 = 0; i1 < k * l; i1++)
             {
-                abiomegenbase[i1] = BiomeGenBase.field_35521_a[ai[i1]];
+                abiomegenbase[i1] = BiomeGenBase.biomeList[ai[i1]];
             }
 
             return abiomegenbase;
@@ -111,14 +127,14 @@ namespace SMP
             }
             if(flag && k == 16 && l == 16 && (i & 0xf) == 0 && (j & 0xf) == 0)
             {
-                BiomeGenBase[] abiomegenbase1 = field_35145_e.func_35682_b(i, j);
+                BiomeGenBase[] abiomegenbase1 = biomeCache.func_35682_b(i, j);
                 Array.Copy(abiomegenbase1, 0, abiomegenbase, 0, k * l);
                 return abiomegenbase;
             }
             int[] ai = field_34906_b.func_35018_a(i, j, k, l);
             for(int i1 = 0; i1 < k * l; i1++)
             {
-                abiomegenbase[i1] = BiomeGenBase.field_35521_a[ai[i1]];
+                abiomegenbase[i1] = BiomeGenBase.biomeList[ai[i1]];
             }
 
             return abiomegenbase;
@@ -135,7 +151,7 @@ namespace SMP
             int[] ai = field_34907_a.func_35018_a(l, i1, l1, i2);
             for(int j2 = 0; j2 < l1 * i2; j2++)
             {
-                BiomeGenBase biomegenbase = BiomeGenBase.field_35521_a[ai[j2]];
+                BiomeGenBase biomegenbase = BiomeGenBase.biomeList[ai[j2]];
                 if(!list.Contains(biomegenbase))
                 {
                     return false;
@@ -160,7 +176,7 @@ namespace SMP
             {
                 int l2 = l + k2 % l1 << 2;
                 int i3 = i1 + k2 / l1 << 2;
-                BiomeGenBase biomegenbase = BiomeGenBase.field_35521_a[ai[k2]];
+                BiomeGenBase biomegenbase = BiomeGenBase.biomeList[ai[k2]];
                 if(list.Contains(biomegenbase) && (chunkposition == null || random.nextInt(j2 + 1) == 0))
                 {
                     chunkposition = new ChunkPosition(l2, 0, i3);
@@ -173,14 +189,15 @@ namespace SMP
 
         public void func_35138_b()
         {
-            field_35145_e.func_35681_a();
+            biomeCache.func_35681_a();
         }
 
         private GenLayer field_34907_a;
         private GenLayer field_34906_b;
-        private GenLayer field_34905_c;
-        private GenLayer field_35144_d;
-        private BiomeCache field_35145_e;
-        private List<BiomeGenBase> field_35143_f;
+        private GenLayer temperatureLayer;
+        private GenLayer rainfallLayer;
+        private BiomeCache biomeCache;
+        private List<BiomeGenBase> biomesToSpawnIn;
+        public float[] field_40580_a;
     }
 }

@@ -11,7 +11,7 @@ namespace SMP
         {
         }
 
-        public static int[] func_35549_a(int i)
+        public static int[] getIntCache(int i)
         {
             if(i <= 256)
             {
@@ -28,19 +28,19 @@ namespace SMP
                     return ai1;
                 }
             }
-            if(i > field_35555_a)
+            if(i > intCacheSize)
             {
                 //Console.WriteLine((new StringBuilder()).Append("New max size: ").Append(i).ToString());
-                field_35555_a = i;
+                intCacheSize = i;
                 field_35551_d.Clear();
                 field_35552_e.Clear();
-                int[] ai2 = new int[field_35555_a];
+                int[] ai2 = new int[intCacheSize];
                 field_35552_e.Add(ai2);
                 return ai2;
             }
             if(field_35551_d.Count == 0)
             {
-                int[] ai3 = new int[field_35555_a];
+                int[] ai3 = new int[intCacheSize];
                 field_35552_e.Add(ai3);
                 return ai3;
             } else
@@ -68,7 +68,7 @@ namespace SMP
             field_35554_c.Clear();
         }
 
-        private static int field_35555_a = 256;
+        private static int intCacheSize = 256;
         private static List<int[]> field_35553_b = new List<int[]>();
         private static List<int[]> field_35554_c = new List<int[]>();
         private static List<int[]> field_35551_d = new List<int[]>();

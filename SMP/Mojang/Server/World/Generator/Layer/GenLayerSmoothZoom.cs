@@ -7,7 +7,7 @@ namespace SMP
         public GenLayerSmoothZoom(long l, GenLayer genlayer)
             : base(l)
         {
-            field_35023_a = genlayer;
+            parent = genlayer;
         }
 
         public override int[] func_35018_a(int i, int j, int k, int l)
@@ -16,8 +16,8 @@ namespace SMP
             int j1 = j >> 1;
             int k1 = (k >> 1) + 3;
             int l1 = (l >> 1) + 3;
-            int[] ai = field_35023_a.func_35018_a(i1, j1, k1, l1);
-            int[] ai1 = IntCache.func_35549_a(k1 * 2 * (l1 * 2));
+            int[] ai = parent.func_35018_a(i1, j1, k1, l1);
+            int[] ai1 = IntCache.getIntCache(k1 * 2 * (l1 * 2));
             int i2 = k1 << 1;
             for(int j2 = 0; j2 < l1 - 1; j2++)
             {
@@ -31,18 +31,18 @@ namespace SMP
                     int i4 = ai[l3 + 1 + (j2 + 0) * k1];
                     int j4 = ai[l3 + 1 + (j2 + 1) * k1];
                     ai1[i3] = j3;
-                    ai1[i3++ + i2] = j3 + ((k3 - j3) * func_35016_a(256)) / 256;
-                    ai1[i3] = j3 + ((i4 - j3) * func_35016_a(256)) / 256;
-                    int k4 = j3 + ((i4 - j3) * func_35016_a(256)) / 256;
-                    int l4 = k3 + ((j4 - k3) * func_35016_a(256)) / 256;
-                    ai1[i3++ + i2] = k4 + ((l4 - k4) * func_35016_a(256)) / 256;
+                    ai1[i3++ + i2] = j3 + ((k3 - j3) * nextInt(256)) / 256;
+                    ai1[i3] = j3 + ((i4 - j3) * nextInt(256)) / 256;
+                    int k4 = j3 + ((i4 - j3) * nextInt(256)) / 256;
+                    int l4 = k3 + ((j4 - k3) * nextInt(256)) / 256;
+                    ai1[i3++ + i2] = k4 + ((l4 - k4) * nextInt(256)) / 256;
                     j3 = i4;
                     k3 = j4;
                 }
 
             }
 
-            int[] ai2 = IntCache.func_35549_a(k * l);
+            int[] ai2 = IntCache.getIntCache(k * l);
             for(int l2 = 0; l2 < l; l2++)
             {
                 Array.Copy(ai1, (l2 + (j & 1)) * (k1 << 1) + (i & 1), ai2, l2 * k, k);

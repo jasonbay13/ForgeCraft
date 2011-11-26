@@ -2,9 +2,9 @@
 
 namespace SMP
 {
-    public class BiomeGenSky : BiomeGenBase
+    public class BiomeGenEnd : BiomeGenBase
     {
-        public BiomeGenSky(int i)
+        public BiomeGenEnd(int i)
             : base(i)
         {
             /*spawnableMonsterList.clear();

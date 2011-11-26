@@ -4,7 +4,8 @@ namespace SMP
 {
     public class WorldGenTaiga2 : WorldGenerator
     {
-        public WorldGenTaiga2()
+        public WorldGenTaiga2(bool flag)
+            : base(flag)
         {
         }
 
@@ -97,7 +98,7 @@ namespace SMP
                         int l5 = k5 - k;
                         if ((java.lang.Math.abs(j5) != k2 || java.lang.Math.abs(l5) != k2 || k2 <= 0) && Chunk.LightOpacity[world.GetBlock(l4, j4, k5)] < 0xf)
                         {
-                            world.SetBlock(l4, j4, k5, (byte)Blocks.Leaves, 1);
+                            func_41043_a(world, l4, j4, k5, (byte)Blocks.Leaves, 1);
                         }
                     }
 
@@ -123,7 +124,7 @@ namespace SMP
                 int i5 = world.GetBlock(i, j + k4, k);
                 if (i5 == 0 || i5 == (byte)Blocks.Leaves)
                 {
-                    world.SetBlock(i, j + k4, k, (byte)Blocks.Wood, 1);
+                    func_41043_a(world, i, j + k4, k, (byte)Blocks.Wood, 1);
                 }
             }
 

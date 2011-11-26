@@ -7,7 +7,7 @@ namespace SMP
         public GenLayerZoom(long l, GenLayer genlayer)
             : base(l)
         {
-            base.field_35023_a = genlayer;
+            base.parent = genlayer;
         }
 
         public override int[] func_35018_a(int i, int j, int k, int l)
@@ -16,8 +16,8 @@ namespace SMP
             int j1 = j >> 1;
             int k1 = (k >> 1) + 3;
             int l1 = (l >> 1) + 3;
-            int[] ai = field_35023_a.func_35018_a(i1, j1, k1, l1);
-            int[] ai1 = IntCache.func_35549_a(k1 * 2 * (l1 * 2));
+            int[] ai = parent.func_35018_a(i1, j1, k1, l1);
+            int[] ai1 = IntCache.getIntCache(k1 * 2 * (l1 * 2));
             int i2 = k1 << 1;
             for(int j2 = 0; j2 < l1 - 1; j2++)
             {
@@ -40,7 +40,7 @@ namespace SMP
 
             }
 
-            int[] ai2 = IntCache.func_35549_a(k * l);
+            int[] ai2 = IntCache.getIntCache(k * l);
             for(int l2 = 0; l2 < l; l2++)
             {
                 Array.Copy(ai1, (l2 + (j & 1)) * (k1 << 1) + (i & 1), ai2, l2 * k, k);
@@ -51,7 +51,7 @@ namespace SMP
 
         protected int func_35026_a(int i, int j)
         {
-            return func_35016_a(2) != 0 ? j : i;
+            return nextInt(2) != 0 ? j : i;
         }
 
         protected int func_35024_b(int i, int j, int k, int l)
@@ -120,7 +120,7 @@ namespace SMP
             {
                 return k;
             }
-            int i1 = func_35016_a(4);
+            int i1 = nextInt(4);
             if (i1 == 0)
             {
                 return i;

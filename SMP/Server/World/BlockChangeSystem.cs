@@ -625,6 +625,22 @@ namespace SMP
                         return true;
                     }
                     return false;
+                case (byte)Blocks.MushroomBrown:
+                    if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
+                    {
+                        Point3 pos2 = BlockclickedPos(a, b);
+                        a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, 0, 0);
+                        new WorldGenBigMushroom(0).generate(a.level, Entity.randomJava, (int)pos2.x, (int)pos2.y, (int)pos2.z);
+                    }
+                    return true;
+                case (byte)Blocks.MushroomRed:
+                    if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
+                    {
+                        Point3 pos2 = BlockclickedPos(a, b);
+                        a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, 0, 0);
+                        new WorldGenBigMushroom(1).generate(a.level, Entity.randomJava, (int)pos2.x, (int)pos2.y, (int)pos2.z);
+                    }
+                    return true;
             }
 			return false;
 		}

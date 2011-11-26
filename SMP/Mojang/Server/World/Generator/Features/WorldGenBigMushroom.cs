@@ -6,13 +6,13 @@ namespace SMP
     {
         public WorldGenBigMushroom(int i)
         {
-            field_35293_a = -1;
-            field_35293_a = i;
+            mushroomType = -1;
+            mushroomType = i;
         }
 
         public WorldGenBigMushroom()
         {
-            field_35293_a = -1;
+            mushroomType = -1;
         }
 
         public override bool generate(World world, java.util.Random random, int i, int j, int k)
@@ -23,16 +23,16 @@ namespace SMP
             label0:
             {
                 l = random.nextInt(2);
-                if(field_35293_a >= 0)
+                if(mushroomType >= 0)
                 {
-                    l = field_35293_a;
+                    l = mushroomType;
                 }
                 i1 = random.nextInt(3) + 4;
                 flag = true;
                 bool label0 = false;
                 if(j >= 1)
                 {
-                    if(j + i1 + 1 <= 128)
+                    if (j + i1 + 1 <= world.worldYMax)
                     {
                         label0 = true;
                     }
@@ -73,94 +73,99 @@ namespace SMP
             {
                 return false;
             }
+            int k1 = world.GetBlock(i, j - 1, k);
+            if (k1 != (byte)Blocks.Dirt && k1 != (byte)Blocks.Grass && k1 != (byte)Blocks.Mycelium)
+            {
+                return false;
+            }
             if (!world.CanPlaceAt((byte)Blocks.MushroomBrown, i, j, k))
             {
                 return false;
             }
             world.SetBlock(i, j - 1, k, (byte)Blocks.Dirt);
-            int k1 = j + i1;
-            if(l == 1)
+            int l1 = j + i1;
+            if (l == 1)
             {
-                k1 = (j + i1) - 3;
+                l1 = (j + i1) - 3;
             }
-            for(int l1 = k1; l1 <= j + i1; l1++)
+            for (int j2 = l1; j2 <= j + i1; j2++)
             {
-                int k2 = 1;
-                if(l1 < j + i1)
+                int i3 = 1;
+                if (j2 < j + i1)
                 {
-                    k2++;
+                    i3++;
                 }
-                if(l == 0)
+                if (l == 0)
                 {
-                    k2 = 3;
+                    i3 = 3;
                 }
-                for(int j3 = i - k2; j3 <= i + k2; j3++)
+                for (int l3 = i - i3; l3 <= i + i3; l3++)
                 {
-                    for(int l3 = k - k2; l3 <= k + k2; l3++)
+                    for (int i4 = k - i3; i4 <= k + i3; i4++)
                     {
-                        int i4 = 5;
-                        if(j3 == i - k2)
+                        int j4 = 5;
+                        if (l3 == i - i3)
                         {
-                            i4--;
+                            j4--;
                         }
-                        if(j3 == i + k2)
+                        if (l3 == i + i3)
                         {
-                            i4++;
+                            j4++;
                         }
-                        if(l3 == k - k2)
+                        if (i4 == k - i3)
                         {
-                            i4 -= 3;
+                            j4 -= 3;
                         }
-                        if(l3 == k + k2)
+                        if (i4 == k + i3)
                         {
-                            i4 += 3;
+                            j4 += 3;
                         }
-                        if(l == 0 || l1 < j + i1)
+                        if (l == 0 || j2 < j + i1)
                         {
-                            if((j3 == i - k2 || j3 == i + k2) && (l3 == k - k2 || l3 == k + k2))
+                            if ((l3 == i - i3 || l3 == i + i3) && (i4 == k - i3 || i4 == k + i3))
                             {
                                 continue;
                             }
-                            if(j3 == i - (k2 - 1) && l3 == k - k2)
+                            if (l3 == i - (i3 - 1) && i4 == k - i3)
                             {
-                                i4 = 1;
+                                j4 = 1;
                             }
-                            if(j3 == i - k2 && l3 == k - (k2 - 1))
+                            if (l3 == i - i3 && i4 == k - (i3 - 1))
                             {
-                                i4 = 1;
+                                j4 = 1;
                             }
-                            if(j3 == i + (k2 - 1) && l3 == k - k2)
+                            if (l3 == i + (i3 - 1) && i4 == k - i3)
                             {
-                                i4 = 3;
+                                j4 = 3;
                             }
-                            if(j3 == i + k2 && l3 == k - (k2 - 1))
+                            if (l3 == i + i3 && i4 == k - (i3 - 1))
                             {
-                                i4 = 3;
+                                j4 = 3;
                             }
-                            if(j3 == i - (k2 - 1) && l3 == k + k2)
+                            if (l3 == i - (i3 - 1) && i4 == k + i3)
                             {
-                                i4 = 7;
+                                j4 = 7;
                             }
-                            if(j3 == i - k2 && l3 == k + (k2 - 1))
+                            if (l3 == i - i3 && i4 == k + (i3 - 1))
                             {
-                                i4 = 7;
+                                j4 = 7;
                             }
-                            if(j3 == i + (k2 - 1) && l3 == k + k2)
+                            if (l3 == i + (i3 - 1) && i4 == k + i3)
                             {
-                                i4 = 9;
+                                j4 = 9;
                             }
-                            if(j3 == i + k2 && l3 == k + (k2 - 1))
+                            if (l3 == i + i3 && i4 == k + (i3 - 1))
                             {
-                                i4 = 9;
+                                j4 = 9;
                             }
                         }
-                        if(i4 == 5 && l1 < j + i1)
+                        if (j4 == 5 && j2 < j + i1)
                         {
-                            i4 = 0;
+                            j4 = 0;
                         }
-                        if((i4 != 0 || j >= (j + i1) - 1) && Chunk.LightOpacity[world.GetBlock(j3, l1, l3)] < 0xf)
+                        if ((j4 != 0 || j >= (j + i1) - 1) && Chunk.LightOpacity[world.GetBlock(l3, j2, i4)] < 0xf)
                         {
-                            world.SetBlock(j3, l1, l3, (byte)((byte)Blocks.HugeBrownMushroom + l), (byte)i4);
+                            world.SetBlock(l3, j2, i4, (byte)((byte)Blocks.HugeBrownMushroom + l), (byte)j4);
                         }
                     }
 
@@ -168,18 +173,18 @@ namespace SMP
 
             }
 
-            for(int i2 = 0; i2 < i1; i2++)
+            for (int k2 = 0; k2 < i1; k2++)
             {
-                int l2 = world.GetBlock(i, j + i2, k);
-                if (Chunk.LightOpacity[l2] < 0xf)
+                int j3 = world.GetBlock(i, j + k2, k);
+                if (Chunk.LightOpacity[j3] < 0xf)
                 {
-                    world.SetBlock(i, j + i2, k, (byte)((byte)Blocks.HugeBrownMushroom + l), 10);
+                    world.SetBlock(i, j + k2, k, (byte)((byte)Blocks.HugeBrownMushroom + l), 10);
                 }
             }
 
             return true;
         }
 
-        private int field_35293_a;
+        private int mushroomType;
     }
 }

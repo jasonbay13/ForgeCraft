@@ -10,10 +10,10 @@ namespace SMP
             //spawnableCreatureList.clear();
             topBlock = (byte)Blocks.Sand;
             fillerBlock = (byte)Blocks.Sand;
-            field_35523_u.field_35284_r = -999;
-            field_35523_u.field_35281_u = 2;
-            field_35523_u.field_35279_w = 50;
-            field_35523_u.field_35289_x = 10;
+            decorator.treesPerChunk = -999;
+            decorator.deadBushPerChunk = 2;
+            decorator.reedsPerChunk = 50;
+            decorator.field_35289_x = 10;
         }
     }
 }

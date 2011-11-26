@@ -4,7 +4,8 @@ namespace SMP
 {
     public class WorldGenBigTree : WorldGenerator
     {
-        public WorldGenBigTree()
+        public WorldGenBigTree(bool flag)
+            : base(flag)
         {
             random0 = new java.util.Random();
             heightLimit = 0;
@@ -130,7 +131,7 @@ namespace SMP
                             l1++;
                         } else
                         {
-                            worldObj.SetBlock(ai1[0], ai1[1], ai1[2], (byte)l);
+                            func_41043_a(worldObj, ai1[0], ai1[1], ai1[2], (byte)l, 0);
                             l1++;
                         }
                     }
@@ -225,7 +226,7 @@ namespace SMP
                 ai3[j] = MathHelper.floor_double((double)(ai[j] + k) + 0.5D);
                 ai3[byte1] = MathHelper.floor_double((double)ai[byte1] + (double)k * d + 0.5D);
                 ai3[byte2] = MathHelper.floor_double((double)ai[byte2] + (double)k * d1 + 0.5D);
-                worldObj.SetBlock(ai3[0], ai3[1], ai3[2], (byte)i);
+                func_41043_a(worldObj, ai3[0], ai3[1], ai3[2], (byte)i, 0);
             }
 
         }

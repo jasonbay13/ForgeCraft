@@ -8,9 +8,9 @@ namespace SMP
         public BiomeCache(WorldChunkManager worldchunkmanager)
         {
             field_35685_b = 0L;
-            field_35686_c = new PlayerHash();
+            field_35686_c = new LongHashMap();
             field_35684_d = new List<BiomeCacheBlock>();
-            field_35687_a = worldchunkmanager;
+            worldChunkManager = worldchunkmanager;
         }
 
         private BiomeCacheBlock func_35680_c(int i, int j)
@@ -32,6 +32,11 @@ namespace SMP
         public BiomeGenBase func_35683_a(int i, int j)
         {
             return func_35680_c(i, j).func_35700_a(i, j);
+        }
+
+        public float func_40625_c(int i, int j)
+        {
+            return func_35680_c(i, j).func_40626_b(i, j);
         }
 
         public void func_35681_a()
@@ -61,14 +66,14 @@ namespace SMP
             return func_35680_c(i, j).field_35706_c;
         }
 
-        public static WorldChunkManager func_35679_a(BiomeCache biomecache)
+        public static WorldChunkManager getChunkManager(BiomeCache biomecache)
         {
-            return biomecache.field_35687_a;
+            return biomecache.worldChunkManager;
         }
 
-        private WorldChunkManager field_35687_a;
+        private WorldChunkManager worldChunkManager;
         private long field_35685_b;
-        private PlayerHash field_35686_c;
+        private LongHashMap field_35686_c;
         private List<BiomeCacheBlock> field_35684_d;
     }
 }

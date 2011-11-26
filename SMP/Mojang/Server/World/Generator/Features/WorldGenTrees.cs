@@ -4,7 +4,8 @@ namespace SMP
 {
     public class WorldGenTrees : WorldGenerator
     {
-        public WorldGenTrees()
+        public WorldGenTrees(bool flag)
+            : base(flag)
         {
         }
 
@@ -90,7 +91,7 @@ namespace SMP
                         int j4 = i4 - k;
                         if ((java.lang.Math.abs(l3) != i3 || java.lang.Math.abs(j4) != i3 || random.nextInt(2) != 0 && j2 != 0) && Chunk.LightOpacity[world.GetBlock(k3, k1, i4)] < 0xf)
                         {
-                            world.SetBlock(k3, k1, i4, (byte)Blocks.Leaves);
+                            func_41043_a(world, k3, k1, i4, (byte)Blocks.Leaves, 0);
                         }
                     }
 
@@ -103,7 +104,7 @@ namespace SMP
                 int k2 = world.GetBlock(i, j + l1, k);
                 if (k2 == 0 || k2 == (byte)Blocks.Leaves)
                 {
-                    world.SetBlock(i, j + l1, k, (byte)Blocks.Wood);
+                    func_41043_a(world, i, j + l1, k, (byte)Blocks.Wood, 0);
                 }
             }
 

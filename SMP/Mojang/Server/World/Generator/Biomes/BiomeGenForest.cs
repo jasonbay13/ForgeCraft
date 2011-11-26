@@ -8,22 +8,22 @@ namespace SMP
             : base(i)
         {
             //spawnableCreatureList.add(new SpawnListEntry(net.minecraft.src.EntityWolf.class, 5, 4, 4));
-            field_35523_u.field_35284_r = 10;
-            field_35523_u.field_35282_t = 2;
+            decorator.treesPerChunk = 10;
+            decorator.grassPerChunk = 2;
         }
 
         public override WorldGenerator getRandomWorldGenForTrees(java.util.Random random)
         {
             if(random.nextInt(5) == 0)
             {
-                return field_35516_B;
+                return forestGenerator;
             }
             if(random.nextInt(10) == 0)
             {
-                return field_35515_A;
+                return bigTreeGenerator;
             } else
             {
-                return field_35528_z;
+                return treeGenerator;
             }
         }
     }

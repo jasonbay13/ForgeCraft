@@ -33,22 +33,20 @@ namespace SMP.Commands
         {
             try
             {
-                if (args[0] == "status") { p.SendMessage(Color.Purple + "Rain is: " + p.level.Israining); return; }
+                if (args[0] == "status") { p.SendMessage(Color.Purple + "Rain is: " + p.level.IsRaining); return; }
             }
             catch { }
 
-			if (p.level.Israining)
+			if (p.level.IsRaining)
             {
 				p.SendMessage(Color.Red + "Stopping rain..");
                 p.level.Rain(false);
-				p.level.Israining = false;
 
             }
             else
             {
 				p.SendMessage(Color.Red + "Starting rain..");
 				p.level.Rain(true);
-				p.level.Israining = true;
             }
         }
 

@@ -112,7 +112,7 @@ namespace SMP
             p.SendTime();
             if (Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, p.level) == null)
                 p.level.LoadChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4);
-            if (p.level.Israining)
+            if (p.level.IsRaining)
                 p.level.Rain(true);
         }
 		private void HandleHandshake(byte[] message)
@@ -948,8 +948,8 @@ namespace SMP
             }
 
             health = 20;
-			Teleport_Spawn();
             SendRespawn();
+            Teleport_Spawn();
         }
 		public static short BlockDropSwitch(short id)
 		{
@@ -1014,6 +1014,27 @@ namespace SMP
 				case (94):
                     return 356;
 					//return 354; // lolwut? why cake?
+                case 97:
+                    return 0;
+                case 99:
+                    if (Entity.random.Next(1, 5) == 3) return 39;
+					return 0;
+                case 100:
+                    if (Entity.random.Next(1, 5) == 3) return 40;
+					return 0;
+                case 102:
+                    return 0;
+                case 104:
+                case 105:
+                    return 0;
+                case 106:
+                    return 0;
+                case 110:
+                    return 3;
+                case 117:
+                    return 379;
+                case 118:
+                    return 380;
 
 				default:
 					return id;

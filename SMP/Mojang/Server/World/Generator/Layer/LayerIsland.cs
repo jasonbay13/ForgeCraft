@@ -11,13 +11,13 @@ namespace SMP
 
         public override int[] func_35018_a(int i, int j, int k, int l)
         {
-            int[] ai = IntCache.func_35549_a(k * l);
+            int[] ai = IntCache.getIntCache(k * l);
             for(int i1 = 0; i1 < l; i1++)
             {
                 for(int j1 = 0; j1 < k; j1++)
                 {
                     func_35017_a(i + j1, j + i1);
-                    ai[j1 + i1 * k] = func_35016_a(10) != 0 ? 0 : 1;
+                    ai[j1 + i1 * k] = nextInt(10) != 0 ? 0 : 1;
                 }
 
             }

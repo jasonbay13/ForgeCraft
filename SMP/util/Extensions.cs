@@ -176,6 +176,23 @@ namespace SMP
             }
         }
 
+        public static int[] ToIntArray(this byte[] bytes)
+        {
+            if (bytes.Length % 4 != 0) throw new Exception("Array length must be divisible by 4.");
+            int[] ints = new int[bytes.Length / 4];
+            for (int i = 0; i < bytes.Length; i += 4)
+                ints[i / 4] = util.EndianBitConverter.Big.ToInt32(bytes, i);
+            return ints;
+        }
+
+        public static byte[] ToByteArray(this int[] ints)
+        {
+            byte[] bytes = new byte[ints.Length * 4];
+            for (int i = 0; i < ints.Length; i++)
+                util.EndianBitConverter.Big.GetBytes(ints[i]).CopyTo(bytes, i * 4);
+            return bytes;
+        }
+
         /// <summary>
         /// Capitalizes a string, duh!
         /// </summary>

@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace SMP
 {
-    public class GenLayerRiver : GenLayer
+    class GenLayerSnow : GenLayer
     {
-        public GenLayerRiver(long l, GenLayer genlayer)
+        public GenLayerSnow(long l, GenLayer genlayer)
             : base(l)
         {
-            base.parent = genlayer;
+            parent = genlayer;
         }
 
         public override int[] func_35018_a(int i, int j, int k, int l)
@@ -22,23 +25,22 @@ namespace SMP
             {
                 for(int j2 = 0; j2 < k; j2++)
                 {
-                    int k2 = ai[j2 + 0 + (i2 + 1) * k1];
-                    int l2 = ai[j2 + 2 + (i2 + 1) * k1];
-                    int i3 = ai[j2 + 1 + (i2 + 0) * k1];
-                    int j3 = ai[j2 + 1 + (i2 + 2) * k1];
-                    int k3 = ai[j2 + 1 + (i2 + 1) * k1];
-                    if(k3 == 0 || k2 == 0 || l2 == 0 || i3 == 0 || j3 == 0)
+                    int k2 = ai[j2 + 1 + (i2 + 1) * k1];
+                    func_35017_a(j2 + i, i2 + j);
+                    if(k2 == 0)
                     {
-                        ai1[j2 + i2 * k] = BiomeGenBase.river.biomeID;
+                        ai1[j2 + i2 * k] = 0;
                         continue;
                     }
-                    if(k3 != k2 || k3 != i3 || k3 != l2 || k3 != j3)
+                    int l2 = nextInt(5);
+                    if(l2 == 0)
                     {
-                        ai1[j2 + i2 * k] = BiomeGenBase.river.biomeID;
+                        l2 = BiomeGenBase.icePlains.biomeID;
                     } else
                     {
-                        ai1[j2 + i2 * k] = -1;
+                        l2 = 1;
                     }
+                    ai1[j2 + i2 * k] = l2;
                 }
 
             }

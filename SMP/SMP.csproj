@@ -72,6 +72,9 @@
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCache.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCacheBlock.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeGenMushroomIsland.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeGenSnow.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\MapGenWaterlily.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenBigMushroom.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenDungeons.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenLakes.cs" />
@@ -79,11 +82,14 @@
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerDownfall.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerDownfallMix.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerIsland.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerMushroomIsland.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerRiver.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerRiverInit.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerRiverMix.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerShore.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerSmooth.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerSmoothZoom.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerSnow.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerTemperature.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerTemperatureMix.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerVillageLandscape.cs" />

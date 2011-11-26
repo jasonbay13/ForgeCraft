@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SMP
 {
-    public class PlayerHashEntry
+    public class LongHashMapEntry
     {
-        public PlayerHashEntry(int i, long l, Object obj, PlayerHashEntry playerhashentry)
+        public LongHashMapEntry(int i, long l, Object obj, LongHashMapEntry playerhashentry)
         {
             value = obj;
             nextEntry = playerhashentry;
@@ -27,11 +27,11 @@ namespace SMP
 
         public override bool Equals(object obj)
         {
-            if(!(obj is PlayerHashEntry))
+            if(!(obj is LongHashMapEntry))
             {
                 return false;
             }
-            PlayerHashEntry playerhashentry = (PlayerHashEntry)obj;
+            LongHashMapEntry playerhashentry = (LongHashMapEntry)obj;
             long long1 = func_736_a();
             long long2 = playerhashentry.func_736_a();
             if(long1 == long2 || long1 != null && long1.Equals(long2))
@@ -48,7 +48,7 @@ namespace SMP
 
         public override int GetHashCode()
         {
-            return PlayerHash.GetHashCode(key);
+            return LongHashMap.GetHashCode(key);
         }
 
         public override string ToString()
@@ -58,7 +58,7 @@ namespace SMP
 
         public long key;
         public object value;
-        public PlayerHashEntry nextEntry;
+        public LongHashMapEntry nextEntry;
         public int field_1026_d;
     }
 }

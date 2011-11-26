@@ -27,9 +27,8 @@ namespace SMP
 
     public partial class World
     {
-
-
-        public bool Israining = false;
+        public Random random = new Random();
+        public bool IsRaining = false;
 
         //public Weather()
         //    :base(0, 127, 0, "main", new Random().Next())
@@ -40,36 +39,53 @@ namespace SMP
         public System.Timers.Timer lightningTimer = new System.Timers.Timer();
         public void InitializeTimers()
         {
-            Random rnd = new Random();
-            this.weatherTimer.Elapsed += new ElapsedEventHandler(WeatherTimer);
-            this.weatherTimer.Interval = rnd.Next(1800000, 5400000);  //30 mins to 90 mins
-            this.weatherTimer.Enabled = true;
+            weatherTimer.Elapsed += WeatherTimer;
+            weatherTimer.Interval = random.Next(30 * 60000, 90 * 60000);  // 30-90 mins
+            weatherTimer.Start();
 
-            this.lightningTimer.Elapsed += new ElapsedEventHandler(LightningTimer);
-            this.lightningTimer.Interval = 300000;  //5 mins
-            this.lightningTimer.Enabled = false;
+            lightningTimer.Elapsed += LightningTimer;
+            lightningTimer.Interval = random.Next(1000, 15000);  // 1-15 seconds
+            lightningTimer.Start();
         }
 
         public void WeatherTimer(Object Source, ElapsedEventArgs e)
         {
             Rain(true);
-            lightningTimer.Start();
-
-            System.Threading.Thread.Sleep(1200000); //lasts for 20 mins
-
+            System.Threading.Thread.Sleep(20 * 60000); //lasts for 20 mins
 			Rain(false);
-            lightningTimer.Stop();
+
+            weatherTimer.Interval = random.Next(30 * 60000, 90 * 60000);
 
         }
         public void LightningTimer(Object Source, ElapsedEventArgs e)
         {
-
-            if (Israining && weatherTimer.Enabled)
+            try
             {
-                Random rnd = new Random();
-                Lightning(rnd.Next(3000), rnd.Next(3000), rnd.Next(3000));
-            }
+                // TODO: Make this not use Player stuffs.
+                if (IsRaining && Player.players.Count > 0)
+                {
+                    Player p = Player.players[random.Next(Player.players.Count)];
+                    if (p.LoggedIn && p.MapLoaded)
+                    {
+                        int x, z, range = p.viewdistance << 4;
+                        for (int i = 0; i < 50; i++)
+                        {
+                            x = random.Next((int)p.pos.x - range, (int)p.pos.x + range);
+                            z = random.Next((int)p.pos.z - range, (int)p.pos.z + range);
 
+                            if (chunkManager.getBiomeGenAt(x, z).canSpawnLightningBolt())
+                            {
+                                Lightning(x, GetTopSolidOrLiquidBlock(x, z), z);
+                                break;
+                            }
+                        }
+                    }
+
+                    lightningTimer.Interval = random.Next(1000, 15000);
+                }
+                else lightningTimer.Interval = 1000;
+            }
+            catch { }
         }
 
     }

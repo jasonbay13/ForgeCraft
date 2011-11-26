@@ -8,7 +8,7 @@ namespace SMP {
     public class GenStandard : ChunkGen {
         private readonly object Lock = new object();
         
-        java.util.Random random;
+        private java.util.Random random;
         public World worldObj;
         private NoiseOctaves field_705_k;
         private NoiseOctaves field_704_l;
@@ -18,16 +18,16 @@ namespace SMP {
         public NoiseOctaves field_714_b;
         //public NoiseOctaves mobSpawnerNoise;
 
-        private MapGenCaves caveGenerator;
-        //public MapGenStronghold field_35559_d;
-        //public MapGenVillage field_35560_e;
-        //public MapGenMineshaft field_35558_f;
-        private MapGenRavine field_35564_x;
+        private MapGenBase caveGenerator;
+        //public MapGenStronghold strongholdGenerator;
+        //public MapGenVillage villageGenerator;
+        //public MapGenMineshaft mineshaftGenerator;
+        private MapGenBase ravineGenerator;
         private BiomeGenBase[] biomesForGeneration;
 
-        bool field_35563_t;
+        private readonly bool mapFeaturesEnabled;
         private double[] field_4224_q;
-        private double[] field_35562_v;
+        private double[] stoneNoise;
         double[] field_4229_d;
         double[] field_4228_e;
         double[] field_4227_f;
@@ -40,14 +40,14 @@ namespace SMP {
         {
             worldObj = w;
             random = new java.util.Random(w.seed);
-            field_35562_v = new double[256];
+            stoneNoise = new double[256];
             caveGenerator = new MapGenCaves();
-            //field_35559_d = new MapGenStronghold();
-            //field_35560_e = new MapGenVillage();
-            //field_35558_f = new MapGenMineshaft();
-            field_35564_x = new MapGenRavine();
+            //strongholdGenerator = new MapGenStronghold();
+            //villageGenerator = new MapGenVillage();
+            //mineshaftGenerator = new MapGenMineshaft();
+            ravineGenerator = new MapGenRavine();
             //unusedIntArray32x32 = new int[32][32];
-            field_35563_t = flag;
+            mapFeaturesEnabled = flag;
             field_705_k = new NoiseOctaves(random, 16);
             field_704_l = new NoiseOctaves(random, 16);
             field_703_m = new NoiseOctaves(random, 8);
@@ -90,13 +90,13 @@ namespace SMP {
                     biomesForGeneration = worldObj.chunkManager.loadBlockGeneratorData(biomesForGeneration, c.x * 16, c.z * 16, 16, 16);
                     replaceBlocksForBiome(c.x, c.z, c.blocks, biomesForGeneration);
                     caveGenerator.generate(worldObj, c.x, c.z, c.blocks);
-                    if (field_35563_t)
+                    if (mapFeaturesEnabled)
                     {
-                        //field_35559_d.generate(this, worldObj, i, j, abyte0);
-                        //field_35558_f.generate(this, worldObj, i, j, abyte0);
-                        //field_35560_e.generate(this, worldObj, i, j, abyte0);
+                        //mineshaftGenerator.generate(this, worldObj, i, j, abyte0);
+                        //villageGenerator.generate(this, worldObj, i, j, abyte0);
+                        //strongholdGenerator.generate(this, worldObj, i, j, abyte0);
                     }
-                    field_35564_x.generate(worldObj, c.x, c.z, c.blocks);
+                    ravineGenerator.generate(worldObj, c.x, c.z, c.blocks);
                     c.GenerateHeightMap();
                 }
             }
@@ -119,23 +119,23 @@ namespace SMP {
                     long l2 = (random.nextLong() / 2L) * 2L + 1L;
                     random.setSeed((long)c.x * l1 + (long)c.z * l2 ^ worldObj.seed);
                     bool flag = false;
-                    if (field_35563_t)
+                    if (mapFeaturesEnabled)
                     {
-                        //field_35559_d.func_35532_a(worldObj, rand, i, j);
-                        //field_35558_f.func_35532_a(worldObj, rand, i, j);
-                        //flag = field_35560_e.func_35532_a(worldObj, rand, i, j);
+                        //mineshaftGenerator.func_35532_a(worldObj, rand, i, j);
+                        //flag = villageGenerator.func_35532_a(worldObj, rand, i, j);
+                        //strongholdGenerator.func_35532_a(worldObj, rand, i, j);
                     }
                     if (!flag && random.nextInt(4) == 0)
                     {
                         int i1 = k + random.nextInt(16) + 8;
-                        int i2 = random.nextInt(128);
+                        int i2 = random.nextInt(worldObj.worldYMax);
                         int i3 = l + random.nextInt(16) + 8;
                         (new WorldGenLakes((byte)Blocks.SWater)).generate(worldObj, random, i1, i2, i3);
                     }
                     if (!flag && random.nextInt(8) == 0)
                     {
                         int j1 = k + random.nextInt(16) + 8;
-                        int j2 = random.nextInt(random.nextInt(128 - 8) + 8);
+                        int j2 = random.nextInt(random.nextInt(worldObj.worldYMax - 8) + 8);
                         int j3 = l + random.nextInt(16) + 8;
                         if (j2 < 63 || random.nextInt(10) == 0)
                         {
@@ -145,7 +145,7 @@ namespace SMP {
                     for (int k1 = 0; k1 < 8; k1++)
                     {
                         int k2 = k + random.nextInt(16) + 8;
-                        int k3 = random.nextInt(128);
+                        int k3 = random.nextInt(worldObj.worldYMax);
                         int l3 = l + random.nextInt(16) + 8;
                         if (!(new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) ;
                         //if ((new WorldGenDungeons()).generate(worldObj, random, k2, k3, l3)) Console.WriteLine("Dungeon @ {0},{1},{2}", k2, k3, l3);
@@ -153,6 +153,25 @@ namespace SMP {
 
                     biomegenbase.func_35513_a(worldObj, random, k, l);
                     //SpawnerAnimals.func_35573_a(worldObj, biomegenbase, k + 8, l + 8, 16, 16, rand);
+                    k += 8;
+                    l += 8;
+                    for (int i2 = 0; i2 < 16; i2++)
+                    {
+                        for (int j3 = 0; j3 < 16; j3++)
+                        {
+                            int j4 = worldObj.GetTopSolidOrLiquidBlock(k + i2, l + j3);
+                            if (worldObj.func_40210_p(i2 + k, j4 - 1, j3 + l))
+                            {
+                                worldObj.SetBlock(i2 + k, j4 - 1, j3 + l, (byte)Blocks.Ice);
+                            }
+                            if (worldObj.func_40215_r(i2 + k, j4, j3 + l))
+                            {
+                                worldObj.SetBlock(i2 + k, j4, j3 + l, (byte)Blocks.Snow);
+                            }
+                        }
+
+                    }
+
                     //BlockSand.fallInstantly = false;
                 }
             }
@@ -235,13 +254,13 @@ namespace SMP {
         {
             byte byte0 = 63;
             double d = 0.03125D;
-            field_35562_v = field_702_n.GetNoise(field_35562_v, i * 16, j * 16, 0, 16, 16, 1, d * 2D, d * 2D, d * 2D);
+            stoneNoise = field_702_n.GetNoise(stoneNoise, i * 16, j * 16, 0, 16, 16, 1, d * 2D, d * 2D, d * 2D);
             for (int k = 0; k < 16; k++)
             {
                 for (int l = 0; l < 16; l++)
                 {
                     BiomeGenBase biomegenbase = abiomegenbase[l + k * 16];
-                    int i1 = (int)(field_35562_v[k + l * 16] / 3D + 3D + random.nextDouble() * 0.25D);
+                    int i1 = (int)(stoneNoise[k + l * 16] / 3D + 3D + random.nextDouble() * 0.25D);
                     int j1 = -1;
                     byte byte1 = biomegenbase.topBlock;
                     byte byte2 = biomegenbase.fillerBlock;
@@ -353,13 +372,13 @@ namespace SMP {
                         for(int j3 = -byte0; j3 <= byte0; j3++)
                         {
                             BiomeGenBase biomegenbase1 = biomesForGeneration[k2 + i3 + 2 + (l2 + j3 + 2) * (l + 5)];
-                            float f4 = field_35561_l[i3 + 2 + (j3 + 2) * 5] / (biomegenbase1.field_35527_q + 2.0F);
-                            if(biomegenbase1.field_35527_q > biomegenbase.field_35527_q)
+                            float f4 = field_35561_l[i3 + 2 + (j3 + 2) * 5] / (biomegenbase1.minHeight + 2.0F);
+                            if(biomegenbase1.minHeight > biomegenbase.minHeight)
                             {
                                 f4 /= 2.0F;
                             }
-                            f1 += biomegenbase1.field_35526_r * f4;
-                            f2 += biomegenbase1.field_35527_q * f4;
+                            f1 += biomegenbase1.maxHeight * f4;
+                            f2 += biomegenbase1.minHeight * f4;
                             f3 += f4;
                         }
 

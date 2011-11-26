@@ -6,7 +6,7 @@ namespace SMP
     {
         public GenLayerSmooth(long l, GenLayer genlayer):base(l)
         {
-            base.field_35023_a = genlayer;
+            base.parent = genlayer;
         }
 
         public override int[] func_35018_a(int i, int j, int k, int l)
@@ -15,8 +15,8 @@ namespace SMP
             int j1 = j - 1;
             int k1 = k + 2;
             int l1 = l + 2;
-            int[] ai = field_35023_a.func_35018_a(i1, j1, k1, l1);
-            int[] ai1 = IntCache.func_35549_a(k * l);
+            int[] ai = parent.func_35018_a(i1, j1, k1, l1);
+            int[] ai1 = IntCache.getIntCache(k * l);
             for(int i2 = 0; i2 < l; i2++)
             {
                 for(int j2 = 0; j2 < k; j2++)
@@ -29,7 +29,7 @@ namespace SMP
                     if(k2 == l2 && i3 == j3)
                     {
                         func_35017_a(j2 + i, i2 + j);
-                        if(func_35016_a(2) == 0)
+                        if(nextInt(2) == 0)
                         {
                             k3 = k2;
                         } else

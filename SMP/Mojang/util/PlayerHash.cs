@@ -5,12 +5,12 @@ using System.Text;
 
 namespace SMP
 {
-    public class PlayerHash
+    public class LongHashMap
     {
-        public PlayerHash()
+        public LongHashMap()
         {
             capacity = 12;
-            hashArray = new PlayerHashEntry[16];
+            hashArray = new LongHashMapEntry[16];
         }
 
         private static int getHashedKey(long l)
@@ -32,7 +32,7 @@ namespace SMP
         public Object getValueByKey(long l)
         {
             int i = getHashedKey(l);
-            for(PlayerHashEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
             {
                 if(playerhashentry.key == l)
                 {
@@ -48,10 +48,10 @@ namespace SMP
             return func_35507_c(l) != null;
         }
 
-        PlayerHashEntry func_35507_c(long l)
+        LongHashMapEntry func_35507_c(long l)
         {
             int i = getHashedKey(l);
-            for(PlayerHashEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
             {
                 if(playerhashentry.key == l)
                 {
@@ -66,7 +66,7 @@ namespace SMP
         {
             int i = getHashedKey(l);
             int j = getHashIndex(i, hashArray.Length);
-            for(PlayerHashEntry playerhashentry = hashArray[j]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry playerhashentry = hashArray[j]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
             {
                 if(playerhashentry.key == l)
                 {
@@ -80,7 +80,7 @@ namespace SMP
 
         private void resizeTable(int i)
         {
-            PlayerHashEntry[] aplayerhashentry = hashArray;
+            LongHashMapEntry[] aplayerhashentry = hashArray;
             int j = aplayerhashentry.Length;
             if(j == 0x40000000)
             {
@@ -88,7 +88,7 @@ namespace SMP
                 return;
             } else
             {
-                PlayerHashEntry[] aplayerhashentry1 = new PlayerHashEntry[i];
+                LongHashMapEntry[] aplayerhashentry1 = new LongHashMapEntry[i];
                 copyHashTableTo(aplayerhashentry1);
                 hashArray = aplayerhashentry1;
                 capacity = (int)((float)i * percentUsable);
@@ -96,13 +96,13 @@ namespace SMP
             }
         }
 
-        private void copyHashTableTo(PlayerHashEntry[] aplayerhashentry)
+        private void copyHashTableTo(LongHashMapEntry[] aplayerhashentry)
         {
-            PlayerHashEntry[] aplayerhashentry1 = hashArray;
+            LongHashMapEntry[] aplayerhashentry1 = hashArray;
             int i = aplayerhashentry.Length;
             for(int j = 0; j < aplayerhashentry1.Length; j++)
             {
-                PlayerHashEntry playerhashentry = aplayerhashentry1[j];
+                LongHashMapEntry playerhashentry = aplayerhashentry1[j];
                 if(playerhashentry == null)
                 {
                     continue;
@@ -110,7 +110,7 @@ namespace SMP
                 aplayerhashentry1[j] = null;
                 do
                 {
-                    PlayerHashEntry playerhashentry1 = playerhashentry.nextEntry;
+                    LongHashMapEntry playerhashentry1 = playerhashentry.nextEntry;
                     int k = getHashIndex(playerhashentry.field_1026_d, i);
                     playerhashentry.nextEntry = aplayerhashentry[k];
                     aplayerhashentry[k] = playerhashentry;
@@ -122,17 +122,17 @@ namespace SMP
 
         public Object remove(long l)
         {
-            PlayerHashEntry playerhashentry = removeKey(l);
+            LongHashMapEntry playerhashentry = removeKey(l);
             return playerhashentry != null ? playerhashentry.value : null;
         }
 
-        PlayerHashEntry removeKey(long l)
+        LongHashMapEntry removeKey(long l)
         {
             int i = getHashedKey(l);
             int j = getHashIndex(i, hashArray.Length);
-            PlayerHashEntry playerhashentry = hashArray[j];
-            PlayerHashEntry playerhashentry1;
-            PlayerHashEntry playerhashentry2;
+            LongHashMapEntry playerhashentry = hashArray[j];
+            LongHashMapEntry playerhashentry1;
+            LongHashMapEntry playerhashentry2;
             for(playerhashentry1 = playerhashentry; playerhashentry1 != null; playerhashentry1 = playerhashentry2)
             {
                 playerhashentry2 = playerhashentry1.nextEntry;
@@ -157,8 +157,8 @@ namespace SMP
 
         private void createKey(int i, long l, Object obj, int j)
         {
-            PlayerHashEntry playerhashentry = hashArray[j];
-            hashArray[j] = new PlayerHashEntry(i, l, obj, playerhashentry);
+            LongHashMapEntry playerhashentry = hashArray[j];
+            hashArray[j] = new LongHashMapEntry(i, l, obj, playerhashentry);
             if(numHashElements++ >= capacity)
             {
                 resizeTable(2 * hashArray.Length);
@@ -170,7 +170,7 @@ namespace SMP
             return getHashedKey(l);
         }
 
-        [NonSerialized] private PlayerHashEntry[] hashArray;
+        [NonSerialized] private LongHashMapEntry[] hashArray;
         [NonSerialized] private int numHashElements;
         private int capacity;
         private float percentUsable = 0.75F;

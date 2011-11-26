@@ -51,7 +51,12 @@ namespace SMP
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;
         public bool Raining = false;
-		public byte height = 128;
+		public byte worldYMax = 128;
+        public byte worldOceanHeight;
+        public byte worldYMask;
+        public byte worldYBits;
+        public byte field_35250_b;
+        public byte height { get { return worldYMax; } set { worldYMax = value; } }
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
         public int ChunkLimit = int.MaxValue;
         public int ChunkHeight = 128; // This is 1-based, not 0-based. Got it?
@@ -95,7 +100,13 @@ namespace SMP
             }
         }
 
-        public World() { }
+        public World()
+        {
+            worldYBits = 7;
+            field_35250_b = (byte)(worldYBits + 4);
+            worldOceanHeight = (byte)(worldYMax / 2 - 1);
+            worldYMask = (byte)(worldYMax - 1);
+        }
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.World"/> class and generates 49 chunks.
 		/// </summary>
@@ -108,12 +119,13 @@ namespace SMP
 		/// <param name='spawnz'>
 		/// Spawnz. The z spawn pos.
 		/// </param>
-		public World (double spawnx, double spawny, double spawnz, string name, long seed)
-		{
+        public World(double spawnx, double spawny, double spawnz, string name, long seed)
+            : this()
+        {
             this.name = name;
             this.seed = seed;
             this.SpawnX = spawnx; this.SpawnY = spawny; this.SpawnZ = spawnz;
-			chunkData = new Dictionary<Point, Chunk>();
+            chunkData = new Dictionary<Point, Chunk>();
             physics = new Physics(this);
             generator = new GenStandard(this, true);
             chunkManager = new WorldChunkManager(this);
@@ -125,35 +137,35 @@ namespace SMP
             Console.Write("0%");
 
             object derpLock = new object();
-			try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
-			{
+            try  // Mono 2.10.2 has Parallel.For(int) and Parallel.ForEach implemented, not sure about 2.8 though. Any version less does not support .NET 4.0
+            {
                 Parallel.For(((int)SpawnX >> 4) - Server.ViewDistance, ((int)SpawnX >> 4) + Server.ViewDistance + 1, delegate(int x)
-	            {
+                {
                     Parallel.For(((int)SpawnZ >> 4) - Server.ViewDistance, ((int)SpawnZ >> 4) + Server.ViewDistance + 1, delegate(int z)
-	                {
+                    {
                         LoadChunk(x, z, false, false);
                         lock (derpLock)
                         {
                             Console.SetCursorPosition(cursorH, Console.CursorTop);
                             count++; Console.Write((int)((count / total) * 100) + "%");
                         }
-	                });
-	                //Server.Log(x + " Row Generated.");
-	            });
-			}
-			catch(NotImplementedException)
-			{
+                    });
+                    //Server.Log(x + " Row Generated.");
+                });
+            }
+            catch (NotImplementedException)
+            {
                 for (int x = ((int)SpawnX >> 4) - Server.ViewDistance; x < ((int)SpawnX >> 4) + Server.ViewDistance + 1; x++)
-				{
+                {
                     for (int z = ((int)SpawnZ >> 4) - Server.ViewDistance; z < ((int)SpawnZ >> 4) + Server.ViewDistance + 1; z++)
-				    {
+                    {
                         LoadChunk(x, z, false, false);
                         Console.SetCursorPosition(cursorH, Console.CursorTop);
                         count++; Console.Write((int)((count / total) * 100) + "%");
-				    }
-			    	//Server.Log(x + " Row Generated.");
-				}		
-			}
+                    }
+                    //Server.Log(x + " Row Generated.");
+                }
+            }
 
             Console.Write("\r");
 
@@ -164,7 +176,7 @@ namespace SMP
 
             if (World.WorldLoad != null)
                 World.WorldLoad(this);
-		}
+        }
        
 		public static World Find(string name)
 		{
@@ -199,11 +211,6 @@ namespace SMP
                 lock (w.chunkData)
                     if (!w.chunkData.ContainsKey(pt))
                         w.chunkData.Add(pt, ch);
-                if (!ch.generated || !ch.populated)
-                {
-                    if (thread) World.chunker.QueueChunk(x, z, w);
-                    else w.GenerateChunk(x, z);
-                }
                 ch.PostLoad(w);
             }
         }
@@ -525,12 +532,14 @@ namespace SMP
             timeincrement.Start();
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();
+            InitializeTimers();
         }
         
         public void Rain(bool rain)
 		{
-			foreach (Player p in Player.players)
-			    if (p.MapLoaded && !p.disconnected)
+            IsRaining = rain;
+			foreach (Player p in Player.players.ToArray())
+			    if (p.LoggedIn && p.MapLoaded)
 				    p.SendRain(rain);
 		}
 		public void Lightning(int x, int y, int z)
@@ -539,11 +548,12 @@ namespace SMP
 			int distance = 16 * LightningRange;
 
 			foreach (Player p in Player.players.ToArray())
-				if (p.MapLoaded && !p.disconnected)
+				if (p.LoggedIn && p.MapLoaded)
 					if (p.pos.mdiff(new Point3(x, y, z)) <= distance)
                         p.SendLightning(x * 32, y * 32, z * 32, e.id);
 
-			//Not sure if lightning needs depsawned, seems to not require it.
+            if (BlockData.IsSolid(GetBlock(x, y - 1, z)))
+                BlockChange(x, y, z, (byte)Blocks.Fire, 0);
 		}
 
         public bool ChunkExists(int x, int z)
@@ -669,10 +679,10 @@ namespace SMP
                 if (y < 0 || y > ChunkHeight - 1) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return;
-                byte oldBlock = GetBlock(x, y, z); byte oldMeta = GetMeta(x, y, z);
+                byte oldBlock = chunk.SGB(x & 0xf, y, z & 0xf); byte oldMeta = chunk.GetMetaData(x & 0xf, y, z & 0xf);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 // TODO: Put lighting updates in a separate thread.
-                chunk.RecalculateLight(x & 0xf, z & 0xf);
+                chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
                 SpreadLight(x, y, z);
                 if (phys) physics.BlockUpdate(x, y, z, oldBlock, oldMeta);
                 if (BlockChanged != null)
@@ -693,9 +703,11 @@ namespace SMP
                 if (y < 0 || y > ChunkHeight - 1) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this, true);
                 if (chunk == null) return;
+                byte oldBlock = chunk.SGB(x & 0xf, y, z & 0xf); byte oldMeta = chunk.GetMetaData(x & 0xf, y, z & 0xf);
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
-                QueueBlockChange(x, y, z, type, meta); // Causes client lag during level generation?
+                if (type != oldBlock || meta != oldMeta) // Don't send block change if it's the same.
+                    QueueBlockChange(x, y, z, type, meta); // Causes client freeze during level generation?
             }
             catch { }
         }
@@ -793,23 +805,22 @@ namespace SMP
         public void GrowTree(int x, int y, int z, byte type, java.util.Random random)
         {
             BlockChange(x, y, z, 0, 0);
-            if (GetBlock(x, y - 1, z) == (byte)Blocks.Grass) BlockChange(x, y - 1, z, (byte)Blocks.Dirt, 0);
             switch (type)
             {
                 case (byte)Tree.Normal:
                     if (Entity.randomJava.nextInt(10) == 0)
-                        new WorldGenBigTree().generate(this, random, x, y, z);
+                        new WorldGenBigTree(true).generate(this, random, x, y, z);
                     else
-                        new WorldGenTrees().generate(this, random, x, y, z);
+                        new WorldGenTrees(true).generate(this, random, x, y, z);
                     break;
                 case (byte)Tree.Spruce:
                     if (Entity.randomJava.nextInt(3) == 0)
                         new WorldGenTaiga1().generate(this, random, x, y, z);
                     else
-                        new WorldGenTaiga2().generate(this, random, x, y, z);
+                        new WorldGenTaiga2(true).generate(this, random, x, y, z);
                     break;
                 case (byte)Tree.Birch:
-                    new WorldGenForest().generate(this, random, x, y, z);
+                    new WorldGenForest(true).generate(this, random, x, y, z);
                     break;
             }
         }
@@ -847,6 +858,28 @@ namespace SMP
                 byte skylight = chunk.GetSkyLight(x & 0xf, y, z & 0xf);
                 if (skylight > 0) skylight--;
                 return Math.Max(skylight, chunk.GetBlockLight(x & 0xf, y, z & 0xf));
+            }
+            catch { return 0; }
+        }
+
+        private byte GetBlockLightValue(int x, int y, int z)
+        {
+            try
+            {
+                Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                if (chunk == null) return 0;
+                return chunk.GetBlockLight(x & 0xf, y, z & 0xf);
+            }
+            catch { return 0; }
+        }
+
+        private byte GetSkyLightValue(int x, int y, int z)
+        {
+            try
+            {
+                Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                if (chunk == null) return 0;
+                return chunk.GetSkyLight(x & 0xf, y, z & 0xf);
             }
             catch { return 0; }
         }
@@ -902,26 +935,25 @@ namespace SMP
                     }
                 case (byte)Blocks.MushroomBrown:
                 case (byte)Blocks.MushroomRed:
-                    label0:
+                    if (y < 0 || y >= worldYMax)
+                        return false;
+                    else
                     {
-                        bool label0 = false;
-                        if(y >= 0)
-                        {
-                            if(y < 128)
-                            {
-                                label0 = true;
-                            }
-                        }
-                        if (!label0) return false;
+                        b2 = GetBlock(x, y - 1, z);
+                        return b2 == (byte)Blocks.Mycelium || (GetFullLightValue(x, y, z) < 13 && BlockData.IsOpaqueCube(b2));
                     }
-                    return GetFullLightValue(x, y, z) < 13 && BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
+                case (byte)Blocks.LilyPad:
+                    if (y < 0 || y >= worldYMax)
+                        return false;
+                    else
+                        return BlockData.BlockMaterial(GetBlock(x, y - 1, z)) == Material.Water && GetMeta(x, y - 1, z) == 0;
             }
             return true;
         }
 
         public bool CanPlaceAt(byte b, int x, int y, int z)
         {
-            byte l;
+            byte l, l2;
             switch (b)
             {
                 case (byte)Blocks.SugarCane:
@@ -954,6 +986,19 @@ namespace SMP
                 case (byte)Blocks.MushroomBrown:
                 case (byte)Blocks.MushroomRed:
                     return BlockData.IsOpaqueCube(GetBlock(x, y - 1, z));
+                case (byte)Blocks.LilyPad:
+                    l = GetBlock(x, y, z);
+                    l2 = GetBlock(x, y - 1, z);
+                    return (l == 0 || BlockData.IsGroundCover(l)) && (l2 == (byte)Blocks.SWater || l2 == (byte)Blocks.AWater);
+                case (byte)Blocks.Snow:
+                    l = GetBlock(x, y - 1, z);
+                    if(l == 0 || !BlockData.IsOpaqueCube(l))
+                    {
+                        return false;
+                    } else
+                    {
+                        return BlockData.IsSolid(l);
+                    }
             }
             return true;
         }
@@ -987,6 +1032,93 @@ namespace SMP
                 return -1;
             }
             catch { return -1; }
+        }
+
+        public int GetTopSolidOrLiquidBlock(int x, int z)
+        {
+            try
+            {
+                Chunk chunk = Chunk.GetChunk(x >> 4, z >> 4, this);
+                if (chunk == null) return 0;
+                return chunk.func_35631_c(this, x & 0xf, z & 0xf);
+            }
+            catch { return 0; }
+        }
+
+        public Material GetBlockMaterial(int x, int y, int z)
+        {
+            return BlockData.BlockMaterial(GetBlock(x, y, z));
+        }
+
+        public bool func_40210_p(int x, int y, int z)
+        {
+            return func_40213_b(x, y, z, false);
+        }
+
+        public bool func_40217_q(int x, int y, int z)
+        {
+            return func_40213_b(x, y, z, true);
+        }
+
+        public bool func_40213_b(int x, int y, int z, bool flag)
+        {
+            float f = chunkManager.func_40579_a(x, y, z);
+            if (f > 0.15F)
+            {
+                return false;
+            }
+            if (y >= 0 && y < worldYMax && GetBlockLightValue(x, y, z) < 10)
+            {
+                int l = GetBlock(x, y, z);
+                if ((l == (byte)Blocks.SWater || l == (byte)Blocks.AWater) && GetMeta(x, y, z) == 0)
+                {
+                    if (!flag)
+                    {
+                        return true;
+                    }
+                    bool flag1 = true;
+                    if (flag1 && GetBlockMaterial(x - 1, y, z) != Material.Water)
+                    {
+                        flag1 = false;
+                    }
+                    if (flag1 && GetBlockMaterial(x + 1, y, z) != Material.Water)
+                    {
+                        flag1 = false;
+                    }
+                    if (flag1 && GetBlockMaterial(x, y, z - 1) != Material.Water)
+                    {
+                        flag1 = false;
+                    }
+                    if (flag1 && GetBlockMaterial(x, y, z + 1) != Material.Water)
+                    {
+                        flag1 = false;
+                    }
+                    if (!flag1)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool func_40215_r(int x, int y, int z)
+        {
+            float f = chunkManager.func_40579_a(x, y, z);
+            if (f > 0.15F)
+            {
+                return false;
+            }
+            if (y >= 0 && y < worldYMax && GetBlockLightValue(x, y, z) < 10)
+            {
+                int l = GetBlock(x, y - 1, z);
+                int i1 = GetBlock(x, y, z);
+                if (i1 == 0 && CanPlaceAt((byte)Blocks.Snow, x, y, z) && l != 0 && l != (byte)Blocks.Ice && BlockData.IsSolid((byte)l))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 	}
 

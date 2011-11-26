@@ -6,7 +6,7 @@ namespace SMP
     {
         public GenLayerZoomVoronoi(long l, GenLayer genlayer):base(l)
         {
-            base.field_35023_a = genlayer;
+            base.parent = genlayer;
         }
 
         public override int[] func_35018_a(int i, int j, int k, int l)
@@ -19,10 +19,10 @@ namespace SMP
             int k1 = j >> byte0;
             int l1 = (k >> byte0) + 3;
             int i2 = (l >> byte0) + 3;
-            int[] ai = field_35023_a.func_35018_a(j1, k1, l1, i2);
+            int[] ai = parent.func_35018_a(j1, k1, l1, i2);
             int j2 = l1 << byte0;
             int k2 = i2 << byte0;
-            int[] ai1 = IntCache.func_35549_a(j2 * k2);
+            int[] ai1 = IntCache.getIntCache(j2 * k2);
             for(int l2 = 0; l2 < i2 - 1; l2++)
             {
                 int i3 = ai[0 + (l2 + 0) * l1];
@@ -31,17 +31,17 @@ namespace SMP
                 {
                     double d = (double)i1 * 0.90000000000000002D;
                     func_35017_a(l3 + j1 << byte0, l2 + k1 << byte0);
-                    double d1 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d;
-                    double d2 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d;
+                    double d1 = ((double)nextInt(1024) / 1024D - 0.5D) * d;
+                    double d2 = ((double)nextInt(1024) / 1024D - 0.5D) * d;
                     func_35017_a(l3 + j1 + 1 << byte0, l2 + k1 << byte0);
-                    double d3 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d + (double)i1;
-                    double d4 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d;
+                    double d3 = ((double)nextInt(1024) / 1024D - 0.5D) * d + (double)i1;
+                    double d4 = ((double)nextInt(1024) / 1024D - 0.5D) * d;
                     func_35017_a(l3 + j1 << byte0, l2 + k1 + 1 << byte0);
-                    double d5 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d;
-                    double d6 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d + (double)i1;
+                    double d5 = ((double)nextInt(1024) / 1024D - 0.5D) * d;
+                    double d6 = ((double)nextInt(1024) / 1024D - 0.5D) * d + (double)i1;
                     func_35017_a(l3 + j1 + 1 << byte0, l2 + k1 + 1 << byte0);
-                    double d7 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d + (double)i1;
-                    double d8 = ((double)func_35016_a(1024) / 1024D - 0.5D) * d + (double)i1;
+                    double d7 = ((double)nextInt(1024) / 1024D - 0.5D) * d + (double)i1;
+                    double d8 = ((double)nextInt(1024) / 1024D - 0.5D) * d + (double)i1;
                     int i4 = ai[l3 + 1 + (l2 + 0) * l1];
                     int j4 = ai[l3 + 1 + (l2 + 1) * l1];
                     for(int k4 = 0; k4 < i1; k4++)
@@ -80,7 +80,7 @@ namespace SMP
 
             }
 
-            int[] ai2 = IntCache.func_35549_a(k * l);
+            int[] ai2 = IntCache.getIntCache(k * l);
             for(int j3 = 0; j3 < l; j3++)
             {
                 Array.Copy(ai1, (j3 + (j & i1 - 1)) * (l1 << byte0) + (i & i1 - 1), ai2, j3 * k, k);

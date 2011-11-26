@@ -182,13 +182,14 @@ namespace SMP
             }
             if (isPlayer && p.LoggedIn)
             {
+                //p.SendMessage(level.chunkManager.getBiomeGenAt(CurrentChunk.x << 4, CurrentChunk.z << 4).biomeName); // Debug!
                 //bool locked = false;
                 List<Point> templist = new List<Point>();
 
-                int sx = CurrentChunk.point.x - p.viewdistance; //StartX
-                int ex = CurrentChunk.point.x + p.viewdistance; //EndX
-                int sz = CurrentChunk.point.z - p.viewdistance; //StartZ
-                int ez = CurrentChunk.point.z + p.viewdistance; //EndZ
+                int sx = CurrentChunk.x - p.viewdistance; //StartX
+                int ex = CurrentChunk.x + p.viewdistance; //EndX
+                int sz = CurrentChunk.z - p.viewdistance; //StartZ
+                int ez = CurrentChunk.z + p.viewdistance; //EndZ
 
                 // This can cause severe lag! DO NOT USE IT!!!
                 /*Parallel.For(sx, ex + 1, delegate(int x)
@@ -235,12 +236,12 @@ namespace SMP
                                     }
                                     else if (forcequeue)
                                     {
-                                        if (!p.level.chunkData[po].generated) World.chunker.QueueChunk(po, p.level, false);
+                                        if (!p.level.chunkData[po].populated) World.chunker.QueueChunk(po, p.level, false);
                                         World.chunker.QueueChunkSend(po, p);
                                     }
                                     else
                                     {
-                                        if (!p.level.chunkData[po].generated) World.chunker.QueueChunk(po, p.level, false);
+                                        if (!p.level.chunkData[po].populated) World.chunker.QueueChunk(po, p.level, false);
                                         p.SendChunk(p.level.chunkData[po]);
                                         //p.level.chunkData[po].Update(p.level, p);
                                     }

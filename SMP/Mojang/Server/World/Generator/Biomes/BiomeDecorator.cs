@@ -6,214 +6,238 @@ namespace SMP
     {
         public BiomeDecorator(BiomeGenBase biomegenbase)
         {
-            field_35270_a = new WorldGenClay(4);
-            field_35268_b = new WorldGenSand(7, (byte)Blocks.Sand);
-            field_35269_c = new WorldGenSand(6, (byte)Blocks.Gravel);
-            field_35266_d = new WorldGenMinable((byte)Blocks.Dirt, 32);
-            field_35267_e = new WorldGenMinable((byte)Blocks.Gravel, 32);
-            field_35264_f = new WorldGenMinable((byte)Blocks.CoalOre, 16);
-            field_35265_g = new WorldGenMinable((byte)Blocks.IronOre, 8);
-            field_35277_h = new WorldGenMinable((byte)Blocks.GoldOre, 8);
-            field_35278_i = new WorldGenMinable((byte)Blocks.RedStoneOre, 7);
-            field_35275_j = new WorldGenMinable((byte)Blocks.DiamondOre, 7);
-            field_35276_k = new WorldGenMinable((byte)Blocks.LapisOre, 6);
-            field_35273_l = new WorldGenFlowers((byte)Blocks.FlowerDandelion);
-            field_35274_m = new WorldGenFlowers((byte)Blocks.FlowerRose);
-            field_35271_n = new WorldGenFlowers((byte)Blocks.MushroomBrown);
-            field_35272_o = new WorldGenFlowers((byte)Blocks.MushroomRed);
+            clayGenerator = new WorldGenClay(4);
+            sandGenerator = new WorldGenSand(7, (byte)Blocks.Sand);
+            gravelGenerator = new WorldGenSand(6, (byte)Blocks.Gravel);
+            dirtGenerator = new WorldGenMinable((byte)Blocks.Dirt, 32);
+            gravelGen = new WorldGenMinable((byte)Blocks.Gravel, 32);
+            coalGen = new WorldGenMinable((byte)Blocks.CoalOre, 16);
+            ironGen = new WorldGenMinable((byte)Blocks.IronOre, 8);
+            goldGen = new WorldGenMinable((byte)Blocks.GoldOre, 8);
+            redstoneGen = new WorldGenMinable((byte)Blocks.RedStoneOre, 7);
+            diamondGen = new WorldGenMinable((byte)Blocks.DiamondOre, 7);
+            lapisGen = new WorldGenMinable((byte)Blocks.LapisOre, 6);
+            plantYellowGen = new WorldGenFlowers((byte)Blocks.FlowerDandelion);
+            plantRedGen = new WorldGenFlowers((byte)Blocks.FlowerRose);
+            mushroomBrownGen = new WorldGenFlowers((byte)Blocks.MushroomBrown);
+            mushroomRedGen = new WorldGenFlowers((byte)Blocks.MushroomRed);
+            field_40320_u = new WorldGenBigMushroom();
             field_35286_p = new WorldGenReed();
             field_35285_q = new WorldGenCactus();
-            field_35284_r = 0;
-            field_35283_s = 2;
-            field_35282_t = 1;
-            field_35281_u = 0;
-            field_35280_v = 0;
-            field_35279_w = 0;
+            field_40322_x = new MapGenWaterlily();
+            field_40321_y = 0;
+            treesPerChunk = 0;
+            flowersPerChunk = 2;
+            grassPerChunk = 1;
+            deadBushPerChunk = 0;
+            mushroomsPerChunk = 0;
+            reedsPerChunk = 0;
             field_35289_x = 0;
             field_35288_y = 1;
             field_35287_z = 3;
-            field_35261_A = 1;
-            field_35260_F = biomegenbase;
+            clayPerChunk = 1;
+            field_40318_J = 0;
+            field_40319_K = true;
+            biomeGenerator = biomegenbase;
         }
 
-        public void func_35255_a(World world, java.util.Random random, int i, int j)
+        public void Decorates(World world, java.util.Random random, int i, int j)
         {
-            if (field_35262_B != null)
+            if (curWorldObj != null)
             {
                 throw new Exception("Already decorating!!");
             }
             else
             {
-                field_35262_B = world;
-                field_35263_C = random;
-                field_35258_D = i;
-                field_35259_E = j;
+                curWorldObj = world;
+                randomGenerator = random;
+                chunk_X = i;
+                chunk_Z = j;
                 func_35256_b();
-                field_35262_B = null;
-                field_35263_C = null;
+                curWorldObj = null;
+                randomGenerator = null;
                 return;
             }
         }
 
         private void func_35256_b()
         {
-            func_35253_a();
+            generateOres();
             for (int i = 0; i < field_35287_z; i++)
             {
-                int i1 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int i5 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35268_b.generate(field_35262_B, field_35263_C, i1, field_35262_B.FindTopSolidBlock(i1, i5), i5);
+                int i1 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int k5 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                sandGenerator.generate(curWorldObj, randomGenerator, i1, curWorldObj.FindTopSolidBlock(i1, k5), k5);
             }
 
-            for (int j = 0; j < field_35261_A; j++)
+            for (int j = 0; j < clayPerChunk; j++)
             {
-                int j1 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int j5 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35270_a.generate(field_35262_B, field_35263_C, j1, field_35262_B.FindTopSolidBlock(j1, j5), j5);
+                int j1 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int l5 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                clayGenerator.generate(curWorldObj, randomGenerator, j1, curWorldObj.FindTopSolidBlock(j1, l5), l5);
             }
 
             for (int k = 0; k < field_35288_y; k++)
             {
-                int k1 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k5 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35268_b.generate(field_35262_B, field_35263_C, k1, field_35262_B.FindTopSolidBlock(k1, k5), k5);
+                int k1 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int i6 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                sandGenerator.generate(curWorldObj, randomGenerator, k1, curWorldObj.FindTopSolidBlock(k1, i6), i6);
             }
 
-            int l = field_35284_r;
-            if (field_35263_C.nextInt(10) == 0)
+            int l = treesPerChunk;
+            if (randomGenerator.nextInt(10) == 0)
             {
                 l++;
             }
             for (int l1 = 0; l1 < l; l1++)
             {
-                int l5 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k9 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                WorldGenerator worldgenerator = field_35260_F.getRandomWorldGenForTrees(field_35263_C);
+                int j6 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int k10 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                WorldGenerator worldgenerator = biomeGenerator.getRandomWorldGenForTrees(randomGenerator);
                 worldgenerator.func_420_a(1.0D, 1.0D, 1.0D);
-                worldgenerator.generate(field_35262_B, field_35263_C, l5, field_35262_B.GetHeightValue(l5, k9), k9);
+                worldgenerator.generate(curWorldObj, randomGenerator, j6, curWorldObj.GetHeightValue(j6, k10), k10);
             }
 
-            for (int i2 = 0; i2 < field_35283_s; i2++)
+            for (int i2 = 0; i2 < field_40318_J; i2++)
             {
-                int i6 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int l9 = field_35263_C.nextInt(128);
-                int j13 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35273_l.generate(field_35262_B, field_35263_C, i6, l9, j13);
-                if (field_35263_C.nextInt(4) == 0)
+                int k6 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int l10 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                field_40320_u.generate(curWorldObj, randomGenerator, k6, curWorldObj.GetHeightValue(k6, l10), l10);
+            }
+
+            for (int j2 = 0; j2 < flowersPerChunk; j2++)
+            {
+                int l6 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int i11 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int l14 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                plantYellowGen.generate(curWorldObj, randomGenerator, l6, i11, l14);
+                if (randomGenerator.nextInt(4) == 0)
                 {
-                    int j6 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                    int i10 = field_35263_C.nextInt(128);
-                    int k13 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                    field_35274_m.generate(field_35262_B, field_35263_C, j6, i10, k13);
+                    int i7 = chunk_X + randomGenerator.nextInt(16) + 8;
+                    int j11 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                    int i15 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                    plantRedGen.generate(curWorldObj, randomGenerator, i7, j11, i15);
                 }
             }
 
-            for (int j2 = 0; j2 < field_35282_t; j2++)
+            for (int k2 = 0; k2 < grassPerChunk; k2++)
             {
-                int k6 = 1;
-                int j10 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int l13 = field_35263_C.nextInt(128);
-                int i16 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                (new WorldGenTallGrass((byte)Blocks.TallGrass, k6)).generate(field_35262_B, field_35263_C, j10, l13, i16);
-            }
-            
-            for (int k2 = 0; k2 < field_35281_u; k2++)
-            {
-                int l6 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k10 = field_35263_C.nextInt(128);
-                int i14 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                (new WorldGenDeadBush((byte)Blocks.DeadShrubs)).generate(field_35262_B, field_35263_C, l6, k10, i14);
+                int j7 = 1;
+                int k11 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int j15 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int l17 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                (new WorldGenTallGrass((byte)Blocks.TallGrass, j7)).generate(curWorldObj, randomGenerator, k11, j15, l17);
             }
 
-            for (int l2 = 0; l2 < field_35280_v; l2++)
+            for (int l2 = 0; l2 < deadBushPerChunk; l2++)
             {
-                if (field_35263_C.nextInt(4) == 0)
+                int k7 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int l11 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int k15 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                (new WorldGenDeadBush((byte)Blocks.DeadShrubs)).generate(curWorldObj, randomGenerator, k7, l11, k15);
+            }
+
+            for (int i3 = 0; i3 < field_40321_y; i3++)
+            {
+                int l7 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int i12 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                int l15;
+                for (l15 = randomGenerator.nextInt(curWorldObj.worldYMax); l15 > 0 && curWorldObj.GetBlock(l7, l15 - 1, i12) == 0; l15--) { }
+                field_40322_x.generate(curWorldObj, randomGenerator, l7, l15, i12);
+            }
+
+            for (int j3 = 0; j3 < mushroomsPerChunk; j3++)
+            {
+                if (randomGenerator.nextInt(4) == 0)
                 {
-                    int i7 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                    int l10 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                    int j14 = field_35262_B.GetHeightValue(i7, l10);
-                    field_35271_n.generate(field_35262_B, field_35263_C, i7, j14, l10);
+                    int i8 = chunk_X + randomGenerator.nextInt(16) + 8;
+                    int j12 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                    int i16 = curWorldObj.GetHeightValue(i8, j12);
+                    mushroomBrownGen.generate(curWorldObj, randomGenerator, i8, i16, j12);
                 }
-                if (field_35263_C.nextInt(8) == 0)
+                if (randomGenerator.nextInt(8) == 0)
                 {
-                    int j7 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                    int i11 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                    int k14 = field_35263_C.nextInt(128);
-                    field_35272_o.generate(field_35262_B, field_35263_C, j7, k14, i11);
+                    int j8 = chunk_X + randomGenerator.nextInt(16) + 8;
+                    int k12 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                    int j16 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                    mushroomRedGen.generate(curWorldObj, randomGenerator, j8, j16, k12);
                 }
             }
 
-            if (field_35263_C.nextInt(4) == 0)
+            if (randomGenerator.nextInt(4) == 0)
             {
-                int i3 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k7 = field_35263_C.nextInt(128);
-                int j11 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35271_n.generate(field_35262_B, field_35263_C, i3, k7, j11);
+                int k3 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int k8 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int l12 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                mushroomBrownGen.generate(curWorldObj, randomGenerator, k3, k8, l12);
             }
-            if (field_35263_C.nextInt(8) == 0)
+            if (randomGenerator.nextInt(8) == 0)
             {
-                int j3 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int l7 = field_35263_C.nextInt(128);
-                int k11 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35272_o.generate(field_35262_B, field_35263_C, j3, l7, k11);
+                int l3 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int l8 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int i13 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                mushroomRedGen.generate(curWorldObj, randomGenerator, l3, l8, i13);
             }
-            for (int k3 = 0; k3 < field_35279_w; k3++)
+            for (int i4 = 0; i4 < reedsPerChunk; i4++)
             {
-                int i8 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int l11 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                int l14 = field_35263_C.nextInt(128);
-                field_35286_p.generate(field_35262_B, field_35263_C, i8, l14, l11);
-            }
-
-            for (int l3 = 0; l3 < 10; l3++)
-            {
-                int j8 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int i12 = field_35263_C.nextInt(128);
-                int i15 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35286_p.generate(field_35262_B, field_35263_C, j8, i12, i15);
+                int i9 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int j13 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                int k16 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                field_35286_p.generate(curWorldObj, randomGenerator, i9, k16, j13);
             }
 
-            if (field_35263_C.nextInt(32) == 0)
+            for (int j4 = 0; j4 < 10; j4++)
             {
-                int i4 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k8 = field_35263_C.nextInt(128);
-                int j12 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                (new WorldGenPumpkin()).generate(field_35262_B, field_35263_C, i4, k8, j12);
-            }
-            for (int j4 = 0; j4 < field_35289_x; j4++)
-            {
-                int l8 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int k12 = field_35263_C.nextInt(128);
-                int j15 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                field_35285_q.generate(field_35262_B, field_35263_C, l8, k12, j15);
+                int j9 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int k13 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int l16 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                field_35286_p.generate(curWorldObj, randomGenerator, j9, k13, l16);
             }
 
-            for (int k4 = 0; k4 < 50; k4++)
+            if (randomGenerator.nextInt(32) == 0)
             {
-                int i9 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int l12 = field_35263_C.nextInt(field_35263_C.nextInt(128 - 8) + 8);
-                int k15 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                (new WorldGenLiquids((byte)Blocks.AWater)).generate(field_35262_B, field_35263_C, i9, l12, k15);
+                int k4 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int k9 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int l13 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                (new WorldGenPumpkin()).generate(curWorldObj, randomGenerator, k4, k9, l13);
+            }
+            for (int l4 = 0; l4 < field_35289_x; l4++)
+            {
+                int l9 = chunk_X + randomGenerator.nextInt(16) + 8;
+                int i14 = randomGenerator.nextInt(curWorldObj.worldYMax);
+                int i17 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                field_35285_q.generate(curWorldObj, randomGenerator, l9, i14, i17);
             }
 
-            for (int l4 = 0; l4 < 20; l4++)
+            if (field_40319_K)
             {
-                int j9 = field_35258_D + field_35263_C.nextInt(16) + 8;
-                int i13 = field_35263_C.nextInt(field_35263_C.nextInt(field_35263_C.nextInt(128 - 16) + 8) + 8);
-                int l15 = field_35259_E + field_35263_C.nextInt(16) + 8;
-                (new WorldGenLiquids((byte)Blocks.ALava)).generate(field_35262_B, field_35263_C, j9, i13, l15);
-            }
+                for (int i5 = 0; i5 < 50; i5++)
+                {
+                    int i10 = chunk_X + randomGenerator.nextInt(16) + 8;
+                    int j14 = randomGenerator.nextInt(randomGenerator.nextInt(curWorldObj.worldYMax - 8) + 8);
+                    int j17 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                    (new WorldGenLiquids((byte)Blocks.AWater)).generate(curWorldObj, randomGenerator, i10, j14, j17);
+                }
 
+                for (int j5 = 0; j5 < 20; j5++)
+                {
+                    int j10 = chunk_X + randomGenerator.nextInt(16) + 8;
+                    int k14 = randomGenerator.nextInt(randomGenerator.nextInt(randomGenerator.nextInt(curWorldObj.worldYMax - 16) + 8) + 8);
+                    int k17 = chunk_Z + randomGenerator.nextInt(16) + 8;
+                    (new WorldGenLiquids((byte)Blocks.ALava)).generate(curWorldObj, randomGenerator, j10, k14, k17);
+                }
+
+            }
         }
 
         protected void func_35257_a(int i, WorldGenerator worldgenerator, int j, int k)
         {
             for (int l = 0; l < i; l++)
             {
-                int i1 = field_35258_D + field_35263_C.nextInt(16);
-                int j1 = field_35263_C.nextInt(k - j) + j;
-                int k1 = field_35259_E + field_35263_C.nextInt(16);
-                worldgenerator.generate(field_35262_B, field_35263_C, i1, j1, k1);
+                int i1 = chunk_X + randomGenerator.nextInt(16);
+                int j1 = randomGenerator.nextInt(k - j) + j;
+                int k1 = chunk_Z + randomGenerator.nextInt(16);
+                worldgenerator.generate(curWorldObj, randomGenerator, i1, j1, k1);
             }
 
         }
@@ -222,57 +246,62 @@ namespace SMP
         {
             for (int l = 0; l < i; l++)
             {
-                int i1 = field_35258_D + field_35263_C.nextInt(16);
-                int j1 = field_35263_C.nextInt(k) + field_35263_C.nextInt(k) + (j - k);
-                int k1 = field_35259_E + field_35263_C.nextInt(16);
-                worldgenerator.generate(field_35262_B, field_35263_C, i1, j1, k1);
+                int i1 = chunk_X + randomGenerator.nextInt(16);
+                int j1 = randomGenerator.nextInt(k) + randomGenerator.nextInt(k) + (j - k);
+                int k1 = chunk_Z + randomGenerator.nextInt(16);
+                worldgenerator.generate(curWorldObj, randomGenerator, i1, j1, k1);
             }
 
         }
 
-        protected void func_35253_a()
+        protected void generateOres()
         {
-            func_35257_a(20, field_35266_d, 0, 128);
-            func_35257_a(10, field_35267_e, 0, 128);
-            func_35257_a(20, field_35264_f, 0, 128);
-            func_35257_a(20, field_35265_g, 0, 128 / 2);
-            func_35257_a(2, field_35277_h, 0, 128 / 4);
-            func_35257_a(8, field_35278_i, 0, 128 / 8);
-            func_35257_a(1, field_35275_j, 0, 128 / 8);
-            func_35254_b(1, field_35276_k, 128 / 8, 128 / 8);
+            func_35257_a(20, dirtGenerator, 0, curWorldObj.worldYMax);
+            func_35257_a(10, gravelGen, 0, curWorldObj.worldYMax);
+            func_35257_a(20, coalGen, 0, curWorldObj.worldYMax);
+            func_35257_a(20, ironGen, 0, curWorldObj.worldYMax / 2);
+            func_35257_a(2, goldGen, 0, curWorldObj.worldYMax / 4);
+            func_35257_a(8, redstoneGen, 0, curWorldObj.worldYMax / 8);
+            func_35257_a(1, diamondGen, 0, curWorldObj.worldYMax / 8);
+            func_35254_b(1, lapisGen, curWorldObj.worldYMax / 8, curWorldObj.worldYMax / 8);
         }
 
-        private World field_35262_B;
-        private java.util.Random field_35263_C;
-        private int field_35258_D;
-        private int field_35259_E;
-        private BiomeGenBase field_35260_F;
-        protected WorldGenerator field_35270_a;
-        protected WorldGenerator field_35268_b;
-        protected WorldGenerator field_35269_c;
-        protected WorldGenerator field_35266_d;
-        protected WorldGenerator field_35267_e;
-        protected WorldGenerator field_35264_f;
-        protected WorldGenerator field_35265_g;
-        protected WorldGenerator field_35277_h;
-        protected WorldGenerator field_35278_i;
-        protected WorldGenerator field_35275_j;
-        protected WorldGenerator field_35276_k;
-        protected WorldGenerator field_35273_l;
-        protected WorldGenerator field_35274_m;
-        protected WorldGenerator field_35271_n;
-        protected WorldGenerator field_35272_o;
+        private World curWorldObj;
+        private java.util.Random randomGenerator;
+        private int chunk_X;
+        private int chunk_Z;
+        private BiomeGenBase biomeGenerator;
+        protected WorldGenerator clayGenerator;
+        protected WorldGenerator sandGenerator;
+        protected WorldGenerator gravelGenerator;
+        protected WorldGenerator dirtGenerator;
+        protected WorldGenerator gravelGen;
+        protected WorldGenerator coalGen;
+        protected WorldGenerator ironGen;
+        protected WorldGenerator goldGen;
+        protected WorldGenerator redstoneGen;
+        protected WorldGenerator diamondGen;
+        protected WorldGenerator lapisGen;
+        protected WorldGenerator plantYellowGen;
+        protected WorldGenerator plantRedGen;
+        protected WorldGenerator mushroomBrownGen;
+        protected WorldGenerator mushroomRedGen;
+        protected WorldGenerator field_40320_u;
         protected WorldGenerator field_35286_p;
         protected WorldGenerator field_35285_q;
-        public int field_35284_r;
-        public int field_35283_s;
-        public int field_35282_t;
-        public int field_35281_u;
-        public int field_35280_v;
-        public int field_35279_w;
+        protected WorldGenerator field_40322_x;
+        public int field_40321_y;
+        public int treesPerChunk;
+        public int flowersPerChunk;
+        public int grassPerChunk;
+        public int deadBushPerChunk;
+        public int mushroomsPerChunk;
+        public int reedsPerChunk;
         public int field_35289_x;
         public int field_35288_y;
         public int field_35287_z;
-        public int field_35261_A;
+        public int clayPerChunk;
+        public int field_40318_J;
+        public bool field_40319_K;
     }
 }

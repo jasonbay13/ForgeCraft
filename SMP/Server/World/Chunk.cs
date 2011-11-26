@@ -20,6 +20,7 @@ using System.IO;
 using System.Collections.Generic;
 using Ionic.Zlib;
 using Substrate.Nbt;
+using System.Linq;
 
 namespace SMP
 {
@@ -34,6 +35,7 @@ namespace SMP
 		public byte[] SkyL;
 		public byte[] meta;
         public byte[] heightMap;
+        public int[] precipitationHeightMap;
         public Dictionary<int, ushort> extra;
 		public int x;
 		public int z;
@@ -83,6 +85,7 @@ namespace SMP
             SkyL = new byte[16384];
             meta = new byte[16384];
             heightMap = new byte[256];
+            precipitationHeightMap = Enumerable.Repeat(-999, 256).ToArray();
             extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
@@ -147,6 +150,7 @@ namespace SMP
                         Array.Copy(nbt.Root["BlockLight"].ToTagByteArray(), ch.Light, ch.Light.Length);
                         Array.Copy(nbt.Root["SkyLight"].ToTagByteArray(), ch.SkyL, ch.SkyL.Length);
                         Array.Copy(nbt.Root["HeightMap"].ToTagByteArray(), ch.heightMap, ch.heightMap.Length);
+                        Array.Copy(nbt.Root["HeightMapPrec"].ToTagByteArray().Data.ToIntArray(), ch.precipitationHeightMap, ch.precipitationHeightMap.Length);
                         TagNodeCompound nbtCompound;
                         foreach (TagNode tag in nbt.Root["Extra"].ToTagList())
                         {
@@ -207,7 +211,7 @@ namespace SMP
             if (generate)
             {
                 if (thread) World.chunker.QueueChunk(x, z, w);
-                else w.GenerateChunk(x, z);
+                else return w.GenerateChunk(x, z);
                 return null;
             }
             if (dummy) return new Chunk(x, z);
@@ -228,6 +232,7 @@ namespace SMP
             nbt.Root.Add("BlockLight", new TagNodeByteArray(Light));
             nbt.Root.Add("SkyLight", new TagNodeByteArray(SkyL));
             nbt.Root.Add("HeightMap", new TagNodeByteArray(heightMap));
+            nbt.Root.Add("HeightMapPrec", new TagNodeByteArray(precipitationHeightMap.ToByteArray()));
             TagNodeList nbtList = new TagNodeList(TagType.TAG_COMPOUND);
             TagNodeCompound nbtCompound;
             lock (extra)
@@ -578,6 +583,29 @@ namespace SMP
             }
             catch { return null; }
         }
+
+        public int func_35631_c(World w, int i, int j)
+        {
+            int k = i | j << 4;
+            int l = precipitationHeightMap[k];
+            if (l == -999)
+            {
+                int i1 = w.worldYMax - 1;
+                for (l = -1; i1 > 0 && l == -1; )
+                {
+                    byte j1 = GetBlock(i, i1, j);
+                    //Material material = j1 != 0 ? BlockData.BlockMaterial(j1) : Material.Air;
+                    if (!BlockData.IsSolid(j1) && !BlockData.IsLiquid(j1))
+                        i1--;
+                    else
+                        l = i1 + 1;
+                }
+
+                precipitationHeightMap[k] = l;
+            }
+            return l;
+        }
+
 		/// <summary>
 		/// Places the block at a x, y, z.
 		/// </summary>
@@ -600,11 +628,7 @@ namespace SMP
 		public void PlaceBlock(int x, int y, int z, byte id, byte meta)
 		{
 			if (InBound(x, y, z))
-			{
-				blocks[PosToInt(x, y, z)] = id;
-				SetMetaData(x, y, z, meta);
-                this._dirty = true;
-			}
+                UNCHECKEDPlaceBlock(x, y, z, id, meta);
 		}
 		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id)
 		{
@@ -612,8 +636,12 @@ namespace SMP
 		}
 		public void UNCHECKEDPlaceBlock(int x, int y, int z, byte id, byte meta)
 		{
+            int i = z << 4 | x;
+            if (y >= precipitationHeightMap[i] - 1)
+                precipitationHeightMap[i] = -999;
+
 			blocks[PosToInt(x, y, z)] = id;
-			if(meta != 0) SetMetaData(x, y, z, meta);
+			SetMetaData(x, y, z, meta);
             this._dirty = true;
 		}
 
