@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SMP.Generator
 {
-    public interface Noise
+    public interface NoiseGenerator
     {
     }
 }

@@ -2,15 +2,15 @@
 
 namespace SMP.Generator
 {
-    public class NoiseOctaves : Noise
+    public class NoiseGeneratorOctaves : NoiseGenerator
     {
-        public NoiseOctaves(java.util.Random random, int i)
+        public NoiseGeneratorOctaves(java.util.Random random, int i)
         {
-            field_938_b = i;
-            generatorCollection = new NoisePerlin[i];
+            octaves = i;
+            generatorCollection = new NoiseGeneratorPerlin[i];
             for(int j = 0; j < i; j++)
             {
-                generatorCollection[j] = new NoisePerlin(random);
+                generatorCollection[j] = new NoiseGeneratorPerlin(random);
             }
 
         }
@@ -19,7 +19,7 @@ namespace SMP.Generator
         {
             double d2 = 0.0D;
             double d3 = 1.0D;
-            for(int i = 0; i < field_938_b; i++)
+            for(int i = 0; i < octaves; i++)
             {
                 d2 += generatorCollection[i].GetNoise(d * d3, d1 * d3) / d3;
                 d3 /= 2D;
@@ -42,7 +42,7 @@ namespace SMP.Generator
 
             }
             double d3 = 1.0D;
-            for(int l1 = 0; l1 < field_938_b; l1++)
+            for(int l1 = 0; l1 < octaves; l1++)
             {
                 double d4 = (double)i * d3 * d;
                 double d5 = (double)j * d3 * d1;
@@ -67,7 +67,7 @@ namespace SMP.Generator
             return GetNoise(ad, i, 10, j, k, 1, l, d, 1.0D, d1);
         }
 
-        private NoisePerlin[] generatorCollection;
-        private int field_938_b;
+        private NoiseGeneratorPerlin[] generatorCollection;
+        private int octaves;
     }
 }

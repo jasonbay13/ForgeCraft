@@ -10,12 +10,12 @@ namespace SMP.Generator {
         
         private java.util.Random random;
         public World worldObj;
-        private NoiseOctaves field_705_k;
-        private NoiseOctaves field_704_l;
-        private NoiseOctaves field_703_m;
-        private NoiseOctaves field_702_n;
-        public NoiseOctaves field_715_a;
-        public NoiseOctaves field_714_b;
+        private NoiseGeneratorOctaves field_705_k;
+        private NoiseGeneratorOctaves field_704_l;
+        private NoiseGeneratorOctaves field_703_m;
+        private NoiseGeneratorOctaves field_702_n;
+        public NoiseGeneratorOctaves field_715_a;
+        public NoiseGeneratorOctaves field_714_b;
         //public NoiseOctaves mobSpawnerNoise;
 
         private MapGenBase caveGenerator;
@@ -48,12 +48,12 @@ namespace SMP.Generator {
             ravineGenerator = new MapGenRavine();
             //unusedIntArray32x32 = new int[32][32];
             mapFeaturesEnabled = flag;
-            field_705_k = new NoiseOctaves(random, 16);
-            field_704_l = new NoiseOctaves(random, 16);
-            field_703_m = new NoiseOctaves(random, 8);
-            field_702_n = new NoiseOctaves(random, 4);
-            field_715_a = new NoiseOctaves(random, 10);
-            field_714_b = new NoiseOctaves(random, 16);
+            field_705_k = new NoiseGeneratorOctaves(random, 16);
+            field_704_l = new NoiseGeneratorOctaves(random, 16);
+            field_703_m = new NoiseGeneratorOctaves(random, 8);
+            field_702_n = new NoiseGeneratorOctaves(random, 4);
+            field_715_a = new NoiseGeneratorOctaves(random, 10);
+            field_714_b = new NoiseGeneratorOctaves(random, 16);
             //mobSpawnerNoise = new NoiseOctaves(random, 8);
         }
 

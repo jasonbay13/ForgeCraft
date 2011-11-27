@@ -38,7 +38,7 @@
 //        private const int GradientSizeTable = 256;
 //        private readonly Random _random;
 //        private readonly double[] _gradients = new double[GradientSizeTable * 3];
-		
+
 //        private readonly byte[] _perm = new byte[] {
 //              225,155,210,108,175,199,221,144,203,116, 70,213, 69,158, 33,252,
 //                5, 82,173,133,222,139,174, 27,  9, 71, 90,246, 75,130, 91,191,
@@ -146,8 +146,8 @@
 //        public void Noise(object sender, EventArgs e)
 //        {
 //            PerlinNoise perlinNoise = new PerlinNoise(99);
-			
-			
+
+
 
 //            //bitmap.SetEachPixelColour(
 //            //    (point, color) =>

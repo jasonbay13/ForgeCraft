@@ -2,11 +2,11 @@
 
 namespace SMP.Generator
 {
-    public class NoisePerlin : Noise
+    public class NoiseGeneratorPerlin : NoiseGenerator
     {
-        public NoisePerlin() : this(new java.util.Random()) { }
+        public NoiseGeneratorPerlin() : this(new java.util.Random()) { }
 
-        public NoisePerlin(java.util.Random random)
+        public NoiseGeneratorPerlin(java.util.Random random)
         {
             permutations = new int[512];
             xCoord = random.nextDouble() * 256D;

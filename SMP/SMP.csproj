@@ -77,7 +77,12 @@
     <Compile Include="Mojang\Server\World\Generator\Features\MapGenWaterlily.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenBigMushroom.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenDungeons.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\WorldGenFire.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\WorldGenGlowStone1.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\WorldGenGlowStone2.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\WorldGenHellLava.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenLakes.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Features\WorldGenSpikes.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayer.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerDownfall.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerDownfallMix.cs" />
@@ -139,9 +144,9 @@
     <Compile Include="Mojang\Server\World\WorldChunkManager.cs" />
     <Compile Include="Mojang\util\LongHashMap.cs" />
     <Compile Include="Mojang\util\LongHashMapEntry.cs" />
-    <Compile Include="Server\World\Generator\Noise\Noise.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Noise\NoiseOctaves.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Noise\NoisePerlin.cs" />
+    <Compile Include="Server\World\Generator\Noise\NoiseGenerator.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Noise\NoiseGeneratorOctaves.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Noise\NoiseGeneratorPerlin.cs" />
     <Compile Include="Server\GUI\InventoryDebug.cs">
       <SubType>Form</SubType>
     </Compile>
