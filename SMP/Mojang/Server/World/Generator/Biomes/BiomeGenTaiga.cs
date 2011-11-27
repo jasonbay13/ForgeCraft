@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SMP
+namespace SMP.Generator
 {
     public class BiomeGenTaiga : BiomeGenBase
     {

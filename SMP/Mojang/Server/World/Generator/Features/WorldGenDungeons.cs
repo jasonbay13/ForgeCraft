@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SMP
+namespace SMP.Generator
 {
     public class WorldGenDungeons : WorldGenerator
     {
@@ -204,19 +204,19 @@ namespace SMP
             int i = random.nextInt(4);
             if (i == 0)
             {
-                return (int)Mobs.Skeleton;
+                return (int)MobType.Skeleton;
             }
             if (i == 1)
             {
-                return (int)Mobs.Zombie;
+                return (int)MobType.Zombie;
             }
             if (i == 2)
             {
-                return (int)Mobs.Zombie;
+                return (int)MobType.Zombie;
             }
             if (i == 3)
             {
-                return (int)Mobs.Spider;
+                return (int)MobType.Spider;
             }
             else
             {

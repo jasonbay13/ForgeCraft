@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP
+namespace SMP.Generator
 {
-    class BiomeGenSnow : BiomeGenBase
+    public class BiomeGenSnow : BiomeGenBase
     {
         public BiomeGenSnow(int i)
             : base(i)

@@ -320,12 +320,12 @@ namespace SMP
 		Vines = 106,
 		FenceGate = 107,
 		BrickStairs = 108,
-		StoneBrickStairs = 109,
+		StairsStoneBrick = 109,
 		Mycelium = 110,
 		LilyPad = 111,
 		NetherBrick = 112,
 		NetherBrickFence = 113,
-		NetherBrickStairs = 114,
+		StairsNetherBrick = 114,
 		NetherWart = 115,
 		EnchantmentTable = 116,
 		BrewingStand = 117,
@@ -479,7 +479,7 @@ namespace SMP
 		elevenMusicDisc = 2266
 		
 	};
-    public enum Mobs : byte
+    public enum MobType : byte
     {
         Creeper = 50,
         Skeleton = 51,
@@ -505,7 +505,7 @@ namespace SMP
         SnowGolem = 97,
         Villager = 120
     }
-    public enum Objects : byte
+    public enum ObjectType : byte
     {
         Boat = 1,
         Minecart = 10,
@@ -912,6 +912,7 @@ namespace SMP
                 case 112:
                 case 113:
                 case 114:
+                case 121:
                     return Material.Stone;
                 case 5:
                 case 17:
@@ -1057,6 +1058,10 @@ namespace SMP
                     return 105;
                 case 372:
                     return 115;
+                case 379:
+                    return 117;
+                case 380:
+                    return 118;
             }
             return 0;
         }
@@ -1252,9 +1257,20 @@ namespace SMP
                 case 113:
                 case 114:
                 case 115:
+                case 116:
+                case 117:
+                case 118:
+                case 119:
+                case 120:
+                case 122:
                     return false;
             }
             return true;
+        }
+
+        public static bool IsNormalCube(byte a)
+        {
+            return IsOpaqueCube(a) && IsCube(a);
         }
 
         public static bool IsSolid(byte a)
@@ -1314,4 +1330,50 @@ namespace SMP
             return face;
         }
 	}
+
+    public static class BlockHelper
+    {
+        public static void PlaceDoor(World world, int i, int j, int k, int l, byte block)
+        {
+            sbyte byte0 = 0;
+            sbyte byte1 = 0;
+            if (l == 0)
+            {
+                byte1 = 1;
+            }
+            if (l == 1)
+            {
+                byte0 = -1;
+            }
+            if (l == 2)
+            {
+                byte1 = -1;
+            }
+            if (l == 3)
+            {
+                byte0 = 1;
+            }
+            int i1 = (BlockData.IsNormalCube(world.GetBlock(i - byte0, j, k - byte1)) ? 1 : 0) + (BlockData.IsNormalCube(world.GetBlock(i - byte0, j + 1, k - byte1)) ? 1 : 0);
+            int j1 = (BlockData.IsNormalCube(world.GetBlock(i + byte0, j, k + byte1)) ? 1 : 0) + (BlockData.IsNormalCube(world.GetBlock(i + byte0, j + 1, k + byte1)) ? 1 : 0);
+            bool flag = world.GetBlock(i - byte0, j, k - byte1) == block || world.GetBlock(i - byte0, j + 1, k - byte1) == block;
+            bool flag1 = world.GetBlock(i + byte0, j, k + byte1) == block || world.GetBlock(i + byte0, j + 1, k + byte1) == block;
+            bool flag2 = false;
+            if (flag && !flag1)
+            {
+                flag2 = true;
+            }
+            else
+                if (j1 > i1)
+                {
+                    flag2 = true;
+                }
+            if (flag2)
+            {
+                l = l - 1 & 3;
+                l += 4;
+            }
+            world.SetBlock(i, j, k, block, (byte)l);
+            world.SetBlock(i, j + 1, k, block, (byte)(l + 8));
+        }
+    }
 }

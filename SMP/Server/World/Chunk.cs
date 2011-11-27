@@ -169,9 +169,10 @@ namespace SMP
                                 ch.physChecks[i] = new Physics.Check(nbtList2[0].ToTagInt(), nbtList2[1].ToTagInt(), nbtList2[2].ToTagInt(), nbtCompound["Meta"].ToTagByte(), nbtCompound["Time"].ToTagShort());
                             }
                         }
-                        AI ai; McObject obj; Item item; TagNodeCompound nbtCompound2;
+                        AI ai; McObject obj; Item item; Entity e; TagNodeCompound nbtCompound2;
                         foreach (TagNode tag in nbt.Root["Entities"].ToTagList())
                         {
+                            e = null;
                             nbtCompound = tag.ToTagCompound();
                             switch ((EntityType)(byte)nbtCompound["Type"].ToTagByte())
                             {
@@ -184,17 +185,21 @@ namespace SMP
                                 case EntityType.Item:
                                     nbtCompound2 = nbtCompound["Data"].ToTagCompound();
                                     item = new Item(nbtCompound2["ID"].ToTagShort(), nbtCompound2["Count"].ToTagByte(), nbtCompound2["Meta"].ToTagShort(), w);
-                                    nbtList = nbtCompound["Motion"].ToTagList();
-                                    item.e.velocity = new double[] { nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble() };
-                                    nbtList = nbtCompound["Pos"].ToTagList();
-                                    item.e.pos = new Point3(nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble());
-                                    nbtList = nbtCompound["Rotation"].ToTagList();
-                                    item.e.rot = new float[] { nbtList[0].ToTagFloat(), nbtList[1].ToTagFloat() };
-                                    item.e.age = nbtCompound["Age"].ToTagInt();
-                                    item.e.onground = nbtCompound["OnGround"].ToTagByte();
-                                    item.e.Health = nbtCompound["Health"].ToTagShort();
-                                    item.e.UpdateChunks(false, false);
+                                    e = item.e;
                                     break;
+                            }
+                            if (e != null)
+                            {
+                                nbtList = nbtCompound["Motion"].ToTagList();
+                                e.velocity = new double[] { nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble() };
+                                nbtList = nbtCompound["Pos"].ToTagList();
+                                e.pos = new Point3(nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble());
+                                nbtList = nbtCompound["Rotation"].ToTagList();
+                                e.rot = new float[] { nbtList[0].ToTagFloat(), nbtList[1].ToTagFloat() };
+                                e.age = nbtCompound["Age"].ToTagInt();
+                                e.OnGround = (nbtCompound["OnGround"].ToTagByte() > 0);
+                                e.health = nbtCompound["Health"].ToTagShort();
+                                e.UpdateChunks(false, false);
                             }
                         }
                     }

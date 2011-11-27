@@ -1187,6 +1187,8 @@ namespace SMP
                     util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 23);
                     util.EndianBitConverter.Big.GetBytes((short)0).CopyTo(bytes, 25);
                 }
+
+                SendRaw(0x17, bytes);
             }
 			public void SendPickupSpawn(Entity e1)
 			{
@@ -1496,7 +1498,7 @@ namespace SMP
 				FlyList.Add(p1);
 			}
 
-			//8 below for catching
+			//9 below for catching
 			for (int x = -1; x <= 1; x++)
 			{
 				for (int z = -1; z <= 1; z++)
@@ -1530,7 +1532,7 @@ namespace SMP
 			}
 
 			//16 for the wall
-			for (int x = -2; x <= 2; x++)
+			/*for (int x = -2; x <= 2; x++)
 			{
 				for (int z = -2; z <= 2; z++)
 				{
@@ -1544,7 +1546,7 @@ namespace SMP
 						FlyList.Add(p);
 					}
 				}
-			}
+			}*/
 
 			foreach (Point3 po in FlyList.ToArray())
 			{

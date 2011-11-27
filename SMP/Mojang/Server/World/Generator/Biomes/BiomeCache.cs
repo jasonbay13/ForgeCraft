@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SMP
+namespace SMP.Generator
 {
     public class BiomeCache
     {

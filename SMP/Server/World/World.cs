@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Ionic.Zlib;
+using SMP.Generator;
 
 namespace SMP
 {
@@ -707,7 +708,7 @@ namespace SMP
                 chunk.PlaceBlock(x & 0xf, y, z & 0xf, type, meta);
                 chunk.QuickRecalculateLight(x & 0xf, y, z & 0xf);
                 if (type != oldBlock || meta != oldMeta) // Don't send block change if it's the same.
-                    QueueBlockChange(x, y, z, type, meta); // Causes client freeze during level generation?
+                    /*QueueBlockChange(x, y, z, type, meta)*/; // Causes client freeze during level generation?
             }
             catch { }
         }

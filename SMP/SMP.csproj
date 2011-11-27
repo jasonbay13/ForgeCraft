@@ -97,6 +97,12 @@
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerZoomFuzzy.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\GenLayerZoomVoronoi.cs" />
     <Compile Include="Mojang\Server\World\Generator\Layer\LayerIsland.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandom.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandomChoice.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructureBoundingBox.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructureComponent.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceBlockSelector.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceTreasure.cs" />
     <Compile Include="Mojang\util\IntCache.cs" />
     <Compile Include="Mojang\Server\World\ChunkPosition.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeDecorator.cs" />
@@ -131,8 +137,8 @@
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenTallGrass.cs" />
     <Compile Include="Mojang\Server\World\Generator\Features\WorldGenTrees.cs" />
     <Compile Include="Mojang\Server\World\WorldChunkManager.cs" />
-    <Compile Include="Mojang\util\PlayerHash.cs" />
-    <Compile Include="Mojang\util\PlayerHashEntry.cs" />
+    <Compile Include="Mojang\util\LongHashMap.cs" />
+    <Compile Include="Mojang\util\LongHashMapEntry.cs" />
     <Compile Include="Server\World\Generator\Noise\Noise.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoiseOctaves.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoisePerlin.cs" />
@@ -406,8 +412,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Folder Include="Mojang\Server\World\Generator\Structures\Components\" />
     <Folder Include="Server\Economy\Commands\" />
-    <Folder Include="Server\World\Generator\Features\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mojang\LICENSE.txt" />

@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SMP.Generator;
 
 namespace SMP
 {
@@ -119,8 +120,8 @@ namespace SMP
 			Placed.Add((short)Blocks.StairsWooden, new BCD(PlaceStairs));
             Placed.Add((short)Blocks.StairsCobblestone, new BCD(PlaceStairs));
             Placed.Add((short)Blocks.BrickStairs, new BCD(PlaceStairs));
-            Placed.Add((short)Blocks.StoneBrickStairs, new BCD(PlaceStairs));
-            Placed.Add((short)Blocks.NetherBrickStairs, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.StairsStoneBrick, new BCD(PlaceStairs));
+            Placed.Add((short)Blocks.StairsNetherBrick, new BCD(PlaceStairs));
 			Placed.Add((short)Blocks.Chest, new BCD(PlaceChest));
 			Placed.Add((short)Blocks.Furnace, new BCD(PlaceFurnace));
 			Placed.Add((short)Blocks.Ladder, new BCD(PlaceLadder));

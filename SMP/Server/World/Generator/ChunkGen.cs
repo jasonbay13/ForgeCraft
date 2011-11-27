@@ -17,7 +17,8 @@
 */
 using System;
 
-namespace SMP {
+namespace SMP.Generator
+{
 
     /// <summary>
     /// This class is used to tie together all chunk generators.

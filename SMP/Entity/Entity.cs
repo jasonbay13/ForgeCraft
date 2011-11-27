@@ -77,7 +77,7 @@ namespace SMP
 		public int id;
 
         public int age = 0;
-        private short health = 20;
+        internal short health = 20;
         public short Health
         {
             get { return health; }
@@ -478,7 +478,7 @@ namespace SMP
         internal void UpdatePosition()
         {
             bool forceTp = false;
-            if ((DateTime.Now - lastPosSync).TotalSeconds >= 10)
+            if ((DateTime.Now - lastPosSync).TotalSeconds >= 60)
             {
                 lastPosSync = DateTime.Now;
                 forceTp = true;

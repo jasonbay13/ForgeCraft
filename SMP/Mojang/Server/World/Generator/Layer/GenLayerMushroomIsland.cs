@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SMP
+namespace SMP.Generator
 {
-    class GenLayerMushroomIsland : GenLayer
+    public class GenLayerMushroomIsland : GenLayer
     {
         public GenLayerMushroomIsland(long l, GenLayer genlayer)
             : base(l)

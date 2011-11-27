@@ -22,10 +22,20 @@ using System.Text;
 
 namespace SMP
 {
-	public interface McObject
+	public abstract class McObject
 	{
-        int id { get; }
-        byte type { get; }
-        Point3 pos { get; set; }
+        public abstract Entity e { get; internal set; }
+        public abstract byte type { get; }
+
+        public int id { get { return e.id; } }
+        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
+        public float[] rot { get { return e.rot; } set { e.rot = value; } }
+        public double[] velocity { get { return e.velocity; } set { e.velocity = value; } }
+
+
+        private McObject(ObjectType type)
+        {
+            // TODO
+        }
 	}
 }
