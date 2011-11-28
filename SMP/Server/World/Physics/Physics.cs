@@ -42,8 +42,8 @@ namespace SMP
         public delegate void OnPhysics(Physics physics, int x, int y, int z, byte type, byte meta);
         public static event OnPhysics WorldPhysicsUpdate;
         public event OnPhysics PhysicsUpdate;
-        #endregion
         internal bool cancelphysics = false;
+        #endregion
 
         public Physics(World w) : this(w, PSetting.Hardcore) { }
         public Physics(World w, PSetting setting) : this(w, setting, 250) { }

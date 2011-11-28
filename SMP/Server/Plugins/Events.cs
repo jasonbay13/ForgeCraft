@@ -46,13 +46,20 @@ namespace SMP
         RightClick,
         LeftClick
     }
+    public enum PhysicsEvent
+    {
+        ButtonRelease,
+        WaterFlow,
+        LavaFlow,
+    }
     public enum LevelEvent
     {
         BlockChange,
         PhysicsUpdate,
         Load,
         Save,
-        Unload
+        Unload,
+        ChunkGenerated
     }
     public enum ServerEvent
     {
