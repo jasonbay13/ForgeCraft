@@ -42,6 +42,7 @@ namespace SMP
         private object genLock = new object();
         private bool initialized = false;
 		public System.Timers.Timer timeupdate = new System.Timers.Timer(1000);
+        public bool timerunning = false;
         public System.Threading.Thread timeincrement;
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
 		private ChunkGen generator;
@@ -68,11 +69,19 @@ namespace SMP
 		public delegate void OnWorldSave(World w);
 		public static event OnWorldSave OnSave;
 		public event OnWorldLoad Save;
-		public delegate void OnGenerateChunk(World w, Chunk c, int x, int z);
-		public static event OnGenerateChunk WorldGenerateChunk;
-		public event OnGenerateChunk GeneratedChunk;
+		public delegate void OnGeneratedChunk(World w, Chunk c, int x, int z);
+        public delegate Chunk OnGenerateChunk(World w, int x, int z);
+		public static event OnGeneratedChunk WorldGeneratedChunk;
+        public event OnGenerateChunk ChunkGenerating;
+        public static event OnGenerateChunk WorldGeneratingChunk;
+		public event OnGeneratedChunk GeneratedChunk;
+        public delegate void OnTimeChange();
+        public event OnTimeChange TimeChanged;
+        public static event OnTimeChange WorldTimeChanged;
 		public delegate void OnBlockChange(int x, int y, int z, byte type, byte meta);
 		public event OnBlockChange BlockChanged;
+        internal bool cancelchunk;
+        internal static bool cancelsave;
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		#endregion
 
@@ -422,6 +431,11 @@ namespace SMP
                 w.Save(w);
             if (World.OnSave != null)
                 World.OnSave(w);
+            if (cancelsave)
+            {
+                cancelsave = false;
+                return;
+            }
             //TODO Save files
             if (!Directory.Exists(w.name)) Directory.CreateDirectory(w.name);
             using (StreamWriter sw = new StreamWriter(w.name + "/" + w.name + ".ini"))
@@ -526,16 +540,46 @@ namespace SMP
                         time++; if (time > 24000) time = 0;
                         TimeSpan Took = DateTime.Now - Start;
                         wait = speed - (int)Took.TotalMilliseconds;
+                        if (TimeChanged != null)
+                            TimeChanged();
+                        if (WorldTimeChanged != null)
+                            WorldTimeChanged();
                     }
                     catch { wait = speed; }
                 }
             }));
             timeincrement.Start();
+            timerunning = true;
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();
             InitializeTimers();
         }
-        
+        /// <summary>
+        /// Start the world time
+        /// </summary>
+        public void StartTime()
+        {
+            if (!timerunning)
+            {
+                timeincrement.Resume();
+                timerunning = true;
+            }
+        }
+        /// <summary>
+        /// Stop the world time
+        /// </summary>
+        public void StopTime()
+        {
+            if (timerunning)
+            {
+                timeincrement.Suspend();
+                timerunning = false;
+            }
+        }
+        /// <summary>
+        /// Set wether its raining or not
+        /// </summary>
+        /// <param name="rain">is it raining?</param>
         public void Rain(bool rain)
 		{
             IsRaining = rain;
@@ -543,6 +587,12 @@ namespace SMP
 			    if (p.LoggedIn && p.MapLoaded)
 				    p.SendRain(rain);
 		}
+        /// <summary>
+        /// Shoot a lighting bolt
+        /// </summary>
+        /// <param name="x">The x cord. of the lighting bolt</param>
+        /// <param name="y">The y cord. of the lighting bolt</param>
+        /// <param name="z">The z cord. of the lighting bolt</param>
 		public void Lightning(int x, int y, int z)
 		{
 			Entity e = new Entity(true);
@@ -556,7 +606,12 @@ namespace SMP
             if (BlockData.IsSolid(GetBlock(x, y - 1, z)))
                 BlockChange(x, y, z, (byte)Blocks.Fire, 0);
 		}
-
+        /// <summary>
+        /// Does a chunk exist?
+        /// </summary>
+        /// <param name="x">The x cord. of the chunk</param>
+        /// <param name="z">The z cord. of the chunk</param>
+        /// <returns></returns>
         public bool ChunkExists(int x, int z)
         {
             Point pt = new Point(x, z);
@@ -564,10 +619,31 @@ namespace SMP
             //Console.WriteLine(chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated);
             return File.Exists(Chunk.CreatePath(this, x, z));
         }
-
+        /// <summary>
+        /// Generate a chunk at x and z
+        /// </summary>
+        /// <param name="x">The x cord. to generate</param>
+        /// <param name="z">The z cord. to generate</param>
+        /// <returns>Returns the generated chunk</returns>
 		public Chunk GenerateChunk(int x, int z)
 		{
-            Chunk c; Point pt = new Point(x, z);
+            Chunk c = null; Point pt = new Point(x, z);
+
+            if (ChunkGenerating != null)
+                c = ChunkGenerating(this, x, z);
+            if (WorldGeneratingChunk != null)
+                c = WorldGeneratingChunk(this, x, z);
+            if (cancelchunk)
+            {
+                if (c != null)
+                {
+                    cancelchunk = false;
+                    return c;
+                }
+                else
+                    Server.ServerLogger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
+            }
+
 
             lock (chunkData)
             {
@@ -585,8 +661,8 @@ namespace SMP
 
             if (GeneratedChunk != null)
                 GeneratedChunk(this, c, x, z);
-            if (WorldGenerateChunk != null)
-                WorldGenerateChunk(this, c, x, z);
+            if (WorldGeneratedChunk != null)
+                WorldGeneratedChunk(this, c, x, z);
 
             return c;
 		}
@@ -673,6 +749,15 @@ namespace SMP
                 Server.ServerLogger.LogError(ex);
             }
         }
+        /// <summary>
+        /// Place a block at x, y, z
+        /// </summary>
+        /// <param name="x">The x cord. of the block</param>
+        /// <param name="y">The y cord. of the block</param>
+        /// <param name="z">The z cord. of the block</param>
+        /// <param name="type">The type</param>
+        /// <param name="meta"></param>
+        /// <param name="phys"></param>
 		public void BlockChange(int x, int y, int z, byte type, byte meta, bool phys = true)
 		{
             try
@@ -712,6 +797,13 @@ namespace SMP
             }
             catch { }
         }
+        /// <summary>
+        /// Get a block at x, y, z
+        /// </summary>
+        /// <param name="x">The x cord.</param>
+        /// <param name="y">The y cord.</param>
+        /// <param name="z">The z cord.</param>
+        /// <returns>The block ID</returns>
 		public byte GetBlock(int x, int y, int z)
 		{
             try
