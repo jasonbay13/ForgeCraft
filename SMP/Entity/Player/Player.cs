@@ -80,7 +80,7 @@ namespace SMP
         public Chunk chunknew { get { return e.c; } }
 
 		public Inventory inventory;
-		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
+		public bool HasWindowOpen = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
         public Experience experience;
@@ -555,18 +555,11 @@ namespace SMP
                 e.SetMetaBit(0, 1, crouching);
                 GlobalMetaUpdate();
 			}
-            public void WindowOpen(WindowType type, Point3 pos)
+            public void OpenWindow(WindowType type, Point3 pos)
             {
-                if (!level.windows.ContainsKey(pos))
-                    window = new Windows(type, pos, level);
-                else if (level.windows[pos].Type != type)
-                {
-                    level.windows.Remove(pos);
-                    window = new Windows(type, pos, level);
-                }
-                else window = level.windows[pos];
-
+                window = new Windows(type, pos, level);
                 SendWindowOpen(window);
+                SendWindowItems(window.id, window.items);
             }
 			public void SetFire(bool onoff)
 			{
@@ -932,26 +925,7 @@ namespace SMP
 			#region Inventory stuff
 			void SendInventory()
 			{
-				List<byte> data = new List<byte>();
-                byte[] nbt;
-				
-				for(int i = 0; i <= 44; i++)
-				{
-					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].id));
-						
-						if (this.inventory.items[i].id != -1 && this.inventory.items[i].id != 0)
-						{
-							data.Add(this.inventory.items[i].count);
-							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
-                            if (this.inventory.items[i].IsDamageable())
-                            {
-                                nbt = this.inventory.items[i].GetEnchantmentNBTData();
-                                data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)(nbt.Length > 0 ? nbt.Length : -1)));
-                                data.AddRange(nbt);
-                            }
-						}		
-				}
-				SendWindowItems(0, 45, data.ToArray());
+				SendWindowItems(0, inventory.items);
 			}
             public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
             public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
@@ -988,6 +962,27 @@ namespace SMP
 				}
 				SendRaw(0x67, tosend);
 			}
+            public void SendWindowItems(byte windowID, Item[] items)
+            {
+                byte[] nbt; List<byte> data = new List<byte>();
+                for (int i = 0; i < items.Length; i++)
+                {
+                    data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].id));
+
+                    if (items[i].id != -1 && items[i].id != 0)
+                    {
+                        data.Add(items[i].count);
+                        data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].meta));
+                        if (items[i].IsDamageable())
+                        {
+                            nbt = items[i].GetEnchantmentNBTData();
+                            data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)(nbt.Length > 0 ? nbt.Length : -1)));
+                            data.AddRange(nbt);
+                        }
+                    }
+                }
+                SendWindowItems(windowID, (short)items.Length, data.ToArray());
+            }
 			public void SendWindowItems(byte windowID, short count, byte[] items)
 			{
 				byte[] data = new byte[3 + items.Length];
@@ -1007,7 +1002,7 @@ namespace SMP
             }
             public void SendWindowOpen(Windows window)
             {
-                SendWindowOpen(window.id, (byte)window.Type, window.name, (byte)window.items.Length);
+                SendWindowOpen(window.id, (byte)window.Type, window.name, (byte)window.InventorySize);
             }
             public void SendUpdateWindowProperty(byte windowID, short property, short value)
             {

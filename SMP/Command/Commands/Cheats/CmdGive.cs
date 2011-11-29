@@ -32,55 +32,38 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-			if (args.Length < 1 || args[0].ToLower() == "help")
-			{
-				Help(p);
-				return;
-			}
+            if (args.Length < 1) { Help(p); return; }
 
-            byte count = 1;
-            short id = -1, meta = 0;
+            Item item = null;
             Player toPlayer = p;
 
             if (args.Length >= 3)
             {
                 toPlayer = Player.FindPlayer(args[0]);
                 if (toPlayer == null) { p.SendMessage(HelpBot + "Player not found.", WrapMethod.Chat); return; }
-                args = (string[])args.TruncateStart(1);
+                item = ParseItem(p, (string[])args.TruncateStart(1));
+                if (item == null) return;
+            }
+            else if (args.Length >= 2)
+            {
+                Player toP = Player.FindPlayer(args[0]);
+                if (toP == null) item = ParseItem(p, args);
+                else { toPlayer = toP; item = ParseItem(p, (string[])args.TruncateStart(1)); }
+                if (item == null) return;
+            }
+            else
+            {
+                item = ParseItem(p, args);
+                if (item == null) return;
             }
 
             if (toPlayer.IsConsole) { p.SendMessage(HelpBot + "You can't give items to the console.", WrapMethod.Chat); return; }
-
-            if (args.Length >= 1)
-            {
-                if (!short.TryParse(args[0], out id))
-                {
-                    if (args[0].Contains(":"))
-                    {
-                        try
-                        {
-                            id = short.Parse(args[0].Substring(0, args[0].IndexOf(':')));
-                            meta = short.Parse(args[0].Substring(args[0].IndexOf(':') + 1));
-                        }
-                        catch { p.SendMessage(HelpBot + "Something is wrong with the item ID.", WrapMethod.Chat); return; }
-                    }
-                    else
-                    {
-                        short[] item = FindBlocks.FindItem(args[0]);
-                        if (item[0] == -1) { p.SendMessage(HelpBot + "Item not found.", WrapMethod.Chat); return; }
-                        id = item[0];
-                        meta = item[1];
-                    }
-                }
-            }
-
-            p.SendMessage(toPlayer + " " + id + ":" + meta + " " + count);
-            SendItem(p, toPlayer, id, count, meta);
+            SendItem(p, toPlayer, item.id, item.count, item.meta);
 			
 		}
 		public void SendItem(Player from, Player to, short id, byte count, short meta)
 		{
-            if (FindBlocks.ValidItem(id) && id >= 1)
+            if (id >= 1 && FindBlocks.ValidItem(id))
 			{
 				to.inventory.Add(id, count, meta);
                 to.SendMessage(HelpBot + "Enjoy!", WrapMethod.Chat);
@@ -88,6 +71,34 @@ namespace SMP.Commands
 			}
             else from.SendMessage(HelpBot + "Invalid item ID.", WrapMethod.Chat);
 		}
+
+        public Item ParseItem(Player p, string[] args)
+        {
+            Item item = Item.Nothing;
+
+            if (args.Length < 1) { Help(p); return null; }
+            if (!short.TryParse(args[0], out item.id))
+            {
+                if (args[0].Contains(":"))
+                {
+                    try
+                    {
+                        item.id = short.Parse(args[0].Substring(0, args[0].IndexOf(':')));
+                        item.meta = short.Parse(args[0].Substring(args[0].IndexOf(':') + 1));
+                    }
+                    catch { p.SendMessage(HelpBot + "Something is wrong with the item ID.", WrapMethod.Chat); return null; }
+                }
+                else
+                {
+                    short[] foundItem = FindBlocks.FindItem(args[0]);
+                    if (foundItem[0] == -1) { p.SendMessage(HelpBot + "Item not found.", WrapMethod.Chat); return null; }
+                    item.id = foundItem[0];
+                    item.meta = foundItem[1];
+                }
+            }
+            if (args.Length >= 2 && !byte.TryParse(args[1], out item.count)) { p.SendMessage(HelpBot + "Something is wrong with the amount.", WrapMethod.Chat); return null; }
+            return item;
+        }
 
 		public override void Help(Player p)
 		{

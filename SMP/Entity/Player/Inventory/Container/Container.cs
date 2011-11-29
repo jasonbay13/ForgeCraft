@@ -8,6 +8,7 @@ namespace SMP
         public abstract ContainerType Type { get; }
         public abstract int Size { get; }
         public abstract Point3 Pos { get; }
+        internal abstract Item[] Items { get; }
         public abstract Item GetSlot(int slot);
         public abstract void SetSlot(int slot, Item item);
         public abstract TagNodeList GetNBTData();

@@ -29,14 +29,14 @@ namespace SMP
 	{
         public void QuickRecalculateLight(int x, int y, int z)
         {
-            sbyte curLight = (sbyte)GetSkyLight(x, y + 1, z); byte block;
+            sbyte curLight = (sbyte)MathHelper.Clamp((0xf - LightOpacity[blocks[PosToInt(x, y, z)]]) + GetSkyLight(x, y + 1, z), 0x0, 0xf); byte block;
             for (; y >= 0; y--)
             {
                 block = blocks[PosToInt(x, y, z)];
                 curLight -= Math.Min(LightOpacity[block], curLight);
                 SetBlockLight(x, y, z, (byte)LightOutput[block]);
                 SetSkyLight(x, y, z, (byte)curLight);
-                if (curLight <= 0) break;
+                if (LightOpacity[blocks[PosToInt(x, y - 1, z)]] == 0xf) break;
             }
         }
 

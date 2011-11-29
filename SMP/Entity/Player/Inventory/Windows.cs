@@ -45,50 +45,51 @@ namespace SMP
         private static byte nextId = 1;
         byte type; //This holds type information, used in deciding which kind of window we need to send.
         public WindowType Type { get { return (WindowType)type; } }
+        public int InventorySize { get { return items.Length; } }
         public byte id;
 		public string name = "Chest";
-		public Point3 pos; //The pos of the block that this window is attached to
-		public World level;
+        public Container container;
 		public Item[] items; //Hold all the items this window has inside it.
-		public Windows(WindowType Type, Point3 Pos, World Level)
+		public Windows(WindowType type, Point3 pos, World world)
 		{
-			Logger.Log("Window Creating.");
+            try
+            {
+                id = FreeId();
+                this.type = (byte)Type;
 
-            id = FreeId();
-			type = (byte)Type;
-			pos = Pos;
-			level = Level;
-
-			switch (Type)
-			{
-				case WindowType.Chest:
-					name = "Chest"; //We change this to "Large Chest" Later if it needs it :3
-					items = new Item[27];
-					break;
-				case WindowType.Dispenser:
-					name = "Workbench";
-					items = new Item[9];
-					break;
-				case WindowType.Furnace:
-					name = "Furnace";
-					items = new Item[3];
-					break;
-				case WindowType.Workbench:
-					name = "Dispenser";
-					items = new Item[9];
-					break;
-				case WindowType.EnchantmentTable:
-					name = "Enchant";
-					items = new Item[1];
-					break;
-                case WindowType.BrewingStand:
-                    name = "Brewing Stand";
-					items = new Item[4];
-					break;
-			}
-			Logger.Log("Window adding.");
-			level.windows.Add(pos, this);
-			Logger.Log("Window done.");
+                switch (Type)
+                {
+                    case WindowType.Chest:
+                        name = "Chest"; //We change this to "Large Chest" Later if it needs it :3
+                        container = world.GetBlockContainer(pos);
+                        items = container.Items;
+                        break;
+                    case WindowType.Dispenser:
+                        name = "Workbench";
+                        //container = world.GetBlockContainer(pos); // We don't have a container for this yet.
+                        items = new Item[9];
+                        break;
+                    case WindowType.Furnace:
+                        name = "Furnace";
+                        //container = world.GetBlockContainer(pos); // We don't have a container for this yet.
+                        items = new Item[3];
+                        break;
+                    case WindowType.Workbench:
+                        name = "Dispenser";
+                        items = new Item[10];
+                        break;
+                    case WindowType.EnchantmentTable:
+                        name = "Enchant";
+                        items = new Item[1];
+                        break;
+                    case WindowType.BrewingStand:
+                        name = "Brewing Stand";
+                        //container = world.GetBlockContainer(pos); // We don't have a container for this yet.
+                        items = new Item[4];
+                        break;
+                }
+            }
+            catch { Logger.Log("Error making window!"); }
 		}
 
 		//public bool AddItem(Item item)
@@ -105,22 +106,14 @@ namespace SMP
 
 		public void Remove(Player p, int slot)
 		{
-			if (slot < items.Length)
-			{
-				items[slot] = Item.Nothing;
-			}
-			else
-				p.inventory.Remove((slot - items.Length) + 9);
+			if (slot < items.Length) items[slot] = Item.Nothing;
+			else p.inventory.Remove((slot - items.Length) + 9);
 				
 		}
 		public void Remove(Player p, int slot, byte count)
 		{
-			if (slot < items.Length)
-			{
-				items[slot].count -= count;
-			}
-			else
-				p.inventory.Remove((slot - items.Length) + 9, count);
+			if (slot < items.Length) items[slot].count -= count;
+			else p.inventory.Remove((slot - items.Length) + 9, count);
 
 		}
 
@@ -480,42 +473,42 @@ namespace SMP
 			}*/
 		}
 
-		public byte GetEmptyChestSlot()
+		public int GetEmptyWindowSlot()
 		{
 			for (byte i = 0; i < items.Length; i++)
-				if (items[i] == Item.Nothing)
+                if (items[i].id == (short)Items.Nothing)
 					return i;
-			return 255;
+            return -1;
 		}
 
-		public byte GetEmptyHotbarSlot(Player p)
+		public int GetEmptyHotbarSlot(Player p)
 		{
 			for (byte i = 36; i < 45; i++)
 				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
-			return 255;
+            return -1;
 		}
-		public byte GetEmptyHotbarSlotReversed(Player p)
+		public int GetEmptyHotbarSlotReversed(Player p)
 		{
 			for (byte i = 44; i >= 36; i--)
 				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
-			return 255;
+            return -1;
 		}
 
-		public byte GetEmptyInventorySlot(Player p)
+		public int GetEmptyInventorySlot(Player p)
 		{
 			for (byte i = 9; i <= 35; i++)
 				if (p.inventory.items[i].id == (short)Items.Nothing)
 					return i;
-			return 255;
+            return -1 - 1;
 		}
-		public byte GetEmptyInvetorySlotReversed(Player p)
+		public int GetEmptyInvetorySlotReversed(Player p)
 		{
 			for (byte i = 35; i >= 9; i--)
 				if (items[i].id == (short)Items.Nothing)
 					return i;
-			return 255;
+			return -1;
 		}
 
         private static byte FreeId()
