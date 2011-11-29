@@ -30,12 +30,22 @@ namespace SMP
     /// </summary>
 	public partial class Plugin
 	{
+        /// <summary>
+        /// Check to see if World Event is canceled
+        /// </summary>
+        /// <param name="e">The event to check</param>
+        /// <param name="w">The world</param>
+        /// <returns></returns>
         public static bool IsEventCancled(LevelEvent e, World w)
         {
             switch (e)
             {
                 case LevelEvent.PhysicsUpdate:
                     return w.physics.cancelphysics;
+                case LevelEvent.ChunkGenerated:
+                    return w.cancelchunk;
+                case LevelEvent.Save:
+                    return World.cancelsave;
                 default:
                     return false;
             }
@@ -126,12 +136,23 @@ namespace SMP
                     return false;
             }
         }
+        /// <summary>
+        /// Cancel a World Event
+        /// </summary>
+        /// <param name="e">The event to cancel</param>
+        /// <param name="w">The world</param>
         public static void CancelEvent(LevelEvent e, World w)
         {
             switch (e)
             {
                 case LevelEvent.PhysicsUpdate:
                     w.physics.cancelphysics = true;
+                    break;
+                case LevelEvent.Save:
+                    World.cancelsave = true;
+                    break;
+                case LevelEvent.ChunkGenerated:
+                    w.cancelchunk = true;
                     break;
             }
         }
@@ -143,7 +164,7 @@ namespace SMP
         /// Cancel a Player event
         /// </summary>
         /// <param name="e">The event that you want to cancel</param>
-        /// <param name="p">The Player that event is related to (null if not dealing with player event)</param>
+        /// <param name="p">The Player</param>
         public static void CancelEvent(PlayerEvents e, Player p) {
             //TODO
             //Add some more events to be canceled
