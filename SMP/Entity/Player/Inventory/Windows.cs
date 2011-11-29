@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -88,7 +89,7 @@ namespace SMP
                         break;
                 }
             }
-            catch { Server.Log("Error making window!"); }
+            catch { Logger.Log("Error making window!"); }
 		}
 
 		//public bool AddItem(Item item)

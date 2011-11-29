@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using SMP.util;
 using Substrate.Nbt;
 
 namespace SMP
@@ -241,7 +242,7 @@ namespace SMP
                     NbtTree nbt = new NbtTree(ms);
                     LoadEnchantmentNBT(nbt.Root["ench"].ToTagList());
                 }
-                catch { Server.ServerLogger.Log("NBT data is invalid."); }
+                catch { Logger.Log("NBT data is invalid."); }
             }
         }
 
@@ -309,7 +310,7 @@ namespace SMP
                 meta = comp["Meta"].ToTagShort();
                 LoadEnchantmentNBT(comp["Ench"].ToTagList());
             }
-            catch { Server.ServerLogger.Log("NBT data is invalid."); }
+            catch { Logger.Log("NBT data is invalid."); }
         }
 	}
 }

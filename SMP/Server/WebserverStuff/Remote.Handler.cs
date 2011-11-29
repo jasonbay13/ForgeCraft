@@ -45,7 +45,7 @@
 
 //               if (command == null)
 //               {
-//                   Server.ServerLogger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
+//                   Logger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
 //                   return;
 //               }
 
@@ -56,12 +56,12 @@
 //                   Array.Copy(args, 1, args, 0, args.Length - 1);
 
 //                   try { command.Use(remotePlayer, args); }
-//                   catch (Exception e) { Server.ServerLogger.LogError(e); }
+//                   catch (Exception e) { Logger.LogError(e); }
 //                   return;
 //               }
 //               else
 //               {
-//                   Server.ServerLogger.Log(LogLevel.Info, cmd + " command not useable in the console.");
+//                   Logger.Log(LogLevel.Info, cmd + " command not useable in the console.");
 //                   return;
 //               }
 //           }
@@ -76,7 +76,7 @@
 //           //        HandleCommand("msg", m.Substring(2));
 //           //    }
 //           //}
-//           Server.ServerLogger.Log("[Remote]: " + m);
+//           Logger.Log("[Remote]: " + m);
 //           Player.GlobalMessage(Color.DarkBlue + "[Remote]: " + Color.White + m);
 //           return ;
 //       }
@@ -86,7 +86,7 @@
 //           Command command = Command.all.Find(cmd);
 //           if (command == null)
 //           {
-//               Server.ServerLogger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
+//               Logger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
 //               return;
 //           }
 
@@ -97,7 +97,7 @@
 //           }
 //           else
 //           {
-//               Server.ServerLogger.Log(LogLevel.Info, cmd + " command not useable in the console.");
+//               Logger.Log(LogLevel.Info, cmd + " command not useable in the console.");
 //               return;
 //           }
 //       }

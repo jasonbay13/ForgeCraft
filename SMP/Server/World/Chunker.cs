@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SMP.util;
 
 namespace SMP
 {
@@ -54,7 +55,7 @@ namespace SMP
                 }
                 catch (NotImplementedException)
                 {
-                    Server.ServerLogger.Log("Parallel.For() is not implemented, chunk generation will be single-threaded.");
+                    Logger.Log("Parallel.For() is not implemented, chunk generation will be single-threaded.");
                     GeneratorLoop();
                 }
             }));

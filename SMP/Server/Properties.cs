@@ -20,6 +20,7 @@ using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -80,11 +81,11 @@ namespace SMP
                                 case "max-players":
                                     if (Convert.ToByte(value) > 128)
                                     {
-                                        value = "128"; Server.Log("Max players has been lowered to 128.");
+                                        value = "128"; Logger.Log("Max players has been lowered to 128.");
                                     }
                                     else if (Convert.ToByte(value) < 1)
                                     {
-                                        value = "1"; Server.Log("Max players has been increased to 1.");
+                                        value = "1"; Logger.Log("Max players has been increased to 1.");
                                     }
                                     Server.MaxPlayers = Convert.ToByte(value);
                                     break;
@@ -94,11 +95,11 @@ namespace SMP
                                 case "view-distance":
                                     if (Convert.ToInt32(value) > 15)
                                     {
-                                        value = "15"; Server.Log("View distance has been lowered to 15.");
+                                        value = "15"; Logger.Log("View distance has been lowered to 15.");
                                     }
                                     else if (Convert.ToInt32(value) < 3)
                                     {
-                                        value = "3"; Server.Log("View distance has been increased to 3.");
+                                        value = "3"; Logger.Log("View distance has been increased to 3.");
                                     }
                                     Server.ViewDistance = Convert.ToInt32(value);
                                     break;
@@ -137,13 +138,13 @@ namespace SMP
                                 case "generator-threads":
                                     if (Convert.ToByte(value) < 1)
                                     {
-                                        value = "1"; Server.Log("Generator threads has been increased to 1.");
+                                        value = "1"; Logger.Log("Generator threads has been increased to 1.");
                                     }
                                     Server.genThreads = Convert.ToByte(value);
                                     break;
                             }
                         }
-                        catch { Server.ServerLogger.Log(LogLevel.Warning, "Invalid " + key.ToLower() + "! Setting to default."); }
+                        catch { Logger.Log(LogLevel.Warning, "Invalid " + key.ToLower() + "! Setting to default."); }
                     }
                 }
                 Server.s.SettingsUpdate();
@@ -178,7 +179,7 @@ namespace SMP
             }
             catch
             {
-                Server.Log("SAVE FAILED! " + givenPath);
+                Logger.Log("SAVE FAILED! " + givenPath);
             }
         }
         static void SaveProps(StreamWriter w)

@@ -24,6 +24,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using SMP.Commands;
+using SMP.util;
 using Substrate.Nbt;
 
 namespace SMP
@@ -257,8 +258,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		static void Receive(IAsyncResult result)
@@ -293,8 +294,8 @@ namespace SMP
             catch (Exception e)
             {
                 p.Disconnect();
-                Server.Log(e.Message);
-                Server.Log(e.StackTrace);
+                Logger.Log(e.Message);
+                Logger.Log(e.StackTrace);
             }
 		}
 		byte[] HandleMessage(byte[] buffer)
@@ -307,7 +308,7 @@ namespace SMP
 				switch (msg)
 				{
                     case 0x00: length = 4; if (buffer.Length < 5 || util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
+					case 0x01: /*Logger.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
@@ -344,7 +345,7 @@ namespace SMP
 					case 0xFF: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //DC
 
 					default:
-                        Server.ServerLogger.Log("Unhandled message ID: " + msg);
+                        Logger.Log("Unhandled message ID: " + msg);
 					    Kick("Unknown packet ID: " + msg);
 						return new byte[0];
 				}
@@ -358,19 +359,19 @@ namespace SMP
 
 					buffer = tempbuffer;
 
-					//if(username!= "Merlin33069") Server.Log(msg + "");
+					//if(username!= "Merlin33069") Logger.Log(msg + "");
 					switch (msg)
 					{
 						case 0x01:
-							//Server.Log("Authentication");
+							//Logger.Log("Authentication");
 							HandleLogin(message);
 							break;
 						case 0x02:
-							//Server.Log("Handshake");
+							//Logger.Log("Handshake");
 							HandleHandshake(message);
 							break;
 						case 0x03:
-							//Server.Log("Chat Message");
+							//Logger.Log("Chat Message");
 							HandleChatMessagePacket(message);
 							break;
                         case 0x07: HandleEntityUse(message); break;
@@ -398,8 +399,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 			return buffer;
 		}
@@ -891,8 +892,8 @@ namespace SMP
 				}
 				catch(Exception e)
 				{
-					Server.Log(e.Message);
-					Server.Log(e.StackTrace);
+					Logger.Log(e.Message);
+					Logger.Log(e.StackTrace);
 				}
 				//SendMap();
 			}
@@ -906,7 +907,7 @@ namespace SMP
 			}
 			void SendLoginDone()
 			{
-				//Server.Log("Login Done");
+				//Logger.Log("Login Done");
 
 				byte[] bytes = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(pos.x).CopyTo(bytes, 0);
@@ -918,7 +919,7 @@ namespace SMP
 				bytes[40] = onground;
 				SendRaw(0x0D, bytes);
 
-				//Server.Log(pos[0] + " " + pos[1] + " " + pos[2]);
+				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
 			#endregion
 			#region Inventory stuff
@@ -1023,14 +1024,14 @@ namespace SMP
 			#region Map Stuff
 			void SendMap()
 			{
-				//Server.Log("Sending");
+				//Logger.Log("Sending");
 				//int i = 0;
 				//foreach (Chunk c in Server.mainlevel.chunkData.Values.ToArray())
 				//{
 				//	SendChunk(c);
 				//	i++;
 				//}
-				//Server.Log(i + " Chunks sent");
+				//Logger.Log(i + " Chunks sent");
 
                 pos = level.SpawnPos;
 				SendSpawnPoint();
@@ -1150,8 +1151,8 @@ namespace SMP
 				}
 				catch (Exception e)
 				{
-					Server.Log(e.Message);
-					Server.Log(e.StackTrace);
+					Logger.Log(e.Message);
+					Logger.Log(e.StackTrace);
 				}
 			}
             public void SendObjectSpawn(Entity e1)
@@ -1194,13 +1195,13 @@ namespace SMP
 					if (VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
 				}
-				//Server.Log("Pickup Spawning " + e1.id);
+				//Logger.Log("Pickup Spawning " + e1.id);
 
 				SendRaw(0x1E, util.EndianBitConverter.Big.GetBytes(e1.id));
 
 				byte[] bytes = new byte[24];
 				util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
-				//Server.Log(e1.itype + "");
+				//Logger.Log(e1.itype + "");
 				util.EndianBitConverter.Big.GetBytes(e1.I.id).CopyTo(bytes, 4);
 				bytes[6] = e1.I.count;
 				util.EndianBitConverter.Big.GetBytes(e1.I.meta).CopyTo(bytes, 7);
@@ -1346,8 +1347,8 @@ namespace SMP
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
             {
-                Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd);
-                Server.ServerLogger.Log(LogLevel.Info, "Unrecognised command: " + cmd);
+                Logger.Log(LogLevel.Info, this.username + " tried using /" + cmd);
+                Logger.Log(LogLevel.Info, "Unrecognised command: " + cmd);
                 SendMessage(Command.HelpBot + "Command /" + cmd + " not recognized");
                 return;
             }
@@ -1373,11 +1374,11 @@ namespace SMP
 	            }
 
                 command.Use(this, args.ToArray());
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
+	            Logger.Log(LogLevel.Info, this.username + " used /" + command.Name);
 	        }
 	        else
 	        {
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
+	            Logger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
 	            SendMessage(Color.Purple + "HelpBot V12: You don't have access to command /" + cmd + ".");
 			}
 		}
@@ -1430,7 +1431,7 @@ namespace SMP
         protected virtual void SendMessageInternal(string message)
         {		
             message = MessageAdditions(message);
-			//Server.Log(message);
+			//Logger.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
@@ -1558,12 +1559,12 @@ namespace SMP
 			
 			if (message != null)
 			{
-			//	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
+			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, message);
 			}
 			else
 			{
-			//	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
+			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
             if (OnKicked != null)
@@ -1638,7 +1639,7 @@ namespace SMP
             util.EndianBitConverter.Big.GetBytes(keep).CopyTo(bytes, bytes.Length - 3);
             util.EndianBitConverter.Big.GetBytes(Ping).CopyTo(bytes, bytes.Length - 2);
             players.ForEach((p) => p.SendRaw(0xC9, bytes));
-            //Server.Log(Ping.ToString());
+            //Logger.Log(Ping.ToString());
         } 
         
         public void hurt(short amount)
@@ -1797,7 +1798,7 @@ namespace SMP
 			}
 			catch
 			{
-				Server.Log("Could not save " + username + "'s data");	
+				Logger.Log("Could not save " + username + "'s data");	
 			}
 		}
 		private void LoadAttributes()
@@ -1941,7 +1942,7 @@ namespace SMP
 			}
 			else
 			{
-				Server.Log(String.Format("Creating new Database entry for {0}.", this.username));
+				Logger.Log(String.Format("Creating new Database entry for {0}.", this.username));
 				
 				this.group = Group.DefaultGroup;
 				//TODO Set Default to default group, setup accounts etc
@@ -2056,11 +2057,11 @@ namespace SMP
 				{
 					s += b + ", ";
 				}
-                Server.Log("Packet " + id + " { " + s + "}");
+                Logger.Log("Packet " + id + " { " + s + "}");
 			}
 			else
 			{
-                Server.Log("Packet " + id + " had no DATA!");
+                Logger.Log("Packet " + id + " had no DATA!");
 			}
 		}
 		

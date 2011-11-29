@@ -20,6 +20,7 @@ using System.IO;
 using System.Data;
 using System.Data.SQLite;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -36,10 +37,10 @@ namespace SMP
 
 			if (!File.Exists("properties/ForgeCraft.db"))
 			{
-				Server.Log("Writing new Database");
+				Logger.Log("Writing new Database");
 				SQLiteConnection.CreateFile("properties/ForgeCraft.db");
 				if (!WriteDefault())
-					Server.Log("Couldn't write default Database");
+					Logger.Log("Couldn't write default Database");
 			}
 			
 		}
@@ -68,15 +69,15 @@ namespace SMP
 	        }
 	        catch (Exception e)
 	        {
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace.ToString());
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace.ToString());
 	        }
 	        return dt;
 	    }
 	     
 	    public int ExecuteNonQuery(string sql)
 	    {
-			//Server.Log(sql);
+			//Logger.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -88,7 +89,7 @@ namespace SMP
 	 
 	    public string ExecuteScalar(string sql)
 	    {
-			//Server.Log(sql);
+			//Logger.Log(sql);
 	        SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 	        cnn.Open();
 	        SQLiteCommand mycommand = new SQLiteCommand(cnn);
@@ -116,13 +117,13 @@ namespace SMP
 	        }
 	        try
 	        {
-				//Server.Log(String.Format("update {0} set {1} where {2};", tableName, vals, where));
+				//Logger.Log(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	            this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
 	        }
 	        catch (Exception e)
 	        {
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace.ToString());
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace.ToString());
 	            returnCode = false;
 	        }
 	        return returnCode;
@@ -137,7 +138,7 @@ namespace SMP
 	        }
 	        catch (Exception e)
 	        {
-	            Server.ServerLogger.LogError(e);
+	            Logger.LogError(e);
 	            returnCode = false;
 	        }
 	        return returnCode;
@@ -157,13 +158,13 @@ namespace SMP
    	        values = values.Substring(0, values.Length - 1);
    	        try
    	        {
-				//Server.Log(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
+				//Logger.Log(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	            this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
    	        }
    	        catch (Exception e)
 	        {
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace.ToString());
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace.ToString());
    	            returnCode = false;
    	        }
    	        return returnCode;
@@ -422,8 +423,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message.ToString());
-				Server.Log(e.StackTrace.ToString());
+				Logger.Log(e.Message.ToString());
+				Logger.Log(e.StackTrace.ToString());
 				return false;
 			}
 			additems();
@@ -740,7 +741,7 @@ namespace SMP
 			this.ExecuteNonQuery("INSERT INTO Item(Value, Meta, Alias) VALUES(2266, 0, '11musicdisc');");
 			#endregion
 		}
-		catch(Exception e){Server.Log(e.Message.ToString()); Server.Log(e.StackTrace.ToString());}
+		catch(Exception e){Logger.Log(e.Message.ToString()); Logger.Log(e.StackTrace.ToString());}
 		}
 		
 	}	

@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Ionic.Zlib;
 using SMP.Generator;
+using SMP.util;
 
 namespace SMP
 {
@@ -141,7 +142,7 @@ namespace SMP
             physics = new Physics(this);
             generator = new GenStandard(this, true);
             chunkManager = new WorldChunkManager(this);
-            Server.Log("Generating " + this.name + "...");
+            Logger.Log("Generating " + this.name + "...");
 
             int cursorH = 25 + this.name.Length;
             float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
@@ -162,7 +163,7 @@ namespace SMP
                             count++; Console.Write((int)((count / total) * 100) + "%");
                         }
                     });
-                    //Server.Log(x + " Row Generated.");
+                    //Logger.Log(x + " Row Generated.");
                 });
             }
             catch (NotImplementedException)
@@ -175,13 +176,13 @@ namespace SMP
                         Console.SetCursorPosition(cursorH, Console.CursorTop);
                         count++; Console.Write((int)((count / total) * 100) + "%");
                     }
-                    //Server.Log(x + " Row Generated.");
+                    //Logger.Log(x + " Row Generated.");
                 }
             }
 
             Console.Write("\r");
 
-            Server.Log("Look distance = " + Server.ViewDistance);
+            Logger.Log("Look distance = " + Server.ViewDistance);
 
             Init();
             physics.Start();
@@ -319,7 +320,7 @@ namespace SMP
             //if (WorldLoad != null)
             //	WorldLoad(this);
             World w = new World() { chunkData = new Dictionary<Point, Chunk>(), name = filename };
-            Server.Log("Loading " + w.name + "...");
+            Logger.Log("Loading " + w.name + "...");
 
             /*using (MemoryStream ms = new MemoryStream())
             {
@@ -353,7 +354,7 @@ namespace SMP
 	                    }
 	                    catch (Exception ex)
 	                    {
-	                        Server.Log(ex.ToString());
+	                        Logger.Log(ex.ToString());
 	                    }
 	                });
 				}
@@ -375,7 +376,7 @@ namespace SMP
 	                    }
 	                    catch (Exception ex)
 	                    {
-	                        Server.Log(ex.ToString());
+	                        Logger.Log(ex.ToString());
 	                    }
 	                }
 				}
@@ -394,7 +395,7 @@ namespace SMP
                     w.dimension = sbyte.Parse(sw.ReadLine());
                 }
             }
-            catch { /*Server.ServerLogger.Log("Error loading world configuration!");*/ }
+            catch { /*Logger.Log("Error loading world configuration!");*/ }
 
             w.physics = new Physics(w);
             w.generator = new GenStandard(w, true);
@@ -437,8 +438,8 @@ namespace SMP
             Console.WriteLine();
 
             World.worlds.Add(w);
-            Server.Log(filename + " Loaded.");
-            Server.Log("Look distance = " + Server.ViewDistance);
+            Logger.Log(filename + " Loaded.");
+            Logger.Log("Look distance = " + Server.ViewDistance);
 
             w.Init();
             w.physics.Start();
@@ -511,7 +512,7 @@ namespace SMP
                         w.SaveChunk(pt.x, pt.z);
                 }
             }
-            if (!silent) Server.Log(w.name + " Saved.");
+            if (!silent) Logger.Log(w.name + " Saved.");
         }
 
         #region Useless compression methods, use byte[].Compress() and byte[].Decompress()
@@ -670,7 +671,7 @@ namespace SMP
                     return c;
                 }
                 else
-                    Server.ServerLogger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
+                    Logger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
             }
 
 
@@ -775,7 +776,7 @@ namespace SMP
             }
             catch (Exception ex)
             {
-                Server.ServerLogger.LogError(ex);
+                Logger.LogError(ex);
             }
         }
         /// <summary>

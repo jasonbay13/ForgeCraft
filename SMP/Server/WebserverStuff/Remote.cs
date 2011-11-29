@@ -51,15 +51,15 @@
 
 //                ip = socket.RemoteEndPoint.ToString().Split(':')[0];
 //                Player.GlobalMessage(Color.Announce + "A Remote has connected to the server");
-//                Server.Log("[Remote] " + ip + " connected to the server.");
+//                Logger.Log("[Remote] " + ip + " connected to the server.");
 
 
 //                socket.BeginReceive(tempbuffer, 0, tempbuffer.Length, SocketFlags.None, new AsyncCallback(Receive), this);
 //            }
 //            catch (Exception e)
 //            {
-//                Server.Log(e.Message);
-//                Server.Log(e.StackTrace);
+//                Logger.Log(e.Message);
+//                Logger.Log(e.StackTrace);
 //            }
 //        }
 //        static void Receive(IAsyncResult result)
@@ -88,8 +88,8 @@
 //            catch (Exception e)
 //            {
 //                p.Disconnect();
-//                Server.Log(e.Message);
-//                Server.Log(e.StackTrace);
+//                Logger.Log(e.Message);
+//                Logger.Log(e.StackTrace);
 //            }
 //        }
 //        byte[] HandleMessage(byte[] buffer)
@@ -121,7 +121,7 @@
 
 
 //                    default:
-//                        Server.Log("unhandled message id " + msg);
+//                        Logger.Log("unhandled message id " + msg);
 //                        Kick();
 //                        return new byte[0];
 //                }
@@ -156,8 +156,8 @@
 //            }
 //            catch (Exception e)
 //            {
-//                Server.Log(e.Message);
-//                Server.Log(e.StackTrace);
+//                Logger.Log(e.Message);
+//                Logger.Log(e.StackTrace);
 //            }
 //            return buffer;
 //        }
@@ -169,7 +169,7 @@
 
 //            if (m.Length > 119)
 //            {
-//                Server.Log("Y");
+//                Logger.Log("Y");
 //                Kick();
 //                return;
 //            }
@@ -178,7 +178,7 @@
 //                if (ch < 32 || ch >= 127)
 //                {
 //                    Kick();
-//                    Server.Log("Remote kicked");
+//                    Logger.Log("Remote kicked");
 //                    return;
 //                }
 //            }
@@ -189,7 +189,7 @@
 //        private void HandleMobileDC()
 //        {
             
-//                Server.Log("[Remote] Disconnected.");
+//                Logger.Log("[Remote] Disconnected.");
 //                Disconnect();
                 
             
@@ -202,7 +202,7 @@
 
 //            short length = util.EndianBitConverter.Big.ToInt16(message, 0);
 //            string msg = Encoding.UTF8.GetString(message, 2, length);
-//            //Server.Log(msg);
+//            //Logger.Log(msg);
 //            if (msg.StartsWith("2.3: "))  //TODO: make a better checker
 //            {
 //                msg = msg.Replace("2.3: ", "");
@@ -214,7 +214,7 @@
 //                byte[] bytes = new byte[(accepted.Length * 2) + 2];
 //                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
 //                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
-//                Server.Log("[Remote] A remote tried to connect with a different version.");
+//                Logger.Log("[Remote] A remote tried to connect with a different version.");
 //                SendData(bytes);
 //            }
 
@@ -225,7 +225,7 @@
 //                 byte[] bytes = new byte[(accepted.Length * 2) + 2];
 //                 util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
 //                 Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
-//                 Server.Log("[Remote] Remote Verified, passing controls to it!");
+//                 Logger.Log("[Remote] Remote Verified, passing controls to it!");
 //                 SendData(bytes);
 //                 LoggedIn = true;
 //            }
@@ -236,7 +236,7 @@
 //                util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
 //                Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
 //                SendData(bytes);
-//                Server.Log("[Remote] A Remote with incorrect information attempted to join.");
+//                Logger.Log("[Remote] A Remote with incorrect information attempted to join.");
 //            }
 //        }
 
@@ -247,26 +247,26 @@
 
 //            switch (type)
 //            {
-//                case 1: Server.Log("Desktop remote has joined"); break;
-//                case 2: Server.Log("Mobile Remote has joined"); break;
-//                default: Server.Log("Unknown type of remote has attempted to join"); Kick(); return;
+//                case 1: Logger.Log("Desktop remote has joined"); break;
+//                case 2: Logger.Log("Mobile Remote has joined"); break;
+//                default: Logger.Log("Unknown type of remote has attempted to join"); Kick(); return;
 //            }
 //            //if (version != this.version)
 //                //Kick("You have a different version");
 //        }
 //        private void HandleRemoteDCPacket(byte[] message)
 //        {
-//            Server.Log("DC");
+//            Logger.Log("DC");
 //        }
 
 //        private void HandleRemoteChatMessagePacket(byte[] message)
 //        {
-//            Server.Log("REMOTE TRY TO TALK");
+//            Logger.Log("REMOTE TRY TO TALK");
 //        }
 
 //        private void HandleRemoteHandshake(byte[] message)
 //        {
-//            Server.Log("REMOTE REQUEST DATA");
+//            Logger.Log("REMOTE REQUEST DATA");
 //        }
 
 //        private void HandleRemoteLogin(byte[] message)
@@ -291,7 +291,7 @@
 
 //        private void HandleRemoteJoin(byte[] message)
 //        {
-//            Server.Log("Remote Has Joined");
+//            Logger.Log("Remote Has Joined");
 //        }
 
 //        public void Kick()
@@ -313,7 +313,7 @@
 //                //util.EndianBitConverter.Big.GetBytes((short)accepted.Length).CopyTo(bytes, 0);
 //                //Encoding.BigEndianUnicode.GetBytes(accepted).CopyTo(bytes, 2);
 //                SendData(0x03);
-//                Server.Log("[Remote] has been kicked from the server!");
+//                Logger.Log("[Remote] has been kicked from the server!");
                 
 
 //            }
@@ -393,11 +393,11 @@
 //                {
 //                    s += b + ", ";
 //                }
-//                Server.Log("Packet " + id + " { " + s + "}");
+//                Logger.Log("Packet " + id + " { " + s + "}");
 //            }
 //            else
 //            {
-//                Server.Log("Packet " + id + " had no DATA!");
+//                Logger.Log("Packet " + id + " had no DATA!");
 //            }
 //        }
 //        public static string getUsername()

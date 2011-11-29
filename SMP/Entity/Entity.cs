@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using SMP.util;
 
 namespace SMP
 {
@@ -178,7 +179,7 @@ namespace SMP
             }
             catch
             {
-                Server.Log("Error updating chunk: " + this.ToString());
+                Logger.Log("Error updating chunk: " + this.ToString());
             }
             if (isPlayer && p.LoggedIn)
             {
