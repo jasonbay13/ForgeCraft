@@ -100,7 +100,7 @@ namespace SMP
 		{
 		    //TODO: (in order)
             LoadEvents();
-            Log("Starting Server");
+            Logger.Log("Starting Server");
             SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
 			//ItemDB = new ItemDB();
@@ -138,8 +138,8 @@ namespace SMP
 				
                 return true;
 			}
-			catch (SocketException e) { Log(e.Message + e.StackTrace); return false; }
-			catch (Exception e) { Log(e.Message + e.StackTrace); return false; }
+            catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); return false; }
+            catch (Exception e) { Logger.Log(e.Message + e.StackTrace); return false; }
             
 		}
 
@@ -217,8 +217,8 @@ namespace SMP
             //new Creeper(new Point3(0, 72, 0), mainlevel);
 
 
-            Log("Setting up on port: " + port);
-            Log("Server Started");
+            Logger.Log("Setting up on port: " + port);
+            Logger.Log("Server Started");
         }
 
         private void loadLevels()
@@ -270,8 +270,8 @@ namespace SMP
 		    }
 		    catch (Exception e)
 		    {
-		        Log(e.Message);
-		        Log(e.StackTrace);
+                Logger.Log(e.Message);
+                Logger.Log(e.StackTrace);
 		        if (p != null)
 		            p.Disconnect();
 		        if (!begin)
@@ -285,7 +285,7 @@ namespace SMP
 		/// <param name="message">
 		/// A <see cref="System.String"/>
 		/// </param>
-        [Obsolete("Please use Logger.Log", false)]
+        [Obsolete("Please use Logger.Log()", true)]
         public static void Log(string message)
 		{
 			Logger.Log(message);
