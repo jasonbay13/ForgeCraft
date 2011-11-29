@@ -191,7 +191,7 @@ namespace SMP
 		}
 		public static bool OpenDispenser(Player a, BCS b)
 		{
-            a.WindowOpen(WindowType.Dispenser, b.pos);
+            a.OpenWindow(WindowType.Dispenser, b.pos);
             return false;
 		}
 		public static bool ChangeNoteblock(Player a, BCS b)
@@ -211,27 +211,27 @@ namespace SMP
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
-            a.WindowOpen(WindowType.Chest, b.pos);
+            a.OpenWindow(WindowType.Chest, b.pos);
             return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
 		{
-            a.WindowOpen(WindowType.Workbench, b.pos);
+            a.OpenWindow(WindowType.Workbench, b.pos);
 			return false;
 		}
 		public static bool OpenFurnace(Player a, BCS b)
 		{
-            a.WindowOpen(WindowType.Furnace, b.pos);
+            a.OpenWindow(WindowType.Furnace, b.pos);
 			return false;
 		}
         public static bool OpenEnchantmentTable(Player a, BCS b)
         {
-            a.WindowOpen(WindowType.EnchantmentTable, b.pos);
+            a.OpenWindow(WindowType.EnchantmentTable, b.pos);
             return false;
         }
         public static bool OpenBrewingStand(Player a, BCS b)
         {
-            a.WindowOpen(WindowType.BrewingStand, b.pos);
+            a.OpenWindow(WindowType.BrewingStand, b.pos);
             return false;
         }
 		public static bool PlayMusic(Player a, BCS b)

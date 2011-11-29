@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using System.Data;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -50,14 +51,14 @@ namespace SMP
 					continue;	
 				}
 				
-				Server.Log(alias + ": " + id + ": " + meta);
+				Logger.Log(alias + ": " + id + ": " + meta);
 				try{
 				Items.Add(alias, id);
 				Durability.Add(alias, meta);
 				}
 				catch (ArgumentException)
 				{
-					Server.Log(alias + "already exsists in the item table, please rename " + alias + ".");
+					Logger.Log(alias + "already exsists in the item table, please rename " + alias + ".");
 				}
 				
 			}
@@ -73,7 +74,7 @@ namespace SMP
 		if (!Items.TryGetValue(name.ToLower(), out durability))
 		return null;
 		
-		return new short[] {id, durability};
+		return new[] {id, durability};
 		}
 	}
 }

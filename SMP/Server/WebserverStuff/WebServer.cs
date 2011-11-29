@@ -43,10 +43,10 @@ namespace SMP
             //    listen.Listen((int)SocketOptionName.MaxConnections);
 
             //    listen.BeginAccept(new AsyncCallback(Accept), null);
-            //    Server.Log("Remote Server Started on port: " + port.ToString());
+            //    Logger.Log("Remote Server Started on port: " + port.ToString());
             //}
-            //catch (SocketException e) { Server.Log(e.Message + e.StackTrace); }
-            //catch (Exception e) { Server.Log(e.Message + e.StackTrace); }
+            //catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); }
+            //catch (Exception e) { Logger.Log(e.Message + e.StackTrace); }
         }
 
         //void Accept(IAsyncResult result)
@@ -77,8 +77,8 @@ namespace SMP
         //        }
         //        catch (Exception e)
         //        {
-        //            Server.Log(e.Message);
-        //            Server.Log(e.StackTrace);
+        //            Logger.Log(e.Message);
+        //            Logger.Log(e.StackTrace);
         //            if (p != null)
         //                p.Disconnect();
         //            if (!begin)

@@ -19,8 +19,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 using Ionic.Zlib;
 using SMP.Generator;
+using SMP.util;
 
 namespace SMP
 {
@@ -49,7 +51,8 @@ namespace SMP
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
-		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
+		//public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
+        public Dictionary<Point3, Container> containers = new Dictionary<Point3, Container>();
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;
         public bool Raining = false;
@@ -139,7 +142,7 @@ namespace SMP
             physics = new Physics(this);
             generator = new GenStandard(this, true);
             chunkManager = new WorldChunkManager(this);
-            Server.Log("Generating " + this.name + "...");
+            Logger.Log("Generating " + this.name + "...");
 
             int cursorH = 25 + this.name.Length;
             float count = 0, total = (Server.ViewDistance * 2 + 1) * (Server.ViewDistance * 2 + 1);
@@ -160,7 +163,7 @@ namespace SMP
                             count++; Console.Write((int)((count / total) * 100) + "%");
                         }
                     });
-                    //Server.Log(x + " Row Generated.");
+                    //Logger.Log(x + " Row Generated.");
                 });
             }
             catch (NotImplementedException)
@@ -173,13 +176,13 @@ namespace SMP
                         Console.SetCursorPosition(cursorH, Console.CursorTop);
                         count++; Console.Write((int)((count / total) * 100) + "%");
                     }
-                    //Server.Log(x + " Row Generated.");
+                    //Logger.Log(x + " Row Generated.");
                 }
             }
 
             Console.Write("\r");
 
-            Server.Log("Look distance = " + Server.ViewDistance);
+            Logger.Log("Look distance = " + Server.ViewDistance);
 
             Init();
             physics.Start();
@@ -236,9 +239,11 @@ namespace SMP
             catch { return; }
 
             SaveChunk(x, z, w);
-            if (((int)w.SpawnX + 1 >> 4) != x || ((int)w.SpawnZ + 1 >> 4) != z) // Don't unload the spawn chunks!
+            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
             {
                 w.physics.RemoveChunkChecks(x, z);
+                foreach (KeyValuePair<Point3, Container> kvp in w.containers.Where(KVP => (((int)KVP.Key.x >> 4) == x && ((int)KVP.Key.z >> 4) == z)).ToList())
+                    w.containers.Remove(kvp.Key);
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
                     {
@@ -284,13 +289,38 @@ namespace SMP
         }
         #endregion
 
+        public Container GetBlockContainer(int x, int y, int z)
+        {
+            try
+            {
+                if (Chunk.GetChunk(x >> 4, z >> 4, this) != null)
+                    Chunk.GetChunk(x >> 4, z >> 4, this)._dirty = true; // Temporary until we find a good way to make the chunk dirty only when the container is edited.
+
+                Point3 point = new Point3(x, y, z);
+                if (containers.ContainsKey(point)) return containers[point];
+                switch (GetBlock(x, y, z))
+                {
+                    case (byte)Blocks.Chest:
+                        containers.Add(point, new ContainerChest(point));
+                        break;
+                    default: return null;
+                }
+                return containers[point];
+            }
+            catch { return null; }
+        }
+        public Container GetBlockContainer(Point3 pos)
+        {
+            return GetBlockContainer((int)pos.x, (int)pos.y, (int)pos.z);
+        }
+
         public static World LoadLVL(string filename)
         {
             //TODO make loading/saving better.
             //if (WorldLoad != null)
             //	WorldLoad(this);
             World w = new World() { chunkData = new Dictionary<Point, Chunk>(), name = filename };
-            Server.Log("Loading " + w.name + "...");
+            Logger.Log("Loading " + w.name + "...");
 
             /*using (MemoryStream ms = new MemoryStream())
             {
@@ -324,7 +354,7 @@ namespace SMP
 	                    }
 	                    catch (Exception ex)
 	                    {
-	                        Server.Log(ex.ToString());
+	                        Logger.Log(ex.ToString());
 	                    }
 	                });
 				}
@@ -346,7 +376,7 @@ namespace SMP
 	                    }
 	                    catch (Exception ex)
 	                    {
-	                        Server.Log(ex.ToString());
+	                        Logger.Log(ex.ToString());
 	                    }
 	                }
 				}
@@ -365,7 +395,7 @@ namespace SMP
                     w.dimension = sbyte.Parse(sw.ReadLine());
                 }
             }
-            catch { /*Server.ServerLogger.Log("Error loading world configuration!");*/ }
+            catch { /*Logger.Log("Error loading world configuration!");*/ }
 
             w.physics = new Physics(w);
             w.generator = new GenStandard(w, true);
@@ -408,8 +438,8 @@ namespace SMP
             Console.WriteLine();
 
             World.worlds.Add(w);
-            Server.Log(filename + " Loaded.");
-            Server.Log("Look distance = " + Server.ViewDistance);
+            Logger.Log(filename + " Loaded.");
+            Logger.Log("Look distance = " + Server.ViewDistance);
 
             w.Init();
             w.physics.Start();
@@ -482,7 +512,7 @@ namespace SMP
                         w.SaveChunk(pt.x, pt.z);
                 }
             }
-            if (!silent) Server.Log(w.name + " Saved.");
+            if (!silent) Logger.Log(w.name + " Saved.");
         }
 
         #region Useless compression methods, use byte[].Compress() and byte[].Decompress()
@@ -641,7 +671,7 @@ namespace SMP
                     return c;
                 }
                 else
-                    Server.ServerLogger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
+                    Logger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
             }
 
 
@@ -746,7 +776,7 @@ namespace SMP
             }
             catch (Exception ex)
             {
-                Server.ServerLogger.LogError(ex);
+                Logger.LogError(ex);
             }
         }
         /// <summary>

@@ -4,6 +4,8 @@ using System.Net;
 using System.Web;
 using System.Net.Sockets;
 using System.IO;
+using SMP.util;
+
 namespace SMP.Commands
 {
     public class CmdCheckPort : Command
@@ -96,9 +98,9 @@ namespace SMP.Commands
                 p.SendMessage(Color.Red + "Testing Port Failed!");
 
                 p.SendMessage("Could not start listening on port " + port + ". Another program may be using the port.");
-                Server.Log("-----------------port error----------------");
-                Server.Log(ex.Message + Environment.NewLine + ex.Source + Environment.NewLine + ex.StackTrace);
-                Server.Log("-----------------port error----------------");
+                Logger.Log("-----------------port error----------------");
+                Logger.Log(ex.Message + Environment.NewLine + ex.Source + Environment.NewLine + ex.StackTrace);
+                Logger.Log("-----------------port error----------------");
             }
             finally
             {

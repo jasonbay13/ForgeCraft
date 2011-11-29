@@ -69,6 +69,8 @@
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Entity\Player\Inventory\Container\Container.cs" />
+    <Compile Include="Entity\Player\Inventory\Container\ContainerChest.cs" />
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCache.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCacheBlock.cs" />
@@ -104,10 +106,13 @@
     <Compile Include="Mojang\Server\World\Generator\Layer\LayerIsland.cs" />
     <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandom.cs" />
     <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandomChoice.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructureMineshaftPieces.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructureMineshaftStart.cs" />
     <Compile Include="Mojang\Server\World\Generator\Structures\StructureBoundingBox.cs" />
     <Compile Include="Mojang\Server\World\Generator\Structures\StructureComponent.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceBlockSelector.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceTreasure.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructurePieceBlockSelector.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructurePieceTreasure.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructureStart.cs" />
     <Compile Include="Mojang\util\IntCache.cs" />
     <Compile Include="Mojang\Server\World\ChunkPosition.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeDecorator.cs" />

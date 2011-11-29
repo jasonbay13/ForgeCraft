@@ -541,35 +541,33 @@ namespace SMP.Generator
             if(structureboundingbox.isInBbVolume(i1, j1, k1) && world.GetBlock(i1, j1, k1) != (byte)Blocks.Chest)
             {
                 world.SetBlock(i1, j1, k1, (byte)Blocks.Chest);
-                // TODO
-                /*TileEntityChest tileentitychest = (TileEntityChest)world.getBlockTileEntity(i1, j1, k1);
-                if(tileentitychest != null)
+                Container tileentitychest = world.GetBlockContainer(i1, j1, k1);
+                if (tileentitychest != null && tileentitychest is ContainerChest)
                 {
-                    func_35311_a(random, astructurepiecetreasure, tileentitychest, l);
-                }*/
+                    func_35311_a(random, astructurepiecetreasure, (ContainerChest)tileentitychest, l);
+                }
             }
         }
 
-        // TODO
-        /*private static void func_35311_a(java.util.Random random, StructurePieceTreasure[] astructurepiecetreasure, TileEntityChest tileentitychest, int i)
+        private static void func_35311_a(java.util.Random random, StructurePieceTreasure[] astructurepiecetreasure, ContainerChest tileentitychest, int i)
         {
             for(int j = 0; j < i; j++)
             {
                 StructurePieceTreasure structurepiecetreasure = (StructurePieceTreasure)WeightedRandom.func_35691_a(random, astructurepiecetreasure);
                 int k = structurepiecetreasure.field_35488_c + random.nextInt((structurepiecetreasure.field_35486_e - structurepiecetreasure.field_35488_c) + 1);
-                if(Item.itemsList[structurepiecetreasure.field_35489_a].getItemStackLimit() >= k)
+                if(Inventory.isStackable((short)structurepiecetreasure.field_35489_a) >= k)
                 {
-                    tileentitychest.setInventorySlotContents(random.nextInt(tileentitychest.getSizeInventory()), new ItemStack(structurepiecetreasure.field_35489_a, k, structurepiecetreasure.field_35487_b));
+                    tileentitychest.SetSlot(random.nextInt(tileentitychest.Size), new Item((short)structurepiecetreasure.field_35489_a, (byte)k, (short)structurepiecetreasure.field_35487_b));
                     continue;
                 }
                 for(int l = 0; l < k; l++)
                 {
-                    tileentitychest.setInventorySlotContents(random.nextInt(tileentitychest.getSizeInventory()), new ItemStack(structurepiecetreasure.field_35489_a, 1, structurepiecetreasure.field_35487_b));
+                    tileentitychest.SetSlot(random.nextInt(tileentitychest.Size), new Item((short)structurepiecetreasure.field_35489_a, 1, (short)structurepiecetreasure.field_35487_b));
                 }
 
             }
 
-        }*/
+        }
 
         protected void func_35298_a(World world, StructureBoundingBox structureboundingbox, java.util.Random random, int i, int j, int k, int l)
         {
