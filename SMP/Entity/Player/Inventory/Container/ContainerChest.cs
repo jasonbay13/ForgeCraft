@@ -1,4 +1,5 @@
 ﻿using System;
+using SMP.util;
 using Substrate.Nbt;
 
 namespace SMP
@@ -69,7 +70,7 @@ namespace SMP
                     items[slot].LoadNBTData(comp);
                 }
             }
-            catch { Server.ServerLogger.Log("NBT data is invalid."); }
+            catch { Logger.Log("NBT data is invalid."); }
         }
     }
 }

@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -51,7 +52,7 @@ namespace SMP
 		public Item[] items; //Hold all the items this window has inside it.
 		public Windows(WindowType Type, Point3 Pos, World Level)
 		{
-			Server.Log("Window Creating.");
+			Logger.Log("Window Creating.");
 
             id = FreeId();
 			type = (byte)Type;
@@ -85,9 +86,9 @@ namespace SMP
 					items = new Item[4];
 					break;
 			}
-			Server.Log("Window adding.");
+			Logger.Log("Window adding.");
 			level.windows.Add(pos, this);
-			Server.Log("Window done.");
+			Logger.Log("Window done.");
 		}
 
 		//public bool AddItem(Item item)

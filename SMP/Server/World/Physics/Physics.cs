@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SMP.util;
 
 namespace SMP
 {
@@ -61,7 +62,7 @@ namespace SMP
             if (physthread != null) return;
             physthread = new Thread(new ThreadStart(RunLoop));
             physthread.Start();
-            Server.ServerLogger.Log("Physics started on " + w.name + ".");
+            Logger.Log("Physics started on " + w.name + ".");
         }
 
         public void Stop()
@@ -71,7 +72,7 @@ namespace SMP
             try { physthread.Abort(); physthread.Join(); }
             catch { }
             physthread = null;
-            Server.ServerLogger.Log("Physics stopped on " + w.name + ".");
+            Logger.Log("Physics stopped on " + w.name + ".");
         }
 
         public void Clear()
@@ -126,8 +127,8 @@ namespace SMP
                     catch (ThreadAbortException) { }
                     catch (Exception e)
                     {
-                        Server.ServerLogger.Log("Physics error on " + w.name + "!");
-                        Server.ServerLogger.LogError(e);
+                        Logger.Log("Physics error on " + w.name + "!");
+                        Logger.LogError(e);
                         Checks.Remove(C);
                     }
                 });
@@ -153,16 +154,16 @@ namespace SMP
                     catch (ThreadAbortException) { }
                     catch (Exception e)
                     {
-                        Server.ServerLogger.Log("Physics update error on " + w.name + "!");
-                        Server.ServerLogger.LogError(e);
+                        Logger.Log("Physics update error on " + w.name + "!");
+                        Logger.LogError(e);
                     }
                 });
                 Updates.Clear();
             }
             catch (Exception e)
             {
-                Server.ServerLogger.Log("Physics error on " + w.name + "!");
-                Server.ServerLogger.LogError(e);
+                Logger.Log("Physics error on " + w.name + "!");
+                Logger.LogError(e);
             }
         }
 
@@ -196,7 +197,7 @@ namespace SMP
             }
             catch (Exception e)
             {
-                Server.ServerLogger.LogError(e);
+                Logger.LogError(e);
             }
         }
         public void AddCheck(Check check)
@@ -266,7 +267,7 @@ namespace SMP
             }
             catch (Exception e)
             {
-                Server.ServerLogger.LogError(e);
+                Logger.LogError(e);
             }
             return false;
         }

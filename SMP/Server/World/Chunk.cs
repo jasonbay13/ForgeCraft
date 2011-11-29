@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using Ionic.Zlib;
 using Substrate.Nbt;
 using System.Linq;
+using SMP.util;
 
 namespace SMP
 {
@@ -220,8 +221,8 @@ namespace SMP
                 }
                 catch (Exception ex)
                 {
-                    Server.ServerLogger.LogToFile("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
-                    Server.ServerLogger.LogErrorToFile(ex);
+                    Logger.LogToFile("Error loading chunk at " + x + "," + z + "! A new chunk will be generated in it's place.");
+                    Logger.LogErrorToFile(ex);
                 }
             }
             //Console.WriteLine("GENERATED " + x + " " + z);
@@ -330,14 +331,14 @@ namespace SMP
                 }
                 catch (Exception ex)
                 {
-                    Server.ServerLogger.LogToFile("Error saving chunk at " + x + "," + z + "!");
-                    Server.ServerLogger.LogErrorToFile(ex);
+                    Logger.LogToFile("Error saving chunk at " + x + "," + z + "!");
+                    Logger.LogErrorToFile(ex);
                 }
 
                 this._dirty = false;
                 //Console.WriteLine("SAVED " + x + " " + z);
             }
-            catch (Exception ex) { Server.ServerLogger.LogError(ex); }
+            catch (Exception ex) { Logger.LogError(ex); }
         }
 
         private List<Container> GetContainers(World w)

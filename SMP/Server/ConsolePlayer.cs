@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using SMP.util;
 
 //for console commands mainly and removes color codes from text
 
@@ -41,7 +42,7 @@ namespace SMP {
 
         protected override void SendMessageInternal(string message)
         {
-            Server.ServerLogger.Log(LogLevel.Info, ParseColors(message) );
+            Logger.Log(LogLevel.Info, ParseColors(message) );
         }
 
         /// <summary>

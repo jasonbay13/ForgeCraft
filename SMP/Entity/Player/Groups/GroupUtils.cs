@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using SMP.util;
 
 /* Notes to self (Keith)
  * if no track is found than try to find a group with inheritance //untested
@@ -266,7 +267,7 @@ namespace SMP
 		/// </returns>
 		public static bool DemotePlayer(Player p)
 		{
-			Server.Log("trackcount: " + p.group.Tracks.Count);
+			Logger.Log("trackcount: " + p.group.Tracks.Count);
 			for (int i = 0; i < p.group.Tracks.Count; i++)
 			{
 				if(Group.TracksDictionary.ContainsKey(p.group.Tracks[i]))

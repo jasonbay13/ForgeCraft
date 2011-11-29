@@ -38,7 +38,7 @@
 
 //        protected override void SendMessageInternal(string message)
 //        {
-//            Server.ServerLogger.Log(LogLevel.Info, ParseColors(message) );
+//            Logger.Log(LogLevel.Info, ParseColors(message) );
 //        }
 
 //        /// <summary>

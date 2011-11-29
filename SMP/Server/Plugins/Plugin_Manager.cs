@@ -22,6 +22,7 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using SMP.util;
 
 namespace SMP
 {
@@ -104,16 +105,16 @@ namespace SMP
                 catch { }
                 if (instance == null)
                 {
-                    Server.ServerLogger.Log("The plugin " + pluginname + " couldnt be loaded!");
+                    Logger.Log("The plugin " + pluginname + " couldnt be loaded!");
                     return;
                 }
                 if (((Plugin)instance).ForgeCraft_Version < Server.version)
                 {
-                    Server.ServerLogger.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
+                    Logger.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
                     Thread.Sleep(1000);
                     if (Server.unsafe_plugin)
                     {
-                        Server.ServerLogger.Log("Will attempt to load!");
+                        Logger.Log("Will attempt to load!");
                         goto here;
                     }
                     else
@@ -123,8 +124,8 @@ namespace SMP
                 Plugin.all.Add((Plugin)instance);
                 creator = ((Plugin)instance).creator;
                 ((Plugin)instance).Load(startup);
-                Server.ServerLogger.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).version.ToString() + " loaded.");
-                Server.ServerLogger.Log(((Plugin)instance).welcome);
+                Logger.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).version.ToString() + " loaded.");
+                Logger.Log(((Plugin)instance).welcome);
             }
             catch (FileNotFoundException)
             {
@@ -144,9 +145,9 @@ namespace SMP
             catch (Exception)
             {
                 //Server.ErrorLog(e);
-                Server.ServerLogger.Log("The plugin " + pluginname + " failed to load!");
+                Logger.Log("The plugin " + pluginname + " failed to load!");
                 if (creator != "")
-                    Server.ServerLogger.Log("You can go bug " + creator + " about it");
+                    Logger.Log("You can go bug " + creator + " about it");
                 Thread.Sleep(1000);
             }
         }
@@ -163,7 +164,7 @@ namespace SMP
         {
             p.Unload(shutdown);
             all.Remove(p);
-            Server.ServerLogger.Log(p.name + " was unloaded.");
+            Logger.Log(p.name + " was unloaded.");
         }
 	/// <summary>
 	/// Unload all plugins.

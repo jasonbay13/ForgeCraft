@@ -21,6 +21,8 @@ using System.Threading;
 using SMP.Commands;
 
 using SMP.Commands;
+using SMP.util;
+
 /*
 	Copyright 2011 ForgeCraft team
 	
@@ -102,7 +104,7 @@ namespace SMP
                     switch (cmd)
                     {
                         case "stop":
-                            Server.ServerLogger.Log(LogLevel.Info, "Stopping Server...");
+                            Logger.Log(LogLevel.Info, "Stopping Server...");
 							for(int i =Player.players.Count -1; i >= 0; i--)
 							{
 								Player.players[i].Kick("Server Shutting Down!");
@@ -116,7 +118,7 @@ namespace SMP
                             Command command = Command.all.Find(cmd);
                             if (command == null)
                             {
-                                Server.ServerLogger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
+                                Logger.Log(LogLevel.Info, "Unrecognized command: " + cmd);
                                 break;
                             } 
 
@@ -127,12 +129,12 @@ namespace SMP
                                 Array.Copy(inputParts, 1, args, 0, inputParts.Length - 1);
 
                                 try { command.Use(Server.consolePlayer, args); }
-                                catch (Exception e) { Server.ServerLogger.LogError(e); }
+                                catch (Exception e) { Logger.LogError(e); }
                                 break;
                             }
                             else
                             {
-                                Server.ServerLogger.Log(LogLevel.Info, cmd + " command not useable in the console.");
+                                Logger.Log(LogLevel.Info, cmd + " command not useable in the console.");
                                 break;
                             }
                     }
@@ -142,13 +144,13 @@ namespace SMP
                     string name = inputParts[0].Substring(1);
                     string message = "";
                     Player p = Player.FindPlayer(name);
-                    Server.ServerLogger.Log(name + " : " );
+                    Logger.Log(name + " : " );
                     
                     if (p != null)
                     {
                         if (inputParts.Length <= 1)
                         {
-                            Server.ServerLogger.Log(LogLevel.Warning, "Please enter a message to send");
+                            Logger.Log(LogLevel.Warning, "Please enter a message to send");
                         }
                         else if (input.Length > 1)
                         {
@@ -161,7 +163,7 @@ namespace SMP
                     }
                     else
                     {
-                        Server.ServerLogger.Log(LogLevel.Warning, "Please enter a valid username");
+                        Logger.Log(LogLevel.Warning, "Please enter a valid username");
                     }
                 }
                 else
@@ -172,7 +174,7 @@ namespace SMP
         }
         private static void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
         {
-            Server.ServerLogger.LogError((Exception)e.ExceptionObject);
+            Logger.LogError((Exception)e.ExceptionObject);
         }
 
 
