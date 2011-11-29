@@ -50,7 +50,7 @@ namespace SMP
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
-		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
+		//public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
         public Dictionary<Point3, Container> containers = new Dictionary<Point3, Container>();
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;

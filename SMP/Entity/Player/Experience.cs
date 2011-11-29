@@ -29,7 +29,7 @@ namespace SMP
         private short _Experience = 0;
 
         public Player player { get { return p; } }
-        public float Bar { get { return (float)MathHelper.Clamp((float)_LevelExp / (float)NeededLevelExp, 0F, 1F); } }
+        public float Bar { get { return MathHelper.Clamp((float)_LevelExp / (float)NeededLevelExp, 0, 1); } }
         public short Level { get { return _Level; } set { _Level = value; } }
         public short LevelExp { get { return _LevelExp; } set { _LevelExp = value; } }
         public short NeededExp { get { return (short)(3.5 * (_Level + 1) * (_Level + 2)); } }
@@ -46,7 +46,6 @@ namespace SMP
         /// <summary>
         /// Adds a number to players experience
         /// </summary>
-        /// <param name="p">Player, duh!</param>
         /// <param name="exp">The ammount of experience to add</param>
         public void Add(short exp)
         {
@@ -72,7 +71,6 @@ namespace SMP
         /// <summary>
         /// Removes ammount of exp (untested!)
         /// </summary>
-        /// <param name="p">Player, duh!</param>
         /// <param name="exp">The ammount of experience to remove</param>
         public void Remove(short exp)
         {

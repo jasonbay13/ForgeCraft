@@ -35,8 +35,48 @@ namespace SMP
             return SIN_TABLE;
         }
 
+        #region Clamp()
+        public static byte Clamp(byte value, byte low, byte high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
 
-        public static decimal Clamp(decimal value, decimal low, decimal high)
+        public static sbyte Clamp(sbyte value, sbyte low, sbyte high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static short Clamp(short value, short low, short high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static ushort Clamp(ushort value, ushort low, ushort high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static int Clamp(int value, int low, int high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static uint Clamp(uint value, uint low, uint high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static long Clamp(long value, long low, long high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static ulong Clamp(ulong value, ulong low, ulong high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static float Clamp(float value, float low, float high)
         {
             return Math.Max(Math.Min(value, high), low);
         }
@@ -45,6 +85,12 @@ namespace SMP
         {
             return Math.Max(Math.Min(value, high), low);
         }
+
+        public static decimal Clamp(decimal value, decimal low, decimal high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+        #endregion
 
         public static int floor_double(double d)
         {

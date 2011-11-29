@@ -792,13 +792,13 @@ namespace SMP
                 cancelclose = false;
                 return;
             }
-            OpenWindow = false;
+            HasWindowOpen = false;
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
 
         private void HandleWindowClick(byte[] message)
 		{
-			if (OpenWindow)
+			if (HasWindowOpen)
 			{
 				//window.HandleClick(this, message);
 			}
@@ -808,7 +808,7 @@ namespace SMP
 			}
 
 			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
-			if (!OpenWindow)
+			if (!HasWindowOpen)
 			{
 				if (slot == 5)
 				{
@@ -870,7 +870,7 @@ namespace SMP
 				}
 			}
 
-			if (OpenWindow)
+			if (HasWindowOpen)
 			{
 				if (slot < 5)
 				{

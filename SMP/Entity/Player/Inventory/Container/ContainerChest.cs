@@ -8,15 +8,17 @@ namespace SMP
         public override ContainerType Type { get { return ContainerType.Chest; } }
         public override int Size { get { return 27; } }
         public override Point3 Pos { get { return point; } }
+        internal override Item[] Items { get { return items; } }
         protected Point3 point;
-        internal Item[] items;
+        private Item[] items;
 
 
         public ContainerChest(Point3 point)
         {
             this.point = point;
             items = new Item[Size];
-            items.Initialize();
+            for (int i = 0; i < Size; i++)
+                items[i] = Item.Nothing;
         }
 
         public ContainerChest(Point3 point, Item[] items)
