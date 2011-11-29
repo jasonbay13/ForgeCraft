@@ -23,15 +23,16 @@ namespace SMP
 {
     public static class MathHelper
     {
-        private static float[] SIN_TABLE;
+        private static float[] SIN_TABLE = InitSinTable();
 
-        public static void Init()
+        private static float[] InitSinTable()
         {
-            SIN_TABLE = new float[0x10000];
+            float[] SIN_TABLE = new float[0x10000];
             for(int i = 0; i < 0x10000; i++)
             {
                 SIN_TABLE[i] = (float)java.lang.Math.sin(((double)i * 3.1415926535897931D * 2D) / 65536D);
             }
+            return SIN_TABLE;
         }
 
 

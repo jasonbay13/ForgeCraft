@@ -38,10 +38,7 @@ namespace SMP
         #region Mode Thingy
         public byte Mode
         {
-            get
-            {
-                return mode;
-            }
+            get { return mode; }
             set
             {
                 mode = value;
@@ -1469,7 +1466,7 @@ namespace SMP
         {
             StringBuilder sb = new StringBuilder(message);
 
-            for (int i = 0; i <= 9; i++)
+            for (byte i = 0; i <= 9; i++)
                 sb.Replace("%" + i, Color.Signal + i);
             for (char c = 'a'; c <= 'f'; c++)
                 sb.Replace("%" + c, Color.Signal + c);

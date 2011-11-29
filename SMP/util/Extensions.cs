@@ -49,8 +49,25 @@ namespace SMP
         public static Array Truncate(this Array source, int maxLength)
         {
             if (source.Length > maxLength)
-                Array.Copy(source, 0, source, 0, maxLength);
+            {
+                Array dest = Array.CreateInstance(source.GetType().GetElementType(), maxLength);
+                Array.Copy(source, 0, dest, 0, maxLength);
+                return dest;
+            }
             return source;
+        }
+
+        /// <summary>
+        /// Truncates a specified number of elements from the beginning of an array.
+        /// </summary>
+        /// <param name="source">The array to be truncated.</param>
+        /// <param name="count">The number of elements to truncate.</param>
+        /// <returns>The truncated array.</returns>
+        public static Array TruncateStart(this Array source, int count)
+        {
+            Array dest = Array.CreateInstance(source.GetType().GetElementType(), source.Length - count);
+            Array.Copy(source, count, dest, 0, source.Length - count);
+            return dest;
         }
 
         [Obsolete("Learn to use bit operators!", false)]

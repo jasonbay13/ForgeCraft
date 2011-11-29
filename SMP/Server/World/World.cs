@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 using Ionic.Zlib;
 using SMP.Generator;
 
@@ -49,6 +50,7 @@ namespace SMP
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
+        public Dictionary<Point3, Container> containers = new Dictionary<Point3, Container>();
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;
         public bool Raining = false;
@@ -227,9 +229,11 @@ namespace SMP
             catch { return; }
 
             SaveChunk(x, z, w);
-            if (((int)w.SpawnX + 1 >> 4) != x || ((int)w.SpawnZ + 1 >> 4) != z) // Don't unload the spawn chunks!
+            if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
             {
                 w.physics.RemoveChunkChecks(x, z);
+                foreach (KeyValuePair<Point3, Container> kvp in w.containers.Where(KVP => (((int)KVP.Key.x >> 4) == x && ((int)KVP.Key.z >> 4) == z)).ToList())
+                    w.containers.Remove(kvp.Key);
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
                     {
@@ -274,6 +278,31 @@ namespace SMP
             }
         }
         #endregion
+
+        public Container GetBlockContainer(int x, int y, int z)
+        {
+            try
+            {
+                if (Chunk.GetChunk(x >> 4, z >> 4, this) != null)
+                    Chunk.GetChunk(x >> 4, z >> 4, this)._dirty = true; // Temporary until we find a good way to make the chunk dirty only when the container is edited.
+
+                Point3 point = new Point3(x, y, z);
+                if (containers.ContainsKey(point)) return containers[point];
+                switch (GetBlock(x, y, z))
+                {
+                    case (byte)Blocks.Chest:
+                        containers.Add(point, new ContainerChest(point));
+                        break;
+                    default: return null;
+                }
+                return containers[point];
+            }
+            catch { return null; }
+        }
+        public Container GetBlockContainer(Point3 pos)
+        {
+            return GetBlockContainer((int)pos.x, (int)pos.y, (int)pos.z);
+        }
 
         public static World LoadLVL(string filename)
         {

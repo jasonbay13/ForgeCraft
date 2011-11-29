@@ -157,7 +157,8 @@ namespace SMP
 				case "cauldron": return 118;
 				case "airportal": return 119;
 				case "airportalframe": return 120;
-                case "whitestone": return 121;
+                case "endstone": return 121;
+                case "dragonegg": return 122;
                 default: return -1;
             }
         }

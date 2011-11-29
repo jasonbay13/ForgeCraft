@@ -43,10 +43,7 @@ namespace SMP
         #endregion
         private static byte nextId = 1;
         byte type; //This holds type information, used in deciding which kind of window we need to send.
-        public WindowType Type
-        {
-            get { return (WindowType)type; }
-        }
+        public WindowType Type { get { return (WindowType)type; } }
         public byte id;
 		public string name = "Chest";
 		public Point3 pos; //The pos of the block that this window is attached to
@@ -128,7 +125,9 @@ namespace SMP
 
 		public Item Right_Click(Player p, int slot)
 		{
-            Item temp11 = Item.Nothing;
+            return Item.Nothing; // TODO
+            
+            /*Item temp11 = Item.Nothing;
             if (RightClick != null)
                 temp11 = RightClick(p, slot);
             if (cancelright)
@@ -144,7 +143,7 @@ namespace SMP
 			{
 				try
 				{
-                    Item temp = new Item(items[slot].id, 0, items[slot].meta, p.level, true);
+                    Item temp = new Item(items[slot].id, 0, items[slot].meta);
 					if (items[slot].count == 1)
 					{
 						temp = items[slot];
@@ -168,12 +167,13 @@ namespace SMP
 				{
 					return Item.Nothing;
 				}
-			}
+			}*/
 		}
 		
 		public void HandleClick(Player p, byte[] message)
 		{
-			byte id = message[0];
+            return; // TODO
+			/*byte id = message[0];
 			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
 			ClickType click = (ClickType)message[3];
 			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
@@ -443,7 +443,7 @@ namespace SMP
 								else
 								{
 									p.OnMouse.count -= 1;
-                                    items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta, p.level, true);
+                                    items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta);
 								}
 							}
 							else
@@ -476,7 +476,7 @@ namespace SMP
 					}
 				}
 				#endregion
-			}
+			}*/
 		}
 
 		public byte GetEmptyChestSlot()

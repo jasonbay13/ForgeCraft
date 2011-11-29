@@ -26,6 +26,7 @@ namespace SMP
 	{
         public abstract Entity e { get; internal set; }
         public abstract byte type { get; }
+        public abstract void Physics();
 
         public int id { get { return e.id; } }
         public Point3 pos { get { return e.pos; } set { e.pos = value; } }
@@ -33,9 +34,14 @@ namespace SMP
         public double[] velocity { get { return e.velocity; } set { e.velocity = value; } }
 
 
-        private McObject(ObjectType type)
+        public McObject()
+        {
+        }
+
+        public static McObject CreateInstance(ObjectType type)
         {
             // TODO
+            return null;
         }
 	}
 }

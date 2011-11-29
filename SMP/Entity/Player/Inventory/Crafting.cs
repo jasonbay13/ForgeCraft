@@ -22,7 +22,7 @@ using System.Text;
 
 namespace SMP
 {
-	static class Crafting
+	public static class Crafting
 	{
         public static void CheckCrafting(Player p)
         {

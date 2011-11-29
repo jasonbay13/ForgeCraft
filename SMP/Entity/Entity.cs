@@ -391,7 +391,7 @@ namespace SMP
                     if (!Entities.ContainsKey(i)) continue;
                     e = Entities[i]; e.Tick();
                     if (e.isPlayer) continue; // Players don't have physics.
-                    if (e.isObject) continue; // TODO
+                    if (e.isObject) e.obj.Physics();
                     if (e.isAI) e.ai.Update();
                     if (e.isItem) e.I.Physics();
                     if (!e.isPlayer) e.UpdatePosition();

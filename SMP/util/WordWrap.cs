@@ -190,11 +190,7 @@ namespace SMP
 
         private static bool IsValidColorCode(char color)
         {
-            if ((color >= '0' && color <= '9') || (color >= 'a' && color <= 'f') || (color >= 'A' && color <= 'F'))
-            {
-                return true;
-            }
-            return false;
+            return (color >= '0' && color <= '9') || (color >= 'a' && color <= 'f') || (color >= 'A' && color <= 'F');
         }
     }
 

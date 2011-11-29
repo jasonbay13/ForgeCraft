@@ -63,7 +63,6 @@ namespace SMP
             if (!Server.useGUI)
                 Console.Title = "ForgeCraft v" + Server.version.ToString();
 
-            MathHelper.Init();
             StartServer();
             StartInput();
         }

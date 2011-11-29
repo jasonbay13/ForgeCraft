@@ -115,7 +115,7 @@ namespace SMP
             if (slot > 44 || slot < 0) return;
 			if (count == 0) return;
 
-			Item I = new Item(item, count, meta, p.level, true);
+			Item I = new Item(item, count, meta);
 			items[slot] = I;
             //if (slot == current_index) p.current_block_holding = I;
 
@@ -132,7 +132,7 @@ namespace SMP
 			if (count >= items[slot].count)
 			{
 				items[slot] = Item.Nothing;
-				p.SendItem((short)slot, -1, 0, 0);
+                p.SendItem((short)slot, -1, 0, 0);
                 if (slot == current_index) UpdateVisibleItemInHand(-1, 0);
 				return;
 			}
@@ -539,7 +539,7 @@ namespace SMP
 							else
 							{
 								p.OnMouse.count -= 1;
-                                items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta, p.level, true);
+                                items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta);
 							}
 						}
 						else
@@ -578,7 +578,7 @@ namespace SMP
 		{
 			try
 			{
-                Item temp = new Item(items[slot].id, 0, items[slot].meta, p.level, true);
+                Item temp = new Item(items[slot].id, 0, items[slot].meta);
 				if (items[slot].count == 1)
 				{
 					temp = items[slot];
@@ -641,29 +641,32 @@ namespace SMP
 			
 			// may be missing a few
 			List<short> stackable64 = new List<short> {
-				262, 263, 264, 265, 266, 280, 281, 287,	288, 
-				289, 295, 296, 318, 321, 331, 334, 336, 337,
-				338, 339, 340, 341, 348, 351, 352, 353, 356
-				
+				260, 262, 263, 264, 265, 266, 280, 281, 287,
+                288, 289, 295, 296, 297, 318, 319, 320, 321,
+                322, 331, 334, 336, 337, 338, 339, 340, 341,
+                345, 347, 348, 349, 350, 351, 352, 353, 356,
+                360, 361, 362, 363, 364, 365, 366, 367, 369,
+                370, 371, 372, 374, 375, 376, 377, 378, 381,
+                382
 			};
 			
 			if(stackable64.Contains(id))
 			{
-				return 64;	
+				return 64;
 			}
 			
 			List<short> stackable16 = new List<short> {
-				332, 344 
+				332, 344, 368
 			};
 			
-			if( stackable16.Contains(id))
+			if(stackable16.Contains(id))
 			{
-				return 16;	
+				return 16;
 			}
 			
 			if(id == 357) //cookies
 			{
-				return 8;	
+				return 8;
 			}
 			return 1;
 		}

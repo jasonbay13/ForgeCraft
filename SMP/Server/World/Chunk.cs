@@ -89,6 +89,7 @@ namespace SMP
             extra = new Dictionary<int, ushort>();
 			this.x = x; this.z = z;
 		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.Chunk"/> class with a custom Block Count
 		/// </summary>
@@ -101,6 +102,7 @@ namespace SMP
 		/// <param name='BlockCount'>
 		/// Block count. The block count
 		/// </param>
+        [Obsolete("Does not work, should never be used!", true)]
 		public Chunk(int x, int z, int BlockCount)
 		{
 			blocks = new byte[BlockCount];
@@ -202,6 +204,16 @@ namespace SMP
                                 e.UpdateChunks(false, false);
                             }
                         }
+                        Container c; Point3 point3;
+                        foreach (TagNode tag in nbt.Root["Containers"].ToTagList())
+                        {
+                            nbtCompound = tag.ToTagCompound();
+                            nbtList = nbtCompound["Pos"].ToTagList();
+                            point3 = new Point3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
+                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), point3);
+                            c.LoadNBTData(nbtCompound["Items"].ToTagList());
+                            if (!w.containers.ContainsKey(point3)) w.containers.Add(point3, c);
+                        }
                     }
                     //Console.WriteLine("LOADED " + x + " " + z);
                     return ch;
@@ -225,92 +237,114 @@ namespace SMP
 
         public void Save(World w)
         {
-            string path = CreatePath(w, x, z, true);
-            string file = CreatePath(w, x, z);
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
-            NbtTree nbt = new NbtTree();
-            nbt.Root.Add("Generated", new TagNodeByte((byte)(generated ? 1 : 0)));
-            nbt.Root.Add("Populated", new TagNodeByte((byte)(populated ? 1 : 0)));
-            nbt.Root.Add("Blocks", new TagNodeByteArray(blocks));
-            nbt.Root.Add("Meta", new TagNodeByteArray(meta));
-            nbt.Root.Add("BlockLight", new TagNodeByteArray(Light));
-            nbt.Root.Add("SkyLight", new TagNodeByteArray(SkyL));
-            nbt.Root.Add("HeightMap", new TagNodeByteArray(heightMap));
-            nbt.Root.Add("HeightMapPrec", new TagNodeByteArray(precipitationHeightMap.ToByteArray()));
-            TagNodeList nbtList = new TagNodeList(TagType.TAG_COMPOUND);
-            TagNodeCompound nbtCompound;
-            lock (extra)
-                foreach (KeyValuePair<int, ushort> kvp in extra)
-                {
-                    nbtCompound = new TagNodeCompound();
-                    nbtCompound.Add("Pos", new TagNodeInt(kvp.Key));
-                    nbtCompound.Add("Value", new TagNodeShort((short)kvp.Value));
-                    nbtList.Add(nbtCompound);
-                }
-            nbt.Root.Add("Extra", nbtList);
-            nbtList = new TagNodeList(TagType.TAG_COMPOUND);
-            List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
-            foreach (Physics.Check check in physChecks)
-            {
-                nbtCompound = new TagNodeCompound();
-                nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_INT) { new TagNodeInt(check.x), new TagNodeInt(check.y), new TagNodeInt(check.z) });
-                nbtCompound.Add("Meta", new TagNodeByte(check.meta));
-                nbtCompound.Add("Time", new TagNodeShort(check.time));
-                nbtList.Add(nbtCompound);
-            }
-            nbt.Root.Add("Physics", nbtList);
-            nbtList = new TagNodeList(TagType.TAG_COMPOUND);
-            List<Entity> entities = Entities; TagNodeCompound nbtCompound2;
-            foreach (Entity e in entities)
-            {
-                if (e.isPlayer) continue;
-                nbtCompound = new TagNodeCompound();
-                nbtCompound.Add("Motion", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.velocity[0]), new TagNodeDouble(e.velocity[1]), new TagNodeDouble(e.velocity[2]) });
-                nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.pos.x), new TagNodeDouble(e.pos.y), new TagNodeDouble(e.pos.z) });
-                nbtCompound.Add("Rotation", new TagNodeList(TagType.TAG_FLOAT) { new TagNodeFloat(e.rot[0]), new TagNodeFloat(e.rot[1]) });
-                nbtCompound.Add("Type", new TagNodeByte((byte)e.Type));
-                nbtCompound.Add("Age", new TagNodeInt(e.age));
-                nbtCompound.Add("OnGround", new TagNodeByte(e.onground));
-                nbtCompound.Add("Health", new TagNodeShort(e.Health));
-                nbtCompound2 = new TagNodeCompound();
-                switch (e.Type)
-                {
-                    case EntityType.AI:
-                        nbtCompound2.Add("Type", new TagNodeByte(e.ai.type));
-                        break;
-                    case EntityType.Object:
-                        nbtCompound2.Add("Type", new TagNodeByte(e.obj.type));
-                        break;
-                    case EntityType.Item:
-                        nbtCompound2.Add("ID", new TagNodeShort(e.I.id));
-                        nbtCompound2.Add("Count", new TagNodeByte(e.I.count));
-                        nbtCompound2.Add("Meta", new TagNodeShort(e.I.meta));
-                        break;
-                }
-                nbtCompound.Add("Data", nbtCompound2);
-                nbtList.Add(nbtCompound);
-            }
-            nbt.Root.Add("Entities", nbtList);
-
             try
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    nbt.WriteTo(ms);
-                    byte[] bytes = ms.ToArray().Compress(CompressionLevel.BestCompression, CompressionType.GZip);
-                    using (FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write))
-                        fs.Write(bytes, 0, bytes.Length);
-                }
-            }
-            catch (Exception ex)
-            {
-                Server.ServerLogger.LogToFile("Error saving chunk at " + x + "," + z + "!");
-                Server.ServerLogger.LogErrorToFile(ex);
-            }
+                string path = CreatePath(w, x, z, true);
+                string file = CreatePath(w, x, z);
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
-            this._dirty = false;
-            //Console.WriteLine("SAVED " + x + " " + z);
+                NbtTree nbt = new NbtTree();
+                nbt.Root.Add("Generated", new TagNodeByte((byte)(generated ? 1 : 0)));
+                nbt.Root.Add("Populated", new TagNodeByte((byte)(populated ? 1 : 0)));
+                nbt.Root.Add("Blocks", new TagNodeByteArray(blocks));
+                nbt.Root.Add("Meta", new TagNodeByteArray(meta));
+                nbt.Root.Add("BlockLight", new TagNodeByteArray(Light));
+                nbt.Root.Add("SkyLight", new TagNodeByteArray(SkyL));
+                nbt.Root.Add("HeightMap", new TagNodeByteArray(heightMap));
+                nbt.Root.Add("HeightMapPrec", new TagNodeByteArray(precipitationHeightMap.ToByteArray()));
+                TagNodeList nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+                TagNodeCompound nbtCompound;
+                lock (extra)
+                    foreach (KeyValuePair<int, ushort> kvp in extra)
+                    {
+                        nbtCompound = new TagNodeCompound();
+                        nbtCompound.Add("Pos", new TagNodeInt(kvp.Key));
+                        nbtCompound.Add("Value", new TagNodeShort((short)kvp.Value));
+                        nbtList.Add(nbtCompound);
+                    }
+                nbt.Root.Add("Extra", nbtList);
+                nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+                List<Physics.Check> physChecks = w.physics.GetChunkChecks(x, z);
+                foreach (Physics.Check check in physChecks)
+                {
+                    nbtCompound = new TagNodeCompound();
+                    nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_INT) { new TagNodeInt(check.x), new TagNodeInt(check.y), new TagNodeInt(check.z) });
+                    nbtCompound.Add("Meta", new TagNodeByte(check.meta));
+                    nbtCompound.Add("Time", new TagNodeShort(check.time));
+                    nbtList.Add(nbtCompound);
+                }
+                nbt.Root.Add("Physics", nbtList);
+                nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+                List<Entity> entities = Entities; TagNodeCompound nbtCompound2;
+                foreach (Entity e in entities)
+                {
+                    if (e.isPlayer) continue;
+                    nbtCompound = new TagNodeCompound();
+                    nbtCompound.Add("Motion", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.velocity[0]), new TagNodeDouble(e.velocity[1]), new TagNodeDouble(e.velocity[2]) });
+                    nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_DOUBLE) { new TagNodeDouble(e.pos.x), new TagNodeDouble(e.pos.y), new TagNodeDouble(e.pos.z) });
+                    nbtCompound.Add("Rotation", new TagNodeList(TagType.TAG_FLOAT) { new TagNodeFloat(e.rot[0]), new TagNodeFloat(e.rot[1]) });
+                    nbtCompound.Add("Type", new TagNodeByte((byte)e.Type));
+                    nbtCompound.Add("Age", new TagNodeInt(e.age));
+                    nbtCompound.Add("OnGround", new TagNodeByte(e.onground));
+                    nbtCompound.Add("Health", new TagNodeShort(e.Health));
+                    nbtCompound2 = new TagNodeCompound();
+                    switch (e.Type)
+                    {
+                        case EntityType.AI:
+                            nbtCompound2.Add("Type", new TagNodeByte(e.ai.type));
+                            break;
+                        case EntityType.Object:
+                            nbtCompound2.Add("Type", new TagNodeByte(e.obj.type));
+                            break;
+                        case EntityType.Item:
+                            nbtCompound2.Add("ID", new TagNodeShort(e.I.id));
+                            nbtCompound2.Add("Count", new TagNodeByte(e.I.count));
+                            nbtCompound2.Add("Meta", new TagNodeShort(e.I.meta));
+                            break;
+                    }
+                    nbtCompound.Add("Data", nbtCompound2);
+                    nbtList.Add(nbtCompound);
+                }
+                nbt.Root.Add("Entities", nbtList);
+                nbtList = new TagNodeList(TagType.TAG_COMPOUND);
+                foreach (Container c in GetContainers(w))
+                {
+                    nbtCompound = new TagNodeCompound();
+                    nbtCompound.Add("Type", new TagNodeByte((byte)c.Type));
+                    nbtCompound.Add("Pos", new TagNodeList(TagType.TAG_INT) { new TagNodeInt((int)c.Pos.x), new TagNodeInt((int)c.Pos.y), new TagNodeInt((int)c.Pos.z) });
+                    nbtCompound.Add("Items", c.GetNBTData());
+                    nbtList.Add(nbtCompound);
+                    //Console.WriteLine("SAVED CONTAINER @ " + (int)c.Pos.x + "," + (int)c.Pos.y + "," + (int)c.Pos.z + " @ " + x + "," + z);
+                }
+                nbt.Root.Add("Containers", nbtList);
+
+                try
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        nbt.WriteTo(ms);
+                        byte[] bytes = ms.ToArray().Compress(CompressionLevel.BestCompression, CompressionType.GZip);
+                        using (FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write))
+                            fs.Write(bytes, 0, bytes.Length);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Server.ServerLogger.LogToFile("Error saving chunk at " + x + "," + z + "!");
+                    Server.ServerLogger.LogErrorToFile(ex);
+                }
+
+                this._dirty = false;
+                //Console.WriteLine("SAVED " + x + " " + z);
+            }
+            catch (Exception ex) { Server.ServerLogger.LogError(ex); }
+        }
+
+        private List<Container> GetContainers(World w)
+        {
+            List<Container> containers;
+            containers = new List<Container>(w.containers.Values);
+            return containers.FindAll(container => (((int)container.Pos.x >> 4) == x && ((int)container.Pos.z >> 4) == z));
         }
 
         public void AddEntity(Entity e)
@@ -374,6 +408,15 @@ namespace SMP
                 w.physics.AddChunkChecks(physChecks);
                 physChecks = null;
             }
+
+            byte bType;
+            for (int xx = 0; xx < Width; xx++)
+                for (int zz = 0; zz < Depth; zz++)
+                    for (int yy = 0; yy < Height; yy++)
+                    {
+                        bType = GetBlock(xx, yy, zz);
+                        if (bType < 0 || bType > 122) UNCHECKEDPlaceBlock(xx, yy, zz, 0);
+                    }
         }
 
         public void PostGenerate(World w)
