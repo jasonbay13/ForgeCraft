@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using java.lang;
 using Exception = System.Exception;
 using String = System.String;
@@ -39,11 +38,7 @@ namespace SMP.util
         static readonly string LogFile = "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_Logger.Log";
         static readonly string ErrorFile = "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
 
-        private static Thread flushThread;
         private static readonly Queue<string> messageQueue = new Queue<string>();
-        private static readonly object enlocker = new object();
-        private static readonly object outlocker = new object();
-
         public delegate void Logs(string message);
         public static event Logs OnLog;
 
@@ -64,7 +59,7 @@ namespace SMP.util
         /// <param name="log"></param>
         public static void Log(string log, bool logToFile = true)
         {
-            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannon Be Null or Empty");
+            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
             messageQueue.Enqueue(FormatTime() + "  " + log);
             if (OnLog != null) OnLog(messageQueue.Dequeue());
             if (logToFile)
@@ -78,7 +73,7 @@ namespace SMP.util
         /// <param name="log"></param>
         public static void Log(LogLevel level, string log, bool logToFile = true)
         {
-            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannon Be Null or Empty");
+            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
             messageQueue.Enqueue(FormatTime() + "  " + log);
             if (OnLog != null) OnLog(messageQueue.Dequeue());
             if (logToFile)
