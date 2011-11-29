@@ -100,6 +100,7 @@ namespace SMP
 		{
 		    //TODO: (in order)
             LoadEvents();
+            Logger.Init();
             Logger.Log("Starting Server");
             SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
