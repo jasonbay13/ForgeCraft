@@ -36,14 +36,42 @@ namespace SMP.Commands
                 p.hurt(2);
                 p.SendMessage(Color.DarkRed + "You slapped yourself in confusion.");
                 p.SendMessage(Color.Yellow + "Who were you trying to slap again?");
+                Help(p);
                 return;
             }
             else
             {
                 Player q = Player.FindPlayer(args[1]);
-
-                q.hurt(2);
-                q.SendMessage(Color.Teal + p.username + " slapped you, how rude.");
+                if (q == null)
+                {
+                    return;
+                }
+                else
+                {
+                    if (!p.IsConsole)
+                    {
+                        bool slapSelf = new Random().Next(0, 100) % 2 == 1;
+                        if (slapSelf == true)
+                        {
+                            p.hurt(2);
+                            p.SendMessage(Color.DarkRed + "You miss " + q.username + "'s face, and fall to the ground.");
+                            p.SendMessage(Color.Yellow + "Try harder next time.");
+                            return;
+                        }
+                        else
+                        {
+                            q.hurt(2);
+                            q.SendMessage(Color.Teal + p.username + " slapped you, how rude.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        q.hurt(2);
+                        q.SendMessage(Color.Teal + "You were slapped by the console, but you probably deserved it.");
+                        return;
+                    }
+                }
             }
         }
 
