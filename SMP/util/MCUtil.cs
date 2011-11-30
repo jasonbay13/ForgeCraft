@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace SMP
 {
@@ -24,8 +27,8 @@ namespace SMP
             {
                 if (source.Length > short.MaxValue) throw new ArgumentException("String too big.");
 
-                byte[] bytes = new byte[2 + (source.Length * 2)];
-                util.EndianBitConverter.Big.GetBytes((short)source.Length).CopyTo(bytes, 0);
+                byte[] bytes = new byte[2 + (source.Length*2)];
+                util.EndianBitConverter.Big.GetBytes((short) source.Length).CopyTo(bytes, 0);
                 Encoding.BigEndianUnicode.GetBytes(source).CopyTo(bytes, 2);
                 return bytes;
             }
@@ -38,7 +41,7 @@ namespace SMP
             public static short GetBytesLength(string source)
             {
                 if (source.Length > short.MaxValue) throw new ArgumentException("String too big.");
-                return (short)(2 + source.Length * 2);
+                return (short) (2 + source.Length*2);
             }
 
             /// <summary>
@@ -62,10 +65,13 @@ namespace SMP
             public static string GetString(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
-                if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
+                if (length > maxLength)
+                    throw new Exception(
+                        new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).
+                            Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length * 2);
+                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length*2);
             }
 
             /// <summary>
@@ -89,10 +95,13 @@ namespace SMP
             public static short GetStringLength(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
-                if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
+                if (length > maxLength)
+                    throw new Exception(
+                        new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).
+                            Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return (short)(2 + length * 2);
+                return (short) (2 + length*2);
             }
         }
 
@@ -100,52 +109,53 @@ namespace SMP
         {
             public static byte[] GetMetaBytes(object[] data)
             {
-                List<byte> bytes = new List<byte>(); object obj;
+                List<byte> bytes = new List<byte>();
+                object obj;
                 for (int i = 0; i < data.Length; i++)
                 {
                     if (i > 31) break; // Maximum index is 31 due to the index being 5 bits.
                     obj = data[i];
                     if (obj == null) continue;
-                    if (obj.GetType() == typeof(byte))
+                    if (obj is byte)
                     {
-                        bytes.Add((byte)(i & 0x1F));
-                        bytes.Add((byte)obj);
+                        bytes.Add((byte) (i & 0x1F));
+                        bytes.Add((byte) obj);
                     }
-                    else if (obj.GetType() == typeof(short))
+                    else if (obj is short)
                     {
-                        bytes.Add((byte)(0x01 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
+                        bytes.Add((byte) (0x01 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short) obj));
                     }
-                    else if (obj.GetType() == typeof(int))
+                    else if (obj is int)
                     {
-                        bytes.Add((byte)(0x02 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
+                        bytes.Add((byte) (0x02 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) obj));
                     }
-                    else if (obj.GetType() == typeof(float))
+                    else if (obj is float)
                     {
-                        bytes.Add((byte)(0x03 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
+                        bytes.Add((byte) (0x03 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float) obj));
                     }
-                    else if (obj.GetType() == typeof(string))
+                    else if (obj is string)
                     {
-                        bytes.Add((byte)(0x04 << 5 | i & 0x1F));
-                        bytes.AddRange(MCUtil.Protocol.GetBytes((string)obj));
+                        bytes.Add((byte) (0x04 << 5 | i & 0x1F));
+                        bytes.AddRange(MCUtil.Protocol.GetBytes((string) obj));
                     }
-                    else if (obj.GetType() == typeof(Item))
+                    else if (obj.GetType() == typeof (Item))
                     {
-                        Item item = (Item)obj;
-                        bytes.Add((byte)(0x05 << 5 | i & 0x1F));
+                        Item item = (Item) obj;
+                        bytes.Add((byte) (0x05 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.id));
                         bytes.Add(item.count);
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
                     }
-                    else if (obj.GetType() == typeof(Point3))
+                    else if (obj is Point3)
                     {
-                        Point3 point = (Point3)obj;
-                        bytes.Add((byte)(0x06 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
+                        Point3 point = (Point3) obj;
+                        bytes.Add((byte) (0x06 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.x));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.y));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.z));
                     }
                 }
                 bytes.Add(0x7F);
