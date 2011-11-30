@@ -44,7 +44,7 @@ namespace SMP.Commands
                 Player q = Player.FindPlayer(args[1]);
                 if (q == null)
                 {
-                    return;
+                    if (!p.IsConsole) { Help(p); } else { return; }
                 }
                 else
                 {
@@ -79,6 +79,7 @@ namespace SMP.Commands
         {
             p.SendMessage(Description);
             p.SendMessage("/slap <player>");
+            return;
         }
     }
 }
