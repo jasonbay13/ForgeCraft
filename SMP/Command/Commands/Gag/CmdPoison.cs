@@ -17,9 +17,8 @@
 */
 using System;
 using System.Collections.Generic;
-using SMP.Commands;
 
-namespace SMP
+namespace SMP.Commands
 {
     public class CmdPoison : Command
     {
@@ -28,7 +27,7 @@ namespace SMP
         public override string Category { get { return "gag"; } }
         public override bool ConsoleUseable { get { return false; } }
         public override string Description { get { return "poisons the set player"; } }
-        public override string PermissionNode { get { return "core.gag.die"; } }
+        public override string PermissionNode { get { return "core.gag.poison"; } }
 
         public override void Use(Player p, params string[] args)
         {
