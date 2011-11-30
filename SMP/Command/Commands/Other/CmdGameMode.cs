@@ -31,7 +31,7 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length < 1 || args[0] == "")
+            if (args.Length < 1 || String.IsNullOrEmpty(args[0]))
             {
                 Server.mode = Server.mode == 0 ? (byte)1 : (byte)0;
                 foreach (Player pl in Player.players)
