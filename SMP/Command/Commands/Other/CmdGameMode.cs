@@ -31,7 +31,7 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length <= 1 || args[0] == "")
+            if (args.Length < 1 || args[0] == "")
             {
                 Server.mode = Server.mode == 0 ? (byte)1 : (byte)0;
                 foreach (Player pl in Player.players)
@@ -40,10 +40,10 @@ namespace SMP.Commands
             }
             else
             {
-                Player ply = Player.FindPlayer(args[0]);
-                if (ply == null) { p.SendMessage("Could not find player."); return; }
-                ply.Mode = ply.Mode == 0 ? (byte)1 : (byte)0;
-                Player.GlobalMessage("Your game mode is now " + (ply.Mode == 0 ? Color.DarkRed + "Survival" : Color.DarkGreen + "Creative") + Color.ServerDefaultColor + "!");
+                Player pl = Player.FindPlayer(args[0]);
+                if (pl == null) { p.SendMessage("Could not find player."); return; }
+                pl.Mode = pl.Mode == 0 ? (byte)1 : (byte)0;
+                pl.SendMessage("Your game mode is now " + (pl.Mode == 0 ? Color.DarkRed + "Survival" : Color.DarkGreen + "Creative") + Color.ServerDefaultColor + "!");
             }
         }
 
