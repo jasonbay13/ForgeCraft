@@ -2080,5 +2080,28 @@ namespace SMP
 			
 			return id;		
 		}
+        /// <summary>
+        /// Does damage to the player till 'remaininghealth' is reached,
+        /// this can look like the poison effect.
+        /// </summary>
+        /// <param name="input">health remaining after method.</param>
+        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
+        public void SlowlyDie(short remaininghealth = 0)
+        {
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
+            DieClock.Start();
+        }
+        private void SlowlyDieTimer(short remaininghealth)
+        {
+            if (this.Mode == 1)
+            {
+                DieClock.Stop();
+            }
+            this.hurt(1); 
+            if (this.health == remaininghealth) 
+            { 
+                DieClock.Stop(); 
+            }
+        }
 	}
 }
