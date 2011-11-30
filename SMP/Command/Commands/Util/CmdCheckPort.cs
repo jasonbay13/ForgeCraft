@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Web;
-using System.Net.Sockets;
-using System.IO;
 using SMP.util;
+using System.Threading;
 
 namespace SMP.Commands
 {
@@ -13,7 +11,7 @@ namespace SMP.Commands
         public override string Name { get { return "checkport"; } }
         public override List<string> Shortcuts { get { return new List<string> { "cp" }; } }
         public override string Category { get { return "other"; } }
-        public override bool ConsoleUseable { get { return false; } }
+        public override bool ConsoleUseable { get { return true; } }
         public override string Description { get { return "Checks the port"; } }
         public override string PermissionNode { get { return "core.util.cport"; } }
 
@@ -23,92 +21,79 @@ namespace SMP.Commands
 
             if (args.Length == 0)
             {
+                if (!p.IsConsole) p.SendMessage("Checking port....");
+                else Logger.Log("Checking Port...");
                 checkport(25565, p);
             }
             else if (args.Length == 1)
             {
-                try { port = Convert.ToInt16(args[0]); checkport(port, p); }
-                catch (Exception e) { p.SendMessage("port must be a number"); p.SendMessage(e.Message); p.SendMessage(e.Source); }
+                try
+                {
+                    port = Convert.ToInt32(args[0]);
+                    if (!p.IsConsole) p.SendMessage("Checking port....");
+                    else Logger.Log("Checking Port...");
+                    checkport(port, p);
+                }
+                catch (Exception e)
+                {
+                    if (!p.IsConsole) p.SendMessage("port must be a number");
+                    else Logger.Log("Port must be a number");
+                }
             }
 
         }
 
         public override void Help(Player p)
         {
-            p.SendMessage("/checkport or /cp");
-            p.SendMessage("OPTIONAL you can specify another port by doing /cp <port>");
+            if (p.IsConsole)
+            {
+                Logger.Log("/checkport or /cp");
+                Logger.Log("OPTIONAL you can specify another port by doing /cp <port>");
+            }
+            else
+            {
+                p.SendMessage("/checkport or /cp");
+                p.SendMessage("OPTIONAL you can specify another port by doing /cp <port>");
+            }
         }
         void checkport(int port, Player p)
         {
-            TcpListener listener = null;
-            try
+            string response;
+
+            new Thread(new ThreadStart(delegate
             {
-                // Try to open the port. If it fails, the port is probably open already.
                 try
                 {
-                    listener = new TcpListener(IPAddress.Any, port);
-                    listener.Start();
+
+                    using (WebClient WEB = new WebClient())
+                    {
+                        response = WEB.DownloadString("http://www.mcforge.net/ports.php?port=" + port);
+                    }
+                    if (response == "open")
+                    {
+                        if (!p.IsConsole) p.SendMessage(Color.Green + "Port Open!");
+                        else Logger.Log("Port Open!");
+                        return;
+                    }
+                    if (response == "closed")
+                    {
+                        if (!p.IsConsole) p.SendMessage(Color.Red + "Port Closed");
+                        else Logger.Log("Port Closed");
+                        return;
+
+                    }
+                    if (!p.IsConsole) p.SendMessage(Color.Yellow + "An Error has occured");
+                    else Logger.Log("An Error has occured");
+                    return;
                 }
                 catch
                 {
-                    // Port is probably open already by the server, so let's just continue :)
-                    listener = null;
+                    if (!p.IsConsole) p.SendMessage(Color.Yellow + "An Error has occured");
+                    else Logger.Log("An Error has occured");
+                    return;
                 }
 
-                p.SendMessage("Testing Port: " + port);
-
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://mcfire.tk/port.php?port=" + port);
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    using (Stream stream = response.GetResponseStream())
-                    {
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-
-
-
-                            string line;
-                            while ((line = reader.ReadLine()) != null)
-                            {
-                                if (line == "") { continue; }
-
-                                if (line == "open")
-                                {
-                                    p.SendMessage(Color.Green + "Port Open!");
-                                    return;
-                                }
-
-                                p.SendMessage((Color.Red + "Port " + port + " seems to be closed. You may need to set up port forwarding."));
-
-
-                            }
-
-                        }
-                    }
-                }
-                else { p.SendMessage(Color.Red + "Could Not connect to site, aborting operation"); }
-
-
-            }
-            catch (Exception ex)
-            {
-                p.SendMessage(Color.Red + "Testing Port Failed!");
-
-                p.SendMessage("Could not start listening on port " + port + ". Another program may be using the port.");
-                Logger.Log("-----------------port error----------------");
-                Logger.Log(ex.Message + Environment.NewLine + ex.Source + Environment.NewLine + ex.StackTrace);
-                Logger.Log("-----------------port error----------------");
-            }
-            finally
-            {
-                if (listener != null)
-                {
-                    listener.Stop();
-                }
-            }
+            })).Start();
 
         }
     }
