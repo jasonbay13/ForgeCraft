@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
     <Compile Include="Command\Commands\Build\CmdTree.cs" />
+    <Compile Include="Command\Commands\Gag\CmdSlap.cs" />
     <Compile Include="Command\Commands\General\CmdReveal.cs" />
     <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />
     <Compile Include="Server\World\Points.cs" />
     <Compile Include="Server\World\World.Light.cs" />
+    <Compile Include="util\DeveloperTools.cs" />
     <Compile Include="util\Extensions.cs" />
     <Compile Include="util\MathHelper.cs" />
     <Compile Include="util\MCUtil.cs" />

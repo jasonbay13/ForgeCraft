@@ -27,8 +27,8 @@ namespace SMP
             {
                 if (source.Length > short.MaxValue) throw new ArgumentException("String too big.");
 
-                byte[] bytes = new byte[2 + (source.Length * 2)];
-                util.EndianBitConverter.Big.GetBytes((short)source.Length).CopyTo(bytes, 0);
+                byte[] bytes = new byte[2 + (source.Length*2)];
+                util.EndianBitConverter.Big.GetBytes((short) source.Length).CopyTo(bytes, 0);
                 Encoding.BigEndianUnicode.GetBytes(source).CopyTo(bytes, 2);
                 return bytes;
             }
@@ -41,7 +41,7 @@ namespace SMP
             public static short GetBytesLength(string source)
             {
                 if (source.Length > short.MaxValue) throw new ArgumentException("String too big.");
-                return (short)(2 + source.Length * 2);
+                return (short) (2 + source.Length*2);
             }
 
             /// <summary>
@@ -71,7 +71,7 @@ namespace SMP
                             Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length * 2);
+                return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length*2);
             }
 
             /// <summary>
@@ -101,7 +101,7 @@ namespace SMP
                             Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
-                return (short)(2 + length * 2);
+                return (short) (2 + length*2);
             }
         }
 
@@ -118,182 +118,48 @@ namespace SMP
                     if (obj == null) continue;
                     if (obj is byte)
                     {
-                        bytes.Add((byte)(i & 0x1F));
-                        bytes.Add((byte)obj);
+                        bytes.Add((byte) (i & 0x1F));
+                        bytes.Add((byte) obj);
                     }
                     else if (obj is short)
                     {
-                        bytes.Add((byte)(0x01 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
+                        bytes.Add((byte) (0x01 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short) obj));
                     }
                     else if (obj is int)
                     {
-                        bytes.Add((byte)(0x02 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
+                        bytes.Add((byte) (0x02 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) obj));
                     }
                     else if (obj is float)
                     {
-                        bytes.Add((byte)(0x03 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
+                        bytes.Add((byte) (0x03 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float) obj));
                     }
                     else if (obj is string)
                     {
-                        bytes.Add((byte)(0x04 << 5 | i & 0x1F));
-                        bytes.AddRange(MCUtil.Protocol.GetBytes((string)obj));
+                        bytes.Add((byte) (0x04 << 5 | i & 0x1F));
+                        bytes.AddRange(MCUtil.Protocol.GetBytes((string) obj));
                     }
-                    else if (obj.GetType() == typeof(Item))
+                    else if (obj.GetType() == typeof (Item))
                     {
-                        Item item = (Item)obj;
-                        bytes.Add((byte)(0x05 << 5 | i & 0x1F));
+                        Item item = (Item) obj;
+                        bytes.Add((byte) (0x05 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.id));
                         bytes.Add(item.count);
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
                     }
                     else if (obj is Point3)
                     {
-                        Point3 point = (Point3)obj;
-                        bytes.Add((byte)(0x06 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
+                        Point3 point = (Point3) obj;
+                        bytes.Add((byte) (0x06 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.x));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.y));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.z));
                     }
                 }
                 bytes.Add(0x7F);
                 return bytes.ToArray();
-            }
-        }
-
-        public static class DeveloperUtils
-        {
-            public static string ReadLineFromFile(string fileName, int lineNumber = 0)
-            {
-                if (String.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is null");
-                if(!File.Exists(fileName)) throw new FileNotFoundException(string.Format("File: {0} doesn't exist", fileName));
-                using(var sr = new StreamReader(fileName))
-                {
-                    return sr.ReadLine();
-                }
-            }
-
-            public static string[] ReadLinesFromFile(string fileName)
-            {
-                if (String.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is null");
-                if (!File.Exists(fileName)) throw new FileNotFoundException(string.Format("File: \"{0}\" doesn't exist", fileName));
-                using (var sr = new StreamReader(fileName))
-                {
-                    return sr.ReadToEnd().Split('\n');
-                }
-            }
-            public static bool WriteLineToFile(string fileName, string line, bool append = true)
-            {
-                if (String.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is null");
-                if (!File.Exists(fileName)) throw new FileNotFoundException(string.Format("File: \"{0}\" doesn't exist", fileName));
-                using(var sw = append ? File.AppendText(fileName) : new StreamWriter(fileName))
-                {
-                    try
-                    {
-                        sw.WriteLine(line);
-                        return true;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-            }
-            public static bool CreateEmptyTextFile(string fileName)
-            {
-                if (String.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is null");
-                if (File.Exists(fileName)) throw new Exception(string.Format("File: \"{0}\" already exists", fileName));
-                try
-                {
-                    File.CreateText(fileName).Close();
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-            public static bool DeleteFile(string fileName)
-            {
-                if (String.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is null");
-                if (!File.Exists(fileName)) throw new FileNotFoundException(string.Format("File: \"{0}\" doesn't exist", fileName));
-                try
-                {
-                    File.Delete(fileName);
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-
-            }
-            public static string ReadLineFromWebsite(string siteName, int lineNumber = 0)
-            {
-                string response;
-                string[] lines = new string[] {};
-                new Thread(
-                    new ThreadStart(
-                        delegate
-                        {
-                            using (var web = new WebClient())
-                            {
-                                try
-                                {
-                                    response = web.DownloadString(siteName);
-                                }
-                                catch (WebException)
-                                {
-                                    throw new WebException();
-                                }
-                            }
-                            if (String.IsNullOrWhiteSpace(response))
-                                throw new Exception("Website Returned No Information");
-                                  lines = response.Split('\n');
-                            if (lineNumber >= lines.Count())
-                                throw new Exception(
-                                    "Line number exceeds number of lines in website");
-                            //maybe add callback feature?
-                        })).Start();
-                return lines[lineNumber];
-            }
-
-            public static string[] ReadLinesFromWebsite(string siteName)
-            {
-                string response = null;
-                new Thread(
-                    new ThreadStart(
-                        delegate
-                            {
-                                using (var web = new WebClient())
-                                {
-                                    try
-                                    {
-                                        response = web.DownloadString(siteName);
-                                    }
-                                    catch (WebException)
-                                    {
-                                        throw new WebException();
-                                    }
-                                }
-                                if (String.IsNullOrWhiteSpace(response))
-                                    throw new Exception("Website Returned No Information");
-                            })).Start();
-              
-                return response.Split('\n');
-               
-            }
-
-            public static int LinesCountInFile(string fileName)
-            {
-                return ReadLinesFromFile(fileName).Count();
-            }
-
-            public static int LinesCountInWebsite(string siteName)
-            {
-                return ReadLinesFromWebsite(siteName).Count();
             }
         }
     }
