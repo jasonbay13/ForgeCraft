@@ -116,46 +116,46 @@ namespace SMP
                     if (i > 31) break; // Maximum index is 31 due to the index being 5 bits.
                     obj = data[i];
                     if (obj == null) continue;
-                    if (obj is byte)
+                    if (obj.GetType() == typeof(byte))
                     {
-                        bytes.Add((byte) (i & 0x1F));
-                        bytes.Add((byte) obj);
+                        bytes.Add((byte)(i & 0x1F));
+                        bytes.Add((byte)obj);
                     }
-                    else if (obj is short)
+                    else if (obj.GetType() == typeof(short))
                     {
-                        bytes.Add((byte) (0x01 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short) obj));
+                        bytes.Add((byte)(0x01 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((short)obj));
                     }
-                    else if (obj is int)
+                    else if (obj.GetType() == typeof(int))
                     {
-                        bytes.Add((byte) (0x02 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) obj));
+                        bytes.Add((byte)(0x02 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)obj));
                     }
-                    else if (obj is float)
+                    else if (obj.GetType() == typeof(float))
                     {
-                        bytes.Add((byte) (0x03 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float) obj));
+                        bytes.Add((byte)(0x03 << 5 | i & 0x1F));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((float)obj));
                     }
-                    else if (obj is string)
+                    else if (obj.GetType() == typeof(string))
                     {
-                        bytes.Add((byte) (0x04 << 5 | i & 0x1F));
-                        bytes.AddRange(MCUtil.Protocol.GetBytes((string) obj));
+                        bytes.Add((byte)(0x04 << 5 | i & 0x1F));
+                        bytes.AddRange(MCUtil.Protocol.GetBytes((string)obj));
                     }
-                    else if (obj.GetType() == typeof (Item))
+                    else if (obj.GetType() == typeof(Item))
                     {
-                        Item item = (Item) obj;
+                        Item item = (Item)obj;
                         bytes.Add((byte) (0x05 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.id));
                         bytes.Add(item.count);
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
                     }
-                    else if (obj is Point3)
+                    else if (obj.GetType() == typeof(Point3))
                     {
-                        Point3 point = (Point3) obj;
+                        Point3 point = (Point3)obj;
                         bytes.Add((byte) (0x06 << 5 | i & 0x1F));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.x));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.y));
-                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int) point.z));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
+                        bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
                     }
                 }
                 bytes.Add(0x7F);
