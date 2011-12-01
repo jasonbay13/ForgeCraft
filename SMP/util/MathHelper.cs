@@ -124,6 +124,11 @@ namespace SMP
             return SIN_TABLE[(int)(f * 10430.38F + 16384F) & 0xffff];
         }
 
+        public static float abs(float f)
+        {
+            return f < 0.0F ? -f : f;
+        }
+
         public static long RandomLong(Random random)
         {
             return (long)((random.NextDouble() * 2.0 - 1.0) * long.MaxValue);

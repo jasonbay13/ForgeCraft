@@ -855,7 +855,9 @@ namespace SMP
             }
 			public void Teleport_Player(double x, double y, double z, float yaw, float pitch)
 			{
-				if (!MapLoaded) return;
+                pos = new Point3(x, y, z);
+                rot[0] = yaw;
+                rot[1] = pitch;
 
 				byte[] tosend = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(x).CopyTo(tosend, 0);
@@ -909,7 +911,7 @@ namespace SMP
 			{
 				//Logger.Log("Login Done");
 
-				byte[] bytes = new byte[41];
+				/*byte[] bytes = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(pos.x).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(Stance).CopyTo(bytes, 8);
 				util.EndianBitConverter.Big.GetBytes(pos.y).CopyTo(bytes, 16);
@@ -917,7 +919,9 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(rot[0]).CopyTo(bytes, 32);
 				util.EndianBitConverter.Big.GetBytes(rot[1]).CopyTo(bytes, 36);
 				bytes[40] = onground;
-				SendRaw(0x0D, bytes);
+				SendRaw(0x0D, bytes);*/
+
+                Teleport_Spawn();
 
 				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
@@ -1033,7 +1037,7 @@ namespace SMP
 				//}
 				//Logger.Log(i + " Chunks sent");
 
-                pos = level.SpawnPos;
+                //pos = level.SpawnPos;
 				SendSpawnPoint();
 				SendLoginDone();
 				SendInventory();

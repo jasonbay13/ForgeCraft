@@ -566,6 +566,7 @@ namespace SMP
 	public enum WallSigns : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Furnace : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Dispenser : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
+    public enum Chests : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Pumpkin : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum PressurePlate : byte { NotPressed = 0x0, Pressed = 0x1 };
 	public enum Slab : byte { Stone = 0x0, SandStone = 0x1, Wooden = 0x2, Cobblestone = 0x3, Brick = 0x4, StoneBrick = 0x5, Stone2 = 0x6 };

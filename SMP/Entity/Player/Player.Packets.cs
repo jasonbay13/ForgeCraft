@@ -293,10 +293,10 @@ namespace SMP
 				float yaw = util.EndianBitConverter.Big.ToSingle(message, 32);
 				float pitch = util.EndianBitConverter.Big.ToSingle(message, 36);
 				byte onGround = message[40];
+                Point3 newpos = new Point3(x, y, z);
 
 				// Return if position hasn't changed.
-				if (new Point3(x, y, z) == pos && stance == Stance &&
-					yaw == rot[0] && pitch == rot[1] && onGround == onground)
+				if (newpos == pos && stance == Stance && yaw == rot[0] && pitch == rot[1] && onGround == onground)
 					return;
 
 				// Check stance
@@ -307,12 +307,12 @@ namespace SMP
 				}
 
 				// Check position
-				//if (Math.Abs(x - this.X) + Math.Abs(y - this.Y) + Math.Abs(z - this.Z) > 100)
-				//{
-				//    Kick("You moved to quickly :( (Hacking?)");
-				//    return;
-				//}
-				/*else */
+				/*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
+				{
+				    Kick("You moved to quickly :( (Hacking?)");
+				    return;
+				}*/
+
 				if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
 				{
 					Kick("Illegal position");
@@ -320,7 +320,7 @@ namespace SMP
 				}
 
 				//oldpos = pos;
-				pos = new Point3(x, y, z);
+				pos = newpos;
 				rot[0] = yaw;
 				rot[1] = pitch;
 				onground = onGround;

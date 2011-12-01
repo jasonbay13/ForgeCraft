@@ -30,7 +30,7 @@ namespace SMP
         EnchantmentTable = 4,
         BrewingStand = 5
     }
-	public class Windows
+	public class Windows : IDisposable
     {
         #region Events
         //-----------Events-----------
@@ -55,7 +55,7 @@ namespace SMP
             try
             {
                 id = FreeId();
-                this.type = (byte)Type;
+                this.type = (byte)type;
 
                 switch (Type)
                 {
@@ -510,6 +510,13 @@ namespace SMP
 					return i;
 			return -1;
 		}
+
+        public void Dispose()
+        {
+            container = null;
+            items = null;
+            name = null;
+        }
 
         private static byte FreeId()
         {
