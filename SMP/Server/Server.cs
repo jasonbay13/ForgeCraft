@@ -121,7 +121,7 @@ namespace SMP
                 if (devstring.Contains(":"))
                 {
                     devs.Clear();
-                    foreach (string dev in devstring.Split(':')) { devs.Add(dev/*.ToLower()*/); }
+                    foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
                 }
             }
             catch { }
