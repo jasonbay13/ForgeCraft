@@ -113,6 +113,19 @@ namespace SMP
             Physics.Handlers.InitAll();
 			Plugin.Load();
 			
+            //Get latest developerlist
+            try
+            {
+                WebClient wc = new WebClient();
+                string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                if (devstring.Contains(":"))
+                {
+                    devs.Clear();
+                    foreach (string dev in devstring.Split(':')) { devs.Add(dev/*.ToLower()*/); }
+                }
+            }
+            catch { }
+
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
@@ -141,7 +154,6 @@ namespace SMP
 			}
             catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); return false; }
             catch (Exception e) { Logger.Log(e.Message + e.StackTrace); return false; }
-            
 		}
 
 	    private void LoadEvents()
