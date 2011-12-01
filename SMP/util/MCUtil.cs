@@ -65,7 +65,7 @@ namespace SMP
             public static string GetString(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
-                if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
+                if (length > maxLength) throw new Exception(new StringBuilder("Recieved string length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
                 return Encoding.BigEndianUnicode.GetString(bytes, index + 2, length*2);
@@ -92,7 +92,7 @@ namespace SMP
             public static short GetStringLength(byte[] bytes, int index, short maxLength)
             {
                 short length = util.EndianBitConverter.Big.ToInt16(bytes, index);
-                if (length > maxLength) throw new Exception(new StringBuilder("Recieved tring length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
+                if (length > maxLength) throw new Exception(new StringBuilder("Recieved string length is longer than maximum allowed. (").Append(length).Append(" > ").Append(maxLength).Append(")").ToString());
                 if (length < 0) throw new Exception("Received string length is less than zero! Weird string!");
 
                 return (short) (2 + length*2);
