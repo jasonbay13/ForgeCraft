@@ -55,6 +55,7 @@ namespace SMP.Commands
             core.Add(new CmdCredits());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
+            core.Add(new CmdDemote());
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());

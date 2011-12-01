@@ -62,6 +62,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Permissions\CmdDemote.cs" />
     <Compile Include="Command\Commands\Gag\CmdPoison.cs" />
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
     <Compile Include="Command\Commands\Build\CmdTree.cs" />

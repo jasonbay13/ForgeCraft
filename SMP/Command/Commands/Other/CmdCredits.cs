@@ -11,7 +11,7 @@ namespace SMP.Commands
         public override List<string> Shortcuts { get { return new List<string> { }; } }
         public override string Category { get { return "other"; } }
         public override bool ConsoleUseable { get { return false; } }
-        public override string Description { get { return "Clears your inventory."; } }
+        public override string Description { get { return "Shows minecraft credits"; } }
         public override string PermissionNode { get { return "core.other.credits"; } }
 
         public override void Use(Player p, params string[] args)

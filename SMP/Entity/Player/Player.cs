@@ -2100,7 +2100,7 @@ namespace SMP
             this.hurt(1); 
             if (this.health == remaininghealth) 
             { 
-                DieClock.Stop(); 
+                DieClock.Stop();
             }
         }
 	}

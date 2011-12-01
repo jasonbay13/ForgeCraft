@@ -109,11 +109,9 @@ namespace SMP
         {
             public static byte[] GetMetaBytes(object[] data)
             {
-                List<byte> bytes = new List<byte>();
-                object obj;
-                for (int i = 0; i < data.Length; i++)
+                List<byte> bytes = new List<byte>(); object obj;
+                for (int i = 0; i < data.Length && i < 32; i++) // Maximum index is 31 due to the index being 5 bits.
                 {
-                    if (i > 31) break; // Maximum index is 31 due to the index being 5 bits.
                     obj = data[i];
                     if (obj == null) continue;
                     if (obj.GetType() == typeof(byte))
@@ -144,7 +142,7 @@ namespace SMP
                     else if (obj.GetType() == typeof(Item))
                     {
                         Item item = (Item)obj;
-                        bytes.Add((byte) (0x05 << 5 | i & 0x1F));
+                        bytes.Add((byte)(0x05 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.id));
                         bytes.Add(item.count);
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
@@ -152,7 +150,7 @@ namespace SMP
                     else if (obj.GetType() == typeof(Point3))
                     {
                         Point3 point = (Point3)obj;
-                        bytes.Add((byte) (0x06 << 5 | i & 0x1F));
+                        bytes.Add((byte)(0x06 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.z));
