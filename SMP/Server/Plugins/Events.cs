@@ -28,6 +28,7 @@ namespace SMP
         PlayerChat,
         PlayerMove,
         PlayerDig,
+        MessageRecieve,
         PlayerKick,
         WindowClose,
         EXPGain,
