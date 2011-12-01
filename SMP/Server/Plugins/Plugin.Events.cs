@@ -132,6 +132,8 @@ namespace SMP
                     return p.cancelbreak;
                 case PlayerEvents.ItemUse:
                     return p.cancelitemuse;
+                case PlayerEvents.MessageRecieve:
+                    return p.cancelmessage;
                 default:
                     return false;
             }
@@ -217,6 +219,9 @@ namespace SMP
                     break;
                 case PlayerEvents.ItemUse:
                     p.cancelitemuse = true;
+                    break;
+                case PlayerEvents.MessageRecieve:
+                    p.cancelmessage = true;
                     break;
             }
         }
