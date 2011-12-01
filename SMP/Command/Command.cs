@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SMP.Commands;
 
 namespace SMP.Commands
 {
@@ -54,6 +55,7 @@ namespace SMP.Commands
             core.Add(new CmdCredits());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
+            core.Add(new CmdDemote());
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
@@ -74,6 +76,7 @@ namespace SMP.Commands
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());
+            core.Add(new CmdPoison());
 			core.Add(new CmdPromote());
             core.Add(new CmdRain());
             core.Add(new CmdReveal());

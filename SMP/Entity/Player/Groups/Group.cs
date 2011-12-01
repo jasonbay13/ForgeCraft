@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SMP.util;
 
 /*TODO
  * inheritance semi-done
@@ -175,7 +176,7 @@ namespace SMP
 			{
 				dt = Server.SQLiteDB.GetDataTable("SELECT * FROM Groups;");
 			}
-			catch{Server.Log("Something went wrong loading groups");}
+			catch{Logger.Log("Something went wrong loading groups");}
 			
 			for(int i = 0; i < dt.Rows.Count; i++)
 			{
@@ -340,7 +341,7 @@ namespace SMP
 			{
 				tracksdt = Server.SQLiteDB.GetDataTable("SELECT * FROM Track;");
 			}
-			catch{Server.Log("Something went wrong loading tracks");}
+			catch{Logger.Log("Something went wrong loading tracks");}
 						
 			for (int i = 0; i < tracksdt.Rows.Count; i++)
 			{

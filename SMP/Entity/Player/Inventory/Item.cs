@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using SMP.util;
 using Substrate.Nbt;
 
 namespace SMP
@@ -54,10 +55,7 @@ namespace SMP
 		private short Mymeta = 0;
 		public short meta
 		{
-			get
-			{
-				return Mymeta;
-			}
+			get { return Mymeta; }
 			set
 			{
 				Mymeta = value;
@@ -66,13 +64,36 @@ namespace SMP
 		}
         public bool OnGround { get { return e.onground == 1; } set { e.onground = (byte)(value ? 1 : 0); } } //This is used to tell the server that this item is on the ground.
 
-		public static Item Nothing = new Item();
+        public static Item Nothing { get { return new Item(); } }
 
         public Point3 pos { get { return e.pos; } set { e.pos = value; } }
         public float[] rot { get { return e.rot; } set { e.rot = value; } }
 
-		private Item() { }
-		public Item (short item, World l, bool inv = false)
+        internal Item() { isInventory = true; }
+        public Item(short id) : this(id, 1, 0) { }
+        public Item(short id, byte count) : this(id, count, 0) { }
+        public Item(short id, byte count, short meta)
+        {
+            isInventory = true;
+            this.id = id;
+            this.count = count;
+            this.meta = meta;
+        }
+        public Item(short id, byte count, short meta, List<Enchantment> enchantments)
+            : this(id, count, meta)
+        {
+            this.enchantments = enchantments;
+        }
+        public Item(Item item) : this(item.id, item.count, item.meta, item.enchantments) { }
+
+        public Item(Item item, World l)
+            : this(item)
+        {
+            isInventory = false;
+            e = new Entity(this, l);
+            OnGround = false;
+        }
+		public Item(short item, World l, bool inv = false)
 		{
             isInventory = inv;
             e = new Entity(this, l);
@@ -137,7 +158,7 @@ namespace SMP
         {
             get
             {
-                short damage = 0;
+                short damage = 1;
                 switch (id)
                 {
                     case 276:
@@ -167,9 +188,6 @@ namespace SMP
                         break;
                     case 273:
                         damage = 2;
-                        break;
-                    default:
-                        damage = 1;
                         break;
                 }
 
@@ -222,16 +240,9 @@ namespace SMP
                 try
                 {
                     NbtTree nbt = new NbtTree(ms);
-                    TagNodeList list = nbt.Root["ench"].ToTagList();
-
-                    TagNodeCompound compound;
-                    foreach (TagNode tag in list)
-                    {
-                        compound = tag.ToTagCompound();
-                        enchantments.Add(new Enchantment(compound["id"].ToTagShort().Data, compound["lvl"].ToTagShort().Data));
-                    }
+                    LoadEnchantmentNBT(nbt.Root["ench"].ToTagList());
                 }
-                catch (InvalidCastException) { Server.ServerLogger.Log("NBT data is invalid."); }
+                catch { Logger.Log("NBT data is invalid."); }
             }
         }
 
@@ -243,11 +254,24 @@ namespace SMP
         public static byte[] GetEnchantmentNBTData(List<Enchantment> enchantments)
         {
             if (enchantments.Count < 1) return new byte[0];
-
             NbtTree nbt = new NbtTree();
-            TagNodeList list = new TagNodeList(TagType.TAG_COMPOUND);
+            nbt.Root.Add("ench", GetEnchantmentNBT(enchantments));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                nbt.WriteTo(ms);
+                return ms.ToArray().Compress(Ionic.Zlib.CompressionLevel.BestCompression, CompressionType.GZip);
+            }
+        }
 
+        public TagNodeList GetEnchantmentNBT()
+        {
+            return GetEnchantmentNBT(enchantments);
+        }
+
+        public static TagNodeList GetEnchantmentNBT(List<Enchantment> enchantments)
+        {
             TagNodeCompound compound;
+            TagNodeList list = new TagNodeList(TagType.TAG_COMPOUND);
             foreach (Enchantment ench in enchantments.ToArray())
             {
                 compound = new TagNodeCompound();
@@ -255,14 +279,38 @@ namespace SMP
                 compound.Add("lvl", new TagNodeShort(ench.level));
                 list.Add(compound);
             }
+            return list;
+        }
 
-            nbt.Root.Add("ench", list);
-
-            using (MemoryStream ms = new MemoryStream())
+        public void LoadEnchantmentNBT(TagNodeList list)
+        {
+            TagNodeCompound compound;
+            foreach (TagNode tag in list)
             {
-                nbt.WriteTo(ms);
-                return ms.ToArray().Compress(Ionic.Zlib.CompressionLevel.BestCompression, CompressionType.GZip);
+                compound = tag.ToTagCompound();
+                enchantments.Add(new Enchantment(compound["id"].ToTagShort().Data, compound["lvl"].ToTagShort().Data));
             }
+        }
+
+        public TagNodeCompound GetNBTData()
+        {
+            TagNodeCompound comp = new TagNodeCompound();
+            comp.Add("ID", new TagNodeShort(id));
+            comp.Add("Count", new TagNodeByte(count));
+            comp.Add("Meta", new TagNodeShort(meta));
+            comp.Add("Ench", GetEnchantmentNBT());
+            return comp;
+        }
+
+        public void LoadNBTData(TagNodeCompound comp)
+        {
+            try {
+                id = comp["ID"].ToTagShort();
+                count = comp["Count"].ToTagByte();
+                meta = comp["Meta"].ToTagShort();
+                LoadEnchantmentNBT(comp["Ench"].ToTagList());
+            }
+            catch { Logger.Log("NBT data is invalid."); }
         }
 	}
 }

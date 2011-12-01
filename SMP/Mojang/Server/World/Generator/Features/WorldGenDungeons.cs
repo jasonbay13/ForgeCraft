@@ -111,12 +111,11 @@ namespace SMP.Generator
                         continue;
                     }
                     world.SetBlock(k3, l3, i4, (byte)Blocks.Chest);
-                    // TODO: Put items in chests once those work!
-                    /*TileEntityChest tileentitychest = (TileEntityChest)world.getBlockTileEntity(k3, l3, i4);
-                    if(tileentitychest == null)
+                    Container tileentitychest = world.GetBlockContainer(k3, l3, i4);
+                    if(tileentitychest == null || !(tileentitychest is ContainerChest))
                     {
                         break;
-                    }*/
+                    }
                     int k4 = 0;
                     bool label0 = false;
                     do
@@ -126,11 +125,11 @@ namespace SMP.Generator
                             label0 = true;
                             break;
                         }
-                        /*ItemStack itemstack = pickCheckLootItem(random);
+                        Item itemstack = pickCheckLootItem(random);
                         if(itemstack != null)
                         {
-                            tileentitychest.setInventorySlotContents(random.nextInt(tileentitychest.getSizeInventory()), itemstack);
-                        }*/
+                            tileentitychest.SetSlot(random.nextInt(tileentitychest.Size), itemstack);
+                        }
                         k4++;
                     } while(true);
                     if (label0) break;
@@ -145,59 +144,58 @@ namespace SMP.Generator
             return true;
         }
 
-        // TODO
-        /*private ItemStack pickCheckLootItem(java.util.Random random)
+        private Item pickCheckLootItem(java.util.Random random)
         {
             int i = random.nextInt(11);
             if (i == 0)
             {
-                return new ItemStack(Item.saddle);
+                return new Item((short)Items.Saddle);
             }
             if (i == 1)
             {
-                return new ItemStack(Item.ingotIron, random.nextInt(4) + 1);
+                return new Item((short)Items.IronIngot, (byte)(random.nextInt(4) + 1));
             }
             if (i == 2)
             {
-                return new ItemStack(Item.bread);
+                return new Item((short)Items.Bread);
             }
             if (i == 3)
             {
-                return new ItemStack(Item.wheat, random.nextInt(4) + 1);
+                return new Item((short)Items.Wheat, (byte)(random.nextInt(4) + 1));
             }
             if (i == 4)
             {
-                return new ItemStack(Item.gunpowder, random.nextInt(4) + 1);
+                return new Item((short)Items.Gunpowder, (byte)(random.nextInt(4) + 1));
             }
             if (i == 5)
             {
-                return new ItemStack(Item.silk, random.nextInt(4) + 1);
+                return new Item((short)Items.String, (byte)(random.nextInt(4) + 1));
             }
             if (i == 6)
             {
-                return new ItemStack(Item.bucketEmpty);
+                return new Item((short)Items.Bucket);
             }
             if (i == 7 && random.nextInt(100) == 0)
             {
-                return new ItemStack(Item.appleGold);
+                return new Item((short)Items.AppleGolden);
             }
             if (i == 8 && random.nextInt(2) == 0)
             {
-                return new ItemStack(Item.redstone, random.nextInt(4) + 1);
+                return new Item((short)Items.Redstone, (byte)(random.nextInt(4) + 1));
             }
             if (i == 9 && random.nextInt(10) == 0)
             {
-                return new ItemStack(Item.itemsList[Item.record13.shiftedIndex + random.nextInt(2)]);
+                return new Item((short)((short)Items.GreenMusicDisc + random.nextInt(2)));
             }
             if (i == 10)
             {
-                return new ItemStack(Item.dyePowder, 1, 3);
+                return new Item((short)Items.Dye, 1, 3);
             }
             else
             {
                 return null;
             }
-        }*/
+        }
 
         private int pickMobSpawner(java.util.Random random)
         {

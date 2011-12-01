@@ -15,11 +15,14 @@
 	or implied. See the Licenses for the specific language governing
 	permissions and limitations under the Licenses.
 */
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using java.lang;
+using Exception = System.Exception;
+using String = System.String;
+using Thread = System.Threading.Thread;
 
 /*
  ****    FILE TODO:   *****
@@ -27,25 +30,40 @@ using System.IO;
  * - maybe have filenames passed to constructor for other logging i.e. plugins
  */
 
-namespace SMP
+namespace SMP.util
 {
-    
-    public class Logger
-    {
-        public static Logger log = new Logger();
-        string LogFile = Environment.CurrentDirectory + "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_server.log";
-        string ErrorFile = Environment.CurrentDirectory + "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
 
+    public static class Logger
+    {
+        static readonly string LogFile = "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_Logger.Log";
+        static readonly string ErrorFile = "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
+
+        private static readonly Queue<string> messageQueue = new Queue<string>();
+        public delegate void Logs(string message);
+        public static event Logs OnLog;
+
+        private static bool Disposing { get; set; }
+
+        public static void Init()
+        {
+            Disposing = false;
+
+            if (!Directory.Exists("logs")) Directory.CreateDirectory("logs");
+            if (!Directory.Exists("logs/errors")) Directory.CreateDirectory("logs/errors");
+
+        }
 
         /// <summary>
         /// Logs to file and console
         /// </summary>
         /// <param name="log"></param>
-        public void Log(string log)
+        public static void Log(string log, bool logToFile = true)
         {
-            if (!Server.useGUI) { Console.WriteLine(FormatTime() + "  " + log); }
-            else { GUI.MainWindow.Log(FormatTime() + "  " + log); }
-            LogToFile(log);
+            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
+            messageQueue.Enqueue(FormatTime() + "  " + log);
+            if (OnLog != null) OnLog(messageQueue.Dequeue());
+            if (logToFile)
+                LogToFile(log);
         }
 
         /// <summary>
@@ -53,11 +71,13 @@ namespace SMP
         /// </summary>
         /// <param name="level"></param>
         /// <param name="log"></param>
-        public void Log(LogLevel level, string log)
+        public static void Log(LogLevel level, string log, bool logToFile = true)
         {
-            if (!Server.useGUI) { Console.WriteLine(FormatTime() + "  " + log); }
-            else { GUI.MainWindow.Log(FormatTime() + "  " + log); }
-            LogToFile(log);
+            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
+            messageQueue.Enqueue(FormatTime() + "  " + log);
+            if (OnLog != null) OnLog(messageQueue.Dequeue());
+            if (logToFile)
+                LogToFile(log);
 
         }
 
@@ -67,20 +87,21 @@ namespace SMP
         /// <param name="level"></param>
         /// <param name="log"></param>
         /// <param name="args"></param>
-        public void Log(LogLevel level, string log, params object[] args)
+        public static void LogFormat(LogLevel level, string log, params object[] args)
         {
-            this.Log( level, string.Format(log, args));
+            Log(level, string.Format(log, args));
         }
 
         /// <summary>
         /// Logs Errors
         /// </summary>
         /// <param name="e"></param>
-        public void LogError(Exception e)
+        public static void LogError(Exception e, bool logToFile = true)
         {
-            if (!Server.useGUI) { Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
-            else { GUI.MainWindow.Log(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
-            LogErrorToFile(e);
+            messageQueue.Enqueue(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)");
+            if (OnLog != null) OnLog(messageQueue.Dequeue());
+            if (logToFile)
+                LogErrorToFile(e);
         }
 
         /// <summary>
@@ -89,50 +110,51 @@ namespace SMP
         /// <param name="level"></param>
         /// <param name="e"></param>
 
-        public void LogError(LogLevel level, Exception e)
+        public static void LogError(LogLevel level, Exception e, bool logToFile = true)
         {
-            if (!Server.useGUI) { Console.WriteLine(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
-            else { GUI.MainWindow.Log(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)"); }
-            LogErrorToFile(e);
-        
+            messageQueue.Enqueue(FormatTime() + " [ERROR] " + e.Message + " (See error log for details!)");
+            if (OnLog != null) OnLog(messageQueue.Dequeue());
+            if (logToFile)
+                LogErrorToFile(e);
+
         }
 
         /// <summary>
         /// logs to file, logs to error file if set to true
         /// </summary>
-        public void LogToFile(string log)
+        public static void LogToFile(string log)
         {
-            retry:
+        retry:
             int retred = 0;
             try
             {
                 if (retred == 5) return;
-                if (!Directory.Exists(Environment.CurrentDirectory + "/logs"))
+                if (!Directory.Exists("/logs"))
                 {
-                    Directory.CreateDirectory(Environment.CurrentDirectory + "/logs");
+                    Directory.CreateDirectory("/logs");
                 }
-            
+
                 using (StreamWriter fh = File.AppendText(LogFile))
                 {
                     fh.WriteLine(FormatTime() + ":  " + log);
                 }
             }
-            catch (System.IO.IOException) { retred++; goto retry; }
+            catch (IOException) { retred++; goto retry; }
         }
 
         /// <summary>
         /// logs errors to file
         /// </summary>
         /// <param name="e"></param>
-        public void LogErrorToFile(Exception e)
+        public static void LogErrorToFile(Exception e)
         {
-            retry:
+        retry:
             int retred = 0;
             try
             {
                 if (retred == 5) return;
-                if (!Directory.Exists(Environment.CurrentDirectory + "/logs/errors"))
-                    Directory.CreateDirectory(Environment.CurrentDirectory + "/logs/errors");
+                if (!Directory.Exists("/logs/errors"))
+                    Directory.CreateDirectory("/logs/errors");
 
                 using (StreamWriter fh = File.AppendText(ErrorFile))
                 {
@@ -140,12 +162,13 @@ namespace SMP
                     fh.WriteLine(e.StackTrace);
                 }
             }
-            catch (System.IO.IOException) { retred++; goto retry; }
+            catch (IOException) { retred++; goto retry; }
 
             // saved for lulz
             // Console.WriteLine("There was an error in the error. ERRORCEPTION!");
         }
-        
+
+
         /// <summary>
         /// formats time for output
         /// </summary>
@@ -156,7 +179,7 @@ namespace SMP
         }
     }
 
-    public enum LogLevel : int
+    public enum LogLevel
     {
         Trivial = -1,
         Debug = 0,

@@ -52,7 +52,7 @@ namespace SMP.Commands
                             w.timeupdate.Dispose();
                             w.ToGenerate.Clear();
                             w.weatherTimer.Dispose();
-                            w.windows.Clear();
+                            //w.windows.Clear();
                             World.worlds.Remove(w);
                             GC.Collect();
                             GC.WaitForPendingFinalizers();

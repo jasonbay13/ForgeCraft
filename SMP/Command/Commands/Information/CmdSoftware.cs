@@ -21,14 +21,14 @@ using System.Text;
 
 namespace SMP.Commands
 {
-    public class CmdDevs : Command
+    public class CmdSoftware : Command
     {
-        public override string Name { get { return "devs"; } }
-        public override List<string> Shortcuts { get { return new List<string> { "developers", "authors" }; } }
+        public override string Name { get { return "software"; } }
+        public override List<string> Shortcuts { get { return new List<string> { "softwareinfo" }; } }
         public override string Category { get { return "information"; } }
         public override bool ConsoleUseable { get { return true; } }
-        public override string Description { get { return "Shows you who developed ForgeCraft."; } }
-        public override string PermissionNode { get { return "core.info.devs"; } }
+        public override string Description { get { return "Shows you some general information on the ForgeCraft server software."; } }
+        public override string PermissionNode { get { return "core.info.software"; } }
 
         public override void Use(Player p, params string[] args)
         {
@@ -49,7 +49,7 @@ namespace SMP.Commands
 
         public override void Help(Player p)
         {
-            p.SendMessage("/devs - Displays the list of ForgeCraft developers.");
+            p.SendMessage("/software - " + Description);
         }
     }
 }

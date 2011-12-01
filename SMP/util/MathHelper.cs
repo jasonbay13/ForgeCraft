@@ -23,19 +23,60 @@ namespace SMP
 {
     public static class MathHelper
     {
-        private static float[] SIN_TABLE;
+        private static float[] SIN_TABLE = InitSinTable();
 
-        public static void Init()
+        private static float[] InitSinTable()
         {
-            SIN_TABLE = new float[0x10000];
+            float[] SIN_TABLE = new float[0x10000];
             for(int i = 0; i < 0x10000; i++)
             {
                 SIN_TABLE[i] = (float)java.lang.Math.sin(((double)i * 3.1415926535897931D * 2D) / 65536D);
             }
+            return SIN_TABLE;
         }
 
+        #region Clamp()
+        public static byte Clamp(byte value, byte low, byte high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
 
-        public static decimal Clamp(decimal value, decimal low, decimal high)
+        public static sbyte Clamp(sbyte value, sbyte low, sbyte high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static short Clamp(short value, short low, short high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static ushort Clamp(ushort value, ushort low, ushort high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static int Clamp(int value, int low, int high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static uint Clamp(uint value, uint low, uint high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static long Clamp(long value, long low, long high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static ulong Clamp(ulong value, ulong low, ulong high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+
+        public static float Clamp(float value, float low, float high)
         {
             return Math.Max(Math.Min(value, high), low);
         }
@@ -44,6 +85,12 @@ namespace SMP
         {
             return Math.Max(Math.Min(value, high), low);
         }
+
+        public static decimal Clamp(decimal value, decimal low, decimal high)
+        {
+            return Math.Max(Math.Min(value, high), low);
+        }
+        #endregion
 
         public static int floor_double(double d)
         {
@@ -75,6 +122,11 @@ namespace SMP
         public static float cos(float f)
         {
             return SIN_TABLE[(int)(f * 10430.38F + 16384F) & 0xffff];
+        }
+
+        public static float abs(float f)
+        {
+            return f < 0.0F ? -f : f;
         }
 
         public static long RandomLong(Random random)

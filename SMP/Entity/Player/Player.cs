@@ -24,6 +24,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using SMP.Commands;
+using SMP.util;
 using Substrate.Nbt;
 
 namespace SMP
@@ -38,10 +39,7 @@ namespace SMP
         #region Mode Thingy
         public byte Mode
         {
-            get
-            {
-                return mode;
-            }
+            get { return mode; }
             set
             {
                 mode = value;
@@ -82,7 +80,7 @@ namespace SMP
         public Chunk chunknew { get { return e.c; } }
 
 		public Inventory inventory;
-		public bool OpenWindow = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
+		public bool HasWindowOpen = false; //Tells the inventory system if the player has an open window (Not used for player inventory)
 		public Windows window; //The window that is currently open (this isnt used for player inventory)
 		public Item OnMouse = Item.Nothing; //The Item the player currently has picked up
         public Experience experience;
@@ -263,8 +261,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		static void Receive(IAsyncResult result)
@@ -299,8 +297,8 @@ namespace SMP
             catch (Exception e)
             {
                 p.Disconnect();
-                Server.Log(e.Message);
-                Server.Log(e.StackTrace);
+                Logger.Log(e.Message);
+                Logger.Log(e.StackTrace);
             }
 		}
 		byte[] HandleMessage(byte[] buffer)
@@ -313,7 +311,7 @@ namespace SMP
 				switch (msg)
 				{
                     case 0x00: length = 4; if (buffer.Length < 5 || util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Server.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
+					case 0x01: /*Logger.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
@@ -350,7 +348,7 @@ namespace SMP
 					case 0xFF: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //DC
 
 					default:
-                        Server.ServerLogger.Log("Unhandled message ID: " + msg);
+                        Logger.Log("Unhandled message ID: " + msg);
 					    Kick("Unknown packet ID: " + msg);
 						return new byte[0];
 				}
@@ -364,19 +362,19 @@ namespace SMP
 
 					buffer = tempbuffer;
 
-					//if(username!= "Merlin33069") Server.Log(msg + "");
+					//if(username!= "Merlin33069") Logger.Log(msg + "");
 					switch (msg)
 					{
 						case 0x01:
-							//Server.Log("Authentication");
+							//Logger.Log("Authentication");
 							HandleLogin(message);
 							break;
 						case 0x02:
-							//Server.Log("Handshake");
+							//Logger.Log("Handshake");
 							HandleHandshake(message);
 							break;
 						case 0x03:
-							//Server.Log("Chat Message");
+							//Logger.Log("Chat Message");
 							HandleChatMessagePacket(message);
 							break;
                         case 0x07: HandleEntityUse(message); break;
@@ -404,8 +402,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 			return buffer;
 		}
@@ -560,18 +558,11 @@ namespace SMP
                 e.SetMetaBit(0, 1, crouching);
                 GlobalMetaUpdate();
 			}
-            public void WindowOpen(WindowType type, Point3 pos)
+            public void OpenWindow(WindowType type, Point3 pos)
             {
-                if (!level.windows.ContainsKey(pos))
-                    window = new Windows(type, pos, level);
-                else if (level.windows[pos].Type != type)
-                {
-                    level.windows.Remove(pos);
-                    window = new Windows(type, pos, level);
-                }
-                else window = level.windows[pos];
-
+                window = new Windows(type, pos, level);
                 SendWindowOpen(window);
+                SendWindowItems(window.id, window.items);
             }
 			public void SetFire(bool onoff)
 			{
@@ -867,7 +858,9 @@ namespace SMP
             }
 			public void Teleport_Player(double x, double y, double z, float yaw, float pitch)
 			{
-				if (!MapLoaded) return;
+                pos = new Point3(x, y, z);
+                rot[0] = yaw;
+                rot[1] = pitch;
 
 				byte[] tosend = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(x).CopyTo(tosend, 0);
@@ -904,8 +897,8 @@ namespace SMP
 				}
 				catch(Exception e)
 				{
-					Server.Log(e.Message);
-					Server.Log(e.StackTrace);
+					Logger.Log(e.Message);
+					Logger.Log(e.StackTrace);
 				}
 				//SendMap();
 			}
@@ -919,9 +912,9 @@ namespace SMP
 			}
 			void SendLoginDone()
 			{
-				//Server.Log("Login Done");
+				//Logger.Log("Login Done");
 
-				byte[] bytes = new byte[41];
+				/*byte[] bytes = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(pos.x).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(Stance).CopyTo(bytes, 8);
 				util.EndianBitConverter.Big.GetBytes(pos.y).CopyTo(bytes, 16);
@@ -929,34 +922,17 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(rot[0]).CopyTo(bytes, 32);
 				util.EndianBitConverter.Big.GetBytes(rot[1]).CopyTo(bytes, 36);
 				bytes[40] = onground;
-				SendRaw(0x0D, bytes);
+				SendRaw(0x0D, bytes);*/
 
-				//Server.Log(pos[0] + " " + pos[1] + " " + pos[2]);
+                Teleport_Spawn();
+
+				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
 			#endregion
 			#region Inventory stuff
 			void SendInventory()
 			{
-				List<byte> data = new List<byte>();
-                byte[] nbt;
-				
-				for(int i = 0; i <= 44; i++)
-				{
-					data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].id));
-						
-						if (this.inventory.items[i].id != -1 && this.inventory.items[i].id != 0)
-						{
-							data.Add(this.inventory.items[i].count);
-							data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)this.inventory.items[i].meta));
-                            if (this.inventory.items[i].IsDamageable())
-                            {
-                                nbt = this.inventory.items[i].GetEnchantmentNBTData();
-                                data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)(nbt.Length > 0 ? nbt.Length : -1)));
-                                data.AddRange(nbt);
-                            }
-						}		
-				}
-				SendWindowItems(0, 45, data.ToArray());
+				SendWindowItems(0, inventory.items);
 			}
             public void SendItem(short slot, Item item) { SendItem(0, slot, item); }
             public void SendItem(short slot, short id, byte count, short use) { SendItem(0, slot, id, count, use); }
@@ -993,6 +969,27 @@ namespace SMP
 				}
 				SendRaw(0x67, tosend);
 			}
+            public void SendWindowItems(byte windowID, Item[] items)
+            {
+                byte[] nbt; List<byte> data = new List<byte>();
+                for (int i = 0; i < items.Length; i++)
+                {
+                    data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].id));
+
+                    if (items[i].id != -1 && items[i].id != 0)
+                    {
+                        data.Add(items[i].count);
+                        data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].meta));
+                        if (items[i].IsDamageable())
+                        {
+                            nbt = items[i].GetEnchantmentNBTData();
+                            data.AddRange(util.BigEndianBitConverter.Big.GetBytes((short)(nbt.Length > 0 ? nbt.Length : -1)));
+                            data.AddRange(nbt);
+                        }
+                    }
+                }
+                SendWindowItems(windowID, (short)items.Length, data.ToArray());
+            }
 			public void SendWindowItems(byte windowID, short count, byte[] items)
 			{
 				byte[] data = new byte[3 + items.Length];
@@ -1012,7 +1009,7 @@ namespace SMP
             }
             public void SendWindowOpen(Windows window)
             {
-                SendWindowOpen(window.id, (byte)window.Type, window.name, (byte)window.items.Length);
+                SendWindowOpen(window.id, (byte)window.Type, window.name, (byte)window.InventorySize);
             }
             public void SendUpdateWindowProperty(byte windowID, short property, short value)
             {
@@ -1034,16 +1031,16 @@ namespace SMP
 			#region Map Stuff
 			void SendMap()
 			{
-				//Server.Log("Sending");
+				//Logger.Log("Sending");
 				//int i = 0;
 				//foreach (Chunk c in Server.mainlevel.chunkData.Values.ToArray())
 				//{
 				//	SendChunk(c);
 				//	i++;
 				//}
-				//Server.Log(i + " Chunks sent");
+				//Logger.Log(i + " Chunks sent");
 
-                pos = level.SpawnPos;
+                //pos = level.SpawnPos;
 				SendSpawnPoint();
 				SendLoginDone();
 				SendInventory();
@@ -1161,8 +1158,8 @@ namespace SMP
 				}
 				catch (Exception e)
 				{
-					Server.Log(e.Message);
-					Server.Log(e.StackTrace);
+					Logger.Log(e.Message);
+					Logger.Log(e.StackTrace);
 				}
 			}
             public void SendObjectSpawn(Entity e1)
@@ -1205,13 +1202,13 @@ namespace SMP
 					if (VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
 				}
-				//Server.Log("Pickup Spawning " + e1.id);
+				//Logger.Log("Pickup Spawning " + e1.id);
 
 				SendRaw(0x1E, util.EndianBitConverter.Big.GetBytes(e1.id));
 
 				byte[] bytes = new byte[24];
 				util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
-				//Server.Log(e1.itype + "");
+				//Logger.Log(e1.itype + "");
 				util.EndianBitConverter.Big.GetBytes(e1.I.id).CopyTo(bytes, 4);
 				bytes[6] = e1.I.count;
 				util.EndianBitConverter.Big.GetBytes(e1.I.meta).CopyTo(bytes, 7);
@@ -1357,8 +1354,8 @@ namespace SMP
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
             {
-                Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd);
-                Server.ServerLogger.Log(LogLevel.Info, "Unrecognised command: " + cmd);
+                Logger.Log(LogLevel.Info, this.username + " tried using /" + cmd);
+                Logger.Log(LogLevel.Info, "Unrecognised command: " + cmd);
                 SendMessage(Command.HelpBot + "Command /" + cmd + " not recognized");
                 return;
             }
@@ -1384,11 +1381,11 @@ namespace SMP
 	            }
 
                 command.Use(this, args.ToArray());
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " used /" + command.Name);
+	            Logger.Log(LogLevel.Info, this.username + " used /" + command.Name);
 	        }
 	        else
 	        {
-	            Server.ServerLogger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
+	            Logger.Log(LogLevel.Info, this.username + " tried using /" + cmd + ", but doesn't have appropiate permissions.");
 	            SendMessage(Color.Purple + "HelpBot V12: You don't have access to command /" + cmd + ".");
 			}
 		}
@@ -1441,7 +1438,7 @@ namespace SMP
         protected virtual void SendMessageInternal(string message)
         {		
             message = MessageAdditions(message);
-			//Server.Log(message);
+			//Logger.Log(message);
             byte[] bytes = new byte[(message.Length * 2) + 2];
             util.EndianBitConverter.Big.GetBytes((ushort)message.Length).CopyTo(bytes, 0);
             Encoding.BigEndianUnicode.GetBytes(message).CopyTo(bytes, 2);
@@ -1481,7 +1478,7 @@ namespace SMP
         {
             StringBuilder sb = new StringBuilder(message);
 
-            for (int i = 0; i <= 9; i++)
+            for (byte i = 0; i <= 9; i++)
                 sb.Replace("%" + i, Color.Signal + i);
             for (char c = 'a'; c <= 'f'; c++)
                 sb.Replace("%" + c, Color.Signal + c);
@@ -1578,12 +1575,12 @@ namespace SMP
 			
 			if (message != null)
 			{
-			//	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
+			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, message);
 			}
 			else
 			{
-			//	Server.ServerLogger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
+			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
             if (OnKicked != null)
@@ -1658,7 +1655,7 @@ namespace SMP
             util.EndianBitConverter.Big.GetBytes(keep).CopyTo(bytes, bytes.Length - 3);
             util.EndianBitConverter.Big.GetBytes(Ping).CopyTo(bytes, bytes.Length - 2);
             players.ForEach((p) => p.SendRaw(0xC9, bytes));
-            //Server.Log(Ping.ToString());
+            //Logger.Log(Ping.ToString());
         } 
         
         public void hurt(short amount)
@@ -1817,7 +1814,7 @@ namespace SMP
 			}
 			catch
 			{
-				Server.Log("Could not save " + username + "'s data");	
+				Logger.Log("Could not save " + username + "'s data");	
 			}
 		}
 		private void LoadAttributes()
@@ -1961,7 +1958,7 @@ namespace SMP
 			}
 			else
 			{
-				Server.Log(String.Format("Creating new Database entry for {0}.", this.username));
+				Logger.Log(String.Format("Creating new Database entry for {0}.", this.username));
 				
 				this.group = Group.DefaultGroup;
 				//TODO Set Default to default group, setup accounts etc
@@ -2076,11 +2073,11 @@ namespace SMP
 				{
 					s += b + ", ";
 				}
-                Server.Log("Packet " + id + " { " + s + "}");
+                Logger.Log("Packet " + id + " { " + s + "}");
 			}
 			else
 			{
-                Server.Log("Packet " + id + " had no DATA!");
+                Logger.Log("Packet " + id + " had no DATA!");
 			}
 		}
 		
@@ -2099,5 +2096,28 @@ namespace SMP
 			
 			return id;		
 		}
+        /// <summary>
+        /// Does damage to the player till 'remaininghealth' is reached,
+        /// this can look like the poison effect.
+        /// </summary>
+        /// <param name="input">health remaining after method.</param>
+        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
+        public void SlowlyDie(short remaininghealth = 0)
+        {
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
+            DieClock.Start();
+        }
+        private void SlowlyDieTimer(short remaininghealth)
+        {
+            if (this.Mode == 1)
+            {
+                DieClock.Stop();
+            }
+            this.hurt(1); 
+            if (this.health == remaininghealth) 
+            { 
+                DieClock.Stop();
+            }
+        }
 	}
 }

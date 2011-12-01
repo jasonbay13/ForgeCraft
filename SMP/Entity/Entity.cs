@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using SMP.util;
 
 namespace SMP
 {
@@ -178,7 +179,7 @@ namespace SMP
             }
             catch
             {
-                Server.Log("Error updating chunk: " + this.ToString());
+                Logger.Log("Error updating chunk: " + this.ToString());
             }
             if (isPlayer && p.LoggedIn)
             {
@@ -391,7 +392,7 @@ namespace SMP
                     if (!Entities.ContainsKey(i)) continue;
                     e = Entities[i]; e.Tick();
                     if (e.isPlayer) continue; // Players don't have physics.
-                    if (e.isObject) continue; // TODO
+                    if (e.isObject) e.obj.Physics();
                     if (e.isAI) e.ai.Update();
                     if (e.isItem) e.I.Physics();
                     if (!e.isPlayer) e.UpdatePosition();

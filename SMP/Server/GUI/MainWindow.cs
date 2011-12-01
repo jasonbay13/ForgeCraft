@@ -1,4 +1,4 @@
-﻿/*
+/*
 	Copyright 2011 ForgeCraft team
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and

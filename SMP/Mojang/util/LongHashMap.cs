@@ -29,11 +29,11 @@ namespace SMP
         public Object getValueByKey(long l)
         {
             int i = getHashedKey(l);
-            for(LongHashMapEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry longhashmapentry = hashArray[getHashIndex(i, hashArray.Length)]; longhashmapentry != null; longhashmapentry = longhashmapentry.nextEntry)
             {
-                if(playerhashentry.key == l)
+                if(longhashmapentry.key == l)
                 {
-                    return playerhashentry.value;
+                    return longhashmapentry.value;
                 }
             }
 
@@ -48,11 +48,11 @@ namespace SMP
         LongHashMapEntry func_35507_c(long l)
         {
             int i = getHashedKey(l);
-            for(LongHashMapEntry playerhashentry = hashArray[getHashIndex(i, hashArray.Length)]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry longhashmapentry = hashArray[getHashIndex(i, hashArray.Length)]; longhashmapentry != null; longhashmapentry = longhashmapentry.nextEntry)
             {
-                if(playerhashentry.key == l)
+                if(longhashmapentry.key == l)
                 {
-                    return playerhashentry;
+                    return longhashmapentry;
                 }
             }
 
@@ -63,22 +63,22 @@ namespace SMP
         {
             int i = getHashedKey(l);
             int j = getHashIndex(i, hashArray.Length);
-            for(LongHashMapEntry playerhashentry = hashArray[j]; playerhashentry != null; playerhashentry = playerhashentry.nextEntry)
+            for(LongHashMapEntry longhashmapentry = hashArray[j]; longhashmapentry != null; longhashmapentry = longhashmapentry.nextEntry)
             {
-                if(playerhashentry.key == l)
+                if(longhashmapentry.key == l)
                 {
-                    playerhashentry.value = obj;
+                    longhashmapentry.value = obj;
                 }
             }
 
-            field_950_e++;
+            modCount++;
             createKey(i, l, obj, j);
         }
 
         private void resizeTable(int i)
         {
-            LongHashMapEntry[] aplayerhashentry = hashArray;
-            int j = aplayerhashentry.Length;
+            LongHashMapEntry[] alonghashmapentry = hashArray;
+            int j = alonghashmapentry.Length;
             if(j == 0x40000000)
             {
                 capacity = 0x7fffffff;
@@ -93,69 +93,69 @@ namespace SMP
             }
         }
 
-        private void copyHashTableTo(LongHashMapEntry[] aplayerhashentry)
+        private void copyHashTableTo(LongHashMapEntry[] alonghashmapentry)
         {
-            LongHashMapEntry[] aplayerhashentry1 = hashArray;
-            int i = aplayerhashentry.Length;
-            for(int j = 0; j < aplayerhashentry1.Length; j++)
+            LongHashMapEntry[] alonghashmapentry1 = hashArray;
+            int i = alonghashmapentry.Length;
+            for(int j = 0; j < alonghashmapentry1.Length; j++)
             {
-                LongHashMapEntry playerhashentry = aplayerhashentry1[j];
-                if(playerhashentry == null)
+                LongHashMapEntry longhashmapentry = alonghashmapentry1[j];
+                if(longhashmapentry == null)
                 {
                     continue;
                 }
-                aplayerhashentry1[j] = null;
+                alonghashmapentry1[j] = null;
                 do
                 {
-                    LongHashMapEntry playerhashentry1 = playerhashentry.nextEntry;
-                    int k = getHashIndex(playerhashentry.field_1026_d, i);
-                    playerhashentry.nextEntry = aplayerhashentry[k];
-                    aplayerhashentry[k] = playerhashentry;
-                    playerhashentry = playerhashentry1;
-                } while(playerhashentry != null);
+                    LongHashMapEntry playerhashentry1 = longhashmapentry.nextEntry;
+                    int k = getHashIndex(longhashmapentry.field_1026_d, i);
+                    longhashmapentry.nextEntry = alonghashmapentry[k];
+                    alonghashmapentry[k] = longhashmapentry;
+                    longhashmapentry = playerhashentry1;
+                } while(longhashmapentry != null);
             }
 
         }
 
         public Object remove(long l)
         {
-            LongHashMapEntry playerhashentry = removeKey(l);
-            return playerhashentry != null ? playerhashentry.value : null;
+            LongHashMapEntry longhashmapentry = removeKey(l);
+            return longhashmapentry != null ? longhashmapentry.value : null;
         }
 
         LongHashMapEntry removeKey(long l)
         {
             int i = getHashedKey(l);
             int j = getHashIndex(i, hashArray.Length);
-            LongHashMapEntry playerhashentry = hashArray[j];
-            LongHashMapEntry playerhashentry1;
-            LongHashMapEntry playerhashentry2;
-            for(playerhashentry1 = playerhashentry; playerhashentry1 != null; playerhashentry1 = playerhashentry2)
+            LongHashMapEntry longhashmapentry = hashArray[j];
+            LongHashMapEntry longhashmapentry1;
+            LongHashMapEntry longhashmapentry2;
+            for(longhashmapentry1 = longhashmapentry; longhashmapentry1 != null; longhashmapentry1 = longhashmapentry2)
             {
-                playerhashentry2 = playerhashentry1.nextEntry;
-                if(playerhashentry1.key == l)
+                longhashmapentry2 = longhashmapentry1.nextEntry;
+                if(longhashmapentry1.key == l)
                 {
-                    field_950_e++;
+                    modCount++;
                     numHashElements--;
-                    if(playerhashentry == playerhashentry1)
+                    if(longhashmapentry == longhashmapentry1)
                     {
-                        hashArray[j] = playerhashentry2;
+                        hashArray[j] = longhashmapentry2;
                     } else
                     {
-                        playerhashentry.nextEntry = playerhashentry2;
+                        longhashmapentry.nextEntry = longhashmapentry2;
                     }
-                    return playerhashentry1;
+                    return longhashmapentry1;
                 }
-                playerhashentry = playerhashentry1;
+                longhashmapentry = longhashmapentry1;
             }
 
-            return playerhashentry1;
+            return longhashmapentry1;
         }
 
         private void createKey(int i, long l, Object obj, int j)
         {
-            LongHashMapEntry playerhashentry = hashArray[j];
-            hashArray[j] = new LongHashMapEntry(i, l, obj, playerhashentry);
+            LongHashMapEntry longhashmapentry = hashArray[j];
+            hashArray[j] = new LongHashMapEntry(i, l, obj, longhashmapentry);
             if(numHashElements++ >= capacity)
             {
                 resizeTable(2 * hashArray.Length);
@@ -170,7 +170,7 @@ namespace SMP
         [NonSerialized] private LongHashMapEntry[] hashArray;
         [NonSerialized] private int numHashElements;
         private int capacity;
-        private float percentUsable = 0.75F;
-        private volatile int field_950_e;
+        private readonly float percentUsable = 0.75F;
+        [NonSerialized] private volatile int modCount;
     }
 }

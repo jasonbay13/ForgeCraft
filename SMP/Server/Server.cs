@@ -25,6 +25,7 @@ using MonoTorrent.Client;
 using System.Threading;
 using System.IO;
 using SMP.Commands;
+using SMP.util;
 
 namespace SMP
 {
@@ -40,10 +41,9 @@ namespace SMP
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 
-        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar" }; //add your names here (must be all lower case!)
+        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010" }; //add your names here (must be all lower case!)
 		
 		public static bool unsafe_plugin = false;
-		public static Logger ServerLogger = new Logger();
 		internal ConsolePlayer consolePlayer;
         #region ==EVENTS==
         #region -DELEGATES-
@@ -99,11 +99,14 @@ namespace SMP
 		public bool Setup()
 		{
 		    //TODO: (in order)
-            Log("Starting Server");
+            LoadEvents();
+            Logger.Init();
+            Logger.Log("Starting Server");
             SQLiteDB  = new SQLiteDatabase(); //
 			UpdateDB();
 			//ItemDB = new ItemDB();
             LoadFiles();
+		    
             Properties.Load("properties/server.properties");
 			Command.InitCore();
 			BlockChange.InitAll();
@@ -136,12 +139,17 @@ namespace SMP
 				
                 return true;
 			}
-			catch (SocketException e) { Log(e.Message + e.StackTrace); return false; }
-			catch (Exception e) { Log(e.Message + e.StackTrace); return false; }
+            catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); return false; }
+            catch (Exception e) { Logger.Log(e.Message + e.StackTrace); return false; }
             
 		}
 
-        private void loadCleanUp()
+	    private void LoadEvents()
+	    {
+	        Logger.OnLog += Console.WriteLine;
+	    }
+
+	    private void loadCleanUp()
         {
             //load any extra stuff, announce any thing after every things has been loaded
 
@@ -210,8 +218,8 @@ namespace SMP
             //new Creeper(new Point3(0, 72, 0), mainlevel);
 
 
-            Log("Setting up on port: " + port);
-            Log("Server Started");
+            Logger.Log("Setting up on port: " + port);
+            Logger.Log("Server Started");
         }
 
         private void loadLevels()
@@ -242,37 +250,34 @@ namespace SMP
 		
 		void Accept(IAsyncResult result)
 		{
-			if (shuttingDown == false)
-			{
-				Player p = null;
-				bool begin = false;
-				try
-				{
-					p = new Player();
+		    if (shuttingDown) return;
+		    Player p = null;
+		    bool begin = false;
+		    try
+		    {
+		        p = new Player {socket = listen.EndAccept(result)};
+
+		        new Thread(p.Start).Start();
 					
-					p.socket = listen.EndAccept(result);
-					new Thread(new ThreadStart(p.Start)).Start();
-					
-					listen.BeginAccept(new AsyncCallback(Accept), null);
-					begin = true;
-				}
-				catch (SocketException)
-				{
-					if (p != null)
-					p.Disconnect();
-					if (!begin)
-					listen.BeginAccept(new AsyncCallback(Accept), null);
-				}
-				catch (Exception e)
-				{
-				Log(e.Message);
-					Log(e.StackTrace);
-					if (p != null)
-					p.Disconnect();
-					if (!begin)
-					listen.BeginAccept(new AsyncCallback(Accept), null);
-				}
-			}
+		        listen.BeginAccept(Accept, null);
+		        begin = true;
+		    }
+		    catch (SocketException)
+		    {
+		        if (p != null)
+		            p.Disconnect();
+		        if (!begin)
+		            listen.BeginAccept(Accept, null);
+		    }
+		    catch (Exception e)
+		    {
+                Logger.Log(e.Message);
+                Logger.Log(e.StackTrace);
+		        if (p != null)
+		            p.Disconnect();
+		        if (!begin)
+		            listen.BeginAccept(new AsyncCallback(Accept), null);
+		    }
 		}
 		
 		/// <summary>
@@ -281,11 +286,12 @@ namespace SMP
 		/// <param name="message">
 		/// A <see cref="System.String"/>
 		/// </param>
-        [Obsolete("Replaced by Server.ServerLogger!", false)]
+        [Obsolete("Please use Logger.Log()", true)]
         public static void Log(string message)
 		{
-			ServerLogger.Log(message);
+			Logger.Log(message);
 		}
+
 		
 		public void Stop()
 		{

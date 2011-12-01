@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP.Commands
 {
@@ -61,7 +62,7 @@ namespace SMP.Commands
 			}
 			
 			foreach(string s in Server.BanList)
-				Server.Log(s);
+				Logger.Log(s);
 				
 		}
 		

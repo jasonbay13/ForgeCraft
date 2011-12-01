@@ -62,13 +62,20 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Information\CmdDevs.cs" />
+    <Compile Include="Command\Commands\Information\CmdSoftware.cs" />
+    <Compile Include="Command\Commands\Permissions\CmdDemote.cs" />
+    <Compile Include="Command\Commands\Gag\CmdPoison.cs" />
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
     <Compile Include="Command\Commands\Build\CmdTree.cs" />
+    <Compile Include="Command\Commands\Gag\CmdSlap.cs" />
     <Compile Include="Command\Commands\General\CmdReveal.cs" />
     <Compile Include="Command\Commands\Information\CmdAbout.cs" />
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Entity\Player\Inventory\Container\Container.cs" />
+    <Compile Include="Entity\Player\Inventory\Container\ContainerChest.cs" />
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCache.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeCacheBlock.cs" />
@@ -104,10 +111,13 @@
     <Compile Include="Mojang\Server\World\Generator\Layer\LayerIsland.cs" />
     <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandom.cs" />
     <Compile Include="Mojang\Server\World\Generator\Random\WeightedRandomChoice.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructureMineshaftPieces.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructureMineshaftStart.cs" />
     <Compile Include="Mojang\Server\World\Generator\Structures\StructureBoundingBox.cs" />
     <Compile Include="Mojang\Server\World\Generator\Structures\StructureComponent.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceBlockSelector.cs" />
-    <Compile Include="Mojang\Server\World\Generator\Structures\StructurePieceTreasure.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructurePieceBlockSelector.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\Pieces\StructurePieceTreasure.cs" />
+    <Compile Include="Mojang\Server\World\Generator\Structures\StructureStart.cs" />
     <Compile Include="Mojang\util\IntCache.cs" />
     <Compile Include="Mojang\Server\World\ChunkPosition.cs" />
     <Compile Include="Mojang\Server\World\Generator\Biomes\BiomeDecorator.cs" />
@@ -166,6 +176,7 @@
     <Compile Include="Server\World\Physics\Physics.Helper.cs" />
     <Compile Include="Server\World\Points.cs" />
     <Compile Include="Server\World\World.Light.cs" />
+    <Compile Include="util\DeveloperTools.cs" />
     <Compile Include="util\Extensions.cs" />
     <Compile Include="util\MathHelper.cs" />
     <Compile Include="util\MCUtil.cs" />
@@ -369,7 +380,6 @@
     <Compile Include="Command\Commands\Moderation\CmdBan.cs" />
     <Compile Include="Command\Commands\Util\CmdCheckPort.cs" />
     <Compile Include="Command\Commands\Build\CmdCuboid.cs" />
-    <Compile Include="Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Command\Commands\Other\CmdDND.cs" />
     <Compile Include="Command\Commands\Other\CmdFire.cs" />
     <Compile Include="Command\Commands\Other\CmdFly.cs" />

@@ -157,7 +157,8 @@ namespace SMP
 				case "cauldron": return 118;
 				case "airportal": return 119;
 				case "airportalframe": return 120;
-                case "whitestone": return 121;
+                case "endstone": return 121;
+                case "dragonegg": return 122;
                 default: return -1;
             }
         }
@@ -299,7 +300,7 @@ namespace SMP
 		Fence = 85,
 		Pumpkin = 86,
 		Netherrack = 87,
-		SouldSand = 88,
+		SoulSand = 88,
 		GlowstoneBlock = 89,
 		Portal = 90,
 		JackOLantern = 91,
@@ -364,7 +365,7 @@ namespace SMP
 		DiamondPickaxe = 278,
 		DiamondAxe = 279,
 		Stick = 280,
-		Bown = 281,
+		Bowl = 281,
 		SoupMushroom = 282,
 		GoldSword = 283,
 		GoldShovel = 284,
@@ -565,6 +566,7 @@ namespace SMP
 	public enum WallSigns : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Furnace : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Dispenser : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
+    public enum Chests : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Pumpkin : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum PressurePlate : byte { NotPressed = 0x0, Pressed = 0x1 };
 	public enum Slab : byte { Stone = 0x0, SandStone = 0x1, Wooden = 0x2, Cobblestone = 0x3, Brick = 0x4, StoneBrick = 0x5, Stone2 = 0x6 };

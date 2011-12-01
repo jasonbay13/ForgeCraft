@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using SMP.util;
 
 namespace SMP
 {
@@ -39,7 +40,7 @@ namespace SMP
 			short length = util.EndianBitConverter.Big.ToInt16(message, 4);
 			if (length > 32) { Kick("Username too long"); return; }
 			username = Encoding.BigEndianUnicode.GetString(message, 6, (length * 2));
-			Server.Log(ip + " Logged in as " + username);
+			Logger.Log(ip + " Logged in as " + username);
 			Player.GlobalMessage(Color.Announce + username + " has joined the game!");
 			
 			/*if (version > Server.protocolversion)  //left commented during development
@@ -117,10 +118,10 @@ namespace SMP
         }
 		private void HandleHandshake(byte[] message)
 		{
-			//Server.Log("handshake-2");
+			//Logger.Log("handshake-2");
 			//short length = util.EndianBitConverter.Big.ToInt16(message, 0);
-			//Server.Log(length + "");
-			//Server.Log(Encoding.BigEndianUnicode.GetString(message, 2, length * 2));
+			//Logger.Log(length + "");
+			//Logger.Log(Encoding.BigEndianUnicode.GetString(message, 2, length * 2));
 
 			SendHandshake();
             
@@ -189,7 +190,7 @@ namespace SMP
 			if (!DoNotDisturb)
 			{
 				GlobalMessage(/*Color.DarkBlue + "<" + level.name + "> " +*/ Color.Gray + "[" + group.GroupColor + group.Name + Color.Gray + "] " + this.GetColor() + GetName() + Color.White + ": " + m);
-            	Server.ServerLogger.Log(LogLevel.Info, username + ": " + m);
+            	Logger.Log(LogLevel.Info, username + ": " + m);
 			}
         }
 		#endregion
@@ -209,8 +210,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		private void HandlePlayerPositionPacket(byte[] message)
@@ -255,8 +256,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		private void HandlePlayerLookPacket(byte[] message)
@@ -277,8 +278,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		private void HandlePlayerPositionAndLookPacket(byte[] message)
@@ -292,10 +293,10 @@ namespace SMP
 				float yaw = util.EndianBitConverter.Big.ToSingle(message, 32);
 				float pitch = util.EndianBitConverter.Big.ToSingle(message, 36);
 				byte onGround = message[40];
+                Point3 newpos = new Point3(x, y, z);
 
 				// Return if position hasn't changed.
-				if (new Point3(x, y, z) == pos && stance == Stance &&
-					yaw == rot[0] && pitch == rot[1] && onGround == onground)
+				if (newpos == pos && stance == Stance && yaw == rot[0] && pitch == rot[1] && onGround == onground)
 					return;
 
 				// Check stance
@@ -306,12 +307,12 @@ namespace SMP
 				}
 
 				// Check position
-				//if (Math.Abs(x - this.X) + Math.Abs(y - this.Y) + Math.Abs(z - this.Z) > 100)
-				//{
-				//    Kick("You moved to quickly :( (Hacking?)");
-				//    return;
-				//}
-				/*else */
+				/*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
+				{
+				    Kick("You moved to quickly :( (Hacking?)");
+				    return;
+				}*/
+
 				if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
 				{
 					Kick("Illegal position");
@@ -319,7 +320,7 @@ namespace SMP
 				}
 
 				//oldpos = pos;
-				pos = new Point3(x, y, z);
+				pos = newpos;
 				rot[0] = yaw;
 				rot[1] = pitch;
 				onground = onGround;
@@ -328,8 +329,8 @@ namespace SMP
 			}
 			catch (Exception e)
 			{
-				Server.Log(e.Message);
-				Server.Log(e.StackTrace);
+				Logger.Log(e.Message);
+				Logger.Log(e.StackTrace);
 			}
 		}
 		#endregion
@@ -392,7 +393,7 @@ namespace SMP
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
                             //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
-                            Server.Log("Delegate for " + rc + " Destroyed returned false");
+                            Logger.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
                     }
@@ -407,7 +408,7 @@ namespace SMP
                         if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
                         {
                             //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
-                            Server.Log("Delegate for " + rc + " Destroyed returned false");
+                            Logger.Log("Delegate for " + rc + " Destroyed returned false");
                             return;
                         }
                     }
@@ -453,7 +454,7 @@ namespace SMP
 					if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
 					{
                         //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
-                        Server.Log("Delegate for " + id + " Destroyed returned false");
+                        Logger.Log("Delegate for " + id + " Destroyed returned false");
 						return;
 					}
 				}
@@ -518,7 +519,7 @@ namespace SMP
 			{
 				if (!(bool)BlockChange.RightClickedOn[rc].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
 				{
-                    Server.Log("Delegate for " + rc + " RightClickedON returned false");
+                    Logger.Log("Delegate for " + rc + " RightClickedON returned false");
 					return;
 				}
 			}
@@ -544,7 +545,7 @@ namespace SMP
                 if (e1.isItem) continue;
                 if (block == pp && !canPlaceOnEntity)
 				{
-					//Server.Log("Entity found!");
+					//Logger.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                     SendItem(inventory.current_index, inventory.current_item.id, inventory.current_item.count, inventory.current_item.meta);
                     return;
@@ -576,7 +577,7 @@ namespace SMP
                 pp.y++;
                 if (block == pp && !canPlaceOnEntity)
                 {
-                    //Server.Log("Entity found!");
+                    //Logger.Log("Entity found!");
                     SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                     SendItem(inventory.current_index, inventory.current_item.id, inventory.current_item.count, inventory.current_item.meta);
                     return;
@@ -792,13 +793,13 @@ namespace SMP
                 cancelclose = false;
                 return;
             }
-            OpenWindow = false;
+            HasWindowOpen = false;
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
 
         private void HandleWindowClick(byte[] message)
 		{
-			if (OpenWindow)
+			if (HasWindowOpen)
 			{
 				//window.HandleClick(this, message);
 			}
@@ -808,7 +809,7 @@ namespace SMP
 			}
 
 			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
-			if (!OpenWindow)
+			if (!HasWindowOpen)
 			{
 				if (slot == 5)
 				{
@@ -870,7 +871,7 @@ namespace SMP
 				}
 			}
 
-			if (OpenWindow)
+			if (HasWindowOpen)
 			{
 				if (slot < 5)
 				{
@@ -888,7 +889,7 @@ namespace SMP
 
 		private void HandleDC(byte[] message)
 		{
-			Server.Log(username + " Disconnected.");
+			Logger.Log(username + " Disconnected.");
 			GlobalMessage(username + " Left.");
             if (OnDisconnect != null)
                 OnDisconnect(this);
