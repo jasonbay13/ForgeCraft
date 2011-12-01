@@ -82,6 +82,7 @@ namespace SMP.Commands
             core.Add(new CmdReveal());
             core.Add(new CmdSay());
 			core.Add(new CmdSetRank());
+            core.Add(new CmdSoftware());
             core.Add(new CmdSpheroid());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
