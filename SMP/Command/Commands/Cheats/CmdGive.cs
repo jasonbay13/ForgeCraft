@@ -42,22 +42,18 @@ namespace SMP.Commands
                 toPlayer = Player.FindPlayer(args[0]);
                 if (toPlayer == null) { p.SendMessage(HelpBot + "Player not found.", WrapMethod.Chat); return; }
                 item = ParseItem(p, (string[])args.TruncateStart(1));
-                if (item == null) return;
             }
             else if (args.Length >= 2)
             {
                 Player toP = Player.FindPlayer(args[0]);
                 if (toP == null) item = ParseItem(p, args);
                 else { toPlayer = toP; item = ParseItem(p, (string[])args.TruncateStart(1)); }
-                if (item == null) return;
             }
-            else
-            {
-                item = ParseItem(p, args);
-                if (item == null) return;
-            }
+            else item = ParseItem(p, args);
 
+            if (item == null) return;
             if (toPlayer.IsConsole) { p.SendMessage(HelpBot + "You can't give items to the console.", WrapMethod.Chat); return; }
+
             SendItem(p, toPlayer, item.id, item.count, item.meta);
 			
 		}
