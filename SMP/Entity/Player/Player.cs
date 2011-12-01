@@ -2089,9 +2089,11 @@ namespace SMP
         /// this can look like the poison effect.
         /// </summary>
         /// <param name="input">health remaining after method.</param>
-        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
-        public void SlowlyDie(short remaininghealth = 0)
+        /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
+        System.Timers.Timer DieClock;
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000)
         {
+            DieClock = new System.Timers.Timer(interval);
             DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
             DieClock.Start();
         }
