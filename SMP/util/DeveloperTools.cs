@@ -197,6 +197,10 @@ namespace SMP.util
 
             }
 
+            /// <summary>
+            /// Create a new node</summary>
+            /// <param name="fileName">name of file. You must specify the extension of file, ".properties" is standard</param>
+            /// <param name="nodeName">name of new node using string array</param>
             public static void CreateNode(string fileName, params string[] nodeName)
             {
                 if (String.IsNullOrWhiteSpace(fileName) || String.IsNullOrWhiteSpace(nodeName.Any().ToString())) throw new Exception("Cannon have null string");
