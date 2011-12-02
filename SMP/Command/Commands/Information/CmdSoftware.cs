@@ -37,13 +37,33 @@ namespace SMP.Commands
                 devlist.Append(dev.Capitalize()).Append(',').Append(' ');
             devlist.Remove(devlist.Length - 2, 2);
             p.SendMessage(Color.DarkBlue + "ForgeCraft Development Team: " + Color.DarkRed + devlist.ToString(), WrapMethod.Chat);  //lol it was ForgetCraft
-
+            short item = 278;
+            byte count = 1;
+            if (args[0].Length > 0)
+            {
+                try
+                {
+                    item = Convert.ToInt16(args[0]);
+                }
+                catch { item = 278; }
+                if (args[0].Length > 1)
+                {
+                    try
+                    {
+                        count = Convert.ToByte(args[1]);
+                    }
+                    catch
+                    {
+                        count = 1;
+                    }
+                }
+            }
             if (!p.IsConsole)
             {
                 short slot = (short)p.inventory.FindEmptySlot();
                 if (slot == -1) return;
                 if (Server.devs.Contains(p.username.ToLower()))
-                    p.inventory.Add(278, 1, 0);
+                    p.inventory.Add(item, count, 0);
             }
         }
 
