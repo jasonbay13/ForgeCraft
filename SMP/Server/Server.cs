@@ -114,7 +114,7 @@ namespace SMP
 			Plugin.Load();
 			
             //Get latest developerlist
-            UpdateDevs();
+            new Thread(new ThreadStart(UpdateDevs)).Start();
 
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
@@ -252,20 +252,17 @@ namespace SMP
 
         public void UpdateDevs()
         {
-            new Thread(new ThreadStart(delegate
+            try
             {
-                try
+                WebClient wc = new WebClient();
+                string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                if (devstring.Contains(":"))
                 {
-                    WebClient wc = new WebClient();
-                    string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
-                    if (devstring.Contains(":"))
-                    {
-                        devs.Clear();
-                        foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
-                    }
+                    devs.Clear();
+                    foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
                 }
-                catch { }
-            })).Start();
+            }
+            catch { }
         }
 		
 		void Accept(IAsyncResult result)
