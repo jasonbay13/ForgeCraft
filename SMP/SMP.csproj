@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Command\Commands\Information\CmdSoftware.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdPauseTime.cs" />
     <Compile Include="Command\Commands\Permissions\CmdDemote.cs" />
     <Compile Include="Command\Commands\Gag\CmdPoison.cs" />
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />

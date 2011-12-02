@@ -48,6 +48,7 @@ namespace SMP
         public System.Threading.Thread timeincrement;
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
         public System.Timers.Timer containerupdate = new System.Timers.Timer(3000);
+        public bool pauseTime = false;
 		private ChunkGen generator;
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
@@ -565,12 +566,14 @@ namespace SMP
                 {
                     try
                     {
+                        if (pauseTime) System.Threading.Thread.Sleep(speed);
                         if (wait > 0) System.Threading.Thread.Sleep(wait);
 
                         DateTime Start = DateTime.Now;
                         time++; if (time > 24000) time = 0;
                         TimeSpan Took = DateTime.Now - Start;
                         wait = speed - (int)Took.TotalMilliseconds;
+
                         if (TimeChanged != null)
                             TimeChanged();
                         if (WorldTimeChanged != null)
