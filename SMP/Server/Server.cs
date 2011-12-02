@@ -61,6 +61,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer worldsavetimer = new System.Timers.Timer(60000);
+        public static System.Timers.Timer devupdatetimer = new System.Timers.Timer(60 * 60000);
         public static Thread entityUpdateThread;
 		public static MainLoop ml;
         public static byte difficulty = 0; // 0 thru 3 for Peaceful, Easy, Normal, Hard
@@ -207,6 +208,14 @@ namespace SMP
                         catch { wait = speed; }
                     }
                 })); entityUpdateThread.Start();
+            });
+            ml.Queue(delegate
+            {
+                devupdatetimer.Elapsed += delegate
+                {
+                    UpdateDevs();
+                };
+                devupdatetimer.Start();
             });
             ml.Queue(delegate
             {
