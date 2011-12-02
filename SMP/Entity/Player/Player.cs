@@ -99,6 +99,8 @@ namespace SMP
         public delegate void OnPlayerChat(string message, Player p);
         public event OnPlayerChat OnChat;
         public static event OnPlayerChat PlayerChat;
+        public event OnPlayerChat OnMessageRecieve;
+        public static event OnPlayerChat MessageRecieve;
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public event OnPlayerCommand OnCommand;
         public static event OnPlayerCommand PlayerCommand;
@@ -163,6 +165,7 @@ namespace SMP
         internal bool cancelbreak = false;
         internal bool cancelrespawn = false;
         internal bool cancelitemuse = false;
+        internal bool cancelmessage = false;
         internal bool CheckEXPGain(short exp)
         {
             if (EXPGain != null)
@@ -1449,6 +1452,15 @@ namespace SMP
         }
         public void SendMessage(string message)
         {
+            if (MessageRecieve != null)
+                MessageRecieve(message, this);
+            if (OnMessageRecieve != null)
+                OnMessageRecieve(message, this);
+            if (cancelmessage)
+            {
+                cancelmessage = false;
+                return;
+            }
             SendMessage(this.MessageAdditions(message), WrapMethod.Default);
         }
         public void SendMessage(string message, WrapMethod method)
@@ -2094,9 +2106,11 @@ namespace SMP
         /// this can look like the poison effect.
         /// </summary>
         /// <param name="input">health remaining after method.</param>
-        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
-        public void SlowlyDie(short remaininghealth = 0)
+        /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
+        System.Timers.Timer DieClock;
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000)
         {
+            DieClock = new System.Timers.Timer(interval);
             DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
             DieClock.Start();
         }

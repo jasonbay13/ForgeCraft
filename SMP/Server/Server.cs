@@ -41,7 +41,7 @@ namespace SMP
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 
-        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010" }; //add your names here (must be all lower case!)
+        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010", "bemacized", "wouto1997" }; //add your names here (must be all lower case!)
 		
 		public static bool unsafe_plugin = false;
 		internal ConsolePlayer consolePlayer;
@@ -113,6 +113,19 @@ namespace SMP
             Physics.Handlers.InitAll();
 			Plugin.Load();
 			
+            //Get latest developerlist
+            try
+            {
+                WebClient wc = new WebClient();
+                string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                if (devstring.Contains(":"))
+                {
+                    devs.Clear();
+                    foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
+                }
+            }
+            catch { }
+
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
@@ -141,7 +154,6 @@ namespace SMP
 			}
             catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); return false; }
             catch (Exception e) { Logger.Log(e.Message + e.StackTrace); return false; }
-            
 		}
 
 	    private void LoadEvents()
