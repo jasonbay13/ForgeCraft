@@ -2104,20 +2104,26 @@ namespace SMP
         /// </summary>
         /// <param name="input">health remaining after method.</param>
         /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
+        /// <param name="damage">damage done to the player every step</param>
         System.Timers.Timer DieClock;
-        public void SlowlyDie(short remaininghealth = 0, int interval = 1000)
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
         {
             DieClock = new System.Timers.Timer(interval);
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth)
+        private void SlowlyDieTimer(short remaininghealth, short damage)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                return;
             }
-            this.hurt(1); 
+            if (remaininghealth - damage < remaininghealth)
+            {
+                damage = (short)(this.health - remaininghealth);
+            }
+            this.hurt(damage); 
             if (this.health == remaininghealth) 
             { 
                 DieClock.Stop();
