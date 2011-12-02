@@ -84,7 +84,7 @@ namespace SMP
             get { return health; }
             set
             {
-                health = value;
+                health = MathHelper.Clamp(value, (short)0, (short)20);
                 if (isPlayer) p.SendHealth();
             }
         }
@@ -140,12 +140,12 @@ namespace SMP
 			id = FreeId();
 		}
 
-        public void hurt(short amount)
+        public void hurt(short amount, bool overRide = false)
         {
-            if (isPlayer && (p.Mode == 1 || Server.mode == 1)) return;
+            if (isPlayer && (p.GodMode || p.Mode == 1 || Server.mode == 1)) return;
             if (Health > 0)
             {
-                if ((DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
+                if (!overRide && (DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
                 lastHurt = DateTime.Now;
                 Health -= Math.Min(amount, Health);
                 foreach (Player pl in Player.players.ToArray())
@@ -154,14 +154,10 @@ namespace SMP
                     if (Health <= 0 && pl != p)
                     {
                         if (isPlayer) p.inventory.Clear();
-                        //pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
+                        pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
                     }
                 }
             }
-        }
-        public void hurt()
-        {
-            hurt(1);
         }
 
         public void UpdateChunks(bool force, bool forcesend, int queue = 0)

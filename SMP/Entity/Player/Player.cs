@@ -1663,14 +1663,11 @@ namespace SMP
             //Logger.Log(Ping.ToString());
         } 
         
-        public void hurt(short amount)
+        public void hurt(short amount, bool overRide = false)
         {
-            e.hurt(amount);
+            e.hurt(amount, overRide);
         }
-        public void hurt()
-        {
-            hurt(1);
-        }
+        
         public void SendMobSpawn(Entity e)
         {
 			/*if (e == null) // What is this I don't even...

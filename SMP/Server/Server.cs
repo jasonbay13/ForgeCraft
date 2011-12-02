@@ -114,17 +114,20 @@ namespace SMP
 			Plugin.Load();
 			
             //Get latest developerlist
-            try
+            new Thread(new ThreadStart(delegate
             {
-                WebClient wc = new WebClient();
-                string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
-                if (devstring.Contains(":"))
+                try
                 {
-                    devs.Clear();
-                    foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
+                    WebClient wc = new WebClient();
+                    string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                    if (devstring.Contains(":"))
+                    {
+                        devs.Clear();
+                        foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
+                    }
                 }
-            }
-            catch { }
+                catch { }
+            })).Start();
 
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
