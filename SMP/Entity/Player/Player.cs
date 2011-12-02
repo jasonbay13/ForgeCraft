@@ -225,6 +225,7 @@ namespace SMP
         public Entity E { get { return e; } }
 		public string ip;
 		public string username;
+        public string name { get { return username; } set { username = value; } }
 		bool hidden = false;
 
 		/// <summary>
