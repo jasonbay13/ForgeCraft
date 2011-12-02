@@ -114,20 +114,7 @@ namespace SMP
 			Plugin.Load();
 			
             //Get latest developerlist
-            new Thread(new ThreadStart(delegate
-            {
-                try
-                {
-                    WebClient wc = new WebClient();
-                    string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
-                    if (devstring.Contains(":"))
-                    {
-                        devs.Clear();
-                        foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
-                    }
-                }
-                catch { }
-            })).Start();
+            UpdateDevs();
 
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
@@ -261,6 +248,24 @@ namespace SMP
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
             if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
             
+        }
+
+        public void UpdateDevs()
+        {
+            new Thread(new ThreadStart(delegate
+            {
+                try
+                {
+                    WebClient wc = new WebClient();
+                    string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                    if (devstring.Contains(":"))
+                    {
+                        devs.Clear();
+                        foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
+                    }
+                }
+                catch { }
+            })).Start();
         }
 		
 		void Accept(IAsyncResult result)
