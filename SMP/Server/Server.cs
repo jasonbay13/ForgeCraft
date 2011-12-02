@@ -32,11 +32,11 @@ namespace SMP
 	public class Server
 	{
 		public static Server s;
-        public static bool useGUI = false;          //not a setting to choose whether using a gui or not, its a reference 
+        public static bool useGUI = false; //not a setting to choose whether using a gui or not, its a reference 
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static int protocolversion = 22;
+		public static readonly int protocolversion = 22;
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
