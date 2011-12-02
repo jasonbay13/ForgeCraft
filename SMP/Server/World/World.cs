@@ -566,7 +566,7 @@ namespace SMP
                 {
                     try
                     {
-                        if (pauseTime) System.Threading.Thread.Sleep(speed);
+                        if (pauseTime) { System.Threading.Thread.Sleep(speed); continue; }
                         if (wait > 0) System.Threading.Thread.Sleep(wait);
 
                         DateTime Start = DateTime.Now;
