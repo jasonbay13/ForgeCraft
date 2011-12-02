@@ -154,7 +154,7 @@ namespace SMP
                     if (Health <= 0 && pl != p)
                     {
                         if (isPlayer) p.inventory.Clear();
-                        pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
+                        //pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
                     }
                 }
             }

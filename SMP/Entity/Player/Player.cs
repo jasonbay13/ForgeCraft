@@ -1082,8 +1082,6 @@ namespace SMP
 				CompressedData.CopyTo(bytes, 17);
 				SendRaw(0x33, bytes);
 
-                Console.WriteLine(CompressedData.Length);
-
                 c.Update(level, this);
 
 				if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);

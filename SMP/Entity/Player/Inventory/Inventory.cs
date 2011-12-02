@@ -154,25 +154,7 @@ namespace SMP
             }
         }
 
-		public void HandleClick(byte[] message)
-		{
-			byte id = message[0];
-			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
-			ClickType click = (ClickType)message[3];
-			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
-			bool Shift = (message[6] == 1);
-			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
-			byte Count = 1;
-			short Meta = 0;
-			if (ItemID != -1)
-			{
-				Count = message[9];
-				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
-			}
-
-			ClickHandler(slot, click, ActionID, Shift, ItemID, Count, Meta);
-		}
-		public void ClickHandler(short slot, ClickType click, short ActionID, bool Shift, short ItemID, byte Count, short Meta)
+        public void HandleClick(short slot, ClickType click, short ActionID, bool Shift)
 		{
 			if (slot == -999)
 			{
