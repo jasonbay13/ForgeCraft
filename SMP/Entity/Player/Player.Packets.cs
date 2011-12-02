@@ -809,16 +809,20 @@ namespace SMP
 
         private void HandleWindowClick(byte[] message)
 		{
+            short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
+            ClickType click = (ClickType)message[3];
+            short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
+            bool Shift = (message[6] == 1);
+
 			if (HasWindowOpen)
 			{
 				//window.HandleClick(this, message);
 			}
 			else
 			{
-				//inventory.HandleClick(message);
+				inventory.HandleClick(slot, click, ActionID, Shift);
 			}
 
-			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
 			if (!HasWindowOpen)
 			{
 				if (slot == 5)
@@ -959,6 +963,7 @@ namespace SMP
             }
 
             health = 20;
+            GlobalNamedEntitySpawn(this);
             SendRespawn();
             Teleport_Spawn();
         }
