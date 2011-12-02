@@ -963,6 +963,7 @@ namespace SMP
             }
 
             health = 20;
+            GlobalNamedEntitySpawn(this);
             SendRespawn();
             Teleport_Spawn();
         }

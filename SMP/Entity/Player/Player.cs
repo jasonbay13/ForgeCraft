@@ -841,6 +841,23 @@ namespace SMP
             {
                 GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, wld, exclude);
             }
+
+            public static void GlobalNamedEntitySpawn(Player p)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != p && pl.MapLoaded && pl.level == p.level && pl.VisibleChunks.Contains(Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, pl.level).point))
+                        pl.SendNamedEntitySpawn(p);
+                });
+            }
+            public static void GlobalDespawn(Entity e)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != e.p && pl.MapLoaded && pl.level == e.level && pl.VisibleEntities.Contains(e.id))
+                        pl.SendDespawn(e.id);
+                });
+            }
             #endregion
             #region Teleport Player
             public void Teleport_Player(double x, double y, double z)
