@@ -225,8 +225,10 @@ namespace SMP
         public Entity E { get { return e; } }
 		public string ip;
 		public string username;
-        public string name { get { return username; } set { username = value; } }
 		bool hidden = false;
+
+        [Obsolete("Only here for reference! Use 'username' instead!", true)]
+        public string name { get { return username; } set { username = value; } }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.Player"/> class.
