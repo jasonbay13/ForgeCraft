@@ -53,7 +53,7 @@ namespace SMP.Commands
             }
             else
             {
-                if (p == Server.s.consolePlayer) { p.SendMessage("Console can't be revealed. Try using /reveal <player> or /reveal all", WrapMethod.None); return; }
+                if (p.IsConsole) { p.SendMessage("Console can't be revealed. Try using /reveal <player> or /reveal all", WrapMethod.None); return; }
                 Chunk chunk;
                 foreach (Point po in p.VisibleChunks.ToArray())
                 {
