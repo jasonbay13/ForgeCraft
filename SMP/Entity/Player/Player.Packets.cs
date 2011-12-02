@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Threading;
 using SMP.util;
 
 namespace SMP
@@ -223,33 +224,35 @@ namespace SMP
 				double stance = util.EndianBitConverter.Big.ToDouble(message, 16);
 				double z = util.EndianBitConverter.Big.ToDouble(message, 24);
 				byte onGround = message[32];
+                Point3 newpos = new Point3(x, y, z);
 
-				// Return if position hasn't changed.
-				if (new Point3(x, y, z) == pos && stance == Stance && onGround == onground)
-					return;
+                // Return if position hasn't changed.
+                if (newpos == pos && stance == Stance && onGround == onground)
+                    return;
 
-				// Check stance
-				if (stance - y < 0.1 || stance - y > 1.65)
-				{
-					Kick("Illegal Stance");
-					return;
-				}
+                // Check stance
+                if (stance - y < 0.1 || stance - y > 1.65)
+                {
+                    Kick("Illegal Stance");
+                    return;
+                }
 
-				// Check position
-				//if (Math.Abs(x - this.X) + Math.Abs(y - this.Y) + Math.Abs(z - this.Z) > 100)
-				//{
-				//    Kick("You moved to quickly :( (Hacking?)");
-				//    return;
-				//}
-				/*else */
-				if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
-				{
-					Kick("Illegal position");
-					return;
-				}
+                // Check movement
+                /*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
+                {
+                    Kick("You moved to quickly :( (Hacking?)");
+                    return;
+                }*/
+
+                // Check position
+                if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
+                {
+                    Kick("Illegal position");
+                    return;
+                }
 
 				//oldpos = pos;
-				pos = new Point3(x, y, z);
+				pos = newpos;
 				onground = onGround;
 
 				e.UpdateChunks(false, false);
@@ -306,13 +309,14 @@ namespace SMP
 					return;
 				}
 
-				// Check position
+				// Check movement
 				/*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
 				{
 				    Kick("You moved to quickly :( (Hacking?)");
 				    return;
 				}*/
 
+                // Check position
 				if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
 				{
 					Kick("Illegal position");
@@ -792,6 +796,12 @@ namespace SMP
             {
                 cancelclose = false;
                 return;
+            }
+
+            if (window != null)
+            {
+                window.Dispose();
+                window = null;
             }
             HasWindowOpen = false;
 			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc

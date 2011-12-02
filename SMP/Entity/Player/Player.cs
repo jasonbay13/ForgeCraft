@@ -557,7 +557,7 @@ namespace SMP
 			}
             public void OpenWindow(WindowType type, Point3 pos)
             {
-                window = new Windows(type, pos, level);
+                window = new Windows(type, pos, level, this);
                 SendWindowOpen(window);
                 SendWindowItems(window.id, window.items);
             }
@@ -1037,20 +1037,23 @@ namespace SMP
 				//}
 				//Logger.Log(i + " Chunks sent");
 
-                //pos = level.SpawnPos;
+                pos = level.SpawnPos;
+                int vd = viewdistance; viewdistance = 3;
+                e.UpdateChunks(true, false, -1);
+                viewdistance = vd;
+                e.UpdateEntities();
 				SendSpawnPoint();
-				SendLoginDone();
 				SendInventory();
-                SendChunk(e.c);
-                e.UpdateChunks(true, false, true);
-				MapLoaded = true;
-				
+                SendLoginDone();
+                MapLoaded = true;
+
+                e.UpdateChunks(true, false);
 			}
 			/// <summary>
 			/// Sends a player a Chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			public void SendChunk(Chunk c)
 			{
@@ -1073,6 +1076,8 @@ namespace SMP
 				CompressedData.CopyTo(bytes, 17);
 				SendRaw(0x33, bytes);
 
+                Console.WriteLine(CompressedData.Length);
+
                 c.Update(level, this);
 
 				if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
@@ -1081,7 +1086,7 @@ namespace SMP
 			/// Prepare the client before sending the chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			/// <param name='load'>
 			/// Load. Weather to unload or load the chunk (0 is unload otherwise it will load)

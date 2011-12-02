@@ -888,18 +888,7 @@ namespace SMP
 		}
 		public static bool PlacePiston(Player a, BCS b)
 		{
-            if (MathHelper.abs((float)a.pos.x - (float)b.pos.x) < 2.0F && MathHelper.abs((float)a.pos.z - (float)b.pos.z) < 2.0F)
-            {
-                double d = (a.pos.y + 1.8200000000000001D) - (a.Stance - a.pos.y);
-                if (d - (double)b.pos.y > 2D) b.Direction = 1;
-                if ((double)b.pos.y - d > 0.0D) b.Direction = 0;
-            }
-            int l = MathHelper.floor_double((double)((a.rot[0] * 4F) / 360F) + 0.5D) & 3;
-            if (l == 0) b.Direction = 2;
-            if (l == 1) b.Direction = 5;
-            if (l == 2) b.Direction = 3;
-            b.Direction = (byte)(l != 3 ? 0 : 4);
-
+            b.Direction = BlockHelper.PistonOrientation(a, b);
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
             if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;

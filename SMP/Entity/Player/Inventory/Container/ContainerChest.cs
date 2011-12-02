@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SMP.util;
 using Substrate.Nbt;
 
@@ -9,21 +10,25 @@ namespace SMP
         public override ContainerType Type { get { return ContainerType.Chest; } }
         public override int Size { get { return 27; } }
         public override Point3 Pos { get { return point; } }
+        public override bool Open { get { return players.Count > 0; } }
         internal override Item[] Items { get { return items; } }
         protected Point3 point;
         private Item[] items;
+        private List<Player> players = new List<Player>();
 
 
-        public ContainerChest(Point3 point)
+        public ContainerChest(World level, Point3 point)
         {
+            this.level = level;
             this.point = point;
             items = new Item[Size];
             for (int i = 0; i < Size; i++)
                 items[i] = Item.Nothing;
         }
 
-        public ContainerChest(Point3 point, Item[] items)
+        public ContainerChest(World level, Point3 point, Item[] items)
         {
+            this.level = level;
             this.point = point;
             this.items = items;
         }
@@ -39,6 +44,24 @@ namespace SMP
             if (slot < 0 || slot > Size - 1) return;
             if (item == null) items[slot] = Item.Nothing;
             else items[slot] = item;
+        }
+
+        public override void AddPlayer(Player p)
+        {
+            if (!players.Contains(p)) players.Add(p);
+            UpdateState();
+        }
+
+        public override void RemovePlayer(Player p)
+        {
+            if (players.Contains(p)) players.Remove(p);
+            UpdateState();
+        }
+
+        public override void UpdateState()
+        {
+            Player.GlobalBlockAction(Pos, 1, (byte)players.Count, level);
+            Player.GlobalBlockAction(Pos, 0, (byte)players.Count, level);
         }
 
         public override TagNodeList GetNBTData()

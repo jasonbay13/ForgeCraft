@@ -47,6 +47,7 @@ namespace SMP
         public bool timerunning = false;
         public System.Threading.Thread timeincrement;
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
+        public System.Timers.Timer containerupdate = new System.Timers.Timer(3000);
 		private ChunkGen generator;
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
@@ -63,7 +64,7 @@ namespace SMP
         public byte field_35250_b;
         public byte height { get { return worldYMax; } set { worldYMax = value; } }
 		public byte LightningRange = 16; //X is chunk offset, a player can be X chunks away from lightning and still see it
-        public int ChunkLimit = int.MaxValue;
+        public int ChunkLimit = 1875000;
         public int ChunkHeight = 128; // This is 1-based, not 0-based. Got it?
         #region Custom Command / Plugin Events
 		//Custom Command / Plugin Events -------------------------------------------------------------------
@@ -301,7 +302,7 @@ namespace SMP
                 switch (GetBlock(x, y, z))
                 {
                     case (byte)Blocks.Chest:
-                        containers.Add(point, new ContainerChest(point));
+                        containers.Add(point, new ContainerChest(this, point));
                         break;
                     default: return null;
                 }
@@ -582,6 +583,8 @@ namespace SMP
             timerunning = true;
             blockflush.Elapsed += delegate { FlushBlockChanges(); };
             blockflush.Start();
+            containerupdate.Elapsed += delegate { UpdateContainers(); };
+            containerupdate.Start();
             InitializeTimers();
         }
         /// <summary>
@@ -665,13 +668,9 @@ namespace SMP
                 c = WorldGeneratingChunk(this, x, z);
             if (cancelchunk)
             {
-                if (c != null)
-                {
-                    cancelchunk = false;
-                    return c;
-                }
-                else
-                    Logger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
+                cancelchunk = false;
+                if (c != null) return c;
+                else Logger.Log("[WARNING] Was told to cancel chunk generating but chunk was null, the event will not cancel");
             }
 
 
@@ -682,8 +681,11 @@ namespace SMP
             }
 
             c.generating = true;
-            generator.Generate(c);
-            c.RecalculateLight();
+            if (x >= -1875000 && z >= -1875000 && x < 1875000 && z < 1875000)
+            {
+                generator.Generate(c);
+                c.RecalculateLight();
+            }
             c.generated = true;
             c.PostGenerate(this);
             c._dirty = true;
@@ -708,11 +710,26 @@ namespace SMP
             }
 
             //Console.WriteLine((x << 4) + "," + (z << 4));
-            generator.Populate(c);
+            if (x >= -1875000 && z >= -1875000 && x < 1875000 && z < 1875000)
+                generator.Populate(c);
             c.populated = true;
             c.PostPopulate(this);
             c._dirty = true;
             c.populating = false;
+        }
+
+        public void UpdateContainers()
+        {
+            try
+            {
+                Container c;
+                foreach (Point3 pos in containers.Keys.ToArray())
+                {
+                    c = containers[pos];
+                    c.UpdateState();
+                }
+            }
+            catch { }
         }
 
         public bool ChunkPopulatingCheck(int x, int z)
@@ -793,6 +810,7 @@ namespace SMP
             try
             {
                 if (y < 0 || y > ChunkHeight - 1) return;
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return;
                 byte oldBlock = chunk.SGB(x & 0xf, y, z & 0xf); byte oldMeta = chunk.GetMetaData(x & 0xf, y, z & 0xf);
@@ -817,6 +835,7 @@ namespace SMP
             try
             {
                 if (y < 0 || y > ChunkHeight - 1) return;
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return;
                 int cx = x >> 4, cz = z >> 4; Chunk chunk = Chunk.GetChunk(cx, cz, this, true);
                 if (chunk == null) return;
                 byte oldBlock = chunk.SGB(x & 0xf, y, z & 0xf); byte oldMeta = chunk.GetMetaData(x & 0xf, y, z & 0xf);
@@ -838,6 +857,7 @@ namespace SMP
 		{
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return 0;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return 0;
@@ -849,6 +869,7 @@ namespace SMP
 		{
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return 0;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return 0;
@@ -860,6 +881,7 @@ namespace SMP
 		{
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return;
@@ -871,6 +893,7 @@ namespace SMP
         {
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return 0;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return 0;
@@ -882,6 +905,7 @@ namespace SMP
         {
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return;
@@ -893,6 +917,7 @@ namespace SMP
         {
             try
             {
+                if (x < -30000000 || z < -30000000 || x >= 30000000 || z >= 30000000) return;
                 int cx = x >> 4, cz = z >> 4;
                 Chunk chunk = Chunk.GetChunk(cx, cz, this);
                 if (chunk == null) return;

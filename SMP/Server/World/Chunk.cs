@@ -211,7 +211,7 @@ namespace SMP
                             nbtCompound = tag.ToTagCompound();
                             nbtList = nbtCompound["Pos"].ToTagList();
                             point3 = new Point3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
-                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), point3);
+                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), w, point3);
                             c.LoadNBTData(nbtCompound["Items"].ToTagList());
                             if (!w.containers.ContainsKey(point3)) w.containers.Add(point3, c);
                         }

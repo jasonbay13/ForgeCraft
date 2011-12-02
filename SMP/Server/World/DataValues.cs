@@ -1377,5 +1377,20 @@ namespace SMP
             world.SetBlock(i, j, k, block, (byte)l);
             world.SetBlock(i, j + 1, k, block, (byte)(l + 8));
         }
+
+        public static byte PistonOrientation(Player a, BCS b)
+        {
+            if (MathHelper.abs((float)a.pos.x - (float)b.pos.x) < 2.0F && MathHelper.abs((float)a.pos.z - (float)b.pos.z) < 2.0F)
+            {
+                double d = (a.pos.y + 1.8200000000000001D);
+                if (d - (double)b.pos.y > 2D) return 1;
+                if ((double)b.pos.y - d > 0.0D) return 0;
+            }
+            int l = MathHelper.floor_double((double)((a.rot[0] * 4F) / 360F) + 0.5D) & 3;
+            if (l == 0) return 2;
+            if (l == 1) return 5;
+            if (l == 2) return 3;
+            return (byte)(l != 3 ? 0 : 4);
+        }
     }
 }

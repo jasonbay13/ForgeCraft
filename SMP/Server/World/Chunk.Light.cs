@@ -29,7 +29,7 @@ namespace SMP
 	{
         public void QuickRecalculateLight(int x, int y, int z)
         {
-            sbyte curLight = (sbyte)MathHelper.Clamp((0xf - LightOpacity[blocks[PosToInt(x, y, z)]]) + GetSkyLight(x, y + 1, z), 0x0, 0xf); byte block;
+            sbyte curLight = (sbyte)GetSkyLight(x, y + 1, z); byte block;
             for (; y >= 0; y--)
             {
                 block = blocks[PosToInt(x, y, z)];

@@ -48,14 +48,16 @@ namespace SMP
         public int InventorySize { get { return items.Length; } }
         public byte id;
 		public string name = "Chest";
+        public Player p;
         public Container container;
 		public Item[] items; //Hold all the items this window has inside it.
-		public Windows(WindowType type, Point3 pos, World world)
+		public Windows(WindowType type, Point3 pos, World world, Player p)
 		{
             try
             {
                 id = FreeId();
                 this.type = (byte)type;
+                this.p = p;
 
                 switch (Type)
                 {
@@ -63,6 +65,7 @@ namespace SMP
                         name = "Chest"; //We change this to "Large Chest" Later if it needs it :3
                         container = world.GetBlockContainer(pos);
                         items = container.Items;
+                        container.AddPlayer(p);
                         break;
                     case WindowType.Dispenser:
                         name = "Workbench";
@@ -513,9 +516,14 @@ namespace SMP
 
         public void Dispose()
         {
-            container = null;
+            if (container != null)
+            {
+                container.RemovePlayer(p);
+                container = null;
+            }
             items = null;
             name = null;
+            p = null;
         }
 
         private static byte FreeId()

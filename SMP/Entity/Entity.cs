@@ -164,10 +164,10 @@ namespace SMP
             hurt(1);
         }
 
-        public void UpdateChunks(bool force, bool forcesend, bool forcequeue = false)
+        public void UpdateChunks(bool force, bool forcesend, int queue = 0)
         {
             if (c == null)
-                level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4);
+                level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4, false, false);
             if (c == null || (c == CurrentChunk && !force))
                 return;
 
@@ -224,7 +224,7 @@ namespace SMP
                         if ((!p.VisibleChunks.Contains(po) || forcesend) && (Math.Abs(po.x) < p.level.ChunkLimit && Math.Abs(po.z) < p.level.ChunkLimit))
                         {
                             if (!p.level.chunkData.ContainsKey(po))
-                                p.level.LoadChunk(po.x, po.z);
+                                p.level.LoadChunk(po.x, po.z, queue != -1, queue != -1);
 
                             try
                             {
@@ -233,9 +233,14 @@ namespace SMP
                                     if (!p.level.chunkData[po].generated)
                                     {
                                         World.chunker.QueueChunk(po, p.level);
-                                        World.chunker.QueueChunkSend(po, p);
+                                        if (queue == -1)
+                                        {
+                                            while (!p.level.chunkData[po].generated) Thread.Sleep(50);
+                                            p.SendChunk(p.level.chunkData[po]);
+                                        }
+                                        else World.chunker.QueueChunkSend(po, p);
                                     }
-                                    else if (forcequeue)
+                                    else if (queue == 1)
                                     {
                                         if (!p.level.chunkData[po].populated) World.chunker.QueueChunk(po, p.level, false);
                                         World.chunker.QueueChunkSend(po, p);
@@ -248,7 +253,14 @@ namespace SMP
                                     }
                                 }
                                 else
-                                    World.chunker.QueueChunkSend(po, p);
+                                {
+                                    if (queue == -1)
+                                    {
+                                        while (!p.level.chunkData.ContainsKey(po)) Thread.Sleep(50);
+                                        p.SendChunk(p.level.chunkData[po]);
+                                    }
+                                    else World.chunker.QueueChunkSend(po, p);
+                                }
                             }
                             catch { p.SendPreChunk(new Chunk(po.x, po.z, true), 0); }
                         }
