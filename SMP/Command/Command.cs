@@ -59,6 +59,7 @@ namespace SMP.Commands
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
+            core.Add(new CmdFlat());
             core.Add(new CmdFly());
             core.Add(new CmdGameMode());
             core.Add(new CmdGive());
