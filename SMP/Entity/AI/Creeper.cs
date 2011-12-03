@@ -73,7 +73,7 @@ namespace SMP
             {
                 if (IsNear(p) && IsInView(p))
                 {
-                    if ((p1.pos.diff(pos).x > p.pos.diff(pos).x || p1.pos.diff(pos).z > p.pos.diff(pos).z) && p1.pos.diff(pos).y >= p.pos.diff(pos).y)
+                    if ((p1.pos.diff(pos).x > p.pos.diff(pos).x || p1.pos.diff(pos).z > p.pos.diff(pos).z) && p1.pos.diff(pos).y >= p.pos.diff(pos).y)//p1 is always null
                         p1 = p;
                 }
             }
