@@ -62,6 +62,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Build\CmdFlat.cs" />
     <Compile Include="Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Command\Commands\Information\CmdSoftware.cs" />
     <Compile Include="Command\Commands\Moderation\CmdPauseTime.cs" />
