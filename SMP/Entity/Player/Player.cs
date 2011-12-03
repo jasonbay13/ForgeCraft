@@ -566,6 +566,7 @@ namespace SMP
                 window = new Windows(type, pos, level, this);
                 SendWindowOpen(window);
                 SendWindowItems(window.id, window.items);
+                HasWindowOpen = true;
             }
 			public void SetFire(bool onoff)
 			{

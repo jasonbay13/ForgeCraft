@@ -348,8 +348,8 @@ namespace SMP
                 }
             }
 
-            //p.SendWindowItems(0, items);
-            //p.SendItem(255, -1, p.OnMouse);
+            p.SendWindowItems(0, items);
+            p.SendItem(255, -1, p.OnMouse);
 		}
 		
 		public void UpdateVisibleItemInHand(short id, short damage)

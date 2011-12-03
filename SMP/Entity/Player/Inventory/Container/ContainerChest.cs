@@ -18,8 +18,8 @@ namespace SMP
 
 
         public ContainerChest(World level, Point3 point)
+            : base(level)
         {
-            this.level = level;
             this.point = point;
             items = new Item[Size];
             for (int i = 0; i < Size; i++)
@@ -27,8 +27,8 @@ namespace SMP
         }
 
         public ContainerChest(World level, Point3 point, Item[] items)
+            : base(level)
         {
-            this.level = level;
             this.point = point;
             this.items = items;
         }
@@ -62,6 +62,15 @@ namespace SMP
         {
             Player.GlobalBlockAction(Pos, 1, (byte)players.Count, level);
             Player.GlobalBlockAction(Pos, 0, (byte)players.Count, level);
+        }
+
+        public override void UpdateContents(Player exclude = null)
+        {
+            foreach (Player pl in players.ToArray())
+            {
+                try { if (pl != exclude) pl.SendWindowItems(pl.window.id, items); }
+                catch { }
+            }
         }
 
         public override TagNodeList GetNBTData()

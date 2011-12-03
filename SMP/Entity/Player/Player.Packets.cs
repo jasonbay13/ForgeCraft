@@ -806,13 +806,34 @@ namespace SMP
 
             if (!HasWindowOpen)
             {
-                for (int i = 0; i <= 4; i++)
+                for (int i = 1; i <= 4; i++)
                 {
                     if (inventory.items[i].id != -1)
                     {
                         // TODO: Throw item!
                         inventory.items[i] = Item.Nothing;
                     }
+                }
+            }
+            else
+            {
+                switch (window.Type)
+                {
+                    case WindowType.Workbench:
+                        for (int i = 1; i <= 9; i++)
+                        {
+                            if (window.items[i].id != -1)
+                            {
+                                // TODO: Throw item!
+                            }
+                        }
+                        break;
+                    case WindowType.EnchantmentTable:
+                        if (window.items[0].id != -1)
+                        {
+                            // TODO: Throw item!
+                        }
+                        break;
                 }
             }
 
@@ -834,7 +855,7 @@ namespace SMP
             Console.WriteLine(String.Format("{0} {1} {2}", click, slot, Shift));
 			if (HasWindowOpen)
 			{
-				//window.HandleClick(this, message);
+                window.HandleClick(this, slot, click, ActionID, Shift);
 			}
 			else
 			{

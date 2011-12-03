@@ -166,10 +166,119 @@ namespace SMP
 				}
 			}*/
 		}
-		
-		public void HandleClick(Player p, byte[] message)
+
+        public void HandleClick(Player p, short slot, ClickType click, short ActionID, bool Shift)
 		{
-            return; // TODO
+            if (slot == -999)
+            {
+                //TODO throw item
+                p.OnMouse = Item.Nothing;
+                return;
+            }
+            if (slot < 0 || slot > InventorySize + 35) return;
+            if (Type == WindowType.Workbench || Type == WindowType.Furnace)
+            {
+                if (slot == 0)
+                {
+                    // TODO: Crafting/smelting output handler.
+                }
+            }
+
+            if (Shift)
+            {
+                if (slot >= InventorySize)
+                {
+                    if (Type == WindowType.Workbench || Type == WindowType.Furnace || Type == WindowType.EnchantmentTable || Type == WindowType.BrewingStand)
+                    {
+                        p.inventory.HandleClick((short)((slot - InventorySize) + 9), click, ActionID, Shift);
+                        return;
+                    }
+                }
+
+                Item clickItem = items[slot];
+            }
+            else
+            {
+                if (slot >= InventorySize)
+                {
+                    p.inventory.HandleClick((short)((slot - InventorySize) + 9), click, ActionID, Shift);
+                    return;
+                }
+
+                Item clickItem = items[slot];
+                if (p.OnMouse.id == -1)
+                {
+                    if (clickItem.id != -1)
+                    {
+                        if (click == ClickType.RightClick && clickItem.count > 1)
+                        {
+                            p.OnMouse = new Item(clickItem);
+                            p.OnMouse.count = (byte)Math.Ceiling((float)p.OnMouse.count / 2F);
+                            clickItem.count /= 2;
+                        }
+                        else
+                        {
+                            items[slot] = Item.Nothing;
+                            p.OnMouse = clickItem;
+                        }
+                    }
+                }
+                else
+                {
+                    if (clickItem.id != -1)
+                    {
+                        if (p.OnMouse.id == clickItem.id && p.OnMouse.meta == clickItem.meta)
+                        {
+                            byte stack = Inventory.isStackable(clickItem.id);
+                            if (click == ClickType.RightClick && p.OnMouse.count > 1)
+                            {
+                                if (clickItem.count < stack)
+                                {
+                                    p.OnMouse.count--;
+                                    clickItem.count++;
+                                }
+                            }
+                            else
+                            {
+                                if (clickItem.count < stack)
+                                {
+                                    byte avail = (byte)(stack - clickItem.count);
+                                    if (p.OnMouse.count <= avail)
+                                    {
+                                        clickItem.count += p.OnMouse.count;
+                                        p.OnMouse = Item.Nothing;
+                                    }
+                                    else
+                                    {
+                                        clickItem.count = stack;
+                                        p.OnMouse.count -= avail;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            items[slot] = p.OnMouse;
+                            p.OnMouse = clickItem;
+                        }
+                    }
+                    else
+                    {
+                        if (click == ClickType.RightClick && p.OnMouse.count > 1)
+                        {
+                            items[slot] = new Item(p.OnMouse);
+                            items[slot].count = 1;
+                            p.OnMouse.count--;
+                        }
+                        else
+                        {
+                            items[slot] = p.OnMouse;
+                            p.OnMouse = Item.Nothing;
+                        }
+                    }
+                }
+            }
+
 			/*byte id = message[0];
 			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
 			ClickType click = (ClickType)message[3];
@@ -474,6 +583,10 @@ namespace SMP
 				}
 				#endregion
 			}*/
+
+            if (container != null) container.UpdateContents(p);
+            p.SendWindowItems(id, items);
+            p.SendItem(255, -1, p.OnMouse);
 		}
 
 		public int GetEmptyWindowSlot()

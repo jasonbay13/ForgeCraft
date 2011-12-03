@@ -16,11 +16,15 @@ namespace SMP
         public abstract TagNodeList GetNBTData();
         public abstract void LoadNBTData(TagNodeList list);
 
+        private static int nextId = 0;
+        public int id; // Used to uniquely identify a container.
         public World level;
 
 
-        public Container()
+        public Container(World level)
         {
+            id = FreeId();
+            this.level = level;
         }
 
         public static Container CreateInstance(ContainerType type, World level, Point3 point)
@@ -67,6 +71,15 @@ namespace SMP
 
         public virtual void UpdateState()
         {
+        }
+
+        public virtual void UpdateContents(Player exclude = null)
+        {
+        }
+
+        private static int FreeId()
+        {
+            return nextId++;
         }
     }
 
