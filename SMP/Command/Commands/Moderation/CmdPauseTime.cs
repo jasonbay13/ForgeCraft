@@ -24,8 +24,8 @@ namespace SMP.Commands
                 if (world == null) { p.SendMessage("World not found!", WrapMethod.Chat); return; }
             }
 
-            world.pauseTime = !world.pauseTime;
-            Player.GlobalMessage("Time is now " + (world.pauseTime ? "paused" : "unpaused") + "!");
+            world.timerunning = !world.timerunning;
+            Player.GlobalMessage("Time is now " + (world.timerunning ? "paused" : "unpaused") + "!");
         }
 
         public override void Help(Player p)
