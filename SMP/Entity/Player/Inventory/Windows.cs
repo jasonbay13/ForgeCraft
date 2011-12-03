@@ -195,7 +195,123 @@ namespace SMP
                     }
                 }
 
-                Item clickItem = items[slot];
+                Item item;
+                bool useEmptySlot = false;
+                if (slot < InventorySize)
+                {
+                    Item clickItem = items[slot];
+                    if (clickItem.id != -1)
+                    {
+                        for (int i = 44; i >= 36; i--)
+                        {
+                            item = p.inventory.items[i];
+                            if (useEmptySlot)
+                            {
+                                if (item.id == -1)
+                                {
+                                    p.inventory.items[i] = clickItem;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
+                            }
+                            else if (item.id == clickItem.id && item.meta == clickItem.meta)
+                            {
+                                byte stack = Inventory.isStackable(item.id);
+                                byte avail = (byte)(stack - item.count);
+                                if (avail < 1) continue;
+
+                                if (clickItem.count <= avail)
+                                {
+                                    item.count += clickItem.count;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
+                                else
+                                {
+                                    item.count = stack;
+                                    clickItem.count -= avail;
+                                }
+                            }
+                            if (i == 36 && !useEmptySlot) { useEmptySlot = true; i = 45; }
+                        }
+                        if (items[slot].id != -1)
+                        {
+                            useEmptySlot = false;
+                            for (int i = 35; i >= 9; i--)
+                            {
+                                item = p.inventory.items[i];
+                                if (useEmptySlot)
+                                {
+                                    if (item.id == -1)
+                                    {
+                                        p.inventory.items[i] = clickItem;
+                                        items[slot] = Item.Nothing;
+                                        break;
+                                    }
+                                }
+                                else if (item.id == clickItem.id && item.meta == clickItem.meta)
+                                {
+                                    byte stack = Inventory.isStackable(item.id);
+                                    byte avail = (byte)(stack - item.count);
+                                    if (avail < 1) continue;
+
+                                    if (clickItem.count <= avail)
+                                    {
+                                        item.count += clickItem.count;
+                                        items[slot] = Item.Nothing;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        item.count = stack;
+                                        clickItem.count -= avail;
+                                    }
+                                }
+                                if (i == 9 && !useEmptySlot) { useEmptySlot = true; i = 36; }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    slot = (short)((slot - InventorySize) + 9);
+                    Item clickItem = p.inventory.items[slot];
+                    if (clickItem.id != -1)
+                    {
+                        for (int i = 0; i < InventorySize; i++)
+                        {
+                            item = items[i];
+                            if (useEmptySlot)
+                            {
+                                if (item.id == -1)
+                                {
+                                    items[i] = clickItem;
+                                    p.inventory.items[slot] = Item.Nothing;
+                                    break;
+                                }
+                            }
+                            else if (item.id == clickItem.id && item.meta == clickItem.meta)
+                            {
+                                byte stack = Inventory.isStackable(item.id);
+                                byte avail = (byte)(stack - item.count);
+                                if (avail < 1) continue;
+
+                                if (clickItem.count <= avail)
+                                {
+                                    item.count += clickItem.count;
+                                    p.inventory.items[slot] = Item.Nothing;
+                                    break;
+                                }
+                                else
+                                {
+                                    item.count = stack;
+                                    clickItem.count -= avail;
+                                }
+                            }
+                            if (i == InventorySize - 1 && !useEmptySlot) { useEmptySlot = true; i = -1; }
+                        }
+                    }
+                }
             }
             else
             {
@@ -279,314 +395,9 @@ namespace SMP
                 }
             }
 
-			/*byte id = message[0];
-			short slot = util.EndianBitConverter.Big.ToInt16(message, 1);
-			ClickType click = (ClickType)message[3];
-			short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
-			bool Shift = (message[6] == 1);
-			short ItemID = util.EndianBitConverter.Big.ToInt16(message, 7);
-			byte Count = 1;
-			short Meta = 0;
-            if (OnWindowClick != null)
-                OnWindowClick(p, Type, slot, click, ActionID, Shift, ItemID, Count, Meta);
-			if (ItemID != -1)
-			{
-				Count = message[9];
-				Meta = util.EndianBitConverter.Big.ToInt16(message, 10);
-			}
-
-			if (slot == -999)
-			{
-				//TODO throw item
-				p.OnMouse = Item.Nothing;
-				return;
-			}
-
-			if (slot > items.Length && !Shift)
-			{
-				p.inventory.ClickHandler((short)((slot - items.Length) + 9), click, ActionID, Shift, ItemID, Count, Meta);
-				return;
-			}
-			if (Shift)
-			{
-				if (type == 3) return;
-				else if (type == 0)
-				{
-					if (slot > items.Length)
-					{
-						//TODO Inventory to Chest
-					}
-					else
-					{
-						//TODO Chest to Inventory
-					}
-				}
-				else if (type == 1)
-				{
-					if (slot > items.Length)
-					{
-						p.inventory.ClickHandler((short)((slot - items.Length) + 9), click, ActionID, Shift, ItemID, Count, Meta);
-						return;
-					}
-					else
-					{
-						//TODO Workbench to Inventory
-					}
-				}
-				else if (type == 2)
-				{
-					if (slot > items.Length)
-					{
-						p.inventory.ClickHandler((short)((slot - items.Length) + 9), click, ActionID, Shift, ItemID, Count, Meta);
-						return;
-					}
-					else
-					{
-						//TODO Furnace to Inventory
-					}
-				}
-			}
-			else
-			{
-				if (p.OnMouse != Item.Nothing)
-				{
-					if (items[slot] != Item.Nothing)
-					{
-						#region Crafting/Furnace Output
-						if ((type == 1 && slot == 0) || (type == 2 && slot == 0))
-						{
-							if (p.OnMouse.id == items[slot].id)
-							{
-								if (p.OnMouse.id < 255)
-								{
-									if (p.OnMouse.meta == items[slot].meta)
-									{
-										byte stacking = Inventory.isStackable(p.OnMouse.id);
-										byte availible = (byte)(stacking - p.OnMouse.count);
-										if (items[slot].count <= availible)
-										{
-											p.OnMouse.count += items[slot].count;
-										}
-									}
-									else
-									{
-										Item temp = items[slot];
-										items[slot] = p.OnMouse;
-										p.OnMouse = temp;
-									}
-								}
-								else
-								{
-									byte stacking = Inventory.isStackable(p.OnMouse.id);
-									byte availible = (byte)(stacking - p.OnMouse.count);
-									if (items[slot].count <= availible)
-									{
-										p.OnMouse.count += items[slot].count;
-									}
-								}
-							}
-							else
-							{
-								return;
-							}
-						}
-						#endregion
-						else
-						{
-							if (click == ClickType.RightClick)
-							{
-                               
-
-								if (p.OnMouse.id == items[slot].id)
-								{
-									if (p.OnMouse.id < 255)
-									{
-										if (p.OnMouse.meta == items[slot].meta)
-										{
-											byte stacking = Inventory.isStackable(p.OnMouse.id);
-											if (items[slot].count < stacking)
-											{
-												items[slot].count += 1;
-												if (p.OnMouse.count == 1)
-												{
-													p.OnMouse = Item.Nothing;
-												}
-												else
-												{
-													p.OnMouse.count -= 1;
-												}
-											}
-										}
-										else
-										{
-											Item temp = items[slot];
-											items[slot] = p.OnMouse;
-											p.OnMouse = temp;
-										}
-									}
-									else
-									{
-										byte stacking = Inventory.isStackable(p.OnMouse.id);
-										if (items[slot].count < stacking)
-										{
-											items[slot].count += 1;
-											if (p.OnMouse.count == 1)
-											{
-												p.OnMouse = Item.Nothing;
-											}
-											else
-											{
-												p.OnMouse.count -= 1;
-											}
-										}
-									}
-								}
-							}
-							else
-							{
-								if (p.OnMouse.id == items[slot].id)
-								{
-									if (p.OnMouse.id < 255)
-									{
-										if (p.OnMouse.meta == items[slot].meta)
-										{
-											byte stacking = Inventory.isStackable(p.OnMouse.id);
-											byte available = (byte)(stacking - items[slot].count);
-											if (available == 0) return;
-											if (p.OnMouse.count <= available)
-											{
-												items[slot].count += p.OnMouse.count;
-												p.OnMouse = Item.Nothing;
-											}
-											else
-											{
-												items[slot].count = stacking;
-												p.OnMouse.count -= available;
-											}
-										}
-										else
-										{
-											Item temp = items[slot];
-											items[slot] = p.OnMouse;
-											p.OnMouse = temp;
-										}
-									}
-									else
-									{
-										byte stacking = Inventory.isStackable(p.OnMouse.id);
-										byte available = (byte)(stacking - items[slot].count);
-										if (available == 0) return;
-										if (p.OnMouse.count <= available)
-										{
-											items[slot].count += p.OnMouse.count;
-											p.OnMouse = Item.Nothing;
-										}
-										else
-										{
-											items[slot].count = stacking;
-											p.OnMouse.count -= available;
-										}
-									}
-								}
-								else
-								{
-									Item temp = items[slot];
-									items[slot] = p.OnMouse;
-									p.OnMouse = temp;
-								}
-							}
-						}
-					}
-					#region Empty Slot Done
-					else
-					{
-						if (slot == 0) return; //Crafting output slot
-						#region Armor slots Done
-						if (slot == 5 || slot == 6 || slot == 7 || slot == 8)
-						{
-							switch (slot)
-							{
-								case 5:
-									if (p.OnMouse.id == 298 || p.OnMouse.id == 302 || p.OnMouse.id == 306 || p.OnMouse.id == 310)
-									{
-										items[slot] = p.OnMouse;
-										p.OnMouse = Item.Nothing;
-									}
-									break;
-								case 6:
-									if (p.OnMouse.id == 299 || p.OnMouse.id == 303 || p.OnMouse.id == 307 || p.OnMouse.id == 311)
-									{
-										items[slot] = p.OnMouse;
-										p.OnMouse = Item.Nothing;
-									}
-									break;
-								case 7:
-									if (p.OnMouse.id == 300 || p.OnMouse.id == 304 || p.OnMouse.id == 308 || p.OnMouse.id == 312)
-									{
-										items[slot] = p.OnMouse;
-										p.OnMouse = Item.Nothing;
-									}
-									break;
-								case 8:
-									if (p.OnMouse.id == 301 || p.OnMouse.id == 305 || p.OnMouse.id == 309 || p.OnMouse.id == 313)
-									{
-										items[slot] = p.OnMouse;
-										p.OnMouse = Item.Nothing;
-									}
-									break;
-							}
-						}
-						#endregion
-						else
-						{
-							if (click == ClickType.RightClick)
-							{
-								if (p.OnMouse.count == 1)
-								{
-									items[slot] = p.OnMouse;
-									p.OnMouse = Item.Nothing;
-								}
-								else
-								{
-									p.OnMouse.count -= 1;
-                                    items[slot] = new Item(p.OnMouse.id, 1, p.OnMouse.meta);
-								}
-							}
-							else
-							{
-								items[slot] = p.OnMouse;
-								p.OnMouse = Item.Nothing;
-							}
-						}
-					}
-					#endregion
-				}
-				#region Empty Mouse done
-				else //Player has NOTHING on the mouse
-				{
-					if (items[slot] != Item.Nothing)
-					{
-						if (click == ClickType.RightClick)
-						{
-							p.OnMouse = Right_Click(p, slot);
-						}
-						else //Player left-clicked
-						{
-							p.OnMouse = items[slot];
-							Remove(p, slot);
-						}
-					}
-					else
-					{
-						return;
-					}
-				}
-				#endregion
-			}*/
-
             if (container != null) container.UpdateContents(p);
-            p.SendWindowItems(id, items);
-            p.SendItem(255, -1, p.OnMouse);
+            //p.SendWindowItems(id, items);
+            //p.SendItem(255, -1, p.OnMouse);
 		}
 
 		public int GetEmptyWindowSlot()

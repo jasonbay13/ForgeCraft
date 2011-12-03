@@ -174,75 +174,78 @@ namespace SMP
 
             if (Shift)
             {
-                bool useEmptySlot = false;
-                if (slot >= 36 || slot <= 8)
+                if (clickItem.id != -1)
                 {
-                    for (int i = 9; i < 36; i++)
+                    bool useEmptySlot = false;
+                    if (slot >= 36 || slot <= 8)
                     {
-                        item = items[i];
-                        if (useEmptySlot)
+                        for (int i = 9; i < 36; i++)
                         {
-                            if (item.id == -1)
+                            item = items[i];
+                            if (useEmptySlot)
                             {
-                                items[i] = clickItem;
-                                items[slot] = Item.Nothing;
-                                break;
+                                if (item.id == -1)
+                                {
+                                    items[i] = clickItem;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
                             }
-                        }
-                        else if (item.id == clickItem.id && item.meta == clickItem.meta)
-                        {
-                            byte stack = isStackable(item.id);
-                            byte avail = (byte)(stack - item.count);
-                            if (avail < 1) continue;
+                            else if (item.id == clickItem.id && item.meta == clickItem.meta)
+                            {
+                                byte stack = isStackable(item.id);
+                                byte avail = (byte)(stack - item.count);
+                                if (avail < 1) continue;
 
-                            if (clickItem.count <= avail)
-                            {
-                                item.count += clickItem.count;
-                                items[slot] = Item.Nothing;
-                                break;
+                                if (clickItem.count <= avail)
+                                {
+                                    item.count += clickItem.count;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
+                                else
+                                {
+                                    item.count = stack;
+                                    clickItem.count -= avail;
+                                }
                             }
-                            else
-                            {
-                                item.count = stack;
-                                clickItem.count -= avail;
-                            }
+                            if (i == 35 && !useEmptySlot) { useEmptySlot = true; i = 8; }
                         }
-                        if (i == 35 && !useEmptySlot) { useEmptySlot = true; i = 8; }
                     }
-                }
-                else
-                {
-                    for (int i = 36; i < 45; i++)
+                    else
                     {
-                        item = items[i];
-                        if (useEmptySlot)
+                        for (int i = 36; i < 45; i++)
                         {
-                            if (item.id == -1)
+                            item = items[i];
+                            if (useEmptySlot)
                             {
-                                items[i] = clickItem;
-                                items[slot] = Item.Nothing;
-                                break;
+                                if (item.id == -1)
+                                {
+                                    items[i] = clickItem;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
                             }
-                        }
-                        else if (item.id == clickItem.id && item.meta == clickItem.meta)
-                        {
-                            byte stack = isStackable(item.id);
-                            byte avail = (byte)(stack - item.count);
-                            if (avail < 1) continue;
+                            else if (item.id == clickItem.id && item.meta == clickItem.meta)
+                            {
+                                byte stack = isStackable(item.id);
+                                byte avail = (byte)(stack - item.count);
+                                if (avail < 1) continue;
 
-                            if (clickItem.count <= avail)
-                            {
-                                item.count += clickItem.count;
-                                items[slot] = Item.Nothing;
-                                break;
+                                if (clickItem.count <= avail)
+                                {
+                                    item.count += clickItem.count;
+                                    items[slot] = Item.Nothing;
+                                    break;
+                                }
+                                else
+                                {
+                                    item.count = stack;
+                                    clickItem.count -= avail;
+                                }
                             }
-                            else
-                            {
-                                item.count = stack;
-                                clickItem.count -= avail;
-                            }
+                            if (i == 44 && !useEmptySlot) { useEmptySlot = true; i = 35; }
                         }
-                        if (i == 44 && !useEmptySlot) { useEmptySlot = true; i = 35; }
                     }
                 }
             }
@@ -348,8 +351,8 @@ namespace SMP
                 }
             }
 
-            p.SendWindowItems(0, items);
-            p.SendItem(255, -1, p.OnMouse);
+            //p.SendWindowItems(0, items);
+            //p.SendItem(255, -1, p.OnMouse);
 		}
 		
 		public void UpdateVisibleItemInHand(short id, short damage)

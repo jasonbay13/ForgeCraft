@@ -852,7 +852,7 @@ namespace SMP
             short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
             bool Shift = (message[6] == 1);
 
-            Console.WriteLine(String.Format("{0} {1} {2}", click, slot, Shift));
+            //Console.WriteLine(String.Format("{0} {1} {2}", click, slot, Shift));
 			if (HasWindowOpen)
 			{
                 window.HandleClick(this, slot, click, ActionID, Shift);
