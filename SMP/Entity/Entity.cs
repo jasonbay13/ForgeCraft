@@ -77,6 +77,8 @@ namespace SMP
         public static java.util.Random randomJava = new java.util.Random();
 		public int id;
 
+        public System.Timers.Timer despawnTimer;
+
         public int age = 0;
         internal short health = 20;
         public short Health
@@ -95,58 +97,64 @@ namespace SMP
 
         internal Entity(World l)
         {
+            despawnTimer = CreateDespawnTimer(this);
             id = FreeId();
             level = l;
         }
 
-		public Entity(Player pl, World l)
+        public Entity(Player pl, World l)
+            : this(l)
 		{
 			p = pl;
-			id = FreeId();
 			isPlayer = true;
-			level = l;
 
 			UpdateChunks(false, false);
 
 			Entities.Add(id, this);
 		}
-		public Entity(Item i, World l)
+        public Entity(Item i, World l)
+            : this(l)
 		{
 			I = i;
-            if (!I.isInventory) id = FreeId();
 			isItem = true;
-			level = l;
-
-            if (!I.isInventory)
-            {
-                UpdateChunks(false, false);
-                Entities.Add(id, this);
-            }
-		}
-		public Entity(AI ai, World l)
-		{
-			this.ai = ai;
-			id = FreeId();
-			isAI = true;
-			level = l;
-
-			Entities.Add(id, this);
-		}
-        public Entity(McObject obj, World l)
-        {
-            this.obj = obj;
-            id = FreeId();
-            isObject = true;
-            level = l;
 
             UpdateChunks(false, false);
+            Entities.Add(id, this);
+		}
+        public Entity(AI ai, World l)
+            : this(l)
+        {
+            this.ai = ai;
+            isAI = true;
 
+            UpdateChunks(false, false);
+            Entities.Add(id, this);
+        }
+        public Entity(McObject obj, World l)
+            : this(l)
+        {
+            this.obj = obj;
+            isObject = true;
+
+            UpdateChunks(false, false);
             Entities.Add(id, this);
         }
 		public Entity(bool lightning) //Stand in entity for lightning
 		{
 			id = FreeId();
 		}
+
+        private static System.Timers.Timer CreateDespawnTimer(Entity e)
+        {
+            System.Timers.Timer timer = new System.Timers.Timer(1000);
+            timer.AutoReset = false;
+            timer.Elapsed += delegate
+            {
+                Player.GlobalDespawn(e);
+                if (!e.isPlayer) RemoveEntity(e);
+            };
+            return timer;
+        }
 
         public void hurt(short amount, bool overRide = false)
         {
@@ -161,20 +169,11 @@ namespace SMP
                     pl.SendEntityStatus(id, 2);
                     if (Health <= 0 && pl != p)
                     {
-                        if (isPlayer) p.inventory.Clear();
+                        if (isPlayer) p.inventory.Clear(true);
                         pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
                     }
                 }
-
-                if (Health <= 0)
-                {
-                    new Thread(new ThreadStart(delegate
-                    {
-                        Thread.Sleep(1000);
-                        Player.GlobalDespawn(this);
-                        if (!isPlayer) RemoveEntity(this);
-                    })).Start();
-                }
+                if (Health <= 0) despawnTimer.Start();
             }
         }
 

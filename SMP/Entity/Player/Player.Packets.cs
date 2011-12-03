@@ -332,7 +332,7 @@ namespace SMP
         {
            if (onground == onGround) return;
             onground = onGround;
-            if (onground != 1)
+            /*if (onground != 1)
             {
                 startY = pos.y;
                 startTime = DateTime.Now;
@@ -382,7 +382,7 @@ namespace SMP
                 }
 
 
-            }
+            }*/
         }
         #endregion
         #region BlockChanges
@@ -1048,6 +1048,7 @@ namespace SMP
                 return;
             }
 
+            e.despawnTimer.Stop();
             health = 20;
             GlobalNamedEntitySpawn(this);
             SendRespawn();
