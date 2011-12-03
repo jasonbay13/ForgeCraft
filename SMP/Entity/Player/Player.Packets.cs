@@ -336,15 +336,9 @@ namespace SMP
             {
                 startY = pos.y;
                 startTime = DateTime.Now;
-#if DEBUG
-                this.SendMessage("In air");
-#endif
             }
             else
             {
-#if DEBUG
-                this.SendMessage("On ground");
-#endif
                 var currentBlock = (Blocks)this.level.GetBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
                 if (startTime != null)
                 {
@@ -363,21 +357,9 @@ namespace SMP
                     if (blocks > 0.5)
                     {
 #if DEBUG
-                        this.SendMessage(String.Format("Fell {0} blocks", blocks));
+                        this.SendMessage(String.Format("You fell {0} blocks", blocks));
 #endif
                         double fallDamage = (blocks - 3);  //to die from full health, u must fall 23 blocks
-
-                        /*Blocks block = currentBlock;
-                        int waterCount = 0;
-                        while (block == Blocks.SWater || block == Blocks.AWater)
-                        {
-                            waterCount++;
-                            block = (Blocks)this.level.GetBlock((int)pos.X, (int)pos.Y + waterCount, (int)pos.Z);
-                        }
-
-                        fallDamage -= waterCount * 16;*/
-                        
-
 
                         if (fallDamage > 0)
                         {
@@ -394,7 +376,7 @@ namespace SMP
                     else if (blocks < -0.5)
                     {
 #if DEBUG
-                        this.SendMessage(String.Format("Climbed {0} blocks", blocks * -1));
+                        this.SendMessage(String.Format("You went up {0} blocks", -blocks));
 #endif
                     }
                 }
