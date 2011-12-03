@@ -175,7 +175,7 @@ namespace SMP
             if (Shift)
             {
                 bool useEmptySlot = false;
-                if (slot >= 36 || slot <= 4)
+                if (slot >= 36 || slot <= 8)
                 {
                     for (int i = 9; i < 36; i++)
                     {
@@ -207,7 +207,7 @@ namespace SMP
                                 clickItem.count -= avail;
                             }
                         }
-                        if (i == 35 && !useEmptySlot) { useEmptySlot = true; i = 9; }
+                        if (i == 35 && !useEmptySlot) { useEmptySlot = true; i = 8; }
                     }
                 }
                 else
@@ -242,7 +242,7 @@ namespace SMP
                                 clickItem.count -= avail;
                             }
                         }
-                        if (i == 44 && !useEmptySlot) { useEmptySlot = true; i = 36; }
+                        if (i == 44 && !useEmptySlot) { useEmptySlot = true; i = 35; }
                     }
                 }
             }
