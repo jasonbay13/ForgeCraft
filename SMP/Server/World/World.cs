@@ -48,7 +48,6 @@ namespace SMP
         public System.Threading.Thread timeincrement;
         public System.Timers.Timer blockflush = new System.Timers.Timer(20);
         public System.Timers.Timer containerupdate = new System.Timers.Timer(3000);
-        public bool pauseTime = false;
 		private ChunkGen generator;
         public WorldChunkManager chunkManager;
 		public Dictionary<Point, Chunk> chunkData;
@@ -566,7 +565,7 @@ namespace SMP
                 {
                     try
                     {
-                        if (pauseTime) { System.Threading.Thread.Sleep(speed); continue; }
+                        if (!timerunning) { System.Threading.Thread.Sleep(speed); continue; }
                         if (wait > 0) System.Threading.Thread.Sleep(wait);
 
                         DateTime Start = DateTime.Now;
@@ -590,28 +589,6 @@ namespace SMP
             containerupdate.Elapsed += delegate { UpdateContainers(); };
             containerupdate.Start();
             InitializeTimers();
-        }
-        /// <summary>
-        /// Start the world time
-        /// </summary>
-        public void StartTime()
-        {
-            if (!timerunning)
-            {
-                timeincrement.Resume();
-                timerunning = true;
-            }
-        }
-        /// <summary>
-        /// Stop the world time
-        /// </summary>
-        public void StopTime()
-        {
-            if (timerunning)
-            {
-                timeincrement.Suspend();
-                timerunning = false;
-            }
         }
         /// <summary>
         /// Set wether its raining or not
