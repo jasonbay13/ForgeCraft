@@ -93,6 +93,12 @@ namespace SMP
         private DateTime lastPosSync = new DateTime();
         private DateTime lastHurt = new DateTime();
 
+        internal Entity(World l)
+        {
+            id = FreeId();
+            level = l;
+        }
+
 		public Entity(Player pl, World l)
 		{
 			p = pl;
@@ -132,6 +138,8 @@ namespace SMP
             id = FreeId();
             isObject = true;
             level = l;
+
+            UpdateChunks(false, false);
 
             Entities.Add(id, this);
         }
@@ -361,18 +369,20 @@ namespace SMP
                     //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
-						if (!e.I.OnGround || e.age < 10) continue;
-						e.I.OnGround = false;
+                        Console.WriteLine(e.age);
+						if (e.age < 10) continue;
 
-                        p.SendPickupAnimation(e.id);
-                        Player.players.ForEach(delegate(Player pl)
+                        if (p.inventory.Add(e.I))
                         {
-                            if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
-                                pl.SendPickupAnimation(e.id, p.id);
-                        });
+                            p.SendPickupAnimation(e.id);
+                            Player.players.ForEach(delegate(Player pl)
+                            {
+                                if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
+                                    pl.SendPickupAnimation(e.id, p.id);
+                            });
 
-						p.inventory.Add(e.I);
-                        RemoveEntity(e);
+                            RemoveEntity(e);
+                        }
 					}
 				}
 				/*if (e.isAI)

@@ -69,7 +69,8 @@ namespace SMP
         public Point3 pos { get { return e.pos; } set { e.pos = value; } }
         public float[] rot { get { return e.rot; } set { e.rot = value; } }
 
-        internal Item() { isInventory = true; }
+        internal Item(bool chunk) { }
+        public Item() { isInventory = true; }
         public Item(short id) : this(id, 1, 0) { }
         public Item(short id, byte count) : this(id, count, 0) { }
         public Item(short id, byte count, short meta)

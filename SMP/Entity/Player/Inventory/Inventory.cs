@@ -48,15 +48,15 @@ namespace SMP
 			current_index = 36;
 		}
 
-		public void Add(short item, int slot)
+		public bool Add(short item, int slot)
 		{
-			Add(item, 1, 0, slot);
+			return Add(item, 1, 0, slot);
 		}
-		public void Add(Item item)
+		public bool Add(Item item)
 		{
-			Add(item.id, item.count, item.meta);
+			return Add(item.id, item.count, item.meta);
 		}
-		public void Add(short item, byte count, short meta)
+		public bool Add(short item, byte count, short meta)
 		{
 			//Console.WriteLine("add1");
 			byte stackable = isStackable(item);
@@ -64,13 +64,10 @@ namespace SMP
 			//Console.WriteLine("add2");
 			for (int i = 36; i < 45; i++)
 			{
-				if (c == 0) return;
+				if (c == 0) return true;
 				if (items[i].id == item)
 				{
-					if (item < 255)
-					{
-						if (items[i].meta != meta) continue;
-					}
+					if (items[i].meta != meta) continue;
 					if (items[i].count < stackable)
 					{
 						items[i].count += c;
@@ -87,13 +84,10 @@ namespace SMP
 			//Console.WriteLine("add3");
 			for (int i = 9; i <= 35; i++)
 			{
-				if (c == 0) return;
+				if (c == 0) return true;
 				if (items[i].id == item)
 				{
-					if (item < 255)
-					{
-						if (items[i].meta != meta) continue;
-					}
+					if (items[i].meta != meta) continue;
 					if (items[i].count < stackable)
 					{
 						items[i].count += c;
@@ -108,20 +102,20 @@ namespace SMP
 				}
 			}
 			//Console.WriteLine("add4");
-			Add(item, c, meta, FindEmptySlot());
+			return Add(item, c, meta, FindEmptySlot());
 		}
-		public void Add(short id, byte count, short meta, int slot)
+		public bool Add(short id, byte count, short meta, int slot)
 		{
-            if (slot > 44 || slot < 0) return;
-            if (count < 1) Add(Item.Nothing, slot);
-            else Add(new Item(id, count, meta), slot);
+            if (count < 1) return Add(Item.Nothing, slot);
+            else return Add(new Item(id, count, meta), slot);
 		}
-        public void Add(Item item, int slot)
+        public bool Add(Item item, int slot)
         {
-            if (slot > 44 || slot < 0) return;
+            if (slot > 44 || slot < 0) return false;
             items[slot] = item;
             p.SendItem((short)slot, item.id, item.count, item.meta);
             if (slot == current_index) UpdateVisibleItemInHand(item.id, item.meta);
+            return true;
         }
 
 		public void Remove(int slot)
@@ -372,16 +366,12 @@ namespace SMP
 		public int FindEmptySlot()
 		{			
 			for (int i = 36; i < 45; i++)
-				if (items[i].id == (short)Items.Nothing)
-				{
+				if (items[i].id == -1)
 					return i;
-				}
 			
 			for (int i = 9; i <= 35; i++)
-				if (items[i].id == (short)Items.Nothing)
-				{
+				if (items[i].id == -1)
 					return i;
-				}
 			
 			return -1;
 		}

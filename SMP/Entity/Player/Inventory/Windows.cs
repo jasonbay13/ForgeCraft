@@ -91,6 +91,12 @@ namespace SMP
                         items = new Item[4];
                         break;
                 }
+
+                if (Type == WindowType.Workbench || Type == WindowType.EnchantmentTable)
+                {
+                    for (int i = 0; i < InventorySize; i++)
+                        items[i] = Item.Nothing;
+                }
             }
             catch { Logger.Log("Error making window!"); }
 		}

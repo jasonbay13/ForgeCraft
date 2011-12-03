@@ -224,8 +224,10 @@ namespace SMP
                 Point pt = new Point(x, z);
                 lock (w.chunkData)
                     if (!w.chunkData.ContainsKey(pt))
+                    {
                         w.chunkData.Add(pt, ch);
-                ch.PostLoad(w);
+                        ch.PostLoad(w);
+                    }
             }
         }
 

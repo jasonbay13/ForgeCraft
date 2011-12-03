@@ -179,15 +179,20 @@ namespace SMP
                         ch = cgq.world.GenerateChunk(cgq.x, cgq.z);
                         lock (cgq.world.chunkData)
                             if (!cgq.world.chunkData.ContainsKey(pt))
+                            {
                                 cgq.world.chunkData.Add(pt, ch);
+                                ch.PostLoad(cgq.world);
+                            }
                     }
                     else
                     {
                         lock (cgq.world.chunkData)
                             if (cgq.world.chunkData.ContainsKey(pt))
+                            {
                                 ch = cgq.world.chunkData[pt];
+                                ch.PostLoad(cgq.world);
+                            }
                     }
-                    if (ch != null) ch.PostLoad(cgq.world);
                     ch = null;
                     lock (generated)
                         generated.Remove(cgq);

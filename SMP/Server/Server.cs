@@ -214,8 +214,7 @@ namespace SMP
                 devupdatetimer.Elapsed += delegate
                 {
                     UpdateDevs();
-                };
-                devupdatetimer.Start();
+                }; devupdatetimer.Start();
             });
             ml.Queue(delegate
             {

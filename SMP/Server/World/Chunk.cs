@@ -44,7 +44,9 @@ namespace SMP
         public bool generated = false, populated = false;
         public bool generating = false, populating = false;
         internal bool _dirty = false;
+
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
+        private List<Entity> entityLoad = new List<Entity>(); // Used to... well... load entities.
 
 		public Point point { get { return new Point(x, z); } }
         public bool Dirty { get { return this._dirty; } }
@@ -187,8 +189,8 @@ namespace SMP
                                     break;
                                 case EntityType.Item:
                                     nbtCompound2 = nbtCompound["Data"].ToTagCompound();
-                                    item = new Item(nbtCompound2["ID"].ToTagShort(), nbtCompound2["Count"].ToTagByte(), nbtCompound2["Meta"].ToTagShort(), w);
-                                    e = item.e;
+                                    item = new Item(true) { id = nbtCompound2["ID"].ToTagShort(), count = nbtCompound2["Count"].ToTagByte(), meta = nbtCompound2["Meta"].ToTagShort() };
+                                    e = new Entity(w) { isItem = true, I = item };
                                     break;
                             }
                             if (e != null)
@@ -202,7 +204,7 @@ namespace SMP
                                 e.age = nbtCompound["Age"].ToTagInt();
                                 e.OnGround = (nbtCompound["OnGround"].ToTagByte() > 0);
                                 e.health = nbtCompound["Health"].ToTagShort();
-                                e.UpdateChunks(false, false);
+                                ch.entityLoad.Add(e);
                             }
                         }
                         Container c; Point3 point3;
@@ -408,6 +410,18 @@ namespace SMP
             {
                 w.physics.AddChunkChecks(physChecks);
                 physChecks = null;
+            }
+
+            if (entityLoad.Count > 0)
+            {
+                foreach (Entity e in entityLoad)
+                {
+                    Entity.Entities.Add(e.id, e);
+                    e.UpdateChunks(false, false);
+                    Console.WriteLine();
+                    Console.Write(e.ToString());
+                }
+                entityLoad.Clear();
             }
 
             byte bType;
