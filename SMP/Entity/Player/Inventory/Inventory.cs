@@ -305,7 +305,7 @@ namespace SMP
                         {
                             if (slot >= 5 && slot <= 8)
                             {
-                                if (ArmorSlotCheck(slot, p.OnMouse))
+                                if (ArmorSlotCheck(slot, p.OnMouse.id))
                                 {
                                     items[slot] = p.OnMouse;
                                     p.OnMouse = clickItem;
@@ -322,7 +322,7 @@ namespace SMP
                     {
                         if (slot >= 5 && slot <= 8)
                         {
-                            if (ArmorSlotCheck(slot, p.OnMouse))
+                            if (ArmorSlotCheck(slot, p.OnMouse.id))
                             {
                                 items[slot] = new Item(p.OnMouse);
                                 items[slot].count = 1;
@@ -502,14 +502,14 @@ namespace SMP
             return false;
         }
 
-        public static bool ArmorSlotCheck(int slot, Item item)
+        public static bool ArmorSlotCheck(int slot, short id)
         {
             switch (slot)
             {
-                case 5: return IsArmorPiece(item.id, ArmorType.Head);
-                case 6: return IsArmorPiece(item.id, ArmorType.Chest);
-                case 7: return IsArmorPiece(item.id, ArmorType.Legs);
-                case 8: return IsArmorPiece(item.id, ArmorType.Shoes);
+                case 5: return IsArmorPiece(id, ArmorType.Head);
+                case 6: return IsArmorPiece(id, ArmorType.Chest);
+                case 7: return IsArmorPiece(id, ArmorType.Legs);
+                case 8: return IsArmorPiece(id, ArmorType.Shoes);
             }
             return false;
         }
