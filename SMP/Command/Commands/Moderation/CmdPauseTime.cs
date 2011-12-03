@@ -25,7 +25,7 @@ namespace SMP.Commands
             }
 
             world.timerunning = !world.timerunning;
-            Player.GlobalMessage("Time is now " + (world.timerunning ? "paused" : "unpaused") + "!");
+            Player.GlobalMessage("Time is now " + (world.timerunning ? "unpaused" : "paused") + "!");
         }
 
         public override void Help(Player p)
