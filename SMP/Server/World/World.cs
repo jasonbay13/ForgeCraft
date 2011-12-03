@@ -570,14 +570,15 @@ namespace SMP
                         if (wait > 0) System.Threading.Thread.Sleep(wait);
 
                         DateTime Start = DateTime.Now;
-                        time++; if (time > 24000) time = 0;
-                        TimeSpan Took = DateTime.Now - Start;
-                        wait = speed - (int)Took.TotalMilliseconds;
 
+                        time++; if (time > 24000) time = 0;
                         if (TimeChanged != null)
                             TimeChanged();
                         if (WorldTimeChanged != null)
                             WorldTimeChanged();
+
+                        TimeSpan Took = DateTime.Now - Start;
+                        wait = speed - (int)Took.TotalMilliseconds;
                     }
                     catch { wait = speed; }
                 }

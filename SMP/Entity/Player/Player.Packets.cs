@@ -798,13 +798,30 @@ namespace SMP
                 return;
             }
 
+            if (OnMouse.id != -1)
+            {
+                // TODO: Throw item!
+                OnMouse = Item.Nothing;
+            }
+
+            if (!HasWindowOpen)
+            {
+                for (int i = 0; i <= 4; i++)
+                {
+                    if (inventory.items[i].id != -1)
+                    {
+                        // TODO: Throw item!
+                        inventory.items[i] = Item.Nothing;
+                    }
+                }
+            }
+
+            HasWindowOpen = false;
             if (window != null)
             {
                 window.Dispose();
                 window = null;
             }
-            HasWindowOpen = false;
-			//TODO save the furnaces/dispensers, add unused stuff back to inventory etc
 		}
 
         private void HandleWindowClick(byte[] message)
@@ -814,6 +831,7 @@ namespace SMP
             short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
             bool Shift = (message[6] == 1);
 
+            Console.WriteLine(String.Format("{0} {1} {2}", click, slot, Shift));
 			if (HasWindowOpen)
 			{
 				//window.HandleClick(this, message);

@@ -84,7 +84,7 @@ namespace SMP
         {
             this.enchantments = enchantments;
         }
-        public Item(Item item) : this(item.id, item.count, item.meta, item.enchantments) { }
+        public Item(Item item) : this(item.id, item.count, item.meta, new List<Enchantment>(item.enchantments)) { }
 
         public Item(Item item, World l)
             : this(item)
