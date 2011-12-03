@@ -351,36 +351,6 @@ namespace SMP
             //p.SendWindowItems(0, items);
             //p.SendItem(255, -1, p.OnMouse);
 		}
-
-		public Item Right_Click(int slot)
-		{
-			try
-			{
-                Item temp = new Item(items[slot].id, 0, items[slot].meta);
-				if (items[slot].count == 1)
-				{
-					temp = items[slot];
-					items[slot] = Item.Nothing;
-					return temp;
-				}
-				if (items[slot].count % 2 == 0) //this makes no FUCKING SENSE
-				{
-					temp.count = (byte)(items[slot].count / 2);
-					items[slot].count = (byte)(items[slot].count / 2);
-				}
-				else
-				{
-					byte a = items[slot].count;
-					items[slot].count = (byte)(a / 2);
-					temp.count = (byte)(a - items[slot].count);
-				}
-				return temp;
-			}
-			catch
-			{
-				return Item.Nothing;
-			}
-		}
 		
 		public void UpdateVisibleItemInHand(short id, short damage)
 		{
