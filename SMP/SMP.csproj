@@ -62,6 +62,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Build\CmdFlat.cs" />
+    <Compile Include="Command\Commands\Information\CmdDevs.cs" />
+    <Compile Include="Command\Commands\Information\CmdSoftware.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdPauseTime.cs" />
     <Compile Include="Command\Commands\Permissions\CmdDemote.cs" />
     <Compile Include="Command\Commands\Gag\CmdPoison.cs" />
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
@@ -378,7 +382,6 @@
     <Compile Include="Command\Commands\Moderation\CmdBan.cs" />
     <Compile Include="Command\Commands\Util\CmdCheckPort.cs" />
     <Compile Include="Command\Commands\Build\CmdCuboid.cs" />
-    <Compile Include="Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Command\Commands\Other\CmdDND.cs" />
     <Compile Include="Command\Commands\Other\CmdFire.cs" />
     <Compile Include="Command\Commands\Other\CmdFly.cs" />

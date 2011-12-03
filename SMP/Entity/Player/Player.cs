@@ -99,6 +99,8 @@ namespace SMP
         public delegate void OnPlayerChat(string message, Player p);
         public event OnPlayerChat OnChat;
         public static event OnPlayerChat PlayerChat;
+        public event OnPlayerChat OnMessageRecieve;
+        public static event OnPlayerChat MessageRecieve;
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public event OnPlayerCommand OnCommand;
         public static event OnPlayerCommand PlayerCommand;
@@ -163,6 +165,7 @@ namespace SMP
         internal bool cancelbreak = false;
         internal bool cancelrespawn = false;
         internal bool cancelitemuse = false;
+        internal bool cancelmessage = false;
         internal bool CheckEXPGain(short exp)
         {
             if (EXPGain != null)
@@ -223,6 +226,9 @@ namespace SMP
 		public string ip;
 		public string username;
 		bool hidden = false;
+
+        [Obsolete("Only here for reference! Use 'username' instead!", true)]
+        public string name { get { return username; } set { username = value; } }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.Player"/> class.
@@ -557,9 +563,10 @@ namespace SMP
 			}
             public void OpenWindow(WindowType type, Point3 pos)
             {
-                window = new Windows(type, pos, level);
+                window = new Windows(type, pos, level, this);
                 SendWindowOpen(window);
                 SendWindowItems(window.id, window.items);
+                HasWindowOpen = true;
             }
 			public void SetFire(bool onoff)
 			{
@@ -835,6 +842,23 @@ namespace SMP
             {
                 GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, wld, exclude);
             }
+
+            public static void GlobalNamedEntitySpawn(Player p)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != p && pl.MapLoaded && pl.level == p.level && pl.VisibleChunks.Contains(Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, pl.level).point))
+                        pl.SendNamedEntitySpawn(p);
+                });
+            }
+            public static void GlobalDespawn(Entity e)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != e.p && pl.MapLoaded && pl.level == e.level && pl.VisibleEntities.Contains(e.id))
+                        pl.SendDespawn(e.id);
+                });
+            }
             #endregion
             #region Teleport Player
             public void Teleport_Player(double x, double y, double z)
@@ -855,7 +879,9 @@ namespace SMP
             }
 			public void Teleport_Player(double x, double y, double z, float yaw, float pitch)
 			{
-				if (!MapLoaded) return;
+                pos = new Point3(x, y, z);
+                rot[0] = yaw;
+                rot[1] = pitch;
 
 				byte[] tosend = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(x).CopyTo(tosend, 0);
@@ -909,7 +935,7 @@ namespace SMP
 			{
 				//Logger.Log("Login Done");
 
-				byte[] bytes = new byte[41];
+				/*byte[] bytes = new byte[41];
 				util.EndianBitConverter.Big.GetBytes(pos.x).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(Stance).CopyTo(bytes, 8);
 				util.EndianBitConverter.Big.GetBytes(pos.y).CopyTo(bytes, 16);
@@ -917,7 +943,9 @@ namespace SMP
 				util.EndianBitConverter.Big.GetBytes(rot[0]).CopyTo(bytes, 32);
 				util.EndianBitConverter.Big.GetBytes(rot[1]).CopyTo(bytes, 36);
 				bytes[40] = onground;
-				SendRaw(0x0D, bytes);
+				SendRaw(0x0D, bytes);*/
+
+                Teleport_Spawn();
 
 				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
@@ -1034,19 +1062,22 @@ namespace SMP
 				//Logger.Log(i + " Chunks sent");
 
                 pos = level.SpawnPos;
+                int vd = viewdistance; viewdistance = 3;
+                e.UpdateChunks(true, false, -1);
+                viewdistance = vd;
+                e.UpdateEntities();
 				SendSpawnPoint();
-				SendLoginDone();
 				SendInventory();
-                SendChunk(e.c);
-                e.UpdateChunks(true, false, true);
-				MapLoaded = true;
-				
+                SendLoginDone();
+                MapLoaded = true;
+
+                e.UpdateChunks(true, false);
 			}
 			/// <summary>
 			/// Sends a player a Chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			public void SendChunk(Chunk c)
 			{
@@ -1077,7 +1108,7 @@ namespace SMP
 			/// Prepare the client before sending the chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			/// <param name='load'>
 			/// Load. Weather to unload or load the chunk (0 is unload otherwise it will load)
@@ -1440,6 +1471,15 @@ namespace SMP
         }
         public void SendMessage(string message)
         {
+            if (MessageRecieve != null)
+                MessageRecieve(message, this);
+            if (OnMessageRecieve != null)
+                OnMessageRecieve(message, this);
+            if (cancelmessage)
+            {
+                cancelmessage = false;
+                return;
+            }
             SendMessage(this.MessageAdditions(message), WrapMethod.Default);
         }
         public void SendMessage(string message, WrapMethod method)
@@ -1642,14 +1682,11 @@ namespace SMP
             //Logger.Log(Ping.ToString());
         } 
         
-        public void hurt(short amount)
+        public void hurt(short amount, bool overRide = false)
         {
-            e.hurt(amount);
+            e.hurt(amount, overRide);
         }
-        public void hurt()
-        {
-            hurt(1);
-        }
+        
         public void SendMobSpawn(Entity e)
         {
 			/*if (e == null) // What is this I don't even...
@@ -2085,19 +2122,27 @@ namespace SMP
         /// this can look like the poison effect.
         /// </summary>
         /// <param name="input">health remaining after method.</param>
-        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
-        public void SlowlyDie(short remaininghealth = 0)
+        /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
+        /// <param name="damage">damage done to the player every step</param>
+        System.Timers.Timer DieClock;
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
         {
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
+            DieClock = new System.Timers.Timer(interval);
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth)
+        private void SlowlyDieTimer(short remaininghealth, short damage)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                return;
             }
-            this.hurt(1); 
+            if (remaininghealth - damage < remaininghealth)
+            {
+                damage = (short)(this.health - remaininghealth);
+            }
+            this.hurt(damage); 
             if (this.health == remaininghealth) 
             { 
                 DieClock.Stop();

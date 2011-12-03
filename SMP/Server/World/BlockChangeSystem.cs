@@ -113,8 +113,8 @@ namespace SMP
 			Placed.Add((short)Blocks.Dispenser, new BCD(PlaceDispenser));
 			Placed.Add((short)Blocks.RailPowered, new BCD(PlaceRailPower));
 			Placed.Add((short)Blocks.RailDetector, new BCD(PlaceRailDetect));
-			Placed.Add((short)Blocks.PistonSticky, new BCD(PlaceStickyPiston));
-			Placed.Add((short)Blocks.Piston, new BCD(PlaceNormalPiston));
+			Placed.Add((short)Blocks.PistonSticky, new BCD(PlacePiston));
+			Placed.Add((short)Blocks.Piston, new BCD(PlacePiston));
 			Placed.Add((short)Blocks.Slabs, new BCD(PlaceSlabs));
 			Placed.Add((short)Blocks.Torch, new BCD(PlaceTorch));
 			Placed.Add((short)Blocks.StairsWooden, new BCD(PlaceStairs));
@@ -710,6 +710,32 @@ namespace SMP
 		}
 		public static bool PlaceChest(Player a, BCS b)
 		{
+        retry:
+            switch (b.Direction)
+            {
+                case (0):
+                case (1):
+                    b.Direction = DirectionByRotFlat(a, b, true);
+                    goto retry;
+                case ((byte)Directions.South):
+                    b.Direction = (byte)Chests.South;
+                    break;
+                case ((byte)Directions.North):
+                    b.Direction = (byte)Chests.North;
+                    break;
+                case ((byte)Directions.West):
+                    b.Direction = (byte)Chests.West;
+                    break;
+                case ((byte)Directions.East):
+                    b.Direction = (byte)Chests.East;
+                    break;
+
+                default:
+                    return false;
+            }
+
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
+            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceDirt(Player a, BCS b)
@@ -860,12 +886,10 @@ namespace SMP
             if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
-		public static bool PlaceNormalPiston(Player a, BCS b)
+		public static bool PlacePiston(Player a, BCS b)
 		{
-            if (b.pos.y >= a.pos.y + 2) b.Direction = (byte)Directions.Bottom;
-            else if (b.pos.y <= a.pos.y - 1) b.Direction = DirectionByRotNOTFlat(a, b, true);
-            else if (b.Direction == 0 || b.Direction == 1) b.Direction = DirectionByRotFlat(a, b, true);
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.Piston, b.Direction);
+            b.Direction = BlockHelper.PistonOrientation(a, b);
+            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
             if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
@@ -918,15 +942,6 @@ namespace SMP
                     break;
             }
             a.level.BlockChange((int)b.pos.X, (int)b.pos.Y, (int)b.pos.Z, (byte)b.ID, b.Direction);
-			return false;
-		}
-		public static bool PlaceStickyPiston(Player a, BCS b)
-		{
-            if (b.pos.y >= a.pos.y + 2) b.Direction = (byte)Directions.Bottom;
-            else if (b.pos.y <= a.pos.y - 1) b.Direction = DirectionByRotNOTFlat(a, b, true);
-            else if (b.Direction == 0 || b.Direction == 1) b.Direction = DirectionByRotFlat(a, b, true);
-            a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)Blocks.PistonSticky, b.Direction);
-            if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;
 		}
 		public static bool PlaceSugarCane(Player a, BCS b)
@@ -1328,8 +1343,7 @@ namespace SMP
 
 		public static byte DirectionByRotFlat(Player p, BCS a, bool invert = false)
 		{
-			byte direction = (byte)Math.Floor((double)((p.rot[0] * 4F) / 360F) + 0.5D);
-            direction = (byte)(direction % 4);
+            byte direction = (byte)(MathHelper.floor_double((double)((p.rot[0] * 4F) / 360F) + 0.5D) & 3);
             if (invert)
                 switch (direction)
                 {

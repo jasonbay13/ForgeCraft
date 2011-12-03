@@ -211,7 +211,7 @@ namespace SMP
                             nbtCompound = tag.ToTagCompound();
                             nbtList = nbtCompound["Pos"].ToTagList();
                             point3 = new Point3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
-                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), point3);
+                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), w, point3);
                             c.LoadNBTData(nbtCompound["Items"].ToTagList());
                             if (!w.containers.ContainsKey(point3)) w.containers.Add(point3, c);
                         }
@@ -454,12 +454,14 @@ namespace SMP
             byte bType, bMeta;
             ushort bExtra;
             int xxx, zzz;
+            Container c;
             for (int xx = 0; xx < Width; xx++)
                 for (int zz = 0; zz < Depth; zz++)
                     for (int yy = 0; yy < Height; yy++)
                     {
                         xxx = (x << 4) + xx; zzz = (z << 4) + zz;
                         bType = GetBlock(xx, yy, zz);
+                        bMeta = GetMetaData(xx, yy, zz);
 
                         if (bType == (byte)Blocks.SignPost || bType == (byte)Blocks.SignWall)
                             p.SendUpdateSign(xxx, (short)yy, zzz, w.GetSign(xxx, yy, zzz));
@@ -468,6 +470,12 @@ namespace SMP
                             bExtra = GetExtraData(xx, yy, zz);
                             if (bExtra >= 2256 && bExtra <= 2266)
                                 p.SendSoundEffect(xxx, (byte)yy, zzz, 1005, bExtra);
+                        }
+                        if (bType == (byte)Blocks.Chest)
+                        {
+                            p.SendBlockChange(xxx, (byte)yy, zzz, bType, bMeta);
+                            c = w.GetBlockContainer(xxx, yy, zzz);
+                            if (c != null) c.UpdateState();
                         }
                     }
         }

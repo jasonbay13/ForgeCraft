@@ -59,6 +59,7 @@ namespace SMP.Commands
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
+            core.Add(new CmdFlat());
             core.Add(new CmdFly());
             core.Add(new CmdGameMode());
             core.Add(new CmdGive());
@@ -76,12 +77,14 @@ namespace SMP.Commands
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());
+            core.Add(new CmdPauseTime());
             core.Add(new CmdPoison());
 			core.Add(new CmdPromote());
             core.Add(new CmdRain());
             core.Add(new CmdReveal());
             core.Add(new CmdSay());
 			core.Add(new CmdSetRank());
+            core.Add(new CmdSoftware());
             core.Add(new CmdSpheroid());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());

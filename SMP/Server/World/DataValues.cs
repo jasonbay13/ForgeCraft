@@ -566,6 +566,7 @@ namespace SMP
 	public enum WallSigns : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Furnace : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Dispenser : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
+    public enum Chests : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum Pumpkin : byte { East = 0x2, West = 0x3, North = 0x4, South = 0x5 };
 	public enum PressurePlate : byte { NotPressed = 0x0, Pressed = 0x1 };
 	public enum Slab : byte { Stone = 0x0, SandStone = 0x1, Wooden = 0x2, Cobblestone = 0x3, Brick = 0x4, StoneBrick = 0x5, Stone2 = 0x6 };
@@ -1375,6 +1376,21 @@ namespace SMP
             }
             world.SetBlock(i, j, k, block, (byte)l);
             world.SetBlock(i, j + 1, k, block, (byte)(l + 8));
+        }
+
+        public static byte PistonOrientation(Player a, BCS b)
+        {
+            if (MathHelper.abs((float)a.pos.x - (float)b.pos.x) < 2.0F && MathHelper.abs((float)a.pos.z - (float)b.pos.z) < 2.0F)
+            {
+                double d = (a.pos.y + 1.8200000000000001D);
+                if (d - (double)b.pos.y > 2D) return 1;
+                if ((double)b.pos.y - d > 0.0D) return 0;
+            }
+            int l = MathHelper.floor_double((double)((a.rot[0] * 4F) / 360F) + 0.5D) & 3;
+            if (l == 0) return 2;
+            if (l == 1) return 5;
+            if (l == 2) return 3;
+            return (byte)(l != 3 ? 0 : 4);
         }
     }
 }
