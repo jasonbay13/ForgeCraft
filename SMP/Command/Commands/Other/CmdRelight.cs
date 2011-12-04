@@ -17,7 +17,7 @@ namespace SMP.Commands
         public override void Use(Player p, params string[] args)
         {
             p.SendMessage("Relighting all chunks! Please wait...", WrapMethod.Chat);
-            foreach (Chunk c in p.level.chunkData.Values)
+            foreach (Chunk c in p.level.chunkData.Values.ToArray())
                 c.RecalculateLight();
             p.SendMessage("Done!");
             Command.all.Find("reveal").Use(p, "all");

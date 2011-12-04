@@ -214,6 +214,8 @@ namespace SMP
         public bool Crouching = false;
         public bool IsOnFire = false;
         public bool isFlying = false;
+        public bool isSleeping = false;
+        public Point3 sleepingPos;
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
@@ -561,6 +563,11 @@ namespace SMP
                 e.SetMetaBit(0, 1, crouching);
                 GlobalMetaUpdate();
 			}
+            public void SetSleeping(bool sleeping, Point3 pos = new Point3())
+            {
+                isSleeping = sleeping;
+                sleepingPos = pos;
+            }
             public void OpenWindow(WindowType type, Point3 pos)
             {
                 window = new Windows(type, pos, level, this);
@@ -1183,6 +1190,7 @@ namespace SMP
 
                     SendEntityMeta(p.id, p.e.metadata);
 					SendEntityEquipment(p);
+                    if (p.isSleeping) SendUseBed(p.id, sleepingPos);
 				}
 				catch (Exception e)
 				{

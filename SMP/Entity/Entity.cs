@@ -278,7 +278,7 @@ namespace SMP
                                     else World.chunker.QueueChunkSend(po, p);
                                 }
                             }
-                            catch { p.SendPreChunk(po.x, po.z, 0); Console.WriteLine("fuck"); }
+                            catch { p.SendPreChunk(po.x, po.z, 0); }
                         }
                     }
                 }
@@ -371,7 +371,6 @@ namespace SMP
                     //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
-                        Console.WriteLine(e.age);
 						if (e.age < 10) continue;
 
                         if (p.inventory.Add(e.I))

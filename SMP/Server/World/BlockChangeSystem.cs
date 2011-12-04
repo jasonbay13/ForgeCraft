@@ -207,6 +207,34 @@ namespace SMP
 		}
 		public static bool GetInBed(Player a, BCS b)
         {
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            byte rot = (byte)(meta & 0x3);
+            bool head = (meta & 0x8) != 0;
+            if (!head)
+            {
+                switch (rot)
+                {
+                    case (byte)Bed.North:
+                        b.pos.x--;
+                        break;
+                    case (byte)Bed.East:
+                        b.pos.z--;
+                        break;
+                    case (byte)Bed.South:
+                        b.pos.x++;
+                        break;
+                    case (byte)Bed.West:
+                        b.pos.z++;
+                        break;
+                }
+            }
+
+            a.Teleport_Player(b.pos, a.rot[0], a.rot[1]);
+            a.SendUseBed(a.id, b.pos);
+            foreach (Player pl in Player.players.ToArray())
+                if (pl.VisibleEntities.Contains(a.id))
+                    pl.SendUseBed(a.id, b.pos);
+            a.SetSleeping(true, b.pos);
 			return false;
 		}
 		public static bool OpenChest(Player a, BCS b)

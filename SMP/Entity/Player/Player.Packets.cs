@@ -1076,6 +1076,14 @@ namespace SMP
                     PlayerCrouch(this);
                 crouch(false);
             }
+            else if (message[4] == 3)
+            {
+                SetSleeping(false);
+                SendAnimation(id, 3);
+                foreach (Player pl in players.ToArray())
+                    if (pl.VisibleEntities.Contains(id))
+                        pl.SendAnimation(id, 3);
+            }
             else if (message[4] == 4)
             {
                 e.SetMetaBit(0, 3, true);
