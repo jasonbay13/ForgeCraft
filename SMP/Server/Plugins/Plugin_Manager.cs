@@ -108,7 +108,7 @@ namespace SMP
                     Logger.Log("The plugin " + pluginname + " couldnt be loaded!");
                     return;
                 }
-                if (((Plugin)instance).ForgeCraft_Version < Server.version)
+                if (((Plugin)instance).ForgeCraft_Version > Server.version)
                 {
                     Logger.Log("This plugin (" + ((Plugin)instance).name + ") isnt compatible with this version of ForgeCraft!");
                     Thread.Sleep(1000);
