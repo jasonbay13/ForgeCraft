@@ -24,7 +24,8 @@ namespace SMP.Commands
                 p.SendMessage("Updates: " + w.physics.UpdateCount);
             });
 
-            int duplicate = 0;
+            // DEBUG
+            /*int duplicate = 0;
             List<Point> temp = new List<Point>();
             foreach (Point po in p.VisibleChunks.ToArray())
             {
@@ -32,7 +33,7 @@ namespace SMP.Commands
                 else temp.Add(po);
             }
             p.SendMessage(p.VisibleChunks.Count + " visible chunks!", WrapMethod.Chat);
-            p.SendMessage(duplicate + " duplicate visible chunks!", WrapMethod.Chat);
+            p.SendMessage(duplicate + " duplicate visible chunks!", WrapMethod.Chat);*/
         }
 
         public override void Help(Player p)

@@ -1124,7 +1124,6 @@ namespace SMP
                 util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 4);
                 bytes[8] = load;
                 SendRaw(0x32, bytes);
-                Console.WriteLine(x + "," + z + " " + load);
             }
 			/// <summary>
 			/// Updates players chunks.
