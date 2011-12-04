@@ -419,8 +419,6 @@ namespace SMP
                 {
                     Entity.Entities.Add(e.id, e);
                     e.UpdateChunks(false, false);
-                    Console.WriteLine();
-                    Console.Write(e.ToString());
                 }
                 entityLoad.Clear();
             }

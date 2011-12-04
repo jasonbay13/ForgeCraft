@@ -154,7 +154,13 @@ namespace SMP
 			if (slot == -999)
 			{
 				//TODO throw item
-				p.OnMouse = Item.Nothing;
+                if (p.OnMouse.id != -1)
+                {
+                    if (click == ClickType.RightClick && p.OnMouse.count > 1)
+                        p.OnMouse.count--;
+                    else
+                        p.OnMouse = Item.Nothing;
+                }
 				return;
 			}
             if (slot < 0 || slot > 44) return;
@@ -345,8 +351,8 @@ namespace SMP
                 }
             }
 
-            //p.SendWindowItems(0, items);
-            //p.SendItem(255, -1, p.OnMouse);
+            p.SendWindowItems(0, items);
+            p.SendItem(255, -1, p.OnMouse);
 		}
 		
 		public void UpdateVisibleItemInHand(short id, short damage)

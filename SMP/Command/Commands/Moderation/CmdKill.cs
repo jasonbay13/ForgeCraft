@@ -32,37 +32,23 @@ namespace SMP.Commands
         public override void Use(Player p, params string[] args)
         {
             // CURRENTLY JUST USING FOR DEBUG
-            if (args.Length == 1)
+            if (args.Length >= 1)
             {
+                bool silent = false;
                 string text = args[0];
-                Player q = Player.FindPlayer(args[0]);
                 if (text[0] == '@')
                 {
-                    string newtext = text;
-                    if (text[0] == '@') newtext = text.Remove(0, 1).Trim();
-
-                    Player d = Player.FindPlayer(newtext);
-
-                    d.health = 0;
-                    d.SendHealth();
+                    text = text.Remove(0, 1);
+                    silent = true;
                 }
 
-                q.health = 0;
-                q.SendHealth();
-                Player.GlobalMessage(q.username + " was destroyed by " + p.username);
-                return;
-            }
-            else if (args.Length == 0)
-            {
+                Player pl = Player.FindPlayer(args[0]);
+                if (pl == null) { p.SendMessage("Player not found.", WrapMethod.Chat); return; }
 
-                p.health = 0;
-                p.SendHealth();
-                return;
+                Use(pl);
+                if (!silent) Player.GlobalMessage(pl.username + " was destroyed by " + p.username);
             }
-            else
-            {
-
-            }
+            else p.hurt(9999, true);
         }
 
         public override void Help(Player p)

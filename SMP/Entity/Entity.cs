@@ -158,7 +158,7 @@ namespace SMP
 
         public void hurt(short amount, bool overRide = false)
         {
-            if (isPlayer && (p.GodMode || p.Mode == 1 || Server.mode == 1)) return;
+            if (isPlayer && (p.GodMode || p.Mode == 1)) return;
             if (Health > 0)
             {
                 if (!overRide && (DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
@@ -169,11 +169,14 @@ namespace SMP
                     pl.SendEntityStatus(id, 2);
                     if (Health <= 0 && pl != p)
                     {
-                        if (isPlayer) p.inventory.Clear(true);
                         pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
                     }
                 }
-                if (Health <= 0) despawnTimer.Start();
+                if (Health <= 0)
+                {
+                    if (isPlayer) p.inventory.Clear(true);
+                    despawnTimer.Start();
+                }
             }
         }
 

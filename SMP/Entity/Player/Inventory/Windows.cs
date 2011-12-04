@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SMP.util;
 
 namespace SMP
@@ -126,59 +127,11 @@ namespace SMP
 
 		}
 
-		public Item Right_Click(Player p, int slot)
-		{
-            return Item.Nothing; // TODO
-            
-            /*Item temp11 = Item.Nothing;
-            if (RightClick != null)
-                temp11 = RightClick(p, slot);
-            if (cancelright)
-            {
-                cancelright = false;
-                return temp11;
-            }
-			if (slot > items.Length)
-			{
-				return p.inventory.Right_Click((slot - items.Length) + 9);
-			}
-			else
-			{
-				try
-				{
-                    Item temp = new Item(items[slot].id, 0, items[slot].meta);
-					if (items[slot].count == 1)
-					{
-						temp = items[slot];
-						items[slot] = Item.Nothing;
-						return temp;
-					}
-					if (items[slot].count % 2 == 0)
-					{
-						temp.count = (byte)(items[slot].count / 2);
-						items[slot].count = (byte)(items[slot].count / 2);
-					}
-					else
-					{
-						byte a = items[slot].count;
-						items[slot].count = (byte)(a / 2);
-						temp.count = (byte)(a - items[slot].count);
-					}
-					return temp;
-				}
-				catch
-				{
-					return Item.Nothing;
-				}
-			}*/
-		}
-
         public void HandleClick(Player p, short slot, ClickType click, short ActionID, bool Shift)
 		{
             if (slot == -999)
             {
-                //TODO throw item
-                p.OnMouse = Item.Nothing;
+                p.inventory.HandleClick(slot, click, ActionID, Shift);
                 return;
             }
             if (slot < 0 || slot > InventorySize + 35) return;
@@ -187,6 +140,7 @@ namespace SMP
                 if (slot == 0)
                 {
                     // TODO: Crafting/smelting output handler.
+                    return;
                 }
             }
 
@@ -402,8 +356,9 @@ namespace SMP
             }
 
             if (container != null) container.UpdateContents(p);
-            //p.SendWindowItems(id, items);
-            //p.SendItem(255, -1, p.OnMouse);
+            List<Item> items2 = new List<Item>(items); items2.AddRange((Item[])p.inventory.items.TruncateStart(9));
+            p.SendWindowItems(id, items2.ToArray());
+            p.SendItem(255, -1, p.OnMouse);
 		}
 
 		public int GetEmptyWindowSlot()

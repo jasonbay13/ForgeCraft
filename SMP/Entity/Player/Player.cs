@@ -923,10 +923,8 @@ namespace SMP
 				}
 				//SendMap();
 			}
-			void SendHandshake()
+			void SendHandshake(string hash)
 			{
-			
-                string hash = Server.VerifyNames ? Convert.ToString(Entity.randomJava.nextLong(), 16) : "-";
                 byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(hash)];
                 MCUtil.Protocol.GetBytes(hash).CopyTo(bytes, 0);
 				SendRaw(0x02, bytes);
@@ -1062,6 +1060,7 @@ namespace SMP
 				//Logger.Log(i + " Chunks sent");
 
                 pos = level.SpawnPos;
+                if (level.IsRaining) SendRain(true);
                 int vd = viewdistance; viewdistance = 3;
                 e.UpdateChunks(true, false, -1);
                 viewdistance = vd;
@@ -1278,19 +1277,19 @@ namespace SMP
 
 			public void SendEntityEquipment(Player p)
 			{
-				SendEntityEquipment(p.id, 4, p.inventory.items[5].id, 0);
-				SendEntityEquipment(p.id, 3, p.inventory.items[6].id, 0);
-				SendEntityEquipment(p.id, 2, p.inventory.items[7].id, 0);
-				SendEntityEquipment(p.id, 1, p.inventory.items[8].id, 0);
-				SendEntityEquipment(p.id, 0, p.current_block_holding.id, 0); //for some reason, this one seems to work when send elsewhere, but not here...
+                SendEntityEquipment(p.id, 4, p.inventory.items[5].id, p.inventory.items[5].meta);
+                SendEntityEquipment(p.id, 3, p.inventory.items[6].id, p.inventory.items[6].meta);
+                SendEntityEquipment(p.id, 2, p.inventory.items[7].id, p.inventory.items[7].meta);
+                SendEntityEquipment(p.id, 1, p.inventory.items[8].id, p.inventory.items[8].meta);
+                SendEntityEquipment(p.id, 0, p.current_block_holding.id, p.current_block_holding.meta); //for some reason, this one seems to work when send elsewhere, but not here...
 			}
-			public void SendEntityEquipment(int id, short slot, short ItemId, short a)
+			public void SendEntityEquipment(int id, short slot, short ItemId, short meta)
 			{
 				byte[] bytes = new byte[10];
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(slot).CopyTo(bytes, 4);
 				util.EndianBitConverter.Big.GetBytes(ItemId).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes(a).CopyTo(bytes, 8);
+				util.EndianBitConverter.Big.GetBytes(meta).CopyTo(bytes, 8);
 				SendRaw(0x05, bytes);
 			}
 

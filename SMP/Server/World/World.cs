@@ -56,7 +56,6 @@ namespace SMP
         public Dictionary<Point3, Container> containers = new Dictionary<Point3, Container>();
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;
-        public bool Raining = false;
 		public byte worldYMax = 128;
         public byte worldOceanHeight;
         public byte worldYMask;

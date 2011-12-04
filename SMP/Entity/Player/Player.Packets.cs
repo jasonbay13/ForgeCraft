@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Threading;
+using System.Net;
 using SMP.util;
 
 namespace SMP
@@ -35,6 +36,7 @@ namespace SMP
         public void ClearBlockChange() { OnBlockChange = null; }
         #endregion
         #region Login
+        private string randomHash = String.Empty;
         private void HandleLogin(byte[] message)
         {
             int version = util.EndianBitConverter.Big.ToInt32(message, 0);
@@ -42,7 +44,21 @@ namespace SMP
             if (length > 32) { Kick("Username too long"); return; }
             username = Encoding.BigEndianUnicode.GetString(message, 6, (length * 2));
             Logger.Log(ip + " Logged in as " + username);
-            Player.GlobalMessage(Color.Announce + username + " has joined the game!");
+
+            if (Server.VerifyNames)
+            {
+                bool verified = false;
+                try
+                {
+                    using (WebClient web = new WebClient())
+                    {
+                        string response = web.DownloadString("http://session.minecraft.net/game/checkserver.jsp?user=" + username + "&serverId=" + randomHash);
+                        verified = (response.Trim() == "YES");
+                    }
+                }
+                catch { }
+                if (!verified) { Kick("Failed to verify username!"); return; }
+            }
 
             /*if (version > Server.protocolversion)  //left commented during development
             {
@@ -91,6 +107,8 @@ namespace SMP
             LoggedIn = true;
             SendLoginPass();
 
+            Player.GlobalMessage(Color.Announce + username + " has joined the game!");
+
             UpdateShi(this);
 
             int tries = 0;
@@ -114,8 +132,6 @@ namespace SMP
             p.SendTime();
             if (Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, p.level) == null)
                 p.level.LoadChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4);
-            if (p.level.IsRaining)
-                p.level.Rain(true);
         }
         private void HandleHandshake(byte[] message)
         {
@@ -124,7 +140,8 @@ namespace SMP
             //Logger.Log(length + "");
             //Logger.Log(Encoding.BigEndianUnicode.GetString(message, 2, length * 2));
 
-            SendHandshake();
+            randomHash = Server.VerifyNames ? Convert.ToString(Math.Abs(Entity.randomJava.nextLong()), 16) : "-";
+            SendHandshake(randomHash);
 
         }
         #endregion
@@ -195,15 +212,18 @@ namespace SMP
         #endregion
         #region Movement stuffs
         
-        private double startY = -1;
-        private double endY = -1;
-        private DateTime? startTime;
+        private double fallStartY = -1;
         private void HandlePlayerPacket(byte[] message)
         {
             try
             {
-                CheckFall(message[0]);
-                
+                byte onGround = message[0];
+
+                if (onGround == onground)
+                    return;
+
+                CheckFall(onGround == 1);
+                onground = onGround;
             }
             catch (Exception e)
             {
@@ -249,6 +269,7 @@ namespace SMP
 
                 //oldpos = pos;
                 pos = newpos;
+                if (onGround != onground) CheckFall(onGround == 1);
                 onground = onGround;
 
                 e.UpdateChunks(false, false);
@@ -273,6 +294,7 @@ namespace SMP
 
                 rot[0] = yaw;
                 rot[1] = pitch;
+                if (onGround != onground) CheckFall(onGround == 1);
                 onground = onGround;
             }
             catch (Exception e)
@@ -323,6 +345,7 @@ namespace SMP
                 pos = newpos;
                 rot[0] = yaw;
                 rot[1] = pitch;
+                if (onGround != onground) CheckFall(onGround == 1);
                 onground = onGround;
 
                 e.UpdateChunks(false, false);
@@ -333,11 +356,34 @@ namespace SMP
                 Logger.Log(e.StackTrace);
             }
         }
-        private void CheckFall(byte onGround)
+        private void CheckFall(bool onGround)
         {
-           if (onground == onGround) return;
+            if (onGround)
+            {
+                if (pos.y < fallStartY)
+                {
+                    double dist = fallStartY - pos.y;
+
+                    if (!GodMode && Mode == 0)
+                    {
+                        short damage = (short)Math.Round(dist - 3);
+                        if (damage > 0)
+                        {
+                            hurt(damage, true);
+                            if (health <= 0) fallStartY = -1;
+                        }
+                    }
+
+                    //SendMessage(String.Format("You fell {0} blocks!", dist), WrapMethod.Chat);
+                }
+            }
+            else
+            {
+                fallStartY = pos.y;
+            }
+            /*if (onground == onGround) return;
             onground = onGround;
-            /*if (onground != 1)
+            if (onground != 1)
             {
                 startY = pos.y;
                 startTime = DateTime.Now;
@@ -964,7 +1010,7 @@ namespace SMP
             }
             else
             {
-                byte currentc = (byte)((current_slot_holding - 9) + window.items.Length); //TODO TEST
+                byte currentc = (byte)((current_slot_holding - 9) + window.InventorySize); //TODO TEST
                 if (slot == currentc)
                 {
                     foreach (int i in VisibleEntities.ToArray())
