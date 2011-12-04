@@ -37,7 +37,7 @@ namespace SMP.Commands
             int length = 0;
             int height = 0;
             byte block = 2;
-            try { width = Convert.ToInt32(args[0]); length = Convert.ToInt32(args[1]); height = Convert.ToInt32(args[2]); block = Convert.ToByte(args[3]); }
+            try { width = Convert.ToInt32(args[0]); length = Convert.ToInt32(args[1]); height = Convert.ToInt32(args[2]); block = (byte)FindBlocks.FindBlock(args[3]); }
             catch { Help(p); return; }
             width /= 2;
             length /= 2;
