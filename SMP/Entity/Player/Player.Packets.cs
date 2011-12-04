@@ -213,18 +213,19 @@ namespace SMP
         }
         private void HandlePlayerPositionPacket(byte[] message)
         {
-           
             try
             {
-                double x = EndianBitConverter.Big.ToDouble(message, 0);
-                double y = EndianBitConverter.Big.ToDouble(message, 8);
-                double stance = EndianBitConverter.Big.ToDouble(message, 16);
-                double z = EndianBitConverter.Big.ToDouble(message, 24);
+                double x = util.EndianBitConverter.Big.ToDouble(message, 0);
+                double y = util.EndianBitConverter.Big.ToDouble(message, 8);
+                double stance = util.EndianBitConverter.Big.ToDouble(message, 16);
+                double z = util.EndianBitConverter.Big.ToDouble(message, 24);
                 byte onGround = message[32];
-                CheckFall(onGround);
+                Point3 newpos = new Point3(x, y, z);
+
                 // Return if position hasn't changed.
-                if (new Point3(x, y, z) == pos && Math.Abs(stance - Stance) < .00001D && onground == onGround)
+                if (newpos == pos && stance == Stance && onGround == onground)
                     return;
+
                 // Check stance
                 if (stance - y < 0.1 || stance - y > 1.65)
                 {
@@ -232,23 +233,26 @@ namespace SMP
                     return;
                 }
 
+                // Check movement
+                /*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
+                {
+                    Kick("You moved to quickly :( (Hacking?)");
+                    return;
+                }*/
+
                 // Check position
-                //if (Math.Abs(x - this.X) + Math.Abs(y - this.Y) + Math.Abs(z - this.Z) > 100)
-                //{
-                //    Kick("You moved to quickly :( (Hacking?)");
-                //    return;
-                //}
-                /*else */
                 if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
                 {
                     Kick("Illegal position");
                     return;
                 }
-               
+
+                //oldpos = pos;
+                pos = newpos;
+                onground = onGround;
+
                 e.UpdateChunks(false, false);
-                
             }
-        
             catch (Exception e)
             {
                 Logger.Log(e.Message);
@@ -262,9 +266,9 @@ namespace SMP
                 float yaw = util.EndianBitConverter.Big.ToSingle(message, 0);
                 float pitch = util.EndianBitConverter.Big.ToSingle(message, 4);
                 byte onGround = message[8];
-                CheckFall(onGround);
+
                 // Return if position hasn't changed.
-                if (Math.Abs(yaw - rot[0]) < .00001D && Math.Abs(pitch - rot[1]) < .00001D && onGround == onground)
+                if (yaw == rot[0] && pitch == rot[1] && onGround == onground)
                     return;
 
                 rot[0] = yaw;
@@ -288,10 +292,10 @@ namespace SMP
                 float yaw = util.EndianBitConverter.Big.ToSingle(message, 32);
                 float pitch = util.EndianBitConverter.Big.ToSingle(message, 36);
                 byte onGround = message[40];
-                CheckFall(onGround);
+                Point3 newpos = new Point3(x, y, z);
+
                 // Return if position hasn't changed.
-                if (new Point3(x, y, z) == pos && Math.Abs(stance - Stance) < .00001D &&
-                    Math.Abs(yaw - rot[0]) < .00001D && Math.Abs(pitch - rot[1]) < .00001D && onGround == onground)
+                if (newpos == pos && stance == Stance && yaw == rot[0] && pitch == rot[1] && onGround == onground)
                     return;
 
                 // Check stance
@@ -301,13 +305,14 @@ namespace SMP
                     return;
                 }
 
+                // Check movement
+                /*if (Math.Abs(pos.distanceNoSqrt(newpos)) > 100)
+                {
+                    Kick("You moved to quickly :( (Hacking?)");
+                    return;
+                }*/
+
                 // Check position
-                //if (Math.Abs(x - this.X) + Math.Abs(y - this.Y) + Math.Abs(z - this.Z) > 100)
-                //{
-                //    Kick("You moved to quickly :( (Hacking?)");
-                //    return;
-                //}
-                /*else */
                 if (Math.Abs(x) > 3.2E7D || Math.Abs(z) > 3.2E7D)
                 {
                     Kick("Illegal position");
@@ -315,10 +320,10 @@ namespace SMP
                 }
 
                 //oldpos = pos;
-                pos = new Point3(x, y, z);
+                pos = newpos;
                 rot[0] = yaw;
                 rot[1] = pitch;
-                
+                onground = onGround;
 
                 e.UpdateChunks(false, false);
             }
