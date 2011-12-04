@@ -632,7 +632,8 @@ namespace SMP
             Point pt = new Point(x, z);
             if (chunkData.ContainsKey(pt)) return true;
             //Console.WriteLine(chunkData.ContainsKey(pt) && chunkData[pt].generated && chunkData[pt].populated);
-            return File.Exists(Chunk.CreatePath(this, x, z));
+            //return File.Exists(Chunk.CreatePath(this, x, z));
+            return false;
         }
         /// <summary>
         /// Generate a chunk at x and z

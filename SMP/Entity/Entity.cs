@@ -278,7 +278,7 @@ namespace SMP
                                     else World.chunker.QueueChunkSend(po, p);
                                 }
                             }
-                            catch { p.SendPreChunk(new Chunk(po.x, po.z, true), 0); }
+                            catch { p.SendPreChunk(po.x, po.z, 0); Console.WriteLine("fuck"); }
                         }
                     }
                 }
@@ -288,8 +288,8 @@ namespace SMP
                 {
                     if (!templist.Contains(point))
                     {
-                        p.SendPreChunk(new Chunk(point.x, point.z, true), 0);
-                        p.VisibleChunks.Remove(point);
+                        p.SendPreChunk(point.x, point.z, 0);
+                        lock (p.VisibleChunks) p.VisibleChunks.Remove(point);
 
                         bool unloadChunk = true;
                         Player.players.ForEach(delegate(Player pl) { if (pl.VisibleChunks.Contains(point)) { unloadChunk = false; return; } });

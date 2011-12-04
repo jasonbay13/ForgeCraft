@@ -1101,7 +1101,8 @@ namespace SMP
 
                 c.Update(level, this);
 
-				if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
+                lock (VisibleChunks)
+				    if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
 			}
 			/// <summary>
 			/// Prepare the client before sending the chunk
@@ -1114,12 +1115,17 @@ namespace SMP
 			/// </param>
 			public void SendPreChunk(Chunk c, byte load)
 			{
-				byte[] bytes = new byte[9];
-				util.EndianBitConverter.Big.GetBytes(c.x).CopyTo(bytes, 0);
-				util.EndianBitConverter.Big.GetBytes(c.z).CopyTo(bytes, 4);
-				bytes[8] = load;
-				SendRaw(0x32, bytes);
+                SendPreChunk(c.x, c.z, load);
 			}
+            public void SendPreChunk(int x, int z, byte load)
+            {
+                byte[] bytes = new byte[9];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 4);
+                bytes[8] = load;
+                SendRaw(0x32, bytes);
+                Console.WriteLine(x + "," + z + " " + load);
+            }
 			/// <summary>
 			/// Updates players chunks.
 			/// </summary>
