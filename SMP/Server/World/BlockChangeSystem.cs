@@ -211,7 +211,8 @@ namespace SMP
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
-            a.OpenWindow(WindowType.Chest, b.pos);
+            if (!BlockData.IsOpaqueCube(a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z)))
+                a.OpenWindow(WindowType.Chest, b.pos);
             return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
