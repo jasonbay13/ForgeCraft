@@ -1221,11 +1221,11 @@ namespace SMP
 					if(VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
 				}
-				if(!e1.I.OnGround)
+				/*if(!e1.I.OnGround)
 				{
 					if (VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
-				}
+				}*/
 				//Logger.Log("Pickup Spawning " + e1.id);
 
 				SendRaw(0x1E, util.EndianBitConverter.Big.GetBytes(e1.id));

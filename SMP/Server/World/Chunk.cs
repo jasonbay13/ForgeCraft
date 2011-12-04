@@ -190,7 +190,8 @@ namespace SMP
                                 case EntityType.Item:
                                     nbtCompound2 = nbtCompound["Data"].ToTagCompound();
                                     item = new Item(true) { id = nbtCompound2["ID"].ToTagShort(), count = nbtCompound2["Count"].ToTagByte(), meta = nbtCompound2["Meta"].ToTagShort() };
-                                    e = new Entity(w) { isItem = true, I = item };
+                                    item.e = new Entity(w) { isItem = true, I = item };
+                                    e = item.e;
                                     break;
                             }
                             if (e != null)

@@ -39,7 +39,7 @@ namespace SMP.Commands
                 {
                     Player.players.ForEach(delegate(Player pl)
                     {
-                        Use(pl, "");
+                        Use(pl);
                     });
                     p.SendMessage("Chunks reloaded for everyone!");
                 }
@@ -47,7 +47,7 @@ namespace SMP.Commands
                 {
                     Player pl = Player.FindPlayer(args[0]);
                     if (pl == null) { p.SendMessage("Could not find player!"); return; }
-                    Use(pl, "");
+                    Use(pl);
                     p.SendMessage("Chunks reloaded for " + pl.GetName() + "!");
                 }
             }
