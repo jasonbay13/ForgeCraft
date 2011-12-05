@@ -229,7 +229,7 @@ namespace SMP
                 }
             }
 
-            a.Teleport_Player(b.pos, a.rot[0], a.rot[1]);
+            //a.Teleport_Player(b.pos, a.rot[0], a.rot[1]);
             a.SendUseBed(a.id, b.pos);
             foreach (Player pl in Player.players.ToArray())
                 if (pl.VisibleEntities.Contains(a.id))

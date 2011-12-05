@@ -40,6 +40,7 @@ namespace SMP
         private long Seed;
         public long seed { get { return Seed; } set { Seed = value; } }
 		public long time;
+        public byte moonPhase = 0;
         public sbyte dimension = 0; // -1: The Nether, 0: The Overworld, 1: The End
         private object genLock = new object();
         private bool initialized = false;
@@ -395,6 +396,7 @@ namespace SMP
                     w.ChunkLimit = int.Parse(sw.ReadLine());
                     w.time = long.Parse(sw.ReadLine());
                     w.dimension = sbyte.Parse(sw.ReadLine());
+                    w.moonPhase = byte.Parse(sw.ReadLine());
                 }
             }
             catch { /*Logger.Log("Error loading world configuration!");*/ }
@@ -479,6 +481,7 @@ namespace SMP
                 sw.WriteLine(w.ChunkLimit);
                 sw.WriteLine(w.time);
                 sw.WriteLine(w.dimension);
+                sw.WriteLine(w.moonPhase);
             }
             /*using (MemoryStream blocks = new MemoryStream())
             {
@@ -571,7 +574,13 @@ namespace SMP
 
                         DateTime Start = DateTime.Now;
 
-                        time++; if (time > 24000) time = 0;
+                        time++;
+                        if (time > 24000)
+                        {
+                            time = 0;
+                            moonPhase++;
+                            if (moonPhase > 7) moonPhase = 0;
+                        }
                         if (TimeChanged != null)
                             TimeChanged();
                         if (WorldTimeChanged != null)

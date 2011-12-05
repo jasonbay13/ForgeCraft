@@ -459,7 +459,7 @@ namespace SMP
 				if (!LoggedIn) return;
 
 				byte[] tosend = new byte[8];
-				util.EndianBitConverter.Big.GetBytes(level.time).CopyTo(tosend, 0);
+				util.EndianBitConverter.Big.GetBytes(level.time + (24000 * level.moonPhase)).CopyTo(tosend, 0);
 				SendRaw(0x04, tosend);
 			}
             public void ping()

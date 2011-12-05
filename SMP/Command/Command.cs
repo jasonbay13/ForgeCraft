@@ -74,6 +74,7 @@ namespace SMP.Commands
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());
             core.Add(new CmdMetaData());
+            core.Add(new CmdMoonPhase());
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());

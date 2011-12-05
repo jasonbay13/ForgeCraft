@@ -222,7 +222,7 @@ namespace SMP
                 if (onGround == onground)
                     return;
 
-                CheckFall(onGround == 1);
+                CheckFall(onGround == 1, onGround != onground);
                 onground = onGround;
             }
             catch (Exception e)
@@ -269,7 +269,7 @@ namespace SMP
 
                 //oldpos = pos;
                 pos = newpos;
-                if (onGround != onground) CheckFall(onGround == 1);
+                CheckFall(onGround == 1, onGround != onground);
                 onground = onGround;
 
                 e.UpdateChunks(false, false);
@@ -294,7 +294,7 @@ namespace SMP
 
                 rot[0] = yaw;
                 rot[1] = pitch;
-                if (onGround != onground) CheckFall(onGround == 1);
+                CheckFall(onGround == 1, onGround != onground);
                 onground = onGround;
             }
             catch (Exception e)
@@ -345,7 +345,7 @@ namespace SMP
                 pos = newpos;
                 rot[0] = yaw;
                 rot[1] = pitch;
-                if (onGround != onground) CheckFall(onGround == 1);
+                CheckFall(onGround == 1, onGround != onground);
                 onground = onGround;
 
                 e.UpdateChunks(false, false);
@@ -356,11 +356,11 @@ namespace SMP
                 Logger.Log(e.StackTrace);
             }
         }
-        private void CheckFall(bool onGround)
+        private void CheckFall(bool onGround, bool changed)
         {
             if (onGround)
             {
-                if (pos.y < fallStartY)
+                if (changed && pos.y < fallStartY)
                 {
                     double dist = fallStartY - pos.y;
 
@@ -376,10 +376,12 @@ namespace SMP
 
                     //SendMessage(String.Format("You fell {0} blocks!", dist), WrapMethod.Chat);
                 }
+                fallStartY = -1;
             }
             else
             {
-                fallStartY = pos.y;
+                if (pos.y > fallStartY)
+                    fallStartY = pos.y;
             }
             /*if (onground == onGround) return;
             onground = onGround;
