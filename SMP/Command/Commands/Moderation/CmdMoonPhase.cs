@@ -20,7 +20,9 @@ namespace SMP.Commands
             if (args.Length < 1) { Help(p); return; }
             try
             {
-                p.level.moonPhase = byte.Parse(args[0]);
+                byte phase = byte.Parse(args[0]);
+                if (phase < 0 || phase > 7) { p.SendMessage("Phase must be between 0 and 7 inclusive.", WrapMethod.Chat); return; }
+                p.level.moonPhase = phase;
             }
             catch { Help(p); return; }
         }
