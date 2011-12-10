@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using SMP.util;
+using SMP.Commands;
 
 namespace SMP
 {
@@ -95,26 +96,44 @@ namespace SMP
                 {
                     foreach (Type t in lib.GetTypes())
                     {
-                        if (t.BaseType == typeof(Plugin))
+                        try
                         {
-                            try
+                            if (t.BaseType == typeof(Plugin))
                             {
-                                instance = Activator.CreateInstance(t);
-                                Load((Plugin)instance, startup);
-                            }
-                            catch
-                            {
-                                if (instance != null)
+                                try
                                 {
-                                    Logger.Log("The plugin " + ((Plugin)instance).name + " failed to load!");
-                                    Logger.Log("You can go bug " + ((Plugin)instance).creator + " about it.");
+                                    instance = Activator.CreateInstance(t);
+                                    Load((Plugin)instance, startup);
                                 }
-                                else Logger.Log("An unknown plugin failed to load!");
+                                catch
+                                {
+                                    if (instance != null)
+                                    {
+                                        Logger.LogFormat("The plugin \"{0}\" failed to load!", ((Plugin)instance).name);
+                                        Logger.LogFormat("You can go bug {0} about it.", ((Plugin)instance).creator);
+                                    }
+                                    else Logger.Log("An unknown plugin failed to load!");
+                                }
                             }
-                            finally
+                            else if (t.BaseType == typeof(Command))
                             {
-                                instance = null;
+                                try
+                                {
+                                    instance = Activator.CreateInstance(t);
+                                    Command.all.Add((Command)instance);
+                                    Logger.LogFormat("Loaded command: {0}", ((Command)instance).Name);
+                                }
+                                catch
+                                {
+                                    if (instance != null) Logger.LogFormat("The command \"{0}\" failed to load!", ((Command)instance).Name);
+                                    else Logger.Log("An unknown command failed to load!");
+                                }
                             }
+                        }
+                        catch { }
+                        finally
+                        {
+                            instance = null;
                         }
                     }
                 }
@@ -155,7 +174,7 @@ namespace SMP
             }
             Plugin.all.Add(plugin);
             plugin.Load(startup);
-            Logger.LogFormat("Plugin \"{0}\" version {1} loaded.", plugin.name, plugin.version);
+            Logger.LogFormat("Loaded plugin: {0} v{1}", plugin.name, plugin.version);
             Logger.Log(plugin.welcome);
         }
 	    /// <summary>

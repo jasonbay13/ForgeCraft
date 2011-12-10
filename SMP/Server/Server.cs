@@ -113,6 +113,7 @@ namespace SMP
 			BlockChange.InitAll();
             Physics.Handlers.InitAll();
 			Plugin.Load();
+            Command.SortCommands();
 			
             //Get latest developerlist
             new Thread(new ThreadStart(UpdateDevs)).Start();

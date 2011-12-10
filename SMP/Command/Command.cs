@@ -22,7 +22,7 @@ using SMP.Commands;
 
 namespace SMP.Commands
 {
-    public abstract class Command
+    public abstract class Command : IComparable<Command>
     {
         /// <summary>
         /// Declarations
@@ -40,6 +40,11 @@ namespace SMP.Commands
         public static CommandList core = new CommandList();
         public static List<List<string>> CommandCategories = new List<List<string>>();
         public static string HelpBot = Color.Purple + "HelpBot V12: "; //we can totally change it, or keep it for lawls. hint, hint
+
+        public int CompareTo(Command other)
+        {
+            return String.Compare(this.Name, other.Name, true);
+        }
 
 		/// <summary>
 		/// Initializes core commands
@@ -121,6 +126,11 @@ namespace SMP.Commands
 
             //TODO: add types when plugins are added
                 //might just have it done in the plugin initialization
+        }
+
+        internal static void SortCommands()
+        {
+            all.commands.Sort();
         }
     }
 }
