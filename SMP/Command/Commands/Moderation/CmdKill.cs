@@ -27,7 +27,7 @@ namespace SMP.Commands
         public override string Category { get { return "mod"; } }
         public override bool ConsoleUseable { get { return true; } }
         public override string Description { get { return "Tasty Murder!!"; } }
-        public override string PermissionNode { get { return "core.mod.devs"; } }
+        public override string PermissionNode { get { return "core.mod.kill"; } }
 
         public override void Use(Player p, params string[] args)
         {
