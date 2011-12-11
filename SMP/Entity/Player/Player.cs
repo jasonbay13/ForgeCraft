@@ -1000,6 +1000,7 @@ namespace SMP
                 byte[] nbt; List<byte> data = new List<byte>();
                 for (int i = 0; i < items.Length; i++)
                 {
+                    if (items[i] == null) { data.AddRange(util.BigEndianBitConverter.Big.GetBytes(-1)); continue; }
                     data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].id));
 
                     if (items[i].id != -1 && items[i].id != 0)
