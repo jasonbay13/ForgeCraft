@@ -78,6 +78,7 @@
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Entity\Player\Inventory\Recipe.cs" />
     <Compile Include="Entity\Player\Inventory\Container\Container.cs" />
     <Compile Include="Entity\Player\Inventory\Container\ContainerChest.cs" />
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />

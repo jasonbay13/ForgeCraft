@@ -51,6 +51,7 @@ namespace SMP
 		public string name = "Chest";
         public Player p;
         public Container container;
+        public Crafting crafting;
 		public Item[] items; //Hold all the items this window has inside it.
 		public Windows(WindowType type, Point3 pos, World world, Player p)
 		{
@@ -59,7 +60,7 @@ namespace SMP
                 id = FreeId();
                 this.type = (byte)type;
                 this.p = p;
-
+                crafting = new Crafting(p, 9);
                 switch (Type)
                 {
                     case WindowType.Chest:
@@ -137,11 +138,8 @@ namespace SMP
             if (slot < 0 || slot > InventorySize + 35) return;
             if (Type == WindowType.Workbench || Type == WindowType.Furnace)
             {
-                if (slot == 0)
-                {
-                    // TODO: Crafting/smelting output handler.
-                    return;
-                }
+
+                crafting.CheckCrafting(slot, items);
             }
 
             if (Shift)

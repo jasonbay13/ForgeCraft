@@ -25,6 +25,7 @@ namespace SMP
 		public Item[] items;
 		public Player p;
 		public Item current_item { get { return items[current_index]; } }
+        private Crafting crafting;
         private short Mycurrent_index;
         public short current_index
         {
@@ -41,7 +42,7 @@ namespace SMP
 			p = pl;
 
 			items = new Item[45];
-			
+            crafting = new Crafting(pl, 4);
 			for (int i = 0; i < items.Length; i++)
 				items[i] = Item.Nothing;
 
@@ -166,11 +167,7 @@ namespace SMP
             if (slot < 0 || slot > 44) return;
             Item item, clickItem = items[slot];
 
-            if (slot == 0)
-            {
-                // TODO: Crafting output handler.
-                return;
-            }
+            crafting.CheckCrafting(slot, items);
 
             if (Shift)
             {
