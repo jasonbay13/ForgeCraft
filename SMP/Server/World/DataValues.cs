@@ -159,7 +159,12 @@ namespace SMP
 				case "airportalframe": return 120;
                 case "endstone": return 121;
                 case "dragonegg": return 122;
-                default: return -1;
+                default:
+                    short i = -1;
+                    try { i = Convert.ToInt16(type); }
+                    catch { i = -1; }
+                    if (i > 122 || i < 0) { i = -1; }
+                    return i;
             }
         }
 		
