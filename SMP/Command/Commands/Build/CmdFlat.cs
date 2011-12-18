@@ -39,8 +39,15 @@ namespace SMP.Commands
             byte block = 2;
             try { width = Convert.ToInt32(args[0]); length = Convert.ToInt32(args[1]); height = Convert.ToInt32(args[2]); block = (byte)FindBlocks.FindBlock(args[3]); }
             catch { Help(p); return; }
-            Thread cuboid = new Thread(new ThreadStart(() => Cuboid(p, width, length, height, block)));
-            cuboid.Start();
+            if (FindBlocks.FindBlock(args[3]) != -1)
+            {
+                Thread cuboid = new Thread(new ThreadStart(() => Cuboid(p, width, length, height, block)));
+                cuboid.Start();
+            }
+            else
+            {
+                p.SendMessage("block " + args[3] + " not found!");
+            }
         }
 
         public override void Help(Player p)
