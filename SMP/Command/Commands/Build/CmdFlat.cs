@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SMP.Commands
 {
@@ -31,7 +32,6 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            World w = p.level;
             if (args.Length < 4) { Help(p); return; }
             int width = 0;
             int length = 0;
@@ -39,8 +39,23 @@ namespace SMP.Commands
             byte block = 2;
             try { width = Convert.ToInt32(args[0]); length = Convert.ToInt32(args[1]); height = Convert.ToInt32(args[2]); block = (byte)FindBlocks.FindBlock(args[3]); }
             catch { Help(p); return; }
+            Thread cuboid = new Thread(new ThreadStart(() => Cuboid(p, width, length, height, block)));
+            cuboid.Start();
+        }
+
+        public override void Help(Player p)
+        {
+            p.SendMessage("/flat <width> <length> <height> <block> - Makes a flat area,");
+            p.SendMessage("and makes a air space above it.");
+        }
+        public static void Cuboid(Player p, int width, int length, int height, byte block)
+        {
+            int cuboided = width * length;
+            if (height > 0) { cuboided *= height; }
+            World w = p.level;
             width /= 2;
             length /= 2;
+            --height;
             int y = (int)p.pos.y - 1;
             int x = (int)p.pos.x - width;
             int z = (int)p.pos.z - length;
@@ -75,12 +90,7 @@ namespace SMP.Commands
                     x++;
                 }
             }
-        }
-
-        public override void Help(Player p)
-        {
-            p.SendMessage("/flat <width> <length> <height> <block> - Makes a flat area,");
-            p.SendMessage("and makes a air space above it.");
+            p.SendMessage("Cuboided " + cuboided.ToString() + " blocks.");
         }
     }
 }
