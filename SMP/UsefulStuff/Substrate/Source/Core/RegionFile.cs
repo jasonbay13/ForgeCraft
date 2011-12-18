@@ -71,7 +71,7 @@ namespace Substrate.Core
 
         protected void ReadFile ()
         {
-            // Get last udpate time
+            // Get last update time
             long newModified = -1;
             try {
                 if (File.Exists(fileName)) {
