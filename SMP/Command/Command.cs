@@ -70,8 +70,9 @@ namespace SMP.Commands
             core.Add(new CmdGive());
 			core.Add(new CmdGod());
 			core.Add(new CmdGotoLVL());
+            core.Add(new CmdHackz());
+            core.Add(new CmdHeal());
             core.Add(new CmdHelp());
-			core.Add(new CmdHackz());
             core.Add(new CmdKick());
 			core.Add(new CmdKill());  
             core.Add(new CmdList());
