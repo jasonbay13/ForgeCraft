@@ -529,7 +529,7 @@ namespace SMP
             /// Updates the players experience bar
             /// </summary>
             /// <param name="expbarval">Value of the experience bar (0-19)</param>
-            /// <param name="level">Ecperience level of player</param>
+            /// <param name="level">Experience level of player</param>
             /// <param name="totalexp">Players total experience</param>
             public void SendExperience(float expbarval, short level, short totalexp)
             {

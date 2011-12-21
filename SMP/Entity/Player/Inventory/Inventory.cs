@@ -167,7 +167,7 @@ namespace SMP
             if (slot < 0 || slot > 44) return;
             Item item, clickItem = items[slot];
 
-            crafting.CheckCrafting(slot, items);
+            //crafting.CheckCrafting(slot, items);
 
             if (Shift)
             {
