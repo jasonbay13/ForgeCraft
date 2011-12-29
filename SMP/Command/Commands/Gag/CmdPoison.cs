@@ -31,7 +31,7 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length < 1 || args.Length > 1)
+            if (args.Length < 1)
             {
                 Help(p);
                 return;
