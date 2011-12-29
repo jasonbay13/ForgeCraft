@@ -162,6 +162,8 @@
     <Compile Include="Mojang\util\LongHashMapEntry.cs" />
     <Compile Include="Server\Plugins\Events\OnMessageRecieveEvent.cs" />
     <Compile Include="Server\Plugins\Events\OnPlayerChatEvent.cs" />
+    <Compile Include="Server\Plugins\Events\OnPlayerCommandEvent.cs" />
+    <Compile Include="Server\Plugins\Events\PlayerDisconnectEvent.cs" />
     <Compile Include="Server\Plugins\Events\PluginLoadEvent.cs" />
     <Compile Include="Server\Plugins\Events\PluginUnloadEvent.cs" />
     <Compile Include="Server\Plugins\Priority.cs" />

@@ -179,10 +179,10 @@ namespace SMP
             }
             Plugin.all.Add(plugin);
             plugin.Load(startup);
-            PluginLoadEvent.Call(p);
+            PluginLoadEvent.Call(plugin);
             if (cancelload)
             {
-                Unload(p, false);
+                Unload(plugin, false);
                 cancelload = false;
                 return;
             }

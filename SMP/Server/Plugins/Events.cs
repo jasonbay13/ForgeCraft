@@ -25,9 +25,7 @@ namespace SMP
     public enum PluginEvents
     {
         PluginLoad,
-        PluginUnload,
-        PluginRegisterEvent,
-        PluginUnRegisterEvent
+        PluginUnload
     }
     public enum PlayerEvents
     {

@@ -1047,10 +1047,11 @@ namespace SMP
         {
             Logger.Log(username + " Disconnected.");
             GlobalMessage(username + " Left.");
-            if (OnDisconnect != null)
+            /*if (OnDisconnect != null)
                 OnDisconnect(this);
             if (PlayerDisconnect != null)
-                PlayerDisconnect(this);
+                PlayerDisconnect(this);*/
+            PlayerDisconnectEvent.Call(this);
             socket.Close();
             Disconnect();
             foreach (int i in VisibleEntities.ToArray())

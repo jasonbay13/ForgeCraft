@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
-using SMP.API;
 
 namespace SMP.API
 {
-    public class OnPlayerAuthEvent
+    public class PlayerDisconnectEvent
     {
-        internal static List<OnPlayerAuthEvent> events = new List<OnPlayerAuthEvent>();
+        internal static List<PlayerDisconnectEvent> events = new List<PlayerDisconnectEvent>();
         Plugin plugin;
-        Player.OnPlayerAuth method;
+        Player.OnPlayerDisconnect method;
         Priority priority;
-        internal OnPlayerAuthEvent(Player.OnPlayerAuth method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal PlayerDisconnectEvent(Player.OnPlayerDisconnect method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
         internal static void Call(Player p)
         {
-            events.ForEach(delegate(OnPlayerAuthEvent p1)
+            events.ForEach(delegate(PlayerDisconnectEvent p1)
             {
                 try
                 {
@@ -25,12 +24,12 @@ namespace SMP.API
         }
         static void Organize()
         {
-            List<OnPlayerAuthEvent> temp = new List<OnPlayerAuthEvent>();
-            List<OnPlayerAuthEvent> temp2 = events;
-            OnPlayerAuthEvent temp3 = null;
-            temp2.ForEach(delegate(OnPlayerAuthEvent auth)
+            List<PlayerDisconnectEvent> temp = new List<PlayerDisconnectEvent>();
+            List<PlayerDisconnectEvent> temp2 = events;
+            PlayerDisconnectEvent temp3 = null;
+            temp2.ForEach(delegate(PlayerDisconnectEvent auth)
             {
-                foreach (OnPlayerAuthEvent p in temp2)
+                foreach (PlayerDisconnectEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -43,20 +42,20 @@ namespace SMP.API
             });
             events = temp;
         }
-        public static OnPlayerAuthEvent Find(Plugin plugin)
+        public static PlayerDisconnectEvent Find(Plugin plugin)
         {
-            foreach (OnPlayerAuthEvent p in events.ToArray())
+            foreach (PlayerDisconnectEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnPlayerAuth method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnPlayerDisconnect method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnPlayerAuthEvent(method, priority, plugin));
+            events.Add(new PlayerDisconnectEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

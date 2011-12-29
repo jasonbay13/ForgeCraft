@@ -95,25 +95,9 @@ namespace SMP
         public delegate void OnPlayerConnect(Player p);
         public delegate void OnPlayerAuth(Player p);
         public static event OnPlayerConnect PlayerConnect;
-        [Obsolete("Please use OnPlayerAuthEvent", true)]
-        public event OnPlayerAuth OnAuth;
-        [Obsolete("Please use OnPlayerAuthEvent", true)]
-        public static event OnPlayerAuth PlayerAuth;
         public delegate void OnPlayerChat(string message, Player p);
-        [Obsolete("Please use OnPlayerChatEvent", true)]
-        public event OnPlayerChat OnChat;
-        [Obsolete("Please use OnPlayerChatEvent", true)]
-        public static event OnPlayerChat PlayerChat;
-        [Obsolete("Please use OnMessageRecieveEvent", true)]
-        public event OnPlayerChat OnMessageRecieve;
-        [Obsolete("Please use OnMessageRecieveEvent", true)]
-        public static event OnPlayerChat MessageRecieve;
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
-        public event OnPlayerCommand OnCommand;
-        public static event OnPlayerCommand PlayerCommand;
         public delegate void OnPlayerDisconnect(Player p);
-        public static event OnPlayerDisconnect PlayerDisconnect;
-        public event OnPlayerDisconnect OnDisconnect;
         public delegate void OnPlayerKicked(Player p, string reason);
         public static event OnPlayerKicked PlayerKicked;
         public event OnPlayerKicked OnKicked;
@@ -1386,10 +1370,11 @@ namespace SMP
 		#region INCOMING
 		public void HandleCommand(string cmd, string message)
 		{
-            if (OnCommand != null)
+            /*if (OnCommand != null)
                 OnCommand(cmd, message, this);
             if (PlayerCommand != null)
-                PlayerCommand(cmd, message, this);
+                PlayerCommand(cmd, message, this);*/
+            OnPlayerCommandEvent.Call(cmd, message, this);
             if (cancelcommand)
             {
                 cancelcommand = false;
