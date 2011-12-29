@@ -1068,18 +1068,20 @@ namespace SMP
         {
             if (message[4] == 1)
             {
-                if (OnCrouch != null)
+                /*if (OnCrouch != null)
                     OnCrouch(this);
                 if (PlayerCrouch != null)
-                    PlayerCrouch(this);
+                    PlayerCrouch(this);*/
+                OnCrouchChangeEvent.Call(this);
                 crouch(true);
             }
             else if (message[4] == 2)
             {
-                if (OnCrouch != null)
+                /*if (OnCrouch != null)
                     OnCrouch(this);
                 if (PlayerCrouch != null)
-                    PlayerCrouch(this);
+                    PlayerCrouch(this);*/
+                OnCrouchChangeEvent.Call(this);
                 crouch(false);
             }
             else if (message[4] == 3)

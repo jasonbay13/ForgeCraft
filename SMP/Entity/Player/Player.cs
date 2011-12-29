@@ -99,11 +99,7 @@ namespace SMP
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public delegate void OnPlayerDisconnect(Player p);
         public delegate void OnPlayerKicked(Player p, string reason);
-        public static event OnPlayerKicked PlayerKicked;
-        public event OnPlayerKicked OnKicked;
         public delegate void OnCrouchChange(Player p);
-        public event OnCrouchChange OnCrouch;
-        public static event OnCrouchChange PlayerCrouch;
         public delegate void OnSpritChange(Player p);
         public event OnSpritChange OnSprint;
         public static event OnSpritChange PlayerSprint;
@@ -1613,10 +1609,11 @@ namespace SMP
 			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
-            if (OnKicked != null)
+            /*if (OnKicked != null)
                 OnKicked(this, message);
             if (PlayerKicked != null)
-                PlayerKicked(this, message);
+                PlayerKicked(this, message);*/
+            OnPlayerKickEvent.Call(this, message);
             if (cancelkick)
             {
                 cancelkick = false;
