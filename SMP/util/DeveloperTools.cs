@@ -111,7 +111,7 @@ namespace SMP.util
                             }
                             if (String.IsNullOrWhiteSpace(response))
                                 throw new Exception("Website Returned No Information");
-                            lines = response.Split(Environment.OSVersion.Platform == PlatformID.Unix ? '\n' : '\r');
+                            lines = response.Split('\n');
                             if (lineNumber >= lines.Count())
                                 throw new Exception(
                                     "Line number exceeds number of lines in website");

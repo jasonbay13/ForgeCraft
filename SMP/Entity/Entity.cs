@@ -77,6 +77,8 @@ namespace SMP
         public static java.util.Random randomJava = new java.util.Random();
 		public int id;
 
+        public System.Timers.Timer despawnTimer;
+
         public int age = 0;
         internal short health = 20;
         public short Health
@@ -84,7 +86,7 @@ namespace SMP
             get { return health; }
             set
             {
-                health = value;
+                health = MathHelper.Clamp(value, (short)0, (short)20);
                 if (isPlayer) p.SendHealth();
             }
         }
@@ -93,46 +95,48 @@ namespace SMP
         private DateTime lastPosSync = new DateTime();
         private DateTime lastHurt = new DateTime();
 
-		public Entity(Player pl, World l)
+        internal Entity(World l)
+        {
+            despawnTimer = CreateDespawnTimer(this);
+            id = FreeId();
+            level = l;
+        }
+
+        public Entity(Player pl, World l)
+            : this(l)
 		{
 			p = pl;
-			id = FreeId();
 			isPlayer = true;
-			level = l;
 
 			UpdateChunks(false, false);
 
 			Entities.Add(id, this);
 		}
-		public Entity(Item i, World l)
+        public Entity(Item i, World l)
+            : this(l)
 		{
 			I = i;
-            if (!I.isInventory) id = FreeId();
 			isItem = true;
-			level = l;
 
-            if (!I.isInventory)
-            {
-                UpdateChunks(false, false);
-                Entities.Add(id, this);
-            }
+            UpdateChunks(false, false);
+            Entities.Add(id, this);
 		}
-		public Entity(AI ai, World l)
-		{
-			this.ai = ai;
-			id = FreeId();
-			isAI = true;
-			level = l;
+        public Entity(AI ai, World l)
+            : this(l)
+        {
+            this.ai = ai;
+            isAI = true;
 
-			Entities.Add(id, this);
-		}
+            UpdateChunks(false, false);
+            Entities.Add(id, this);
+        }
         public Entity(McObject obj, World l)
+            : this(l)
         {
             this.obj = obj;
-            id = FreeId();
             isObject = true;
-            level = l;
 
+            UpdateChunks(false, false);
             Entities.Add(id, this);
         }
 		public Entity(bool lightning) //Stand in entity for lightning
@@ -140,12 +144,24 @@ namespace SMP
 			id = FreeId();
 		}
 
-        public void hurt(short amount)
+        private static System.Timers.Timer CreateDespawnTimer(Entity e)
         {
-            if (isPlayer && (p.Mode == 1 || Server.mode == 1)) return;
+            System.Timers.Timer timer = new System.Timers.Timer(1000);
+            timer.AutoReset = false;
+            timer.Elapsed += delegate
+            {
+                Player.GlobalDespawn(e);
+                if (!e.isPlayer) RemoveEntity(e);
+            };
+            return timer;
+        }
+
+        public void hurt(short amount, bool overRide = false)
+        {
+            if (isPlayer && (p.GodMode || p.Mode == 1)) return;
             if (Health > 0)
             {
-                if ((DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
+                if (!overRide && (DateTime.Now - lastHurt).TotalMilliseconds < 500) return;
                 lastHurt = DateTime.Now;
                 Health -= Math.Min(amount, Health);
                 foreach (Player pl in Player.players.ToArray())
@@ -153,21 +169,21 @@ namespace SMP
                     pl.SendEntityStatus(id, 2);
                     if (Health <= 0 && pl != p)
                     {
-                        if (isPlayer) p.inventory.Clear();
-                        //pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
+                        pl.SendEntityStatus(id, 3); // Gets stuck dead, removed until that's fixed.
                     }
+                }
+                if (Health <= 0)
+                {
+                    if (isPlayer) p.inventory.Clear(true);
+                    despawnTimer.Start();
                 }
             }
         }
-        public void hurt()
-        {
-            hurt(1);
-        }
 
-        public void UpdateChunks(bool force, bool forcesend, bool forcequeue = false)
+        public void UpdateChunks(bool force, bool forcesend, int queue = 0)
         {
             if (c == null)
-                level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4);
+                level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4, false, false);
             if (c == null || (c == CurrentChunk && !force))
                 return;
 
@@ -224,7 +240,7 @@ namespace SMP
                         if ((!p.VisibleChunks.Contains(po) || forcesend) && (Math.Abs(po.x) < p.level.ChunkLimit && Math.Abs(po.z) < p.level.ChunkLimit))
                         {
                             if (!p.level.chunkData.ContainsKey(po))
-                                p.level.LoadChunk(po.x, po.z);
+                                p.level.LoadChunk(po.x, po.z, queue != -1, queue != -1);
 
                             try
                             {
@@ -233,9 +249,14 @@ namespace SMP
                                     if (!p.level.chunkData[po].generated)
                                     {
                                         World.chunker.QueueChunk(po, p.level);
-                                        World.chunker.QueueChunkSend(po, p);
+                                        if (queue == -1)
+                                        {
+                                            while (!p.level.chunkData[po].generated) Thread.Sleep(50);
+                                            p.SendChunk(p.level.chunkData[po]);
+                                        }
+                                        else World.chunker.QueueChunkSend(po, p);
                                     }
-                                    else if (forcequeue)
+                                    else if (queue == 1)
                                     {
                                         if (!p.level.chunkData[po].populated) World.chunker.QueueChunk(po, p.level, false);
                                         World.chunker.QueueChunkSend(po, p);
@@ -248,9 +269,16 @@ namespace SMP
                                     }
                                 }
                                 else
-                                    World.chunker.QueueChunkSend(po, p);
+                                {
+                                    if (queue == -1)
+                                    {
+                                        while (!p.level.chunkData.ContainsKey(po)) Thread.Sleep(50);
+                                        p.SendChunk(p.level.chunkData[po]);
+                                    }
+                                    else World.chunker.QueueChunkSend(po, p);
+                                }
                             }
-                            catch { p.SendPreChunk(new Chunk(po.x, po.z, true), 0); }
+                            catch { p.SendPreChunk(po.x, po.z, 0); }
                         }
                     }
                 }
@@ -260,8 +288,8 @@ namespace SMP
                 {
                     if (!templist.Contains(point))
                     {
-                        p.SendPreChunk(new Chunk(point.x, point.z, true), 0);
-                        p.VisibleChunks.Remove(point);
+                        p.SendPreChunk(point.x, point.z, 0);
+                        lock (p.VisibleChunks) p.VisibleChunks.Remove(point);
 
                         bool unloadChunk = true;
                         Player.players.ForEach(delegate(Player pl) { if (pl.VisibleChunks.Contains(point)) { unloadChunk = false; return; } });
@@ -343,18 +371,19 @@ namespace SMP
                     //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
 					{
-						if (!e.I.OnGround || e.age < 10) continue;
-						e.I.OnGround = false;
+						if (e.age < 10) continue;
 
-                        p.SendPickupAnimation(e.id);
-                        Player.players.ForEach(delegate(Player pl)
+                        if (p.inventory.Add(e.I))
                         {
-                            if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
-                                pl.SendPickupAnimation(e.id, p.id);
-                        });
+                            p.SendPickupAnimation(e.id);
+                            Player.players.ForEach(delegate(Player pl)
+                            {
+                                if (pl != p && pl.level == p.level && pl.VisibleEntities.Contains(p.id))
+                                    pl.SendPickupAnimation(e.id, p.id);
+                            });
 
-						p.inventory.Add(e.I);
-                        RemoveEntity(e);
+                            RemoveEntity(e);
+                        }
 					}
 				}
 				/*if (e.isAI)

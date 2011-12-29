@@ -59,7 +59,7 @@ namespace SMP.Commands
             if (World.Find(level) != null && p.level.name.ToLower() != level)
 			{
 				Player.players.ForEach(delegate(Player p1) { if (p1.level == p.level) p1.SendDespawn(p.id); p.SendDespawn(p1.id); });
-                foreach (Point pt in p.VisibleChunks) { p.SendPreChunk(new Chunk(pt.x, pt.z, true), 0); }
+                foreach (Point pt in p.VisibleChunks.ToArray()) { p.SendPreChunk(pt.x, pt.z, 0); }
                 p.level = World.Find(level);
                 p.Teleport_Spawn();
 				//foreach (Chunk c in p.level.chunkData.Values) { p.SendPreChunk(c, 1); System.Threading.Thread.Sleep(10); p.SendChunk(c); c.RecalculateLight(); } // This is a bad idea!

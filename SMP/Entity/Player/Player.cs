@@ -221,6 +221,8 @@ namespace SMP
         public bool Crouching = false;
         public bool IsOnFire = false;
         public bool isFlying = false;
+        public bool isSleeping = false;
+        public Point3 sleepingPos;
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
@@ -233,6 +235,9 @@ namespace SMP
 		public string ip;
 		public string username;
 		bool hidden = false;
+
+        [Obsolete("Only here for reference! Use 'username' instead!", true)]
+        public string name { get { return username; } set { username = value; } }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SMP.Player"/> class.
@@ -461,7 +466,7 @@ namespace SMP
 				if (!LoggedIn) return;
 
 				byte[] tosend = new byte[8];
-				util.EndianBitConverter.Big.GetBytes(level.time).CopyTo(tosend, 0);
+				util.EndianBitConverter.Big.GetBytes(level.time + (24000 * level.moonPhase)).CopyTo(tosend, 0);
 				SendRaw(0x04, tosend);
 			}
             public void ping()
@@ -531,7 +536,7 @@ namespace SMP
             /// Updates the players experience bar
             /// </summary>
             /// <param name="expbarval">Value of the experience bar (0-19)</param>
-            /// <param name="level">Ecperience level of player</param>
+            /// <param name="level">Experience level of player</param>
             /// <param name="totalexp">Players total experience</param>
             public void SendExperience(float expbarval, short level, short totalexp)
             {
@@ -565,11 +570,17 @@ namespace SMP
                 e.SetMetaBit(0, 1, crouching);
                 GlobalMetaUpdate();
 			}
+            public void SetSleeping(bool sleeping, Point3 pos = new Point3())
+            {
+                isSleeping = sleeping;
+                sleepingPos = pos;
+            }
             public void OpenWindow(WindowType type, Point3 pos)
             {
-                window = new Windows(type, pos, level);
+                window = new Windows(type, pos, level, this);
                 SendWindowOpen(window);
                 SendWindowItems(window.id, window.items);
+                HasWindowOpen = true;
             }
 			public void SetFire(bool onoff)
 			{
@@ -845,6 +856,23 @@ namespace SMP
             {
                 GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, wld, exclude);
             }
+
+            public static void GlobalNamedEntitySpawn(Player p)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != p && pl.MapLoaded && pl.level == p.level && pl.VisibleChunks.Contains(Chunk.GetChunk((int)p.pos.x >> 4, (int)p.pos.z >> 4, pl.level).point))
+                        pl.SendNamedEntitySpawn(p);
+                });
+            }
+            public static void GlobalDespawn(Entity e)
+            {
+                Player.players.ForEach(delegate(Player pl)
+                {
+                    if (pl != e.p && pl.MapLoaded && pl.level == e.level && pl.VisibleEntities.Contains(e.id))
+                        pl.SendDespawn(e.id);
+                });
+            }
             #endregion
             #region Teleport Player
             public void Teleport_Player(double x, double y, double z)
@@ -909,10 +937,8 @@ namespace SMP
 				}
 				//SendMap();
 			}
-			void SendHandshake()
+			void SendHandshake(string hash)
 			{
-			
-                string hash = Server.VerifyNames ? Convert.ToString(Entity.randomJava.nextLong(), 16) : "-";
                 byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(hash)];
                 MCUtil.Protocol.GetBytes(hash).CopyTo(bytes, 0);
 				SendRaw(0x02, bytes);
@@ -981,6 +1007,7 @@ namespace SMP
                 byte[] nbt; List<byte> data = new List<byte>();
                 for (int i = 0; i < items.Length; i++)
                 {
+                    if (items[i] == null) { data.AddRange(util.BigEndianBitConverter.Big.GetBytes(-1)); continue; }
                     data.AddRange(util.BigEndianBitConverter.Big.GetBytes(items[i].id));
 
                     if (items[i].id != -1 && items[i].id != 0)
@@ -1047,20 +1074,24 @@ namespace SMP
 				//}
 				//Logger.Log(i + " Chunks sent");
 
-                //pos = level.SpawnPos;
+                pos = level.SpawnPos;
+                if (level.IsRaining) SendRain(true);
+                int vd = viewdistance; viewdistance = 3;
+                e.UpdateChunks(true, false, -1);
+                viewdistance = vd;
+                e.UpdateEntities();
 				SendSpawnPoint();
-				SendLoginDone();
 				SendInventory();
-                SendChunk(e.c);
-                e.UpdateChunks(true, false, true);
-				MapLoaded = true;
-				
+                SendLoginDone();
+                MapLoaded = true;
+
+                e.UpdateChunks(true, false);
 			}
 			/// <summary>
 			/// Sends a player a Chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			public void SendChunk(Chunk c)
 			{
@@ -1085,25 +1116,30 @@ namespace SMP
 
                 c.Update(level, this);
 
-				if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
+                lock (VisibleChunks)
+				    if (!VisibleChunks.Contains(c.point)) VisibleChunks.Add(c.point);
 			}
 			/// <summary>
 			/// Prepare the client before sending the chunk
 			/// </summary>
 			/// <param name='c'>
-			/// C. The chunk to send
+			/// The chunk to send
 			/// </param>
 			/// <param name='load'>
 			/// Load. Weather to unload or load the chunk (0 is unload otherwise it will load)
 			/// </param>
 			public void SendPreChunk(Chunk c, byte load)
 			{
-				byte[] bytes = new byte[9];
-				util.EndianBitConverter.Big.GetBytes(c.x).CopyTo(bytes, 0);
-				util.EndianBitConverter.Big.GetBytes(c.z).CopyTo(bytes, 4);
-				bytes[8] = load;
-				SendRaw(0x32, bytes);
+                SendPreChunk(c.x, c.z, load);
 			}
+            public void SendPreChunk(int x, int z, byte load)
+            {
+                byte[] bytes = new byte[9];
+                util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 4);
+                bytes[8] = load;
+                SendRaw(0x32, bytes);
+            }
 			/// <summary>
 			/// Updates players chunks.
 			/// </summary>
@@ -1162,6 +1198,7 @@ namespace SMP
 
                     SendEntityMeta(p.id, p.e.metadata);
 					SendEntityEquipment(p);
+                    if (p.isSleeping) SendUseBed(p.id, sleepingPos);
 				}
 				catch (Exception e)
 				{
@@ -1204,11 +1241,11 @@ namespace SMP
 					if(VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
 				}
-				if(!e1.I.OnGround)
+				/*if(!e1.I.OnGround)
 				{
 					if (VisibleEntities.Contains(e1.id)) VisibleEntities.Remove(e1.id);
 					return;
-				}
+				}*/
 				//Logger.Log("Pickup Spawning " + e1.id);
 
 				SendRaw(0x1E, util.EndianBitConverter.Big.GetBytes(e1.id));
@@ -1261,19 +1298,19 @@ namespace SMP
 
 			public void SendEntityEquipment(Player p)
 			{
-				SendEntityEquipment(p.id, 4, p.inventory.items[5].id, 0);
-				SendEntityEquipment(p.id, 3, p.inventory.items[6].id, 0);
-				SendEntityEquipment(p.id, 2, p.inventory.items[7].id, 0);
-				SendEntityEquipment(p.id, 1, p.inventory.items[8].id, 0);
-				SendEntityEquipment(p.id, 0, p.current_block_holding.id, 0); //for some reason, this one seems to work when send elsewhere, but not here...
+                SendEntityEquipment(p.id, 4, p.inventory.items[5].id, p.inventory.items[5].meta);
+                SendEntityEquipment(p.id, 3, p.inventory.items[6].id, p.inventory.items[6].meta);
+                SendEntityEquipment(p.id, 2, p.inventory.items[7].id, p.inventory.items[7].meta);
+                SendEntityEquipment(p.id, 1, p.inventory.items[8].id, p.inventory.items[8].meta);
+                SendEntityEquipment(p.id, 0, p.current_block_holding.id, p.current_block_holding.meta); //for some reason, this one seems to work when send elsewhere, but not here...
 			}
-			public void SendEntityEquipment(int id, short slot, short ItemId, short a)
+			public void SendEntityEquipment(int id, short slot, short ItemId, short meta)
 			{
 				byte[] bytes = new byte[10];
 				util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
 				util.EndianBitConverter.Big.GetBytes(slot).CopyTo(bytes, 4);
 				util.EndianBitConverter.Big.GetBytes(ItemId).CopyTo(bytes, 6);
-				util.EndianBitConverter.Big.GetBytes(a).CopyTo(bytes, 8);
+				util.EndianBitConverter.Big.GetBytes(meta).CopyTo(bytes, 8);
 				SendRaw(0x05, bytes);
 			}
 
@@ -1666,14 +1703,11 @@ namespace SMP
             //Logger.Log(Ping.ToString());
         } 
         
-        public void hurt(short amount)
+        public void hurt(short amount, bool overRide = false)
         {
-            e.hurt(amount);
+            e.hurt(amount, overRide);
         }
-        public void hurt()
-        {
-            hurt(1);
-        }
+        
         public void SendMobSpawn(Entity e)
         {
 			/*if (e == null) // What is this I don't even...
@@ -2109,23 +2143,43 @@ namespace SMP
         /// this can look like the poison effect.
         /// </summary>
         /// <param name="input">health remaining after method.</param>
-        System.Timers.Timer DieClock = new System.Timers.Timer(1000);
-        public void SlowlyDie(short remaininghealth = 0)
+        /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
+        /// <param name="damage">damage done to the player every step</param>
+        System.Timers.Timer DieClock;
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
         {
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth); };
+            DieClock = new System.Timers.Timer(interval);
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth)
+        private void SlowlyDieTimer(short remaininghealth, short damage)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                return;
             }
-            this.hurt(1); 
+            if (remaininghealth - damage < remaininghealth)
+            {
+                damage = (short)(this.health - remaininghealth);
+            }
+            this.hurt(damage); 
             if (this.health == remaininghealth) 
             { 
                 DieClock.Stop();
             }
+        }
+        public bool PayXPLevels(Player who, short levels)
+        {
+            Experience exp = new Experience(this);
+            Experience exw = new Experience(who);
+            if (exp.LevelExp >= levels)
+            {
+                exw.Add(levels);
+                exp.Remove(levels);
+                return true;
+            }
+            return false;
         }
 	}
 }

@@ -32,16 +32,16 @@ namespace SMP
 	public class Server
 	{
 		public static Server s;
-        public static bool useGUI = false;          //not a setting to choose whether using a gui or not, its a reference 
+        public static bool useGUI = false; //not a setting to choose whether using a gui or not, its a reference 
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static int protocolversion = 22;
+		public static readonly int protocolversion = 22;
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 
-        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010" }; //add your names here (must be all lower case!)
+        public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010", "bemacized", "wouto1997" }; //add your names here (must be all lower case!)
 		
 		public static bool unsafe_plugin = false;
 		internal ConsolePlayer consolePlayer;
@@ -61,6 +61,7 @@ namespace SMP
         public static System.Timers.Timer updateTimer = new System.Timers.Timer(100);
         public static System.Timers.Timer playerlisttimer = new System.Timers.Timer(1000);
         public static System.Timers.Timer worldsavetimer = new System.Timers.Timer(60000);
+        public static System.Timers.Timer devupdatetimer = new System.Timers.Timer(60 * 60000);
         public static Thread entityUpdateThread;
 		public static MainLoop ml;
         public static byte difficulty = 0; // 0 thru 3 for Peaceful, Easy, Normal, Hard
@@ -112,7 +113,11 @@ namespace SMP
 			BlockChange.InitAll();
             Physics.Handlers.InitAll();
 			Plugin.Load();
+            Command.SortCommands();
 			
+            //Get latest developerlist
+            new Thread(new ThreadStart(UpdateDevs)).Start();
+
 			//load groups
 			consolePlayer = new ConsolePlayer(s);
 			consolePlayer.SetUsername(ConsoleName);
@@ -141,7 +146,6 @@ namespace SMP
 			}
             catch (SocketException e) { Logger.Log(e.Message + e.StackTrace); return false; }
             catch (Exception e) { Logger.Log(e.Message + e.StackTrace); return false; }
-            
 		}
 
 	    private void LoadEvents()
@@ -208,6 +212,13 @@ namespace SMP
             });
             ml.Queue(delegate
             {
+                devupdatetimer.Elapsed += delegate
+                {
+                    UpdateDevs();
+                }; devupdatetimer.Start();
+            });
+            ml.Queue(delegate
+            {
                 World.chunker.Start();
             });
             #endregion
@@ -231,8 +242,8 @@ namespace SMP
             }
             else
             {
-                //mainlevel = new World(0, 127, 0, "main", 0) { ChunkLimit = int.MaxValue }; // Flatgrass
-                mainlevel = new World(0, 127, 0, "main", new java.util.Random().nextLong()) { ChunkLimit = int.MaxValue }; // Perlin
+                //mainlevel = new World(0, 127, 0, "main", 0); // Flatgrass
+                mainlevel = new World(0, 127, 0, "main", new java.util.Random().nextLong()); // Perlin
                 mainlevel.SaveLVL();
                 World.worlds.Add(mainlevel);
             } //changed to seed 0 for now
@@ -246,6 +257,21 @@ namespace SMP
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
             if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
             
+        }
+
+        public void UpdateDevs()
+        {
+            try
+            {
+                WebClient wc = new WebClient();
+                string devstring = wc.DownloadString("http://software.mcforge.net/devs.txt");
+                if (devstring.Contains(":"))
+                {
+                    devs.Clear();
+                    foreach (string dev in devstring.Split(':')) { devs.Add(dev.ToLower()); }
+                }
+            }
+            catch { }
         }
 		
 		void Accept(IAsyncResult result)

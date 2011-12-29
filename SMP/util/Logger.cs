@@ -19,10 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using java.lang;
-using Exception = System.Exception;
-using String = System.String;
-using Thread = System.Threading.Thread;
+//using Exception = System.Exception;
+//using File = System.IO.File;
+//using IOException = System.IO.IOException;
+//using String = System.String;
 
 /*
  ****    FILE TODO:   *****
@@ -35,8 +35,8 @@ namespace SMP.util
 
     public static class Logger
     {
-        static readonly string LogFile = "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_Logger.Log";
-        static readonly string ErrorFile = "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
+        static readonly string LogFile = Environment.CurrentDirectory + "/logs/" + DateTime.Now.ToString("yyyy-MM-dd") + "_Logger.Log";
+        static readonly string ErrorFile = Environment.CurrentDirectory + "/logs/errors/" + DateTime.Now.ToString("yyyy-MM-dd") + "_error.log";
 
         private static readonly Queue<string> messageQueue = new Queue<string>();
         public delegate void Logs(string message);
@@ -59,7 +59,7 @@ namespace SMP.util
         /// <param name="log"></param>
         public static void Log(string log, bool logToFile = true)
         {
-            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
+            if (String.IsNullOrWhiteSpace(log)) throw new ArgumentException("Message Cannot Be Null or Empty");
             messageQueue.Enqueue(FormatTime() + "  " + log);
             if (OnLog != null) OnLog(messageQueue.Dequeue());
             if (logToFile)
@@ -73,12 +73,22 @@ namespace SMP.util
         /// <param name="log"></param>
         public static void Log(LogLevel level, string log, bool logToFile = true)
         {
-            if (String.IsNullOrWhiteSpace(log)) throw new NullPointerException("Message Cannot Be Null or Empty");
+            if (String.IsNullOrWhiteSpace(log)) throw new ArgumentException("Message Cannot Be Null or Empty");
             messageQueue.Enqueue(FormatTime() + "  " + log);
             if (OnLog != null) OnLog(messageQueue.Dequeue());
             if (logToFile)
                 LogToFile(log);
+        }
 
+        /// <summary>
+        /// Formats and logs to file and console, takes a loglevel
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="log"></param>
+        /// <param name="args"></param>
+        public static void LogFormat(string log, params object[] args)
+        {
+            Log(string.Format(log, args));
         }
 
         /// <summary>
@@ -128,7 +138,7 @@ namespace SMP.util
             int retred = 0;
             try
             {
-                if (retred == 5) return;
+                if (retred == 5) throw new IOException("Error logging to file");
                 if (!Directory.Exists("/logs"))
                 {
                     Directory.CreateDirectory("/logs");

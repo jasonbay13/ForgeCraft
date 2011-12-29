@@ -22,7 +22,7 @@ using SMP.Commands;
 
 namespace SMP.Commands
 {
-    public abstract class Command
+    public abstract class Command : IComparable<Command>
     {
         /// <summary>
         /// Declarations
@@ -40,6 +40,11 @@ namespace SMP.Commands
         public static CommandList core = new CommandList();
         public static List<List<string>> CommandCategories = new List<List<string>>();
         public static string HelpBot = Color.Purple + "HelpBot V12: "; //we can totally change it, or keep it for lawls. hint, hint
+
+        public int CompareTo(Command other)
+        {
+            return String.Compare(this.Name, other.Name, true);
+        }
 
 		/// <summary>
 		/// Initializes core commands
@@ -59,13 +64,15 @@ namespace SMP.Commands
             core.Add(new CmdDevs());
 			core.Add(new CmdDND());
 			core.Add(new CmdFire());
+            core.Add(new CmdFlat());
             core.Add(new CmdFly());
             core.Add(new CmdGameMode());
             core.Add(new CmdGive());
 			core.Add(new CmdGod());
 			core.Add(new CmdGotoLVL());
+            core.Add(new CmdHackz());
+            core.Add(new CmdHeal());
             core.Add(new CmdHelp());
-			core.Add(new CmdHackz());
             core.Add(new CmdKick());
 			core.Add(new CmdKill());  
             core.Add(new CmdList());
@@ -73,15 +80,19 @@ namespace SMP.Commands
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());
             core.Add(new CmdMetaData());
+            core.Add(new CmdMoonPhase());
 			core.Add(new CmdMotd());
 			core.Add(new CmdMsg());
 			core.Add(new CmdNewLVL());
+            core.Add(new CmdPauseTime());
             core.Add(new CmdPoison());
 			core.Add(new CmdPromote());
             core.Add(new CmdRain());
+            core.Add(new CmdRelight());
             core.Add(new CmdReveal());
             core.Add(new CmdSay());
 			core.Add(new CmdSetRank());
+            core.Add(new CmdSoftware());
             core.Add(new CmdSpheroid());
 			core.Add(new CmdSpawn());
             core.Add(new CmdStrike());
@@ -116,6 +127,11 @@ namespace SMP.Commands
 
             //TODO: add types when plugins are added
                 //might just have it done in the plugin initialization
+        }
+
+        internal static void SortCommands()
+        {
+            all.commands.Sort();
         }
     }
 }

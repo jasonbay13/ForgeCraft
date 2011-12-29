@@ -207,11 +207,40 @@ namespace SMP
 		}
 		public static bool GetInBed(Player a, BCS b)
         {
+            byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
+            byte rot = (byte)(meta & 0x3);
+            bool head = (meta & 0x8) != 0;
+            if (!head)
+            {
+                switch (rot)
+                {
+                    case (byte)Bed.North:
+                        b.pos.x--;
+                        break;
+                    case (byte)Bed.East:
+                        b.pos.z--;
+                        break;
+                    case (byte)Bed.South:
+                        b.pos.x++;
+                        break;
+                    case (byte)Bed.West:
+                        b.pos.z++;
+                        break;
+                }
+            }
+
+            //a.Teleport_Player(b.pos, a.rot[0], a.rot[1]);
+            a.SendUseBed(a.id, b.pos);
+            foreach (Player pl in Player.players.ToArray())
+                if (pl.VisibleEntities.Contains(a.id))
+                    pl.SendUseBed(a.id, b.pos);
+            a.SetSleeping(true, b.pos);
 			return false;
 		}
 		public static bool OpenChest(Player a, BCS b)
 		{
-            a.OpenWindow(WindowType.Chest, b.pos);
+            if (!BlockData.IsOpaqueCube(a.level.GetBlock((int)b.pos.x, (int)b.pos.y + 1, (int)b.pos.z)))
+                a.OpenWindow(WindowType.Chest, b.pos);
             return false;
 		}
 		public static bool OpenCraftingTable(Player a, BCS b)
@@ -888,18 +917,7 @@ namespace SMP
 		}
 		public static bool PlacePiston(Player a, BCS b)
 		{
-            if (MathHelper.abs((float)a.pos.x - (float)b.pos.x) < 2.0F && MathHelper.abs((float)a.pos.z - (float)b.pos.z) < 2.0F)
-            {
-                double d = (a.pos.y + 1.8200000000000001D) - (a.Stance - a.pos.y);
-                if (d - (double)b.pos.y > 2D) b.Direction = 1;
-                if ((double)b.pos.y - d > 0.0D) b.Direction = 0;
-            }
-            int l = MathHelper.floor_double((double)((a.rot[0] * 4F) / 360F) + 0.5D) & 3;
-            if (l == 0) b.Direction = 2;
-            if (l == 1) b.Direction = 5;
-            if (l == 2) b.Direction = 3;
-            b.Direction = (byte)(l != 3 ? 0 : 4);
-
+            b.Direction = BlockHelper.PistonOrientation(a, b);
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, (byte)b.ID, b.Direction);
             if (Server.mode == 0) a.inventory.Remove(a.inventory.current_index, 1);
 			return false;

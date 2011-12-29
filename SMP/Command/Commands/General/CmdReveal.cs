@@ -39,7 +39,7 @@ namespace SMP.Commands
                 {
                     Player.players.ForEach(delegate(Player pl)
                     {
-                        Use(pl, "");
+                        Use(pl);
                     });
                     p.SendMessage("Chunks reloaded for everyone!");
                 }
@@ -47,14 +47,24 @@ namespace SMP.Commands
                 {
                     Player pl = Player.FindPlayer(args[0]);
                     if (pl == null) { p.SendMessage("Could not find player!"); return; }
-                    Use(pl, "");
+                    Use(pl);
                     p.SendMessage("Chunks reloaded for " + pl.GetName() + "!");
                 }
             }
             else
             {
-                if (p == Server.s.consolePlayer) { p.SendMessage("Console can't be revealed. Try using /reveal <player> or /reveal all", WrapMethod.None); return; }
-                p.UpdateChunks(true, true);
+                if (p.IsConsole) { p.SendMessage("Console can't be revealed. Try using /reveal <player> or /reveal all", WrapMethod.None); return; }
+                Chunk chunk;
+                foreach (Point po in p.VisibleChunks.ToArray())
+                {
+                    try
+                    {
+                        chunk = p.level.chunkData[po];
+                        p.SendPreChunk(chunk, 0);
+                        p.SendChunk(chunk);
+                    }
+                    catch { }
+                }
                 p.SendMessage("Chunks reloaded!");
             }
         }

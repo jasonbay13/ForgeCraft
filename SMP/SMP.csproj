@@ -62,8 +62,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\Commands\Build\CmdFlat.cs" />
+    <Compile Include="Command\Commands\Cheats\CmdHeal.cs" />
     <Compile Include="Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Command\Commands\Information\CmdSoftware.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdMoonPhase.cs" />
+    <Compile Include="Command\Commands\Moderation\CmdPauseTime.cs" />
+    <Compile Include="Command\Commands\Other\CmdRelight.cs" />
     <Compile Include="Command\Commands\Permissions\CmdDemote.cs" />
     <Compile Include="Command\Commands\Gag\CmdPoison.cs" />
     <Compile Include="Command\Commands\Build\CmdSpheroid.cs" />
@@ -74,6 +79,7 @@
     <Compile Include="Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Command\Commands\Other\CmdMetaData.cs" />
+    <Compile Include="Entity\Player\Inventory\Recipe.cs" />
     <Compile Include="Entity\Player\Inventory\Container\Container.cs" />
     <Compile Include="Entity\Player\Inventory\Container\ContainerChest.cs" />
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />

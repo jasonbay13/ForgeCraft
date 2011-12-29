@@ -44,7 +44,9 @@ namespace SMP
         public bool generated = false, populated = false;
         public bool generating = false, populating = false;
         internal bool _dirty = false;
+
         private Physics.Check[] physChecks; // Temporary array used for loading physics data!
+        private List<Entity> entityLoad = new List<Entity>(); // Used to... well... load entities.
 
 		public Point point { get { return new Point(x, z); } }
         public bool Dirty { get { return this._dirty; } }
@@ -187,7 +189,8 @@ namespace SMP
                                     break;
                                 case EntityType.Item:
                                     nbtCompound2 = nbtCompound["Data"].ToTagCompound();
-                                    item = new Item(nbtCompound2["ID"].ToTagShort(), nbtCompound2["Count"].ToTagByte(), nbtCompound2["Meta"].ToTagShort(), w);
+                                    item = new Item(true) { id = nbtCompound2["ID"].ToTagShort(), count = nbtCompound2["Count"].ToTagByte(), meta = nbtCompound2["Meta"].ToTagShort() };
+                                    item.e = new Entity(w) { isItem = true, I = item };
                                     e = item.e;
                                     break;
                             }
@@ -202,7 +205,7 @@ namespace SMP
                                 e.age = nbtCompound["Age"].ToTagInt();
                                 e.OnGround = (nbtCompound["OnGround"].ToTagByte() > 0);
                                 e.health = nbtCompound["Health"].ToTagShort();
-                                e.UpdateChunks(false, false);
+                                ch.entityLoad.Add(e);
                             }
                         }
                         Container c; Point3 point3;
@@ -211,7 +214,7 @@ namespace SMP
                             nbtCompound = tag.ToTagCompound();
                             nbtList = nbtCompound["Pos"].ToTagList();
                             point3 = new Point3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
-                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), point3);
+                            c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), w, point3);
                             c.LoadNBTData(nbtCompound["Items"].ToTagList());
                             if (!w.containers.ContainsKey(point3)) w.containers.Add(point3, c);
                         }
@@ -410,6 +413,16 @@ namespace SMP
                 physChecks = null;
             }
 
+            if (entityLoad.Count > 0)
+            {
+                foreach (Entity e in entityLoad)
+                {
+                    Entity.Entities.Add(e.id, e);
+                    e.UpdateChunks(false, false);
+                }
+                entityLoad.Clear();
+            }
+
             byte bType;
             for (int xx = 0; xx < Width; xx++)
                 for (int zz = 0; zz < Depth; zz++)
@@ -454,12 +467,14 @@ namespace SMP
             byte bType, bMeta;
             ushort bExtra;
             int xxx, zzz;
+            Container c;
             for (int xx = 0; xx < Width; xx++)
                 for (int zz = 0; zz < Depth; zz++)
                     for (int yy = 0; yy < Height; yy++)
                     {
                         xxx = (x << 4) + xx; zzz = (z << 4) + zz;
                         bType = GetBlock(xx, yy, zz);
+                        bMeta = GetMetaData(xx, yy, zz);
 
                         if (bType == (byte)Blocks.SignPost || bType == (byte)Blocks.SignWall)
                             p.SendUpdateSign(xxx, (short)yy, zzz, w.GetSign(xxx, yy, zzz));
@@ -468,6 +483,12 @@ namespace SMP
                             bExtra = GetExtraData(xx, yy, zz);
                             if (bExtra >= 2256 && bExtra <= 2266)
                                 p.SendSoundEffect(xxx, (byte)yy, zzz, 1005, bExtra);
+                        }
+                        if (bType == (byte)Blocks.Chest)
+                        {
+                            p.SendBlockChange(xxx, (byte)yy, zzz, bType, bMeta);
+                            c = w.GetBlockContainer(xxx, yy, zzz);
+                            if (c != null) c.UpdateState();
                         }
                     }
         }

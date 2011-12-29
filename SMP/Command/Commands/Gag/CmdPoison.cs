@@ -31,7 +31,7 @@ namespace SMP.Commands
 
         public override void Use(Player p, params string[] args)
         {
-            if (args.Length < 1 || args.Length > 1)
+            if (args.Length < 1)
             {
                 Help(p);
                 return;
@@ -41,7 +41,7 @@ namespace SMP.Commands
 
             if (pl.Mode == 0)
             {
-                pl.SlowlyDie(10);
+                pl.SlowlyDie(10, 1000, 2);
                 if (pl != p) { Player.GlobalMessage(pl.GetName() + " got poisonned by " + p.GetName() + "! D:"); }
                 else { Player.GlobalMessage(p.GetName() + " poisonned him/herself! D:"); }
             }
