@@ -2161,5 +2161,17 @@ namespace SMP
                 DieClock.Stop();
             }
         }
+        public bool PayXPLevels(Player who, short levels)
+        {
+            Experience exp = new Experience(this);
+            Experience exw = new Experience(who);
+            if (exp.LevelExp >= levels)
+            {
+                exw.Add(levels);
+                exp.Remove(levels);
+                return true;
+            }
+            return false;
+        }
 	}
 }
