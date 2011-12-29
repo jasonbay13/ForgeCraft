@@ -154,6 +154,12 @@
     <Compile Include="Mojang\Server\World\WorldChunkManager.cs" />
     <Compile Include="Mojang\util\LongHashMap.cs" />
     <Compile Include="Mojang\util\LongHashMapEntry.cs" />
+    <Compile Include="Server\Plugins\Events\OnMessageRecieveEvent.cs" />
+    <Compile Include="Server\Plugins\Events\OnPlayerChatEvent.cs" />
+    <Compile Include="Server\Plugins\Events\PluginLoadEvent.cs" />
+    <Compile Include="Server\Plugins\Events\PluginUnloadEvent.cs" />
+    <Compile Include="Server\Plugins\Priority.cs" />
+    <Compile Include="Server\Plugins\Events\OnPlayerAuthEvent.cs" />
     <Compile Include="Server\World\Generator\Noise\NoiseGenerator.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoiseGeneratorOctaves.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoiseGeneratorPerlin.cs" />

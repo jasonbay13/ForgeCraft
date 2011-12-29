@@ -22,6 +22,13 @@ using System.Text;
 
 namespace SMP
 {
+    public enum PluginEvents
+    {
+        PluginLoad,
+        PluginUnload,
+        PluginRegisterEvent,
+        PluginUnRegisterEvent
+    }
     public enum PlayerEvents
     {
         PlayerCommand,

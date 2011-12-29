@@ -26,6 +26,7 @@ using System.Threading;
 using SMP.Commands;
 using SMP.util;
 using Substrate.Nbt;
+using SMP.API;
 
 namespace SMP
 {
@@ -94,12 +95,18 @@ namespace SMP
         public delegate void OnPlayerConnect(Player p);
         public delegate void OnPlayerAuth(Player p);
         public static event OnPlayerConnect PlayerConnect;
+        [Obsolete("Please use OnPlayerAuthEvent", true)]
         public event OnPlayerAuth OnAuth;
+        [Obsolete("Please use OnPlayerAuthEvent", true)]
         public static event OnPlayerAuth PlayerAuth;
         public delegate void OnPlayerChat(string message, Player p);
+        [Obsolete("Please use OnPlayerChatEvent", true)]
         public event OnPlayerChat OnChat;
+        [Obsolete("Please use OnPlayerChatEvent", true)]
         public static event OnPlayerChat PlayerChat;
+        [Obsolete("Please use OnMessageRecieveEvent", true)]
         public event OnPlayerChat OnMessageRecieve;
+        [Obsolete("Please use OnMessageRecieveEvent", true)]
         public static event OnPlayerChat MessageRecieve;
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
         public event OnPlayerCommand OnCommand;
@@ -1447,10 +1454,11 @@ namespace SMP
         }
         public void SendMessage(string message)
         {
-            if (MessageRecieve != null)
+            /*if (MessageRecieve != null)
                 MessageRecieve(message, this);
             if (OnMessageRecieve != null)
-                OnMessageRecieve(message, this);
+                OnMessageRecieve(message, this);*/
+            OnMessageRecieveEvent.Call(message, this);
             if (cancelmessage)
             {
                 cancelmessage = false;

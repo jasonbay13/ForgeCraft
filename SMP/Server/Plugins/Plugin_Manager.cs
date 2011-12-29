@@ -23,11 +23,16 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using SMP.util;
+using SMP.API;
 
 namespace SMP
 {
     public abstract partial class Plugin
     {
+        public delegate void PluginLoad(Plugin p);
+        public delegate void PluginUnload(Plugin p);
+        static internal bool cancelload = false;
+        static internal bool cancelunload = false;
         public static List<Plugin> all = new List<Plugin>();
         public abstract void Load(bool startup);
         public abstract void Unload(bool shutdown);
@@ -63,6 +68,19 @@ namespace SMP
             if (returnNull == true) return null;
             if (tempPlayer != null) return tempPlayer;
             return null;
+        }
+        public static void Load(Plugin p, bool startup)
+        {
+            Plugin.all.Add(p);
+                p.Load(startup);
+                PluginLoadEvent.Call(p);
+                if (cancelload)
+                {
+                    Unload(p, false);
+                    cancelload = false;
+                }
+                Logger.Log("Plugin: " + p.name + " version " + p.version.ToString() + " loaded.");
+                Logger.Log(p.welcome);
         }
 		/// <summary>
 		/// Load a Plugin
@@ -121,11 +139,15 @@ namespace SMP
                         return;
                 }
             here:
-                Plugin.all.Add((Plugin)instance);
                 creator = ((Plugin)instance).creator;
-                ((Plugin)instance).Load(startup);
-                Logger.Log("Plugin: " + ((Plugin)instance).name + " version " + ((Plugin)instance).version.ToString() + " loaded.");
-                Logger.Log(((Plugin)instance).welcome);
+                Load((Plugin)instance, startup);
+                PluginLoadEvent.Call((Plugin)instance);
+                if (cancelload)
+                {
+                    Unload((Plugin)instance, false);
+                    cancelload = false;
+                    return;
+                }
             }
             catch (FileNotFoundException)
             {
@@ -164,6 +186,13 @@ namespace SMP
         {
             p.Unload(shutdown);
             all.Remove(p);
+            PluginUnloadEvent.Call(p);
+            if (cancelunload)
+            {
+                Load(p, false);
+                cancelunload = false;
+                return;
+            }
             Logger.Log(p.name + " was unloaded.");
         }
 	/// <summary>

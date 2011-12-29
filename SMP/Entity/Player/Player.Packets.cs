@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.API;
 
 namespace SMP
 {
@@ -102,10 +103,11 @@ namespace SMP
             if (Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
                 Kick("Chunk missing: " + ((int)pos.x >> 4) + "," + ((int)pos.z >> 4));
 			
-			if (PlayerAuth != null)
+			/*if (PlayerAuth != null)
 				PlayerAuth(this);
             if (OnAuth != null)
-                OnAuth(this);
+                OnAuth(this);*/
+            OnPlayerAuthEvent.Call(this);
 		}
 
         private void UpdateShi(Player p)
@@ -176,10 +178,11 @@ namespace SMP
 				}
 			}
 
-            if (OnChat != null)
+            /*if (OnChat != null)
                 OnChat(m, this);
             if (PlayerChat != null)
-                PlayerChat(m, this);
+                PlayerChat(m, this);*/
+            OnPlayerChatEvent.Call(m, this);
             if (cancelchat)
             {
                 cancelchat = false;
