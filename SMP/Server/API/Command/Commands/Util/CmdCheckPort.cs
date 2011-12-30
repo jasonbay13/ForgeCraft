@@ -35,7 +35,7 @@ namespace SMP.Commands
                     else Logger.Log("Checking Port...");
                     checkport(port, p);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     if (!p.IsConsole) p.SendMessage("port must be a number");
                     else Logger.Log("Port must be a number");

@@ -23,12 +23,14 @@ namespace SMP.API
                 catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the OnPlayerAuth Event!"); Logger.LogErrorToFile(e); }
             });
         }
-        static void Organize()
+        public static void Organize()
         {
             List<OnPlayerAuthEvent> temp = new List<OnPlayerAuthEvent>();
             List<OnPlayerAuthEvent> temp2 = events;
             OnPlayerAuthEvent temp3 = null;
-            temp2.ForEach(delegate(OnPlayerAuthEvent auth)
+            int i = 0;
+            int ii = temp2.Count;
+            while (i < ii)
             {
                 foreach (OnPlayerAuthEvent p in temp2)
                 {
@@ -40,7 +42,8 @@ namespace SMP.API
                 temp.Add(temp3);
                 temp2.Remove(temp3);
                 temp3 = null;
-            });
+                i++;
+            }
             events = temp;
         }
         public static OnPlayerAuthEvent Find(Plugin plugin)

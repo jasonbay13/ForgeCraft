@@ -22,12 +22,14 @@ namespace SMP.API
                 catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerCommand Event!"); Logger.LogErrorToFile(e); }
             });
         }
-        static void Organize()
+        public static void Organize()
         {
             List<OnPlayerCommandEvent> temp = new List<OnPlayerCommandEvent>();
             List<OnPlayerCommandEvent> temp2 = events;
             OnPlayerCommandEvent temp3 = null;
-            temp2.ForEach(delegate(OnPlayerCommandEvent auth)
+            int i = 0;
+            int ii = temp2.Count;
+            while (i < ii)
             {
                 foreach (OnPlayerCommandEvent p in temp2)
                 {
@@ -39,7 +41,8 @@ namespace SMP.API
                 temp.Add(temp3);
                 temp2.Remove(temp3);
                 temp3 = null;
-            });
+                i++;
+            }
             events = temp;
         }
         public static OnPlayerCommandEvent Find(Plugin plugin)

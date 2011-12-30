@@ -27,7 +27,9 @@ namespace SMP.API
             List<OnCrouchChangeEvent> temp = new List<OnCrouchChangeEvent>();
             List<OnCrouchChangeEvent> temp2 = events;
             OnCrouchChangeEvent temp3 = null;
-            temp2.ForEach(delegate(OnCrouchChangeEvent auth)
+            int i = 0;
+            int ii = temp2.Count;
+            while (i < ii)
             {
                 foreach (OnCrouchChangeEvent p in temp2)
                 {
@@ -39,7 +41,8 @@ namespace SMP.API
                 temp.Add(temp3);
                 temp2.Remove(temp3);
                 temp3 = null;
-            });
+                i++;
+            }
             events = temp;
         }
         public static OnCrouchChangeEvent Find(Plugin plugin)

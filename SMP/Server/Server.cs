@@ -26,6 +26,7 @@ using System.Threading;
 using System.IO;
 using SMP.Commands;
 using SMP.util;
+using SMP.API;
 
 namespace SMP
 {
