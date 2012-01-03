@@ -57,6 +57,7 @@ namespace SMP.API
             core.Add(new CmdCheckPort());
             core.Add(new CmdChunks());
             core.Add(new CmdClearInventory());
+            core.Add(new CmdCrashServer());
             core.Add(new CmdCredits());
             core.Add(new CmdCuboid());
 			core.Add(new CmdBan());
