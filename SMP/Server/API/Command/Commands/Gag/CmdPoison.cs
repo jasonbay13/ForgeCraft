@@ -42,7 +42,7 @@ namespace SMP.Commands
 
             if (pl.Mode == 0)
             {
-                pl.SlowlyDie(10, 1000, 2);
+                pl.SlowlyDie(10, 1000, 2, true);
                 if (pl != p) { Player.GlobalMessage(pl.GetName() + " got poisonned by " + p.GetName() + "! D:"); }
                 else { Player.GlobalMessage(p.GetName() + " poisonned him/herself! D:"); }
             }

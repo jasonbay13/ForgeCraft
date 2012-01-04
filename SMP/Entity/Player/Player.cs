@@ -2135,30 +2135,30 @@ namespace SMP
         /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
         /// <param name="damage">damage done to the player every step</param>
         System.Timers.Timer DieClock;
-        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1, bool poison = false)
         {
             DieClock = new System.Timers.Timer(interval);
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval); };
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval, poison); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth, short damage, int interval)
+        private void SlowlyDieTimer(short remaininghealth, short damage, int interval, bool poison)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
-                SendStopEntityEffect(19);
+                if (poison) { SendStopEntityEffect(19); }
                 return;
             }
             if (remaininghealth - damage < remaininghealth)
             {
                 damage = (short)(this.health - remaininghealth);
-                SendEntityEffect(19, 0, (short)interval);
+                if (poison) { SendEntityEffect(19, 0, (short)interval); }
             }
             this.hurt(damage); 
             if (this.health == remaininghealth) 
             {
                 DieClock.Stop();
-                SendStopEntityEffect(19);
+                if (poison) { SendStopEntityEffect(19); }
             }
         }
         public bool PayXPLevels(Player who, short levels)
