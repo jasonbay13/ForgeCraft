@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright 2011 ForgeCraft team
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and
@@ -547,7 +547,7 @@ namespace SMP
             {
                 byte[] bytes = new byte[5];
                 util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
-                util.EndianBitConverter.Big.GetBytes(effect).CopyTo(bytes, 4);
+                bytes[4] = effect;
                 SendRaw(0x2a, bytes);
             }
 			void crouch(bool crouching)
@@ -2137,6 +2137,7 @@ namespace SMP
         System.Timers.Timer DieClock;
         public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1, bool poison = false)
         {
+            if (poison) { SendEntityEffect(19, 0, (short)(interval * (health - remaininghealth) / damage / 40)); }
             DieClock = new System.Timers.Timer(interval);
             DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval, poison); };
             DieClock.Start();
@@ -2151,10 +2152,9 @@ namespace SMP
             }
             if (remaininghealth - damage < remaininghealth)
             {
-                damage = (short)(this.health - remaininghealth);
-                if (poison) { SendEntityEffect(19, 0, (short)interval); }
+                //damage = (short)(this.health - remaininghealth);
+                hurt(damage);
             }
-            this.hurt(damage); 
             if (this.health == remaininghealth) 
             {
                 DieClock.Stop();
