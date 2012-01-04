@@ -543,6 +543,13 @@ namespace SMP
                 util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
                 SendRaw(0x29, bytes);
             }
+            public void SendStopEntityEffect(byte effect)
+            {
+                byte[] bytes = new byte[5];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                util.EndianBitConverter.Big.GetBytes(effect).CopyTo(bytes, 4);
+                SendRaw(0x2a, bytes);
+            }
 			void crouch(bool crouching)
 			{
 				if (!MapLoaded) return;
@@ -2131,24 +2138,27 @@ namespace SMP
         public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
         {
             DieClock = new System.Timers.Timer(interval);
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth, short damage)
+        private void SlowlyDieTimer(short remaininghealth, short damage, int interval)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                SendStopEntityEffect(19);
                 return;
             }
             if (remaininghealth - damage < remaininghealth)
             {
                 damage = (short)(this.health - remaininghealth);
+                SendEntityEffect(19, 0, (short)interval);
             }
             this.hurt(damage); 
             if (this.health == remaininghealth) 
-            { 
+            {
                 DieClock.Stop();
+                SendStopEntityEffect(19);
             }
         }
         public bool PayXPLevels(Player who, short levels)
