@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net;
 using SMP.util;
+using SMP.API;
 
 namespace SMP
 {
@@ -120,12 +121,13 @@ namespace SMP
 
             if (Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
                 Kick("Chunk missing: " + ((int)pos.x >> 4) + "," + ((int)pos.z >> 4));
-
-            if (PlayerAuth != null)
-                PlayerAuth(this);
+			
+			/*if (PlayerAuth != null)
+				PlayerAuth(this);
             if (OnAuth != null)
-                OnAuth(this);
-        }
+                OnAuth(this);*/
+            OnPlayerAuthEvent.Call(this);
+		}
 
         private void UpdateShi(Player p)
         {
@@ -194,10 +196,11 @@ namespace SMP
                 }
             }
 
-            if (OnChat != null)
+            /*if (OnChat != null)
                 OnChat(m, this);
             if (PlayerChat != null)
-                PlayerChat(m, this);
+                PlayerChat(m, this);*/
+            OnPlayerChatEvent.Call(m, this);
             if (cancelchat)
             {
                 cancelchat = false;
@@ -1044,10 +1047,11 @@ namespace SMP
         {
             Logger.Log(username + " Disconnected.");
             GlobalMessage(username + " Left.");
-            if (OnDisconnect != null)
+            /*if (OnDisconnect != null)
                 OnDisconnect(this);
             if (PlayerDisconnect != null)
-                PlayerDisconnect(this);
+                PlayerDisconnect(this);*/
+            PlayerDisconnectEvent.Call(this);
             socket.Close();
             Disconnect();
             foreach (int i in VisibleEntities.ToArray())
@@ -1064,18 +1068,20 @@ namespace SMP
         {
             if (message[4] == 1)
             {
-                if (OnCrouch != null)
+                /*if (OnCrouch != null)
                     OnCrouch(this);
                 if (PlayerCrouch != null)
-                    PlayerCrouch(this);
+                    PlayerCrouch(this);*/
+                OnCrouchChangeEvent.Call(this);
                 crouch(true);
             }
             else if (message[4] == 2)
             {
-                if (OnCrouch != null)
+                /*if (OnCrouch != null)
                     OnCrouch(this);
                 if (PlayerCrouch != null)
-                    PlayerCrouch(this);
+                    PlayerCrouch(this);*/
+                OnCrouchChangeEvent.Call(this);
                 crouch(false);
             }
             else if (message[4] == 3)

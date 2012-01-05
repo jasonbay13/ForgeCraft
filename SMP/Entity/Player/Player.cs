@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright 2011 ForgeCraft team
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and
@@ -26,6 +26,7 @@ using System.Threading;
 using SMP.Commands;
 using SMP.util;
 using Substrate.Nbt;
+using SMP.API;
 
 namespace SMP
 {
@@ -94,25 +95,11 @@ namespace SMP
         public delegate void OnPlayerConnect(Player p);
         public delegate void OnPlayerAuth(Player p);
         public static event OnPlayerConnect PlayerConnect;
-        public event OnPlayerAuth OnAuth;
-        public static event OnPlayerAuth PlayerAuth;
         public delegate void OnPlayerChat(string message, Player p);
-        public event OnPlayerChat OnChat;
-        public static event OnPlayerChat PlayerChat;
-        public event OnPlayerChat OnMessageRecieve;
-        public static event OnPlayerChat MessageRecieve;
         public delegate void OnPlayerCommand(string cmd, string message, Player p);
-        public event OnPlayerCommand OnCommand;
-        public static event OnPlayerCommand PlayerCommand;
         public delegate void OnPlayerDisconnect(Player p);
-        public static event OnPlayerDisconnect PlayerDisconnect;
-        public event OnPlayerDisconnect OnDisconnect;
         public delegate void OnPlayerKicked(Player p, string reason);
-        public static event OnPlayerKicked PlayerKicked;
-        public event OnPlayerKicked OnKicked;
         public delegate void OnCrouchChange(Player p);
-        public event OnCrouchChange OnCrouch;
-        public static event OnCrouchChange PlayerCrouch;
         public delegate void OnSpritChange(Player p);
         public event OnSpritChange OnSprint;
         public static event OnSpritChange PlayerSprint;
@@ -555,6 +542,13 @@ namespace SMP
                 bytes[5] = amplifier;
                 util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
                 SendRaw(0x29, bytes);
+            }
+            public void SendStopEntityEffect(byte effect)
+            {
+                byte[] bytes = new byte[5];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                bytes[4] = effect;
+                SendRaw(0x2a, bytes);
             }
 			void crouch(bool crouching)
 			{
@@ -1379,10 +1373,11 @@ namespace SMP
 		#region INCOMING
 		public void HandleCommand(string cmd, string message)
 		{
-            if (OnCommand != null)
+            /*if (OnCommand != null)
                 OnCommand(cmd, message, this);
             if (PlayerCommand != null)
-                PlayerCommand(cmd, message, this);
+                PlayerCommand(cmd, message, this);*/
+            OnPlayerCommandEvent.Call(cmd, message, this);
             if (cancelcommand)
             {
                 cancelcommand = false;
@@ -1484,10 +1479,11 @@ namespace SMP
         }
         public void SendMessage(string message)
         {
-            if (MessageRecieve != null)
+            /*if (MessageRecieve != null)
                 MessageRecieve(message, this);
             if (OnMessageRecieve != null)
-                OnMessageRecieve(message, this);
+                OnMessageRecieve(message, this);*/
+            OnMessageRecieveEvent.Call(message, this);
             if (cancelmessage)
             {
                 cancelmessage = false;
@@ -1620,10 +1616,11 @@ namespace SMP
 			//	Logger.Log(LogLevel.Notice, "{0}{1} kicked: {2}",
             //    	LoggedIn ? "" : "/", LoggedIn ? username : ip, Server.KickMessage);				
 			}
-            if (OnKicked != null)
+            /*if (OnKicked != null)
                 OnKicked(this, message);
             if (PlayerKicked != null)
-                PlayerKicked(this, message);
+                PlayerKicked(this, message);*/
+            OnPlayerKickEvent.Call(this, message);
             if (cancelkick)
             {
                 cancelkick = false;
@@ -2138,28 +2135,55 @@ namespace SMP
         /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
         /// <param name="damage">damage done to the player every step</param>
         System.Timers.Timer DieClock;
-        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1, bool poison = false)
         {
+            if (poison) { SendEntityEffect(19, 0, (short)(interval * (health - remaininghealth) / damage / 40)); }
             DieClock = new System.Timers.Timer(interval);
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval, poison); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth, short damage)
+        private void SlowlyDieTimer(short remaininghealth, short damage, int interval, bool poison)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                if (poison) { SendStopEntityEffect(19); }
                 return;
             }
             if (remaininghealth - damage < remaininghealth)
             {
-                damage = (short)(this.health - remaininghealth);
+                //damage = (short)(this.health - remaininghealth);
+                hurt(damage);
             }
-            this.hurt(damage); 
             if (this.health == remaininghealth) 
-            { 
+            {
                 DieClock.Stop();
+                if (poison) { SendStopEntityEffect(19); }
             }
+        }
+        public bool PayXPLevels(Player who, short levels)
+        {
+            Experience exp = new Experience(this);
+            Experience exw = new Experience(who);
+            if (exp.LevelExp >= levels)
+            {
+                exw.Add(levels);
+                exp.Remove(levels);
+                return true;
+            }
+            return false;
+        }
+        public static void Explode(Player p)
+        {
+            Explosion xpl = new Explosion(p.level, p.pos.x, p.pos.y, p.pos.z, (new Random()).Next(5, 10));
+            xpl.DoExplosionA();
+            xpl.DoExplosionB();
+        }
+        public void Explode()
+        {
+            Explosion xpl = new Explosion(this.level, this.pos.x, this.pos.y, this.pos.z, (new Random()).Next(5, 10));
+            xpl.DoExplosionA();
+            xpl.DoExplosionB();
         }
 	}
 }
