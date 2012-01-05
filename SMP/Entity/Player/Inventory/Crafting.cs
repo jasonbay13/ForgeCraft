@@ -29,102 +29,98 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace SMP
 {
     public class Crafting
     {
-        private short size;
-        private Player p;
-        private List<TableData> recipes;
-        private TableData Table { get; set; }
-        private Item inHand = Item.Nothing;
-        public Crafting(Player p, short size)
+        public static List<TableData> recipes;
+        public static TableData Table { get; set; }
+        // private Item inHand = Item.Nothing;
+        public static void Init()
         {
-            this.p = p;
-            this.size = size;
             recipes = new List<TableData>();
-            Table = new TableData(size);
-            loadRecipies("LOL");
+            Table = new TableData();
+            loadRecipies("path");
         }
-        public void loadRecipies(string filePath)
+        public static void loadRecipies(string filePath)
         {
+            DateTime start = DateTime.Now;
             /*
              * XXX
              * #X#     ===  Pick axe format
              * #x#
              */
-            CreateRecipe("XXX#X##X#", new Item((short)Items.Diamond, 3),
-                ParseForCrafting(new char[] { '#', 'X' }, new Item[] { new Item((short)-1), new Item((short)Blocks.Sand) }));
+            CreateDefinedRecipe("XXX###XXX", new Item((short)Items.Diamond, 3), ParseForCrafting("X#".ToArray(), new Item[] { new Item((short)Blocks.Sand), new Item((short)-1) }), 9);
+            util.Logger.Log(recipes.Count + " Recipes. Created in " + (DateTime.Now - start).Milliseconds);
         }
-        public void CreateRecipe(string format, Item output, params object[] obj)
+        public static void CreateDefinedRecipe(string format, Item output, CraftStack[] stack, short tableSize)
         {
 
             if (String.IsNullOrWhiteSpace(format)) throw new NullReferenceException("Recipe format is null");
             if (output == null) throw new NullReferenceException("Item output is null");
-            if ((obj[0].GetType() != typeof(char[]) || obj[obj.Length - 1].GetType() != typeof(Item[])) && obj.Length % 2 != 0)
-                throw new ArgumentException("Incorrect recipe format");
-            Item[] iArray = new Item[size + 1];
+            Item[] iArray = new Item[tableSize + 1];
+            string[] lines = format.Split(',');
 
-            for (int i = 1; i < obj.Length; i += 2)
+            for (int i = 0; i < stack.Length; i++)
             {
-                if (obj[i - 1].GetType() == typeof(char[]) && obj[i].GetType() == typeof(Item[]))
-                {
-                    char[] c = (char[])obj[i - 1];
-                    Item[] e = (Item[])obj[i];
-                    for (int j = 1; j <= size; j++)
-                    {
-                        for (int holyWtf = 0; holyWtf < c.Length; holyWtf++)
-                        {
-                            if (c[holyWtf] == format[j - 1])
-                                iArray[j] = e[holyWtf];
-                        }
-                    }
-                    iArray[0] = output;
-                }
+                for (int j = 1; j <= tableSize; j++)
+                    if (stack[i].CharId == format[j - 1])
+                        iArray[j] = stack[i].Item;
             }
-            TableData data = new TableData(size);
+            iArray[0] = output;
+            TableData data = new TableData();
             data.addData(iArray);
             recipes.Add(data);
         }
 
-        public void CheckCrafting(short slot, Item[] items)
+        public static Item[] CheckCrafting(Player p, short slot, Item[] items)
         {
-            if (size == 4)
+
+            short tableSize = p.HasWindowOpen ? (p.window.Type == WindowType.Workbench ? (short)9 : (short)2) : (short)4;
+            if (slot > tableSize) return items;
+            Item[] array = new Item[items.Length];
+            if (tableSize == 4) //personal crafting
             {
+                items[0] = new Item((short)Items.Arrow);
+                p.inventory.Add((short)Items.Arrow, 0);
+                p.SendMessage(slot + " - slot from nothing");
+                return items;
                 // if (items[1].id == (short)Blocks.Sand)
                 // {
                 ////    p.SendItem(p.window.id, 0, new Item((short)Items.Diamond));
                 //loadRecipies("lol");
                 //    }
             }
-            else if (size == 2) //furnace?
+            else if (tableSize == 2) //furnace?
             {
 
             }
-            else if (size == 9)
+            else if (tableSize == 9)
             {
                 p.SendMessage(slot + " - slot");
                 Table.addData(items);
                 for (int i = 0; i < recipes.Count; i++)          //Need better way
                     if (Table.equals(recipes[i]))
                     {
-                        SendItem(recipes[i].items[0]);
                         items[0] = recipes[i].items[0];
+                        p.SendItem(p.window.id, 0, recipes[i].items[0]);
                         if (slot == 0)
                         {
-                            if (p.OnMouse != null)
+                            if (p.OnMouse.id != -1)
                             {
-                                p.OnMouse = inHand;
-                                inHand = p.OnMouse;
+                                //p.OnMouse = inHand;
+                                //inHand = p.OnMouse;
                                 if ((p.OnMouse.id == items[0].id) && (p.OnMouse.meta == items[0].meta))
                                 {
-                                    p.OnMouse.count += items[0].count;
+                                    //p.OnMouse.count += items[0].count;
+                                    //items[0] = Item.Nothing;
                                 }
-                                items[0] = Item.Nothing;
+
                             }
 
-                            for (int id = 1; id < 9; id++)
+                            for (int id = 1; id <= 9; id++)
                             {
                                 Item toTake = items[id];
                                 if (toTake != Item.Nothing)
@@ -138,25 +134,29 @@ namespace SMP
                                     else toTake = Item.Nothing;
                                     items[id] = toTake;
                                 }
+
                             }
-                            return;
+
 
                         }
                     }
-
             }
-            else util.Logger.Log("Incorrect inventory size"); 
+            else { util.Logger.Log("Incorrect inventory size"); } return items;
         }
 
-        private void SendItem(Item item)
+        private static void SendItem(Player p, Item item, byte id)
         {
-            if (!p.HasWindowOpen) return;
-            p.SendItem(p.window.id, 0, item);
+            if (!p.HasWindowOpen && id > 0) return;  //HAXORS
+            p.SendItem(id, 0, item.id, item.count, item.meta);
             item = Item.Nothing;
         }
-        public static object[] ParseForCrafting(char[] c, Item[] item)
+        public static CraftStack[] ParseForCrafting(char[] c, Item[] item)
         {
-            return new object[] { c, item };
+            if (c.Length != item.Length) throw new ArgumentException("Size difference");
+            CraftStack[] stack = new CraftStack[c.Length];
+            for (int i = 0; i < c.Length; i++)
+                stack[i] = new CraftStack(c[i], item[i]);
+            return stack;
         }
 
 
@@ -164,21 +164,15 @@ namespace SMP
 
     public class TableData
     {
-        private short _size;
         public Item[] items;
-        public TableData(short size)
-        {
-            _size = (short)(size + 1);
-        }
         public void addData(Item[] inOrder)
         {
-            if (inOrder.Length > _size) throw new ArgumentException("Size of array cant be bigger than initialized");
             items = inOrder;
         }
         public bool equals(TableData compare)
         {
             if (items == null) throw new NullReferenceException("You must add data using \"addData(Item[])\" before comparing");
-            for (int i = 1; i < _size; i++)
+            for (int i = 1; i < items.Count(); i++)
             {
                 if ((compare.items[i].id != this.items[i].id) || (compare.items[i].meta != this.items[i].meta))
                     return false;
@@ -186,6 +180,16 @@ namespace SMP
             return true;
         }
 
+    }
+    public class CraftStack
+    {
+        public char CharId { get; set; }
+        public Item Item { get; set; }
+        public CraftStack(char c, Item it)
+        {
+            CharId = c;
+            Item = it;
+        }
     }
 
 }
