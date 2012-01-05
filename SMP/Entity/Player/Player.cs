@@ -76,7 +76,6 @@ namespace SMP
 		public int id { get { return e.id; } }
         private DateTime pingdate = new DateTime();
         public short Ping = 500;
-
 		public Chunk chunk { get { return e.CurrentChunk; } }
         public Chunk chunknew { get { return e.c; } }
 

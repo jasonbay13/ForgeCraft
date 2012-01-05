@@ -1274,7 +1274,32 @@ namespace SMP
             }
             return true;
         }
-
+        //To lazy to make it a short/byte or w/e ._.
+        public static bool IsFood(Items a)
+        {
+            switch (a)
+            {
+                case Items.AppleGolden:
+                case Items.AppleRed:
+                case Items.Bread:
+                case Items.Cake:
+                case Items.ChickenCooked:
+                case Items.ChickenRaw:
+                case Items.Cookie:
+                case Items.FishCooked:
+                case Items.FishRaw:
+                case Items.MelonSlice:
+                case Items.PorkchopCooked:
+                case Items.PorkchopRaw:
+                case Items.SoupMushroom:
+                case Items.SpiderEye:
+                case Items.SteakCooked:
+                case Items.SteakRaw:
+                    return true;
+                default:
+                    return false;
+            }
+        }
         public static bool IsNormalCube(byte a)
         {
             return IsOpaqueCube(a) && IsCube(a);

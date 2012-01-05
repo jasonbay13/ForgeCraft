@@ -594,7 +594,10 @@ namespace SMP
 
             if (blockX == -1 && blockY == unchecked((byte)-1) && blockZ == -1 && direction == unchecked((byte)-1))
             {
-                //this is supposed to just tell the server to update food and stuffs
+                if (BlockData.IsFood((Items)current_block_holding.id) && food < 20)
+                {
+                    //Food shit here...(I couldnt figure it out :/
+                }
                 return;
             }
 
