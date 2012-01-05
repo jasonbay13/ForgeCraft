@@ -2161,6 +2161,30 @@ namespace SMP
                 if (poison) { SendStopEntityEffect(19); }
             }
         }
+        /// <summary>
+        /// Poisons the player
+        /// </summary>
+        /// <param name="timespan">the time the player should be poisonned (in 0.1 seconds)</param>
+        /// <param name="interval">interval between hurts (in 0.1 seconds)</param>
+        public void Poison(int timespan = 50, int interval = 15)
+        {
+            SendEntityEffect(19, 0, (short)(timespan * 2));
+            Thread psn = new Thread(new ThreadStart(() => Poison(timespan, interval, true)));
+            psn.Start();
+        }
+        private void Poison(int timespan, int interval, bool itworks)
+        {
+            int hurts = (int)Math.Floor((double)(timespan / interval));
+            int timeleft = timespan - (interval * hurts);
+            while (hurts > 0)
+            {
+                hurt(1);
+                Thread.Sleep(interval * 100);
+                hurts--;
+            }
+            Thread.Sleep(timeleft * 100);
+            SendStopEntityEffect(19);
+        }
         public bool PayXPLevels(Player who, short levels)
         {
             Experience exp = new Experience(this);
