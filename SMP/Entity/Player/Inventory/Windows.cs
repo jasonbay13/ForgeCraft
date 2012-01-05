@@ -51,7 +51,6 @@ namespace SMP
 		public string name = "Chest";
         public Player p;
         public Container container;
-        public Crafting crafting;
 		public Item[] items; //Hold all the items this window has inside it.
 		public Windows(WindowType type, Point3 pos, World world, Player p)
 		{
@@ -60,7 +59,6 @@ namespace SMP
                 id = FreeId();
                 this.type = (byte)type;
                 this.p = p;
-                crafting = new Crafting(p, 9);
                 switch (Type)
                 {
                     case WindowType.Chest:
@@ -103,17 +101,18 @@ namespace SMP
             catch { Logger.Log("Error making window!"); }
 		}
 
-		//public bool AddItem(Item item)
-		//{
-		//    byte slot = FindEmptySlot();
-		//    if (slot == 255) return false;
-
-		//    return AddItem(item, slot);
-		//}
-		public bool AddItem(Item item, byte slot)
-		{
-			return false;
-		}
+        public bool Add(short id, byte count, short meta, int slot)
+        {
+            if (count < 1) return Add(Item.Nothing, slot);
+            else return Add(new Item(id, count, meta), slot);
+        }
+        public bool Add(Item item, int slot)
+        {
+            if (slot < 0 || slot > 9) return false;
+            items[slot] = item;
+            p.SendWindowItems(id, items);
+            return true;
+        }
 
 		public void Remove(Player p, int slot)
 		{
@@ -136,11 +135,11 @@ namespace SMP
                 return;
             }
             if (slot < 0 || slot > InventorySize + 35) return;
-            if (Type == WindowType.Workbench || Type == WindowType.Furnace)
+           /* if (Type == WindowType.Workbench || Type == WindowType.Furnace)
             {
-
-                crafting.CheckCrafting(slot, items);
-            }
+                Item[] stack = Crafting.CheckCrafting(p, slot, items);
+                if (stack != null) items = stack;
+            }*/
 
             if (Shift)
             {
@@ -352,10 +351,14 @@ namespace SMP
                     }
                 }
             }
-
-            if (container != null) container.UpdateContents(p);
+            if (Type == WindowType.Workbench || Type == WindowType.Furnace)
+            {
+                Item[] stack = Crafting.CheckCrafting(p, slot, items);
+                if (stack != null)  items = stack; 
+            }
+            //if (container != null) container.UpdateContents(p);
             List<Item> items2 = new List<Item>(items); items2.AddRange((Item[])p.inventory.items.TruncateStart(9));
-            p.SendWindowItems(id, items2.ToArray());
+            for (int i = 0; i <= 9; i++) p.SendItem(id, (short)i, items[i]);
             p.SendItem(255, -1, p.OnMouse);
 		}
 

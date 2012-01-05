@@ -33,7 +33,7 @@ namespace SMP
 
 		Entity mye;
 		World mylevel = Server.mainlevel;
-		byte mytype = 50;
+		byte mytype = Mob.Creeper;
 		byte[] mymeta = new byte[4] { 0, 0, 0, 0 };
 
 		public Creeper(Point3 pos, World level)

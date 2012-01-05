@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright 2011 ForgeCraft team
 	
 	Dual-licensed under the	Educational Community License, Version 2.0 and
@@ -541,6 +541,13 @@ namespace SMP
                 bytes[5] = amplifier;
                 util.EndianBitConverter.Big.GetBytes(duration).CopyTo(bytes, 6);
                 SendRaw(0x29, bytes);
+            }
+            public void SendStopEntityEffect(byte effect)
+            {
+                byte[] bytes = new byte[5];
+                util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
+                bytes[4] = effect;
+                SendRaw(0x2a, bytes);
             }
 			void crouch(bool crouching)
 			{
@@ -2127,28 +2134,55 @@ namespace SMP
         /// <param name="interval">Interval in miliseconds before the player dies, don't set for 1000 miliseconds.</param>
         /// <param name="damage">damage done to the player every step</param>
         System.Timers.Timer DieClock;
-        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1)
+        public void SlowlyDie(short remaininghealth = 0, int interval = 1000, short damage = 1, bool poison = false)
         {
+            if (poison) { SendEntityEffect(19, 0, (short)(interval * (health - remaininghealth) / damage / 40)); }
             DieClock = new System.Timers.Timer(interval);
-            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage); };
+            DieClock.Elapsed += delegate { SlowlyDieTimer(remaininghealth, damage, interval, poison); };
             DieClock.Start();
         }
-        private void SlowlyDieTimer(short remaininghealth, short damage)
+        private void SlowlyDieTimer(short remaininghealth, short damage, int interval, bool poison)
         {
             if (this.Mode == 1)
             {
                 DieClock.Stop();
+                if (poison) { SendStopEntityEffect(19); }
                 return;
             }
             if (remaininghealth - damage < remaininghealth)
             {
-                damage = (short)(this.health - remaininghealth);
+                //damage = (short)(this.health - remaininghealth);
+                hurt(damage);
             }
-            this.hurt(damage); 
             if (this.health == remaininghealth) 
-            { 
+            {
                 DieClock.Stop();
+                if (poison) { SendStopEntityEffect(19); }
             }
+        }
+        /// <summary>
+        /// Poisons the player
+        /// </summary>
+        /// <param name="timespan">the time the player should be poisonned (in 0.1 seconds)</param>
+        /// <param name="interval">interval between hurts (in 0.1 seconds)</param>
+        public void Poison(int timespan = 50, int interval = 15)
+        {
+            SendEntityEffect(19, 0, (short)(timespan * 2));
+            Thread psn = new Thread(new ThreadStart(() => Poison(timespan, interval, true)));
+            psn.Start();
+        }
+        private void Poison(int timespan, int interval, bool itworks)
+        {
+            int hurts = (int)Math.Floor((double)(timespan / interval));
+            int timeleft = timespan - (interval * hurts);
+            while (hurts > 0)
+            {
+                hurt(1);
+                Thread.Sleep(interval * 100);
+                hurts--;
+            }
+            Thread.Sleep(timeleft * 100);
+            SendStopEntityEffect(19);
         }
         public bool PayXPLevels(Player who, short levels)
         {
@@ -2161,6 +2195,18 @@ namespace SMP
                 return true;
             }
             return false;
+        }
+        public static void Explode(Player p)
+        {
+            Explosion xpl = new Explosion(p.level, p.pos.x, p.pos.y, p.pos.z, (new Random()).Next(5, 10));
+            xpl.DoExplosionA();
+            xpl.DoExplosionB();
+        }
+        public void Explode()
+        {
+            Explosion xpl = new Explosion(this.level, this.pos.x, this.pos.y, this.pos.z, (new Random()).Next(5, 10));
+            xpl.DoExplosionA();
+            xpl.DoExplosionB();
         }
 	}
 }

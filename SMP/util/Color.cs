@@ -75,7 +75,7 @@ namespace SMP
         }
 
 		/// <summary>
-		/// Makes sure a colour code is vaild. Doesn't check preceding character just the value.
+		/// Makes sure a color code is vaild. Doesn't check preceding character just the value.
 		/// </summary>
         public static bool IsColorValid(char ch)
         {

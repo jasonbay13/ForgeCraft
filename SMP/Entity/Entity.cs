@@ -576,5 +576,31 @@ namespace SMP
                 rot.CopyTo(oldrot, 0);
             }
         }
+        /// <summary>
+        /// Spawns a mob at a specific x, y, z
+        /// returns the entity id
+        /// </summary>
+        /// <param name="mob">Try Mob.name</param>
+        /// <param name="w">World</param>
+        /// <param name="x">X</param>
+        /// <param name="y">Y</param>
+        /// <param name="z">Z</param>
+        /// <returns>Returns the entity id</returns>
+        public static int SpawnMob(byte mob, World w, int x, byte y, int z)
+        {
+            int entityid = -1;
+            Point3 aipos = new Point3((double)x, (double)y, (double)z);
+            switch (mob)
+            {
+                case Mob.Creeper:
+                    Creeper Monster = new Creeper(aipos, w);
+                    entityid = Monster.e.id;
+                    break;
+                default:
+                    entityid = -1;
+                    break;
+            }
+            return entityid;
+        }
 	}
 }
