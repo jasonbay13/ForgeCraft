@@ -27,8 +27,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <DocumentationFile>
-    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
@@ -66,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Server\API\Command\Commands\Build\CmdFlat.cs" />
     <Compile Include="Server\API\Command\Commands\Cheats\CmdHeal.cs" />
+    <Compile Include="Server\API\Command\Commands\Gag\CmdCrashServer.cs" />
     <Compile Include="Server\API\Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Server\API\Command\Commands\Information\CmdSoftware.cs" />
     <Compile Include="Server\API\Command\Commands\Moderation\CmdMoonPhase.cs" />
