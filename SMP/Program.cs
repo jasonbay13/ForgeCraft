@@ -20,8 +20,9 @@ using System.Reflection;
 using System.Threading;
 using SMP.Commands;
 using SMP.API;
-using SMP.Commands;
+using SMP.API.Commands;
 using SMP.util;
+using SMP.PLAYER;
 
 /*
 	Copyright 2011 ForgeCraft team

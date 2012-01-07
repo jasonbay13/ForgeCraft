@@ -31,7 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace SMP
+namespace SMP.PLAYER.Crafting
 {
     public class Crafting
     {

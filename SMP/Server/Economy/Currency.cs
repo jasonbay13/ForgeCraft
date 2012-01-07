@@ -17,7 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
-namespace SMP
+namespace SMP.ECO
 {
 	public class Currency
 	{

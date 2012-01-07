@@ -2,36 +2,37 @@
 using System.Collections.Generic;
 using SMP.util;
 
-namespace SMP.API
+using SMP.PLAYER;
+namespace SMP.API.Events.PlayerEvents
 {
-    public class PluginUnloadEvent
+    public class OnPlayerChatEvent
     {
-        internal static List<PluginUnloadEvent> events = new List<PluginUnloadEvent>();
+        internal static List<OnPlayerChatEvent> events = new List<OnPlayerChatEvent>();
         Plugin plugin;
-        Plugin.PluginUnload method;
+        Player.OnPlayerChat method;
         Priority priority;
-        internal PluginUnloadEvent(Plugin.PluginUnload method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
-        internal static void Call(Plugin p)
+        internal OnPlayerChatEvent(Player.OnPlayerChat method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal static void Call(string message, Player p)
         {
-            events.ForEach(delegate(PluginUnloadEvent p1)
+            events.ForEach(delegate(OnPlayerChatEvent p1)
             {
                 try
                 {
-                    p1.method(p);
+                    p1.method(message, p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PluginUnload Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerChat Event!"); Logger.LogErrorToFile(e); }
             });
         }
         public static void Organize()
         {
-            List<PluginUnloadEvent> temp = new List<PluginUnloadEvent>();
-            List<PluginUnloadEvent> temp2 = events;
-            PluginUnloadEvent temp3 = null;
+            List<OnPlayerChatEvent> temp = new List<OnPlayerChatEvent>();
+            List<OnPlayerChatEvent> temp2 = events;
+            OnPlayerChatEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (PluginUnloadEvent p in temp2)
+                foreach (OnPlayerChatEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -45,20 +46,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static PluginUnloadEvent Find(Plugin plugin)
+        public static OnPlayerChatEvent Find(Plugin plugin)
         {
-            foreach (PluginUnloadEvent p in events.ToArray())
+            foreach (OnPlayerChatEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Plugin.PluginUnload method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnPlayerChat method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new PluginUnloadEvent(method, priority, plugin));
+            events.Add(new OnPlayerChatEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

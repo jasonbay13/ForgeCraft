@@ -1,37 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
-
-namespace SMP.API
+using SMP.API;
+using SMP.PLAYER;
+namespace SMP.API.Events.PlayerEvents
 {
-    public class OnPlayerSprintEvent
+    public class OnPlayerAuthEvent
     {
-        internal static List<OnPlayerSprintEvent> events = new List<OnPlayerSprintEvent>();
+        internal static List<OnPlayerAuthEvent> events = new List<OnPlayerAuthEvent>();
         Plugin plugin;
-        Player.OnSpritChange method;
+        Player.OnPlayerAuth method;
         Priority priority;
-        internal OnPlayerSprintEvent(Player.OnSpritChange method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal OnPlayerAuthEvent(Player.OnPlayerAuth method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
         internal static void Call(Player p)
         {
-            events.ForEach(delegate(OnPlayerSprintEvent p1)
+            events.ForEach(delegate(OnPlayerAuthEvent p1)
             {
                 try
                 {
                     p1.method(p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerKick Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the OnPlayerAuth Event!"); Logger.LogErrorToFile(e); }
             });
         }
         public static void Organize()
         {
-            List<OnPlayerSprintEvent> temp = new List<OnPlayerSprintEvent>();
-            List<OnPlayerSprintEvent> temp2 = events;
-            OnPlayerSprintEvent temp3 = null;
+            List<OnPlayerAuthEvent> temp = new List<OnPlayerAuthEvent>();
+            List<OnPlayerAuthEvent> temp2 = events;
+            OnPlayerAuthEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (OnPlayerSprintEvent p in temp2)
+                foreach (OnPlayerAuthEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -45,20 +46,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static OnPlayerSprintEvent Find(Plugin plugin)
+        public static OnPlayerAuthEvent Find(Plugin plugin)
         {
-            foreach (OnPlayerSprintEvent p in events.ToArray())
+            foreach (OnPlayerAuthEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnSpritChange method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnPlayerAuth method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnPlayerSprintEvent(method, priority, plugin));
+            events.Add(new OnPlayerAuthEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

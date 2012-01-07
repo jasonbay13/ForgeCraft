@@ -26,9 +26,15 @@ using System.Threading;
 using SMP.Commands;
 using SMP.util;
 using Substrate.Nbt;
-using SMP.API;
+using SMP.API.Events.PlayerEvents;
+using SMP.API.Commands;
+using SMP.ECO;
+using SMP.INVENTORY;
+using SMP.PLAYER.Enchantments;
+using SMP.PLAYER.Crafting;
+using SMP.ENTITY;
 
-namespace SMP
+namespace SMP.PLAYER
 {
 	public partial class Player : System.IDisposable
 	{
@@ -100,8 +106,6 @@ namespace SMP
         public delegate void OnPlayerKicked(Player p, string reason);
         public delegate void OnCrouchChange(Player p);
         public delegate void OnSpritChange(Player p);
-        public event OnSpritChange OnSprint;
-        public static event OnSpritChange PlayerSprint;
         public delegate void OnPlayerRespawn(Player p);
         public static event OnPlayerRespawn PlayerRespawn;
         public event OnPlayerRespawn OnRespawn;
@@ -219,7 +223,7 @@ namespace SMP
         public string name { get { return username; } set { username = value; } }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SMP.Player"/> class.
+		/// Initializes a new instance of the <see cref="SMP.PLAYER"/> class.
 		/// </summary>
 		public Player()
 		{

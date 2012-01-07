@@ -20,6 +20,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using SMP.util;
+using SMP.PLAYER;
 
 //for console commands mainly and removes color codes from text
 

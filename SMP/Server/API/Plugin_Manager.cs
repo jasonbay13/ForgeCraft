@@ -23,7 +23,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using SMP.util;
-using SMP.Commands;
+using SMP.API.Commands;
+using SMP.API.Events.SystemEvents;
+using SMP.PLAYER;
 
 namespace SMP.API
 {

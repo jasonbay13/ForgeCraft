@@ -17,8 +17,11 @@
 */
 using System;
 using System.Collections.Generic;
+using SMP.PLAYER;
+using SMP.PLAYER.Crafting;
+using SMP.ENTITY;
 
-namespace SMP
+namespace SMP.INVENTORY
 {
 	public class Inventory
 	{

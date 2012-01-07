@@ -19,8 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SMP.PLAYER;
 
-namespace SMP
+namespace SMP.ENTITY
 {
 	class Creeper : AI
 	{

@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SMP.Generator;
+using SMP.PLAYER;
+using SMP.ENTITY;
 
 namespace SMP
 {

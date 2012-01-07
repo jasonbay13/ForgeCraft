@@ -19,6 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SMP.util;
+using SMP.PLAYER.Crafting;
+using SMP.PLAYER;
+using SMP.INVENTORY;
 
 namespace SMP
 {

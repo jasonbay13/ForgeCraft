@@ -21,7 +21,7 @@ using System.Linq;
 using System.Text;
 using SMP.API;
 
-namespace SMP.API
+namespace SMP.API.Commands
 {
     public sealed class CommandList
     {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SMP.ENTITY;
+using SMP.PLAYER;
 
 namespace SMP
 {

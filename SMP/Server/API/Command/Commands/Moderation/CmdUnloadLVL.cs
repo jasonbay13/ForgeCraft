@@ -16,8 +16,8 @@
 	permissions and limitations under the Licenses.
 */
 using System;
-using SMP.API;
-
+using SMP.API.Commands;
+using SMP.PLAYER;
 namespace SMP.Commands
 {
     public class CmdUnloadLVL : Command

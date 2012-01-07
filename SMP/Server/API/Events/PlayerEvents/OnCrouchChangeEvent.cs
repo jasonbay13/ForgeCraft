@@ -1,37 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.PLAYER;
 
-namespace SMP.API
+namespace SMP.API.Events.PlayerEvents
 {
-    public class OnPlayerChatEvent
+    public class OnCrouchChangeEvent
     {
-        internal static List<OnPlayerChatEvent> events = new List<OnPlayerChatEvent>();
+        internal static List<OnCrouchChangeEvent> events = new List<OnCrouchChangeEvent>();
         Plugin plugin;
-        Player.OnPlayerChat method;
+        Player.OnCrouchChange method;
         Priority priority;
-        internal OnPlayerChatEvent(Player.OnPlayerChat method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
-        internal static void Call(string message, Player p)
+        internal OnCrouchChangeEvent(Player.OnCrouchChange method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal static void Call(Player p)
         {
-            events.ForEach(delegate(OnPlayerChatEvent p1)
+            events.ForEach(delegate(OnCrouchChangeEvent p1)
             {
                 try
                 {
-                    p1.method(message, p);
+                    p1.method(p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerChat Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerCrouchChange Event!"); Logger.LogErrorToFile(e); }
             });
         }
-        public static void Organize()
+        static void Organize()
         {
-            List<OnPlayerChatEvent> temp = new List<OnPlayerChatEvent>();
-            List<OnPlayerChatEvent> temp2 = events;
-            OnPlayerChatEvent temp3 = null;
+            List<OnCrouchChangeEvent> temp = new List<OnCrouchChangeEvent>();
+            List<OnCrouchChangeEvent> temp2 = events;
+            OnCrouchChangeEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (OnPlayerChatEvent p in temp2)
+                foreach (OnCrouchChangeEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -45,20 +46,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static OnPlayerChatEvent Find(Plugin plugin)
+        public static OnCrouchChangeEvent Find(Plugin plugin)
         {
-            foreach (OnPlayerChatEvent p in events.ToArray())
+            foreach (OnCrouchChangeEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnPlayerChat method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnCrouchChange method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnPlayerChatEvent(method, priority, plugin));
+            events.Add(new OnCrouchChangeEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

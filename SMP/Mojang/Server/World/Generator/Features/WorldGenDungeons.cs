@@ -1,4 +1,6 @@
 ﻿using System;
+using SMP.INVENTORY;
+using SMP.PLAYER.Crafting;
 
 namespace SMP.Generator
 {

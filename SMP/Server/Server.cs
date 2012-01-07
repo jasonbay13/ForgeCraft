@@ -24,9 +24,14 @@ using System.Net.Sockets;
 using MonoTorrent.Client;
 using System.Threading;
 using System.IO;
-using SMP.Commands;
+using SMP.API.Commands;
 using SMP.util;
 using SMP.API;
+using SMP.PLAYER.Crafting;
+using SMP.PLAYER;
+using SMP.PLAYER.Enchantments;
+using SMP.INVENTORY;
+using SMP.ENTITY;
 
 namespace SMP
 {

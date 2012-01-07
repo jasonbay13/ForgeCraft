@@ -22,8 +22,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using SMP.util;
+using SMP.PLAYER;
+using SMP.PLAYER.Crafting;
 
-namespace SMP
+namespace SMP.ENTITY
 {
 	public class Entity
 	{

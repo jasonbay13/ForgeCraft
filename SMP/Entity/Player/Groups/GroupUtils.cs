@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.PLAYER;
 
 /* Notes to self (Keith)
  * if no track is found than try to find a group with inheritance //untested

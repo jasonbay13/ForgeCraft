@@ -1,37 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.PLAYER;
 
-namespace SMP.API
+namespace SMP.API.Events.PlayerEvents
 {
-    public class OnCrouchChangeEvent
+    public class OnPlayerSprintEvent
     {
-        internal static List<OnCrouchChangeEvent> events = new List<OnCrouchChangeEvent>();
+        internal static List<OnPlayerSprintEvent> events = new List<OnPlayerSprintEvent>();
         Plugin plugin;
-        Player.OnCrouchChange method;
+        Player.OnSpritChange method;
         Priority priority;
-        internal OnCrouchChangeEvent(Player.OnCrouchChange method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal OnPlayerSprintEvent(Player.OnSpritChange method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
         internal static void Call(Player p)
         {
-            events.ForEach(delegate(OnCrouchChangeEvent p1)
+            events.ForEach(delegate(OnPlayerSprintEvent p1)
             {
                 try
                 {
                     p1.method(p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerCrouchChange Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerKick Event!"); Logger.LogErrorToFile(e); }
             });
         }
-        static void Organize()
+        public static void Organize()
         {
-            List<OnCrouchChangeEvent> temp = new List<OnCrouchChangeEvent>();
-            List<OnCrouchChangeEvent> temp2 = events;
-            OnCrouchChangeEvent temp3 = null;
+            List<OnPlayerSprintEvent> temp = new List<OnPlayerSprintEvent>();
+            List<OnPlayerSprintEvent> temp2 = events;
+            OnPlayerSprintEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (OnCrouchChangeEvent p in temp2)
+                foreach (OnPlayerSprintEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -45,20 +46,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static OnCrouchChangeEvent Find(Plugin plugin)
+        public static OnPlayerSprintEvent Find(Plugin plugin)
         {
-            foreach (OnCrouchChangeEvent p in events.ToArray())
+            foreach (OnPlayerSprintEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnCrouchChange method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnSpritChange method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnCrouchChangeEvent(method, priority, plugin));
+            events.Add(new OnPlayerSprintEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

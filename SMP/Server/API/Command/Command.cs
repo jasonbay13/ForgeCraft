@@ -19,8 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SMP.Commands;
+using SMP.PLAYER;
 
-namespace SMP.API
+namespace SMP.API.Commands
 {
     public abstract class Command : IComparable<Command>
     {

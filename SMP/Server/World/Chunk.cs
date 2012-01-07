@@ -22,6 +22,10 @@ using Ionic.Zlib;
 using Substrate.Nbt;
 using System.Linq;
 using SMP.util;
+using SMP.ENTITY;
+using SMP.PLAYER;
+using SMP.INVENTORY;
+using SMP.PLAYER.Crafting;
 
 namespace SMP
 {

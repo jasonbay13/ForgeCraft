@@ -21,9 +21,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net;
 using SMP.util;
-using SMP.API;
+using SMP.API.Events.PlayerEvents;
+using SMP.ENTITY;
+using SMP.API.Commands;
+using SMP.ECO;
+using SMP.INVENTORY;
+using SMP.PLAYER.Enchantments;
+using SMP.PLAYER.Crafting;
 
-namespace SMP
+namespace SMP.PLAYER
 {
 
     /// <summary>

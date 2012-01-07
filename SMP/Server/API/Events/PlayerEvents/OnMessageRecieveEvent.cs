@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.PLAYER;
 
-namespace SMP.API
+namespace SMP.API.Events.PlayerEvents
 {
     public class OnMessageRecieveEvent
     {

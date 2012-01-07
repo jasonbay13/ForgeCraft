@@ -17,8 +17,8 @@
 */
 using System;
 using System.Collections.Generic;
-using SMP.API;
-
+using SMP.API.Commands;
+using SMP.PLAYER;
 namespace SMP.Commands
 {
 	public class CmdViewDistance : Command

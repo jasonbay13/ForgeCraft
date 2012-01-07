@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SMP
+namespace SMP.PLAYER
 {
     public class Experience
     {

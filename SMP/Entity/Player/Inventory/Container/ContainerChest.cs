@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using SMP.util;
 using Substrate.Nbt;
+using SMP.PLAYER.Crafting;
+using SMP.PLAYER;
 
-namespace SMP
+namespace SMP.INVENTORY
 {
     public class ContainerChest : Container
     {

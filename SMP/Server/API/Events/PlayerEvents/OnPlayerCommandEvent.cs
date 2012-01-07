@@ -1,37 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
+using SMP.PLAYER;
 
-namespace SMP.API
+namespace SMP.API.Events.PlayerEvents
 {
-    public class OnPlayerKickEvent
+    public class OnPlayerCommandEvent
     {
-        internal static List<OnPlayerKickEvent> events = new List<OnPlayerKickEvent>();
+        internal static List<OnPlayerCommandEvent> events = new List<OnPlayerCommandEvent>();
         Plugin plugin;
-        Player.OnPlayerKicked method;
+        Player.OnPlayerCommand method;
         Priority priority;
-        internal OnPlayerKickEvent(Player.OnPlayerKicked method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
-        internal static void Call(Player p, string reason)
+        internal OnPlayerCommandEvent(Player.OnPlayerCommand method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal static void Call(string cmd, string message, Player p)
         {
-            events.ForEach(delegate(OnPlayerKickEvent p1)
+            events.ForEach(delegate(OnPlayerCommandEvent p1)
             {
                 try
                 {
-                    p1.method(p, reason);
+                    p1.method(cmd, message, p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerKick Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PlayerCommand Event!"); Logger.LogErrorToFile(e); }
             });
         }
         public static void Organize()
         {
-            List<OnPlayerKickEvent> temp = new List<OnPlayerKickEvent>();
-            List<OnPlayerKickEvent> temp2 = events;
-            OnPlayerKickEvent temp3 = null;
+            List<OnPlayerCommandEvent> temp = new List<OnPlayerCommandEvent>();
+            List<OnPlayerCommandEvent> temp2 = events;
+            OnPlayerCommandEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (OnPlayerKickEvent p in temp2)
+                foreach (OnPlayerCommandEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -45,20 +46,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static OnPlayerKickEvent Find(Plugin plugin)
+        public static OnPlayerCommandEvent Find(Plugin plugin)
         {
-            foreach (OnPlayerKickEvent p in events.ToArray())
+            foreach (OnPlayerCommandEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnPlayerKicked method, Priority priority, Plugin plugin)
+        public static void Register(Player.OnPlayerCommand method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnPlayerKickEvent(method, priority, plugin));
+            events.Add(new OnPlayerCommandEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

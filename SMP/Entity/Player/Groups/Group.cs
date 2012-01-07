@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SMP.util;
+using SMP.PLAYER;
 
 /*TODO
  * inheritance semi-done

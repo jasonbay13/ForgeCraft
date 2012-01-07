@@ -1,38 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using SMP.util;
-using SMP.API;
 
-namespace SMP.API
+namespace SMP.API.Events.SystemEvents
 {
-    public class OnPlayerAuthEvent
+    public class PluginUnloadEvent
     {
-        internal static List<OnPlayerAuthEvent> events = new List<OnPlayerAuthEvent>();
+        internal static List<PluginUnloadEvent> events = new List<PluginUnloadEvent>();
         Plugin plugin;
-        Player.OnPlayerAuth method;
+        Plugin.PluginUnload method;
         Priority priority;
-        internal OnPlayerAuthEvent(Player.OnPlayerAuth method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
-        internal static void Call(Player p)
+        internal PluginUnloadEvent(Plugin.PluginUnload method, Priority priority, Plugin plugin) { this.plugin = plugin; this.priority = priority; this.method = method; }
+        internal static void Call(Plugin p)
         {
-            events.ForEach(delegate(OnPlayerAuthEvent p1)
+            events.ForEach(delegate(PluginUnloadEvent p1)
             {
                 try
                 {
                     p1.method(p);
                 }
-                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the OnPlayerAuth Event!"); Logger.LogErrorToFile(e); }
+                catch (Exception e) { Logger.Log("The plugin " + p1.plugin.name + " errored when calling the PluginUnload Event!"); Logger.LogErrorToFile(e); }
             });
         }
         public static void Organize()
         {
-            List<OnPlayerAuthEvent> temp = new List<OnPlayerAuthEvent>();
-            List<OnPlayerAuthEvent> temp2 = events;
-            OnPlayerAuthEvent temp3 = null;
+            List<PluginUnloadEvent> temp = new List<PluginUnloadEvent>();
+            List<PluginUnloadEvent> temp2 = events;
+            PluginUnloadEvent temp3 = null;
             int i = 0;
             int ii = temp2.Count;
             while (i < ii)
             {
-                foreach (OnPlayerAuthEvent p in temp2)
+                foreach (PluginUnloadEvent p in temp2)
                 {
                     if (temp3 == null)
                         temp3 = p;
@@ -46,20 +45,20 @@ namespace SMP.API
             }
             events = temp;
         }
-        public static OnPlayerAuthEvent Find(Plugin plugin)
+        public static PluginUnloadEvent Find(Plugin plugin)
         {
-            foreach (OnPlayerAuthEvent p in events.ToArray())
+            foreach (PluginUnloadEvent p in events.ToArray())
             {
                 if (p.plugin == plugin)
                     return p;
             }
             return null;
         }
-        public static void Register(Player.OnPlayerAuth method, Priority priority, Plugin plugin)
+        public static void Register(Plugin.PluginUnload method, Priority priority, Plugin plugin)
         {
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
-            events.Add(new OnPlayerAuthEvent(method, priority, plugin));
+            events.Add(new PluginUnloadEvent(method, priority, plugin));
             Organize();
         }
         public static void UnRegister(Plugin plugin)

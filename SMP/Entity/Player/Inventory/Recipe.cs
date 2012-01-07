@@ -16,7 +16,7 @@
 	permissions and limitations under the Licenses.
 */
 using System;
-namespace SMP
+namespace SMP.PLAYER.Crafting
 {
     public struct Recipe 
     {

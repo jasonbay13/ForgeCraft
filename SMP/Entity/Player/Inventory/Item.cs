@@ -20,8 +20,10 @@ using System.IO;
 using System.Collections.Generic;
 using SMP.util;
 using Substrate.Nbt;
+using SMP.ENTITY;
+using SMP.PLAYER.Enchantments;
 
-namespace SMP
+namespace SMP.PLAYER.Crafting
 {
 	public class Item
     {

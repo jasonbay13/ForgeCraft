@@ -18,7 +18,8 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
-using SMP.API;
+using SMP.PLAYER;
+using SMP.API.Commands;
 
 //TODO: group players by rank
 

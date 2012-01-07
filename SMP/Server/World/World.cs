@@ -23,6 +23,10 @@ using System.Linq;
 using Ionic.Zlib;
 using SMP.Generator;
 using SMP.util;
+using SMP.INVENTORY;
+using SMP.PLAYER;
+using SMP.PLAYER.Crafting;
+using SMP.ENTITY;
 
 namespace SMP
 {

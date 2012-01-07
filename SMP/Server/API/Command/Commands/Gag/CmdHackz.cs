@@ -17,7 +17,8 @@
 */
 using System;
 using System.Collections.Generic;
-using SMP.API;
+using SMP.API.Commands;
+using SMP.PLAYER;
 
 // for LULZ
 //Epic Win, we should have the MCLawl /hacks message for teh lulz. 
