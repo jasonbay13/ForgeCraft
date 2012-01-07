@@ -162,7 +162,8 @@
     <Compile Include="Mojang\util\LongHashMap.cs" />
     <Compile Include="Mojang\util\LongHashMapEntry.cs" />
     <Compile Include="Server\API\Crafting\Custom Recipes.cs" />
-    <Content Include="Server\API\Crafting\Example.txt" />
+    <Content Include="Server\API\Crafting\CraftBench Example.txt" />
+    <Content Include="Server\API\Crafting\PersonalInventory Example.txt" />
     <Compile Include="Server\API\Events\PlayerEvents\OnCrouchChangeEvent.cs" />
     <Compile Include="Server\API\Events\PlayerEvents\OnMessageRecieveEvent.cs" />
     <Compile Include="Server\API\Events\PlayerEvents\OnPlayerChatEvent.cs" />

@@ -1,0 +1,35 @@
+﻿using System;
+using SMP.API;
+using SMP;
+using SMP.PLAYER.Crafting;
+
+namespace Example
+{
+    public class Example : Custom_Recipes
+    {
+        public override Item[] line1
+        {
+            get { return new Item[] { new Item(Items.AppleGolden), new Item(Items.AppleGolden) }; }
+        }
+        public override Item[] line2
+        {
+            get { return new Item[] { new Item(Items.AppleGolden), new Item(Items.AppleGolden) }; }
+        }
+        public override Item[] line3
+        {
+            get { return null; }
+        }
+        public override string name
+        {
+            get { return "Example Name";  }
+        }
+        public override Item output
+        {
+            get { return new Item(Items.Bed); }
+        }
+        public override Size size
+        {
+            get { return Size.PersonalInventory; }
+        }
+    }
+}
