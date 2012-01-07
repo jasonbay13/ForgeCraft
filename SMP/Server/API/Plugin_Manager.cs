@@ -135,6 +135,20 @@ namespace SMP.API
                                     else Logger.Log("An unknown command failed to load!");
                                 }
                             }
+                            else if (t.BaseType == typeof(Custom_Recipes))
+                            {
+                                try
+                                {
+                                    instance = Activator.CreateInstance(t);
+                                    Custom_Recipes.Load((Custom_Recipes)instance);
+                                    Logger.LogFormat("Loaded recipe: {0}", ((Custom_Recipes)instance).name);
+                                }
+                                catch
+                                {
+                                    if (instance != null) Logger.LogFormat("The recipe \"{0}\" failed to load!", ((Custom_Recipes)instance).name);
+                                    else Logger.Log("An unknown recipe failed to load!");
+                                }
+                            }
                         }
                         catch { }
                         finally

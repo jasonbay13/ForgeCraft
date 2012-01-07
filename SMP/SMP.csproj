@@ -161,6 +161,8 @@
     <Compile Include="Mojang\Server\World\WorldChunkManager.cs" />
     <Compile Include="Mojang\util\LongHashMap.cs" />
     <Compile Include="Mojang\util\LongHashMapEntry.cs" />
+    <Compile Include="Server\API\Crafting\Custom Recipes.cs" />
+    <Content Include="Server\API\Crafting\Example.txt" />
     <Compile Include="Server\API\Events\PlayerEvents\OnCrouchChangeEvent.cs" />
     <Compile Include="Server\API\Events\PlayerEvents\OnMessageRecieveEvent.cs" />
     <Compile Include="Server\API\Events\PlayerEvents\OnPlayerChatEvent.cs" />
@@ -171,7 +173,7 @@
     <Compile Include="Server\API\Events\PlayerEvents\PlayerDisconnectEvent.cs" />
     <Compile Include="Server\API\Events\SystemEvents\PluginLoadEvent.cs" />
     <Compile Include="Server\API\Events\SystemEvents\PluginUnloadEvent.cs" />
-    <Compile Include="Server\API\Priority.cs" />
+    <Compile Include="Server\API\Events\Priority.cs" />
     <Compile Include="Server\API\Events\PlayerEvents\OnPlayerAuthEvent.cs" />
     <Compile Include="Server\World\Generator\Noise\NoiseGenerator.cs" />
     <Compile Include="Mojang\Server\World\Generator\Noise\NoiseGeneratorOctaves.cs" />
@@ -184,8 +186,8 @@
     </Compile>
     <Compile Include="Entity\Player\Inventory\Crafting.cs" />
     <Compile Include="Entity\Player\Experience.cs" />
-    <Compile Include="Server\API\Events.cs" />
-    <Compile Include="Server\API\Plugin.Events.cs" />
+    <Compile Include="Server\API\Events\Events.cs" />
+    <Compile Include="Server\API\Events\Plugin.Events.cs" />
     <Compile Include="Server\WebserverStuff\Remote.Handler.cs" />
     <Compile Include="Server\WebserverStuff\RemotePlayer.cs" />
     <Compile Include="Mojang\Server\World\Explosion.cs" />

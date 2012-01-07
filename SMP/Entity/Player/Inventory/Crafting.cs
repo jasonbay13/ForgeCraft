@@ -55,6 +55,20 @@ namespace SMP.PLAYER.Crafting
             CreateDefinedRecipe("XXX###XXX", new Item((short)Items.Diamond, 3), ParseForCrafting("X#".ToArray(), new Item[] { new Item((short)Blocks.Sand), new Item((short)-1) }), 9);
             util.Logger.Log(recipes.Count + " Recipes. Created in " + (DateTime.Now - start).Milliseconds);
         }
+        public static void CreateDefinedRecipe(Item output, Item[] stack, short tableSize)
+        {
+            if (output == null) throw new NullReferenceException("Item output is null");
+            Item[] iArray = new Item[tableSize + 1];
+            for (int i = 0; i < stack.Length; i++)
+            {
+                for (int j = 1; j <= tableSize; j++)
+                    iArray[j] = stack[i];
+            }
+            iArray[0] = output;
+            TableData data = new TableData();
+            data.addData(iArray);
+            recipes.Add(data);
+        }
         public static void CreateDefinedRecipe(string format, Item output, CraftStack[] stack, short tableSize)
         {
 

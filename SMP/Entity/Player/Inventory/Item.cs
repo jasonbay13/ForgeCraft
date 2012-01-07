@@ -73,6 +73,7 @@ namespace SMP.PLAYER.Crafting
 
         internal Item(bool chunk) { }
         public Item() { isInventory = true; }
+        public Item(Items i) : this((short)i) { }
         public Item(short id) : this(id, 1, 0) { }
         public Item(short id, byte count) : this(id, count, 0) { }
         public Item(short id, byte count, short meta)

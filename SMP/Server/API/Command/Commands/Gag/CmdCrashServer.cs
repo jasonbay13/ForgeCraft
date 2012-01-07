@@ -18,6 +18,8 @@
 using System;
 using System.Collections.Generic;
 using SMP.API;
+using SMP.PLAYER;
+using SMP.API.Commands;
 
 namespace SMP.Commands
 {
