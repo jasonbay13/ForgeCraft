@@ -41,6 +41,7 @@ namespace SMP
 		public float SpawnPitch;
 		//public string Map_Name; // THE FUCK IS THIS SHIT!?
 		public string name;
+        public string leveltype = "DEFAULT";
         private long Seed;
         public long seed { get { return Seed; } set { Seed = value; } }
 		public long time;

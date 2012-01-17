@@ -310,7 +310,7 @@ namespace SMP.PLAYER
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
-					case 0x09: length = 13; break; //Respawn
+                    case 0x09: length = 15 + (util.EndianBitConverter.Big.ToInt16(buffer, 14) * 2); break; //Respawn
 					
 					case 0x0A: length = 1; break; //OnGround incoming
 					case 0x0B: length = 33; break; //Pos incoming
@@ -908,12 +908,12 @@ namespace SMP.PLAYER
 				try
 				{
                     short name = MCUtil.Protocol.GetBytesLength(Server.name);
-					byte[] bytes = new byte[name + MCUtil.Protocol.GetBytesLength("DEFAULT") + 20];
+					byte[] bytes = new byte[name + MCUtil.Protocol.GetBytesLength(Server.mainlevel.leveltype) + 20];
 
 					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); // id : int
                     MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4); // unused string : short+stringlength*2
                     util.EndianBitConverter.Big.GetBytes(level.seed).CopyTo(bytes, name + 4); // map seed : long
-                    MCUtil.Protocol.GetBytes("DEFAULT").CopyTo(bytes, name + 12); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
+                    MCUtil.Protocol.GetBytes(Server.mainlevel.leveltype).CopyTo(bytes, name + 12); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
 
                     bytes[bytes.Length - 5] = Server.mode; // 0 for survival, 1 for creative 
                     bytes[bytes.Length - 4] = (byte)level.dimension; // -1: The Nether, 0: The Overworld, 1: The End 
@@ -1349,13 +1349,14 @@ namespace SMP.PLAYER
 			}
             public void SendRespawn()
             {
-                byte[] bytes = new byte[13];
+                byte[] bytes = new byte[13 + MCUtil.Protocol.GetBytesLength(level.leveltype)];
 
                 bytes[0] = (byte)level.dimension;
 				bytes[1] = Server.difficulty;
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
 				util.BigEndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, 5);
+                MCUtil.Protocol.GetBytes(level.leveltype).CopyTo(bytes, 13); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
                 SendRaw(0x09, bytes);
             }
 			#endregion
