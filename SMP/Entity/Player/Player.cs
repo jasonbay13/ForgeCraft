@@ -306,7 +306,7 @@ namespace SMP.PLAYER
 				switch (msg)
 				{
                     case 0x00: length = 4; if (buffer.Length < 5 || util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Logger.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
+					case 0x01: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 24); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
@@ -907,15 +907,18 @@ namespace SMP.PLAYER
 			{
 				try
 				{
-					byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(Server.name) + 20];
+                    short name = MCUtil.Protocol.GetBytesLength(Server.name);
+					byte[] bytes = new byte[name + MCUtil.Protocol.GetBytesLength("DEFAULT") + 20];
 
-					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
-                    MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4);
-					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16);
-					bytes[bytes.Length - 5] = Server.mode;
-					bytes[bytes.Length - 4] = (byte)level.dimension;
-                    bytes[bytes.Length - 3] = Server.difficulty;
-					bytes[bytes.Length - 2] = level.height;
+					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); // id : int
+                    MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4); // unused string : short+stringlength*2
+                    util.EndianBitConverter.Big.GetBytes(level.seed).CopyTo(bytes, name + 4); // map seed : long
+                    MCUtil.Protocol.GetBytes("DEFAULT").CopyTo(bytes, name + 12); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
+
+                    bytes[bytes.Length - 5] = Server.mode; // 0 for survival, 1 for creative 
+                    bytes[bytes.Length - 4] = (byte)level.dimension; // -1: The Nether, 0: The Overworld, 1: The End 
+                    bytes[bytes.Length - 3] = Server.difficulty; //	0 thru 3 for Peaceful, Easy, Normal, Hard 
+					bytes[bytes.Length - 2] = level.height; // default 128, unsigned
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
 					SendRaw(0x01, bytes);

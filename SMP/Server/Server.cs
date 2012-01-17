@@ -42,7 +42,7 @@ namespace SMP
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static readonly int protocolversion = 22;
+		public static readonly int protocolversion = 23;
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
