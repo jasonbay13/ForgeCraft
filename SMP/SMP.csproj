@@ -65,6 +65,8 @@
     <Compile Include="Server\API\Command\Commands\Build\CmdFlat.cs" />
     <Compile Include="Server\API\Command\Commands\Cheats\CmdHeal.cs" />
     <Compile Include="Server\API\Command\Commands\Gag\CmdCrashServer.cs" />
+    <Compile Include="Server\API\Command\Commands\General\CmdHome.cs" />
+    <Compile Include="Server\API\Command\Commands\General\CmdSethome.cs" />
     <Compile Include="Server\API\Command\Commands\Information\CmdDevs.cs" />
     <Compile Include="Server\API\Command\Commands\Information\CmdSoftware.cs" />
     <Compile Include="Server\API\Command\Commands\Moderation\CmdMoonPhase.cs" />

@@ -48,7 +48,8 @@ namespace SMP
 		public static ItemDB ItemDB;
 
         public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010", "bemacized", "wouto1997", "meinigeshandwerk" }; //add your names here (must be all lower case!)
-		
+        public static List<string> homedata = new List<string>();
+
 		public static bool unsafe_plugin = false;
 		internal ConsolePlayer consolePlayer;
         #region ==EVENTS==
@@ -113,6 +114,7 @@ namespace SMP
 			UpdateDB();
 			//ItemDB = new ItemDB();
             LoadFiles();
+            LoadData();
 		    
             Properties.Load("properties/server.properties");
 			Command.InitCore();
@@ -261,9 +263,18 @@ namespace SMP
             if (!Directory.Exists("properties")) Directory.CreateDirectory("properties");
             if (!Directory.Exists("text")) Directory.CreateDirectory("text");
 
+            if (!File.Exists("text/homedata.dat")) File.Create("text/homedata.dat").Close();
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
             if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
             
+        }
+
+        private void LoadData()
+        {
+            foreach (string line in File.ReadAllLines("text/homedata.dat"))
+            {
+                homedata.Add(line);
+            }
         }
 
         public void UpdateDevs()
