@@ -205,6 +205,7 @@ namespace SMP.PLAYER
         public bool IsOnFire = false;
         public bool isFlying = false;
         public bool isSleeping = false;
+        private bool touchedground; // temporary fix for fall damage killing on spawn
         public Point3 sleepingPos;
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;

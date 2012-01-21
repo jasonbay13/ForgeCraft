@@ -375,6 +375,7 @@ namespace SMP.PLAYER
 
                     if (!GodMode && Mode == 0)
                     {
+                        if (!touchedground) { touchedground = true; return; } // temporary fix
                         short damage = (short)Math.Round(dist - 3);
                         if (damage > 0)
                         {
