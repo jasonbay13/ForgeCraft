@@ -902,6 +902,33 @@ namespace SMP.PLAYER
             {
                 Teleport_Player(level.SpawnPos, level.SpawnYaw, level.SpawnPitch);
             }
+            public void Teleport_Saved_Pos()
+            {
+                using (System.Data.DataTable dt = Server.SQLiteDB.GetDataTable("SELECT * FROM SavedLoc WHERE Username='" + username + "' AND World='" + level.name + "'"))
+                {
+                    if (dt.Rows.Count == 1)
+                    {
+                        string name, world;
+                        double x, y, z;
+                        float yaw, pitch;
+
+                        name = dt.Rows[0]["Username"].ToString();
+                        world = dt.Rows[0]["World"].ToString();
+                        x = Convert.ToDouble(dt.Rows[0]["X"]);
+                        y = Convert.ToDouble(dt.Rows[0]["Y"]);
+                        z = Convert.ToDouble(dt.Rows[0]["Z"]);
+                        float.TryParse(dt.Rows[0]["Yaw"].ToString(), out yaw);
+                        float.TryParse(dt.Rows[0]["Pitch"].ToString(), out pitch);
+                        Teleport_Player(x, y, z, yaw, pitch);
+                        //Logger.Log(name + " " + world + " " + x + " " + y + " " + z); //debug line
+                    }
+                    else
+                    {
+                        Teleport_Player(level.SpawnPos, level.SpawnYaw, level.SpawnPitch);
+                        //Logger.Log("fail"); //debug line
+                    }
+                }
+            }
 			#endregion
 			#region Login Stuffs
 			void SendLoginPass()
@@ -951,7 +978,7 @@ namespace SMP.PLAYER
 				bytes[40] = onground;
 				SendRaw(0x0D, bytes);*/
 
-                Teleport_Spawn();
+                Teleport_Saved_Pos(); // location from dc
 
 				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
@@ -1743,8 +1770,17 @@ namespace SMP.PLAYER
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS
-		
-		private void SaveAttributes(bool newplayer)
+
+        /// <summary>
+        /// Saves players location for use when joining.
+        /// </summary>
+        private void SaveLoc()
+        {
+            if (Server.SQLiteDB.ExecuteNonQuery("UPDATE SavedLoc SET X=" + pos.X + ",Y=" + pos.Y + ",Z=" + pos.Z + ",Yaw=" + rot[0] + ",Pitch=" + rot[1] + " WHERE Username='" + username + "' AND World='" + level.name + "';") == 0)
+                Server.SQLiteDB.ExecuteNonQuery("INSERT INTO SavedLoc (Username,World,X,Y,Z,Yaw,Pitch) VALUES('" + username + "','" + level.name + "'," + pos.X + "," + pos.Y + "," + pos.Z + "," + rot[0] + "," + rot[1] + ");");
+        }
+
+        private void SaveAttributes(bool newplayer)
 		{
 			Dictionary<string, string> data = new Dictionary<string, string>();
 			
@@ -1849,7 +1885,8 @@ namespace SMP.PLAYER
 					Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
 				else
 					Server.SQLiteDB.Insert("Player", data);
-				
+
+                if (!newplayer) SaveLoc();
 			}
 			catch
 			{

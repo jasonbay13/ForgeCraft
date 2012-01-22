@@ -1129,7 +1129,7 @@ namespace SMP.PLAYER
             health = 20;
             GlobalNamedEntitySpawn(this);
             SendRespawn();
-            Teleport_Spawn();
+            Teleport_Spawn(); // todo: beds?
         }
         public static short BlockDropSwitch(short id)
         {
