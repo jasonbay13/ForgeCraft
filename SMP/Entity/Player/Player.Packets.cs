@@ -375,6 +375,7 @@ namespace SMP.PLAYER
 
                     if (!GodMode && Mode == 0)
                     {
+                        if (!touchedground) { touchedground = true; return; } // temporary fix
                         short damage = (short)Math.Round(dist - 3);
                         if (damage > 0)
                         {
@@ -1141,7 +1142,7 @@ namespace SMP.PLAYER
             health = 20;
             GlobalNamedEntitySpawn(this);
             SendRespawn();
-            Teleport_Spawn();
+            Teleport_Spawn(); // todo: beds?
         }
         public static short BlockDropSwitch(short id)
         {
