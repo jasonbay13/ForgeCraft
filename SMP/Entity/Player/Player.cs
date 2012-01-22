@@ -1534,6 +1534,7 @@ namespace SMP.PLAYER
         }
 		#endregion
 
+        [Obsolete("Notch added fly into client", false)]
 		internal void FlyCode()
 		{
 			List<Point3> temp = new List<Point3>();
@@ -2204,12 +2205,7 @@ namespace SMP.PLAYER
             }
             return false;
         }
-        public static void Explode(Player p)
-        {
-            Explosion xpl = new Explosion(p.level, p.pos.x, p.pos.y, p.pos.z, (new Random()).Next(5, 10));
-            xpl.DoExplosionA();
-            xpl.DoExplosionB();
-        }
+
         public void Explode()
         {
             Explosion xpl = new Explosion(this.level, this.pos.x, this.pos.y, this.pos.z, (new Random()).Next(5, 10));

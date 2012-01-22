@@ -122,7 +122,7 @@ namespace SMP
             Physics.Handlers.InitAll();
 			Plugin.Load();
             Command.SortCommands();
-            Crafting.Init();
+            CraftingManager.Init();
 			
             //Get latest developerlist
             new Thread(new ThreadStart(UpdateDevs)).Start();

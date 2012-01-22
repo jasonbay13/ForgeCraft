@@ -82,7 +82,7 @@
     <Compile Include="Server\API\Command\Commands\Other\CmdChunks.cs" />
     <Compile Include="Server\API\Command\Commands\Other\CmdCredits.cs" />
     <Compile Include="Server\API\Command\Commands\Other\CmdMetaData.cs" />
-    <Compile Include="Entity\Player\Inventory\Recipe.cs" />
+    <Compile Include="Entity\Player\Inventory\Crafting\Recipe.cs" />
     <Compile Include="Entity\Player\Inventory\Container\Container.cs" />
     <Compile Include="Entity\Player\Inventory\Container\ContainerChest.cs" />
     <Compile Include="Entity\Player\Inventory\Enchantment.cs" />
@@ -187,7 +187,7 @@
     <Compile Include="Server\GUI\InventoryDebug.Designer.cs">
       <DependentUpon>InventoryDebug.cs</DependentUpon>
     </Compile>
-    <Compile Include="Entity\Player\Inventory\Crafting.cs" />
+    <Compile Include="Entity\Player\Inventory\Crafting\CraftingManager.cs" />
     <Compile Include="Entity\Player\Experience.cs" />
     <Compile Include="Server\API\Events\Events.cs" />
     <Compile Include="Server\API\Events\Plugin.Events.cs" />

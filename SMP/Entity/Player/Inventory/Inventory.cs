@@ -169,7 +169,7 @@ namespace SMP.INVENTORY
             if (slot < 0 || slot > 44) return;
             Item item, clickItem = items[slot];
 
-            if(slot < 5)items = Crafting.CheckCrafting(p, slot, items);
+            //if(slot < 5)items = Crafting.CheckCrafting(p, slot, items);
 
             if (Shift)
             {
@@ -351,7 +351,7 @@ namespace SMP.INVENTORY
             }
 
             p.SendWindowItems(0, items);
-            p.SendItem(255, -1, p.OnMouse);
+            p.SendItem(255, 255, p.OnMouse);
 		}
 		
 		public void UpdateVisibleItemInHand(short id, short damage)
