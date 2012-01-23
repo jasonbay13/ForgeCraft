@@ -57,6 +57,7 @@ namespace SMP.API.Events.PlayerEvents
         }
         public static void Register(Player.OnPlayerChat method, Priority priority, Plugin plugin)
         {
+            //hi
             if (Find(plugin) != null)
                 throw new Exception("The user tried to register 2 of the same event!");
             events.Add(new OnMessageRecieveEvent(method, priority, plugin));
