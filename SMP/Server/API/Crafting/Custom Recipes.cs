@@ -23,7 +23,7 @@ namespace SMP.API
         {
             Item[] stack = c.GetStack();
             if (stack == null) throw new Exception("The stack returned null");
-            Crafting.CreateDefinedRecipe(c.output, stack, (short)c.size);
+            //CraftingManager.CreateDefinedRecipe(c.output, stack, (short)c.size);
         }
         public Item[] GetStack()
         {
@@ -38,14 +38,14 @@ namespace SMP.API
                 for (int i = 0; i < line1.Length; i++)
                 {
                     if (line1[i] == null)
-                        stack[i] = new Item(-1);
+                        stack[i] = Item.Nothing;
                     else
                         stack[i] = line1[i];
                 }
                 for (int i = 0; i < line2.Length; i++)
                 {
                     if (line2[i] == null)
-                        stack[i + add1] = new Item(-1);
+                        stack[i + add1] = Item.Nothing;
                     else
                         stack[i + add1] = line2[i];
                 }
@@ -54,7 +54,7 @@ namespace SMP.API
                     for (int i = 0; i < line3.Length; i++)
                     {
                         if (line3[i] == null)
-                            stack[i + 6] = new Item(-1);
+                            stack[i + 6] = Item.Nothing;
                         else
                             stack[i + 6] = line3[i];
                     }

@@ -155,34 +155,28 @@ namespace SMP
 
         public static bool operator ==(Point3 a, Point3 b)
         {
-            if (a.X == b.X && a.Y == b.Y && a.Z == b.Z) return true;
-            return false;
+            return (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
         }
         public static bool operator ==(Point3 a, int[] b)
         {
-            if (RD(a.X) == b[0] && RD(a.Y) == b[1] && RD(a.Z) == b[2]) return true;
-            return false;
+            return (RD(a.X) == b[0] && RD(a.Y) == b[1] && RD(a.Z) == b[2]) ;
         }
         public static bool operator ==(Point3 a, double[] b)
         {
-            if (a.X == b[0] && a.Y == b[1] && a.Z == b[2]) return true;
-            return false;
+            return (a.X == b[0] && a.Y == b[1] && a.Z == b[2]);
         }
 
         public static bool operator !=(Point3 a, Point3 b)
         {
-            if (a.x != b.x || a.y != b.y || a.z != b.z) return true;
-            return false;
+            return (a.x != b.x || a.y != b.y || a.z != b.z);
         }
         public static bool operator !=(Point3 a, int[] b)
         {
-            if (RD(a.x) != b[0] || RD(a.y) != b[1] || RD(a.z) != b[2]) return true;
-            return false;
+            return (RD(a.x) != b[0] || RD(a.y) != b[1] || RD(a.z) != b[2]) ;
         }
         public static bool operator !=(Point3 a, double[] b)
         {
-            if (a.x != b[0] || a.y != b[1] || a.z != b[2]) return true;
-            return false;
+            return (a.x != b[0] || a.y != b[1] || a.z != b[2]) ;
         }
 
         public static Point3 operator *(Point3 a, int b)

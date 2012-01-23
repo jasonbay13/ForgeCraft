@@ -402,6 +402,19 @@ namespace SMP
                                     ");"
                                                  ;
                             cmd.ExecuteNonQuery();
+
+                            cmd.CommandText =
+                                    "CREATE TABLE SavedLoc(" +
+                                    "Username  	TEXT, " +
+                                    "World		TEXT, " +
+                                    "X			DOUBLE, " +
+                                    "Y			DOUBLE, " +
+                                    "Z			DOUBLE, " +
+                                    "Yaw		FLOAT, " +
+                                    "Pitch		FLOAT " +
+                                    ");"
+                                                 ;
+                            cmd.ExecuteNonQuery();
                             #endregion
 
                             #region INSERTS

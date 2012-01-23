@@ -122,7 +122,7 @@ namespace SMP
             Physics.Handlers.InitAll();
 			Plugin.Load();
             Command.SortCommands();
-            Crafting.Init();
+            CraftingManager.Init();
 			
             //Get latest developerlist
             new Thread(new ThreadStart(UpdateDevs)).Start();
@@ -390,6 +390,17 @@ namespace SMP
                         "Line4		TEXT " +
                         ");"
                                      );
+            SQLiteDB.ExecuteNonQuery(
+                                    "CREATE TABLE IF NOT EXISTS SavedLoc(" +
+                                    "Username  	TEXT, " +
+                                    "World		TEXT, " +
+                                    "X			DOUBLE, " +
+                                    "Y			DOUBLE, " +
+                                    "Z			DOUBLE, " +
+                                    "Yaw		FLOAT, " +
+                                    "Pitch		FLOAT " +
+                                    ");"
+                                    );
         }
 
 	}

@@ -47,7 +47,6 @@ namespace SMP.INVENTORY
             }
             return null;
         }
-
         public void SetSlot(int slot, short id)
         {
             SetSlot(slot, id, 1, 0);
