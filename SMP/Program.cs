@@ -88,7 +88,7 @@ namespace SMP
                             Logger.Log(LogLevel.Info, "Stopping Server...");
 							for(int i =Player.players.Count -1; i >= 0; i--)
 							{
-								Player.players[i].Kick("Server Shutting Down!");
+								Player.players[i].Kick("Server is shutting down!");
 							}
                             Exit();
                             return;
