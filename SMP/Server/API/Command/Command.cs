@@ -75,6 +75,7 @@ namespace SMP.API.Commands
             core.Add(new CmdHackz());
             core.Add(new CmdHeal());
             core.Add(new CmdHelp());
+            core.Add(new CmdHome());
             core.Add(new CmdKick());
 			core.Add(new CmdKill());  
             core.Add(new CmdList());
@@ -93,6 +94,7 @@ namespace SMP.API.Commands
             core.Add(new CmdRelight());
             core.Add(new CmdReveal());
             core.Add(new CmdSay());
+            core.Add(new CmdSethome());
 			core.Add(new CmdSetRank());
             core.Add(new CmdSoftware());
             core.Add(new CmdSpheroid());

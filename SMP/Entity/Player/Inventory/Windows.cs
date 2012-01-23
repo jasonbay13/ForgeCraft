@@ -34,7 +34,7 @@ namespace SMP
         EnchantmentTable = 4,
         BrewingStand = 5
     }
-	public class Windows : IDisposable
+    public class Windows : IDisposable
     {
         #region Events
         //-----------Events-----------
@@ -51,12 +51,12 @@ namespace SMP
         public WindowType Type { get { return (WindowType)type; } }
         public int InventorySize { get { return items.Length; } }
         public byte id;
-		public string name = "Chest";
+        public string name = "Chest";
         public Player p;
         public Container container;
-		public Item[] items; //Hold all the items this window has inside it.
-		public Windows(WindowType type, Point3 pos, World world, Player p)
-		{
+        public Item[] items; //Hold all the items this window has inside it.
+        public Windows(WindowType type, Point3 pos, World world, Player p)
+        {
             try
             {
                 id = FreeId();
@@ -102,7 +102,7 @@ namespace SMP
                 }
             }
             catch { Logger.Log("Error making window!"); }
-		}
+        }
 
         public bool Add(short id, byte count, short meta, int slot)
         {
@@ -117,33 +117,30 @@ namespace SMP
             return true;
         }
 
-		public void Remove(Player p, int slot)
-		{
-			if (slot < items.Length) items[slot] = Item.Nothing;
-			else p.inventory.Remove((slot - items.Length) + 9);
-				
-		}
-		public void Remove(Player p, int slot, byte count)
-		{
-			if (slot < items.Length) items[slot].count -= count;
-			else p.inventory.Remove((slot - items.Length) + 9, count);
+        public void Remove(Player p, int slot)
+        {
+            if (slot < items.Length) items[slot] = Item.Nothing;
+            else p.inventory.Remove((slot - items.Length) + 9);
 
-		}
+        }
+        public void Remove(Player p, int slot, byte count)
+        {
+            if (slot < items.Length) items[slot].count -= count;
+            else p.inventory.Remove((slot - items.Length) + 9, count);
 
-        public void HandleClick(Player p, short slot, ClickType click, short ActionID, bool Shift)
-		{
+        }
+
+        public void HandleClick(Player p, short slot, ClickType click, short ActionID, bool Shift, Item clicked)
+        {
+            
             if (slot == -999)
             {
                 p.inventory.HandleClick(slot, click, ActionID, Shift);
                 return;
             }
             if (slot < 0 || slot > InventorySize + 35) return;
-           /* if (Type == WindowType.Workbench || Type == WindowType.Furnace)
-            {
-                Item[] stack = Crafting.CheckCrafting(p, slot, items);
-                if (stack != null) items = stack;
-            }*/
 
+            
             if (Shift)
             {
                 if (slot >= InventorySize)
@@ -354,54 +351,105 @@ namespace SMP
                     }
                 }
             }
-            if (Type == WindowType.Workbench || Type == WindowType.Furnace)
+            Item result = CraftingManager.getResult(p);
+            if (result.id != -1)
             {
-                Item[] stack = Crafting.CheckCrafting(p, slot, items);
-                if (stack != null)  items = stack; 
+                Logger.Log(((Items)result.id).ToString());
+                if (slot == 0)
+                {
+                    if (p.OnMouse == Item.Nothing)
+                    {
+                        p.OnMouse = result;
+                        result = Item.Nothing;
+                    }
+                    else if (p.OnMouse.id == result.id)
+                    {
+                        p.OnMouse.count += result.count;
+                        result = Item.Nothing;
+                    }
+                    if (click == ClickType.LeftClick)
+                    {
+                        if (items[0] != Item.Nothing)
+                        {
+                            for (int i = 1; i < items.Count(); i++)
+                            {
+                                Item itm = items[i];
+                                if (itm == Item.Nothing)
+                                    continue;
+                                itm.count -= 1;
+                                if (itm.count <= 0)
+                                    items[i] = Item.Nothing;
+
+                            }
+                        }
+                    }
+                    else if (click == ClickType.RightClick)
+                    {
+                        if (p.OnMouse != Item.Nothing)
+                        {
+
+                        }
+                    }
+
+                }
+                
             }
-            //if (container != null) container.UpdateContents(p);
-            List<Item> items2 = new List<Item>(items); items2.AddRange((Item[])p.inventory.items.TruncateStart(9));
-            for (int i = 0; i <= 9; i++) p.SendItem(id, (short)i, items[i]);
-            p.SendItem(255, -1, p.OnMouse);
-		}
+            items[0] = result;
+            if (Item.isEqual(clicked, items[slot]))
+            {
+                p.SendTransaction(id, ActionID, true);
+                CraftingManager.UpdateCrafting(this);
+            }
+            else
+            {
+                p.SendTransaction(id, ActionID, false);
 
-		public int GetEmptyWindowSlot()
-		{
-			for (byte i = 0; i < items.Length; i++)
+
+                //if (container != null) container.UpdateContents(p);
+                List<Item> items2 = new List<Item>(items); items2.AddRange((Item[])p.inventory.items.TruncateStart(9));
+                for (int i = 0; i <= 9; i++) p.SendItem(id, (short)i, items[i]);
+                
+            }
+            p.SendItem(255,255, p.OnMouse); //225 = -1 in big endian
+        }
+
+        public int GetEmptyWindowSlot()
+        {
+            for (byte i = 0; i < items.Length; i++)
                 if (items[i].id == (short)Items.Nothing)
-					return i;
+                    return i;
             return -1;
-		}
+        }
 
-		public int GetEmptyHotbarSlot(Player p)
-		{
-			for (byte i = 36; i < 45; i++)
-				if (p.inventory.items[i].id == (short)Items.Nothing)
-					return i;
+        public int GetEmptyHotbarSlot(Player p)
+        {
+            for (byte i = 36; i < 45; i++)
+                if (p.inventory.items[i].id == (short)Items.Nothing)
+                    return i;
             return -1;
-		}
-		public int GetEmptyHotbarSlotReversed(Player p)
-		{
-			for (byte i = 44; i >= 36; i--)
-				if (p.inventory.items[i].id == (short)Items.Nothing)
-					return i;
+        }
+        public int GetEmptyHotbarSlotReversed(Player p)
+        {
+            for (byte i = 44; i >= 36; i--)
+                if (p.inventory.items[i].id == (short)Items.Nothing)
+                    return i;
             return -1;
-		}
+        }
 
-		public int GetEmptyInventorySlot(Player p)
-		{
-			for (byte i = 9; i <= 35; i++)
-				if (p.inventory.items[i].id == (short)Items.Nothing)
-					return i;
+        public int GetEmptyInventorySlot(Player p)
+        {
+            for (byte i = 9; i <= 35; i++)
+                if (p.inventory.items[i].id == (short)Items.Nothing)
+                    return i;
             return -1 - 1;
-		}
-		public int GetEmptyInvetorySlotReversed(Player p)
-		{
-			for (byte i = 35; i >= 9; i--)
-				if (items[i].id == (short)Items.Nothing)
-					return i;
-			return -1;
-		}
+        }
+        public int GetEmptyInvetorySlotReversed(Player p)
+        {
+            for (byte i = 35; i >= 9; i--)
+                if (items[i].id == (short)Items.Nothing)
+                    return i;
+            return -1;
+        }
 
         public void Dispose()
         {
@@ -420,6 +468,17 @@ namespace SMP
             if (nextId == 0) nextId++;
             return nextId++;
         }
-	}
+
+        internal Item getItem(byte x, byte y)
+        {
+            if (this.Type != WindowType.Workbench) throw new ArgumentException("Must be a workbench");
+            byte matrixSize = (byte)Math.Sqrt(this.InventorySize - 1);
+            if(x < 0 || x > matrixSize)
+            return null;
+            if (y < 0 || y > matrixSize)
+                return null;
+            return items[(x + y * matrixSize) + 1];
+        }
+    }
 }
 

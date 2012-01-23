@@ -316,6 +316,13 @@ namespace SMP.PLAYER.Crafting
             }
             catch { Logger.Log("NBT data is invalid."); }
         }
-	}
+
+        internal static bool isEqual(Item a, Item b)
+        {
+            if ((a == null && b != null) || (a != null && b == null))
+                return false;
+            return (a.count == b.count && a.meta == b.meta && a.id == b.id);
+        }
+    }
 }
 

@@ -42,13 +42,14 @@ namespace SMP
 		public bool shuttingDown = false;
 		public static Socket listen;
 		public static World mainlevel;
-		public static readonly int protocolversion = 22;
+		public static readonly int protocolversion = 23;
         public static Version version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
 		public static SQLiteDatabase SQLiteDB;
 		public static ItemDB ItemDB;
 
         public static List<string> devs = new List<string> { "silentneeb", "hypereddie10", "merlin33069", "headdetect", "the_legacy", "dmitchell", "techjar", "shade2010", "bemacized", "wouto1997", "meinigeshandwerk" }; //add your names here (must be all lower case!)
-		
+        public static List<string> homedata = new List<string>();
+
 		public static bool unsafe_plugin = false;
 		internal ConsolePlayer consolePlayer;
         #region ==EVENTS==
@@ -113,6 +114,7 @@ namespace SMP
 			UpdateDB();
 			//ItemDB = new ItemDB();
             LoadFiles();
+            LoadData();
 		    
             Properties.Load("properties/server.properties");
 			Command.InitCore();
@@ -120,7 +122,7 @@ namespace SMP
             Physics.Handlers.InitAll();
 			Plugin.Load();
             Command.SortCommands();
-            Crafting.Init();
+            CraftingManager.Init();
 			
             //Get latest developerlist
             new Thread(new ThreadStart(UpdateDevs)).Start();
@@ -261,9 +263,18 @@ namespace SMP
             if (!Directory.Exists("properties")) Directory.CreateDirectory("properties");
             if (!Directory.Exists("text")) Directory.CreateDirectory("text");
 
+            if (!File.Exists("text/homedata.dat")) File.Create("text/homedata.dat").Close();
             if (File.Exists("server.properties")) File.Move("server.properties", "properties/server.properties");
             if (Server.usewhitelist) if (File.Exists("whitelist.txt")) File.Move("whitelist.txt", "properties/whitelist.txt");
             
+        }
+
+        private void LoadData()
+        {
+            foreach (string line in File.ReadAllLines("text/homedata.dat"))
+            {
+                homedata.Add(line);
+            }
         }
 
         public void UpdateDevs()
@@ -379,6 +390,17 @@ namespace SMP
                         "Line4		TEXT " +
                         ");"
                                      );
+            SQLiteDB.ExecuteNonQuery(
+                                    "CREATE TABLE IF NOT EXISTS SavedLoc(" +
+                                    "Username  	TEXT, " +
+                                    "World		TEXT, " +
+                                    "X			DOUBLE, " +
+                                    "Y			DOUBLE, " +
+                                    "Z			DOUBLE, " +
+                                    "Yaw		FLOAT, " +
+                                    "Pitch		FLOAT " +
+                                    ");"
+                                    );
         }
 
 	}

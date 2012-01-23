@@ -205,6 +205,7 @@ namespace SMP.PLAYER
         public bool IsOnFire = false;
         public bool isFlying = false;
         public bool isSleeping = false;
+        private bool touchedground; // temporary fix for fall damage killing on spawn
         public Point3 sleepingPos;
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
@@ -306,11 +307,11 @@ namespace SMP.PLAYER
 				switch (msg)
 				{
                     case 0x00: length = 4; if (buffer.Length < 5 || util.EndianBitConverter.Big.ToInt32(buffer, 1) == 1337) ping(); break; //Keep alive
-					case 0x01: /*Logger.Log("auth start");*/ length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 22); break; //Login Request
+					case 0x01: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 5) * 2) + 24); break; //Login Request
 					case 0x02: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Handshake
 					case 0x03: length = ((util.EndianBitConverter.Big.ToInt16(buffer, 1) * 2) + 2); break; //Chat
 					case 0x07: length = 9; break; //Entity Use
-					case 0x09: length = 13; break; //Respawn
+                    case 0x09: length = 15 + (util.EndianBitConverter.Big.ToInt16(buffer, 14) * 2); break; //Respawn
 					
 					case 0x0A: length = 1; break; //OnGround incoming
 					case 0x0B: length = 33; break; //Pos incoming
@@ -901,21 +902,51 @@ namespace SMP.PLAYER
             {
                 Teleport_Player(level.SpawnPos, level.SpawnYaw, level.SpawnPitch);
             }
+            public void Teleport_Saved_Pos()
+            {
+                using (System.Data.DataTable dt = Server.SQLiteDB.GetDataTable("SELECT * FROM SavedLoc WHERE Username='" + username + "' AND World='" + level.name + "'"))
+                {
+                    if (dt.Rows.Count == 1)
+                    {
+                        string name, world;
+                        double x, y, z;
+                        float yaw, pitch;
+
+                        name = dt.Rows[0]["Username"].ToString();
+                        world = dt.Rows[0]["World"].ToString();
+                        x = Convert.ToDouble(dt.Rows[0]["X"]);
+                        y = Convert.ToDouble(dt.Rows[0]["Y"]);
+                        z = Convert.ToDouble(dt.Rows[0]["Z"]);
+                        float.TryParse(dt.Rows[0]["Yaw"].ToString(), out yaw);
+                        float.TryParse(dt.Rows[0]["Pitch"].ToString(), out pitch);
+                        Teleport_Player(x, y, z, yaw, pitch);
+                        //Logger.Log(name + " " + world + " " + x + " " + y + " " + z); //debug line
+                    }
+                    else
+                    {
+                        Teleport_Player(level.SpawnPos, level.SpawnYaw, level.SpawnPitch);
+                        //Logger.Log("fail"); //debug line
+                    }
+                }
+            }
 			#endregion
 			#region Login Stuffs
 			void SendLoginPass()
 			{
 				try
 				{
-					byte[] bytes = new byte[MCUtil.Protocol.GetBytesLength(Server.name) + 20];
+                    short name = MCUtil.Protocol.GetBytesLength(Server.name);
+					byte[] bytes = new byte[name + MCUtil.Protocol.GetBytesLength(Server.mainlevel.leveltype) + 20];
 
-					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); //id
-                    MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4);
-					util.EndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, bytes.Length - 16);
-					bytes[bytes.Length - 5] = Server.mode;
-					bytes[bytes.Length - 4] = (byte)level.dimension;
-                    bytes[bytes.Length - 3] = Server.difficulty;
-					bytes[bytes.Length - 2] = level.height;
+					util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0); // id : int
+                    MCUtil.Protocol.GetBytes(Server.name).CopyTo(bytes, 4); // unused string : short+stringlength*2
+                    util.EndianBitConverter.Big.GetBytes(level.seed).CopyTo(bytes, name + 4); // map seed : long
+                    MCUtil.Protocol.GetBytes(Server.mainlevel.leveltype).CopyTo(bytes, name + 12); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
+
+                    bytes[bytes.Length - 5] = Server.mode; // 0 for survival, 1 for creative 
+                    bytes[bytes.Length - 4] = (byte)level.dimension; // -1: The Nether, 0: The Overworld, 1: The End 
+                    bytes[bytes.Length - 3] = Server.difficulty; //	0 thru 3 for Peaceful, Easy, Normal, Hard 
+					bytes[bytes.Length - 2] = level.height; // default 128, unsigned
 					bytes[bytes.Length - 1] = Server.MaxPlayers;
 
 					SendRaw(0x01, bytes);
@@ -947,7 +978,7 @@ namespace SMP.PLAYER
 				bytes[40] = onground;
 				SendRaw(0x0D, bytes);*/
 
-                Teleport_Spawn();
+                Teleport_Saved_Pos(); // location from dc
 
 				//Logger.Log(pos[0] + " " + pos[1] + " " + pos[2]);
 			}
@@ -1346,13 +1377,14 @@ namespace SMP.PLAYER
 			}
             public void SendRespawn()
             {
-                byte[] bytes = new byte[13];
+                byte[] bytes = new byte[13 + MCUtil.Protocol.GetBytesLength(level.leveltype)];
 
                 bytes[0] = (byte)level.dimension;
 				bytes[1] = Server.difficulty;
                 bytes[2] = mode;
 				util.BigEndianBitConverter.Big.GetBytes((short)level.height).CopyTo(bytes, 3);
 				util.BigEndianBitConverter.Big.GetBytes((long)level.seed).CopyTo(bytes, 5);
+                MCUtil.Protocol.GetBytes(level.leveltype).CopyTo(bytes, 13); // level-type "DEFAULT" or "SUPERFLAT" : short+stringlength*2
                 SendRaw(0x09, bytes);
             }
 			#endregion
@@ -1530,6 +1562,7 @@ namespace SMP.PLAYER
         }
 		#endregion
 
+        [Obsolete("Notch added fly into client", false)]
 		internal void FlyCode()
 		{
 			List<Point3> temp = new List<Point3>();
@@ -1738,8 +1771,17 @@ namespace SMP.PLAYER
 			SendRaw(0x18, bytes);
         }
 		#region TOOLS
-		
-		private void SaveAttributes(bool newplayer)
+
+        /// <summary>
+        /// Saves players location for use when joining.
+        /// </summary>
+        private void SaveLoc()
+        {
+            if (Server.SQLiteDB.ExecuteNonQuery("UPDATE SavedLoc SET X=" + pos.X + ",Y=" + pos.Y + ",Z=" + pos.Z + ",Yaw=" + rot[0] + ",Pitch=" + rot[1] + " WHERE Username='" + username + "' AND World='" + level.name + "';") == 0)
+                Server.SQLiteDB.ExecuteNonQuery("INSERT INTO SavedLoc (Username,World,X,Y,Z,Yaw,Pitch) VALUES('" + username + "','" + level.name + "'," + pos.X + "," + pos.Y + "," + pos.Z + "," + rot[0] + "," + rot[1] + ");");
+        }
+
+        private void SaveAttributes(bool newplayer)
 		{
 			Dictionary<string, string> data = new Dictionary<string, string>();
 			
@@ -1844,7 +1886,8 @@ namespace SMP.PLAYER
 					Server.SQLiteDB.Update("Player", data, "Name = '" + username + "'"); 
 				else
 					Server.SQLiteDB.Insert("Player", data);
-				
+
+                if (!newplayer) SaveLoc();
 			}
 			catch
 			{
@@ -2200,12 +2243,7 @@ namespace SMP.PLAYER
             }
             return false;
         }
-        public static void Explode(Player p)
-        {
-            Explosion xpl = new Explosion(p.level, p.pos.x, p.pos.y, p.pos.z, (new Random()).Next(5, 10));
-            xpl.DoExplosionA();
-            xpl.DoExplosionB();
-        }
+
         public void Explode()
         {
             Explosion xpl = new Explosion(this.level, this.pos.x, this.pos.y, this.pos.z, (new Random()).Next(5, 10));

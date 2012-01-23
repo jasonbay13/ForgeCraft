@@ -127,13 +127,13 @@ namespace SMP.PLAYER
 
             if (Chunk.GetChunk((int)pos.x >> 4, (int)pos.z >> 4, level) == null)
                 Kick("Chunk missing: " + ((int)pos.x >> 4) + "," + ((int)pos.z >> 4));
-			
-			/*if (PlayerAuth != null)
-				PlayerAuth(this);
+
+            /*if (PlayerAuth != null)
+                PlayerAuth(this);
             if (OnAuth != null)
                 OnAuth(this);*/
             OnPlayerAuthEvent.Call(this);
-		}
+        }
 
         private void UpdateShi(Player p)
         {
@@ -220,7 +220,7 @@ namespace SMP.PLAYER
         }
         #endregion
         #region Movement stuffs
-        
+
         private double fallStartY = -1;
         private void HandlePlayerPacket(byte[] message)
         {
@@ -375,6 +375,7 @@ namespace SMP.PLAYER
 
                     if (!GodMode && Mode == 0)
                     {
+                        if (!touchedground) { touchedground = true; return; } // temporary fix
                         short damage = (short)Math.Round(dist - 3);
                         if (damage > 0)
                         {
@@ -964,10 +965,23 @@ namespace SMP.PLAYER
             short ActionID = util.EndianBitConverter.Big.ToInt16(message, 4);
             bool Shift = (message[6] == 1);
 
+            Item item = null;
+
+            short id = IPAddress.HostToNetworkOrder(BitConverter.ToInt16(message, 7));
+            if (id >= 0)
+            {
+                byte count = message[9];
+                short meta = IPAddress.HostToNetworkOrder(BitConverter.ToInt16(message, 10));
+                item = new Item(id, count);
+            }
+
+
+
+
             //Console.WriteLine(String.Format("{0} {1} {2}", click, slot, Shift));
             if (HasWindowOpen)
             {
-                window.HandleClick(this, slot, click, ActionID, Shift);
+                window.HandleClick(this, slot, click, ActionID, Shift, item);
             }
             else
             {
@@ -1128,7 +1142,7 @@ namespace SMP.PLAYER
             health = 20;
             GlobalNamedEntitySpawn(this);
             SendRespawn();
-            Teleport_Spawn();
+            Teleport_Spawn(); // todo: beds?
         }
         public static short BlockDropSwitch(short id)
         {
