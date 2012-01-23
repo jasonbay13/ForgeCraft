@@ -32,6 +32,14 @@ namespace SMP.ENTITY
         private static int nextId = 0;
 		public static Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
 
+        internal bool PhysicsEnabled
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public EntityType Type
         {
             get
@@ -53,8 +61,8 @@ namespace SMP.ENTITY
 		}
 		public Chunk CurrentChunk;
 
-		public Point3 pos = Point3.Zero;
-        public Point3 oldpos = Point3.Zero;
+		public Vector3 pos = Vector3.Zero;
+        public Vector3 oldpos = Vector3.Zero;
         public float[] rot = new float[2];
         public float[] oldrot = new float[2];
         public double[] velocity = new double[3];
@@ -368,7 +376,7 @@ namespace SMP.ENTITY
 				Entity e = Entities[i];
 				if (e.isItem)
 				{
-					Point3 diff = pos - e.pos;
+					Vector3 diff = pos - e.pos;
 
                     //Console.WriteLine(diff.x + " " + diff.z);
                     if (Math.Abs(diff.x) <= 1.5 && Math.Ceiling(diff.y) <= 0 && Math.Ceiling(diff.y) >= -1 && Math.Abs(diff.z) <= 1.5)
@@ -516,8 +524,8 @@ namespace SMP.ENTITY
                 forceTp = true;
             }
 
-            Point3 temppos = (pos * 32) / new Point3(32), tempoldpos = (oldpos * 32) / new Point3(32);
-            Point3 diff = temppos - tempoldpos;
+            Vector3 temppos = (pos * 32) / new Vector3(32), tempoldpos = (oldpos * 32) / new Vector3(32);
+            Vector3 diff = temppos - tempoldpos;
             double diff1 = temppos.mdiff(tempoldpos);
 
             //TODO move this?
@@ -541,7 +549,7 @@ namespace SMP.ENTITY
             }
             else if ((int)(diff1 * 32) <= 127 && !forceTp)
             {
-                Point3 sendme = diff * 32;
+                Vector3 sendme = diff * 32;
                 byte[] bytes = new byte[9];
                 util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
                 bytes[4] = (byte)sendme.x;
@@ -561,7 +569,7 @@ namespace SMP.ENTITY
             }
             else
             {
-                Point3 sendme = pos * 32;
+                Vector3 sendme = pos * 32;
                 byte[] bytes = new byte[18];
                 util.EndianBitConverter.Big.GetBytes(id).CopyTo(bytes, 0);
                 util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 4);
@@ -591,7 +599,7 @@ namespace SMP.ENTITY
         public static int SpawnMob(byte mob, World w, int x, byte y, int z)
         {
             int entityid = -1;
-            Point3 aipos = new Point3((double)x, (double)y, (double)z);
+            Vector3 aipos = new Vector3((double)x, (double)y, (double)z);
             switch (mob)
             {
                 case Mob.Creeper:

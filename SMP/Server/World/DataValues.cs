@@ -1349,9 +1349,9 @@ namespace SMP
             return false;
         }
 
-        public static Point3 GetFaceBlock(int x, int y, int z, byte direction)
+        public static Vector3 GetFaceBlock(int x, int y, int z, byte direction)
         {
-            Point3 face = new Point3(x, y, z);
+            Vector3 face = new Vector3(x, y, z);
             switch (direction)
             {
                 case 0: face.y--; break;

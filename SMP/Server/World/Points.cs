@@ -107,7 +107,7 @@ namespace SMP
         }
     }
 
-    public struct Point3 : IEquatable<Point3>
+    public struct Vector3 : IEquatable<Vector3>
     {
         public double x
         {
@@ -128,58 +128,58 @@ namespace SMP
         public double Y;
         public double Z;
 
-        public Point3(double X, double Y, double Z)
+        public Vector3(double X, double Y, double Z)
         {
             this.X = X;
             this.Y = Y;
             this.Z = Z;
         }
-        public Point3(double d)
+        public Vector3(double d)
         {
             X = d;
             Y = d;
             Z = d;
         }
-        public Point3(int[] iar)
+        public Vector3(int[] iar)
         {
             X = iar[0];
             Y = iar[1];
             Z = iar[2];
         }
-        public Point3(double[] iar)
+        public Vector3(double[] iar)
         {
             X = iar[0];
             Y = iar[1];
             Z = iar[2];
         }
 
-        public static bool operator ==(Point3 a, Point3 b)
+        public static bool operator ==(Vector3 a, Vector3 b)
         {
             return (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
         }
-        public static bool operator ==(Point3 a, int[] b)
+        public static bool operator ==(Vector3 a, int[] b)
         {
             return (RD(a.X) == b[0] && RD(a.Y) == b[1] && RD(a.Z) == b[2]) ;
         }
-        public static bool operator ==(Point3 a, double[] b)
+        public static bool operator ==(Vector3 a, double[] b)
         {
             return (a.X == b[0] && a.Y == b[1] && a.Z == b[2]);
         }
 
-        public static bool operator !=(Point3 a, Point3 b)
+        public static bool operator !=(Vector3 a, Vector3 b)
         {
             return (a.x != b.x || a.y != b.y || a.z != b.z);
         }
-        public static bool operator !=(Point3 a, int[] b)
+        public static bool operator !=(Vector3 a, int[] b)
         {
             return (RD(a.x) != b[0] || RD(a.y) != b[1] || RD(a.z) != b[2]) ;
         }
-        public static bool operator !=(Point3 a, double[] b)
+        public static bool operator !=(Vector3 a, double[] b)
         {
             return (a.x != b[0] || a.y != b[1] || a.z != b[2]) ;
         }
 
-        public static Point3 operator *(Point3 a, int b)
+        public static Vector3 operator *(Vector3 a, int b)
         {
             try
             {
@@ -193,7 +193,7 @@ namespace SMP
                 return Zero;
             }
         }
-        public static Point3 operator *(Point3 a, Point3 b)
+        public static Vector3 operator *(Vector3 a, Vector3 b)
         {
             try
             {
@@ -208,7 +208,7 @@ namespace SMP
             }
         }
 
-        public static Point3 operator /(Point3 a, int b)
+        public static Vector3 operator /(Vector3 a, int b)
         {
             try
             {
@@ -222,7 +222,7 @@ namespace SMP
                 return Zero;
             }
         }
-        public static Point3 operator /(Point3 a, Point3 b)
+        public static Vector3 operator /(Vector3 a, Vector3 b)
         {
             try
             {
@@ -237,14 +237,14 @@ namespace SMP
             }
         }
 
-        public static Point3 operator -(Point3 a, int b)
+        public static Vector3 operator -(Vector3 a, int b)
         {
             a.x = a.x - b;
             a.y = a.y - b;
             a.z = a.z - b;
             return a;
         }
-        public static Point3 operator -(Point3 a, Point3 b)
+        public static Vector3 operator -(Vector3 a, Vector3 b)
         {
             a.x = a.x - b.x;
             a.y = a.y - b.y;
@@ -252,14 +252,14 @@ namespace SMP
             return a;
         }
 
-        public static Point3 operator +(Point3 a, int b)
+        public static Vector3 operator +(Vector3 a, int b)
         {
             a.x = a.x + b;
             a.y = a.y + b;
             a.z = a.z + b;
             return a;
         }
-        public static Point3 operator +(Point3 a, Point3 b)
+        public static Vector3 operator +(Vector3 a, Vector3 b)
         {
             a.x = a.x + b.x;
             a.y = a.y + b.y;
@@ -267,14 +267,14 @@ namespace SMP
             return a;
         }
 
-        public Point3 diff(Point3 a)
+        public Vector3 diff(Vector3 a)
         {
             a.x = Math.Abs(Math.Max(a.X, X) - Math.Min(a.X, X));
             a.y = Math.Abs(Math.Max(a.Y, Y) - Math.Min(a.Y, Y));
             a.z = Math.Abs(Math.Max(a.Z, Z) - Math.Min(a.Z, Z));
             return a;
         }
-        public double mdiff(Point3 a)
+        public double mdiff(Vector3 a)
         {
             a.x = Math.Abs(a.X - X);
             a.y = Math.Abs(a.Y - Y);
@@ -282,42 +282,42 @@ namespace SMP
             return Math.Max(Math.Max(a.x, a.y), a.z);
         }
 
-        public double distance(Point3 a)
+        public double distance(Vector3 a)
         {
-            Point3 dist = a - this; dist *= dist;
+            Vector3 dist = a - this; dist *= dist;
             return Math.Sqrt(dist.x + dist.y + dist.z);
         }
 
-        public double distanceNoSqrt(Point3 a)
+        public double distanceNoSqrt(Vector3 a)
         {
-            Point3 dist = a - this; dist *= dist;
+            Vector3 dist = a - this; dist *= dist;
             return dist.x + dist.y + dist.z;
         }
 
-        static public implicit operator Point3(int[] value)
+        static public implicit operator Vector3(int[] value)
         {
-            return new Point3(value);
+            return new Vector3(value);
         }
-        static public implicit operator Point3(double[] value)
+        static public implicit operator Vector3(double[] value)
         {
-            return new Point3(value);
+            return new Vector3(value);
         }
-        static public explicit operator int[](Point3 po)
+        static public explicit operator int[](Vector3 po)
         {
             return new int[3] { (int)RD(po.x), (int)RD(po.y), (int)RD(po.z) };
         }
-        static public explicit operator double[](Point3 po)
+        static public explicit operator double[](Vector3 po)
         {
             return new double[3] { po.x, po.y, po.z };
         }
 
-        public static Point3 Zero { get { return new Point3(0, 0, 0); } }
+        public static Vector3 Zero { get { return new Vector3(0, 0, 0); } }
 
         public override bool Equals(object obj)
         {
             return base.Equals(obj);
         }
-        public bool Equals(Point3 other)
+        public bool Equals(Vector3 other)
         {
             if (this == other) return true;
             return false;
@@ -331,9 +331,9 @@ namespace SMP
             return base.GetHashCode();
         }
 
-        public Point3 RD()
+        public Vector3 RD()
         {
-            return new Point3(RD(x), RD(y), RD(z));
+            return new Vector3(RD(x), RD(y), RD(z));
         }
         static double RD(double valueToRound)
         {

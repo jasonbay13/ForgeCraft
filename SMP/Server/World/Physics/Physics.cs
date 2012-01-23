@@ -283,7 +283,7 @@ namespace SMP
             public short time;
             public int x, y, z;
 
-            public Check(Point3 a, byte meta) : this((int)a.x, (int)a.y, (int)a.z, meta, 0) { }
+            public Check(Vector3 a, byte meta) : this((int)a.x, (int)a.y, (int)a.z, meta, 0) { }
             public Check(int x, int y, int z, byte meta) : this(x, y, z, meta, 0) { }
             public Check(int x, int y, int z, byte meta, short time)
             {

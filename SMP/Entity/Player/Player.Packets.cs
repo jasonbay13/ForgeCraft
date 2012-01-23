@@ -249,7 +249,7 @@ namespace SMP.PLAYER
                 double stance = util.EndianBitConverter.Big.ToDouble(message, 16);
                 double z = util.EndianBitConverter.Big.ToDouble(message, 24);
                 byte onGround = message[32];
-                Point3 newpos = new Point3(x, y, z);
+                Vector3 newpos = new Vector3(x, y, z);
 
                 // Return if position hasn't changed.
                 if (newpos == pos && stance == Stance && onGround == onground)
@@ -323,7 +323,7 @@ namespace SMP.PLAYER
                 float yaw = util.EndianBitConverter.Big.ToSingle(message, 32);
                 float pitch = util.EndianBitConverter.Big.ToSingle(message, 36);
                 byte onGround = message[40];
-                Point3 newpos = new Point3(x, y, z);
+                Vector3 newpos = new Vector3(x, y, z);
 
                 // Return if position hasn't changed.
                 if (newpos == pos && stance == Stance && yaw == rot[0] && pitch == rot[1] && onGround == onground)
@@ -469,7 +469,7 @@ namespace SMP.PLAYER
                 int z = util.EndianBitConverter.Big.ToInt32(message, 6);
                 byte direction = message[10];
 
-                Point3 face = BlockData.GetFaceBlock(x, y, z, direction);
+                Vector3 face = BlockData.GetFaceBlock(x, y, z, direction);
 
                 byte rc = level.GetBlock(x, y, z); //block hit
 
@@ -491,7 +491,7 @@ namespace SMP.PLAYER
 
                 if (BlockChange.LeftClicked.ContainsKey(rc))
                 {
-                    BlockChange.LeftClicked[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0));
+                    BlockChange.LeftClicked[rc].DynamicInvoke(this, new BCS(new Vector3(x, y, z), 0, 0, 0, 0));
                 }
 
                 if (level.GetBlock((int)face.x, (int)face.y, (int)face.z) == 51)
@@ -504,7 +504,7 @@ namespace SMP.PLAYER
                 {
                     if (BlockChange.Destroyed.ContainsKey(rc))
                     {
-                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
+                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Vector3(x, y, z), 0, 0, 0, 0)))
                         {
                             //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Logger.Log("Delegate for " + rc + " Destroyed returned false");
@@ -519,7 +519,7 @@ namespace SMP.PLAYER
                 {
                     if (BlockChange.Destroyed.ContainsKey(rc))
                     {
-                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
+                        if (!(bool)BlockChange.Destroyed[rc].DynamicInvoke(this, new BCS(new Vector3(x, y, z), 0, 0, 0, 0)))
                         {
                             //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                             Logger.Log("Delegate for " + rc + " Destroyed returned false");
@@ -547,7 +547,7 @@ namespace SMP.PLAYER
                 int z = util.EndianBitConverter.Big.ToInt32(message, 6);
                 byte direction = message[10];
 
-                Point3 face = BlockData.GetFaceBlock(x, y, z, direction);
+                Vector3 face = BlockData.GetFaceBlock(x, y, z, direction);
 
                 short id = level.GetBlock(x, y, z);
                 short storeId = id;
@@ -565,7 +565,7 @@ namespace SMP.PLAYER
 
                 if (BlockChange.Destroyed.ContainsKey(id))
                 {
-                    if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Point3(x, y, z), 0, 0, 0, 0)))
+                    if (!(bool)BlockChange.Destroyed[id].DynamicInvoke(this, new BCS(new Vector3(x, y, z), 0, 0, 0, 0)))
                     {
                         //SendBlockChange(x, y, z, level.GetBlock(x, y, z), level.GetMeta(x, y, z));
                         Logger.Log("Delegate for " + id + " Destroyed returned false");
@@ -634,7 +634,7 @@ namespace SMP.PLAYER
             byte rc = level.GetBlock(blockX, blockY, blockZ);
             if (BlockChange.RightClickedOn.ContainsKey(rc))
             {
-                if (!(bool)BlockChange.RightClickedOn[rc].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
+                if (!(bool)BlockChange.RightClickedOn[rc].DynamicInvoke(this, new BCS(new Vector3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
                 {
                     Logger.Log("Delegate for " + rc + " RightClickedON returned false");
                     return;
@@ -656,8 +656,8 @@ namespace SMP.PLAYER
             bool canPlaceOnEntity = (blockID < 0 || (blockID < 256 && BlockData.CanPlaceOnEntity((byte)blockID)) || (blockID >= 256 && BlockData.CanPlaceOnEntity(BlockData.PlaceableItemSwitch(blockID))));
             foreach (Entity e1 in new List<Entity>(Entity.Entities.Values))
             {
-                Point3 block = new Point3(blockX, blockY, blockZ);
-                Point3 pp = new Point3((int[])e1.pos);
+                Vector3 block = new Vector3(blockX, blockY, blockZ);
+                Vector3 pp = new Vector3((int[])e1.pos);
 
                 if (e1.isItem) continue;
                 if (block == pp && !canPlaceOnEntity)
@@ -761,7 +761,7 @@ namespace SMP.PLAYER
 
                 if (BlockChange.Placed.ContainsKey(blockID))
                 {
-                    if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
+                    if (!(bool)BlockChange.Placed[blockID].DynamicInvoke(this, new BCS(new Vector3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
                     {
                         //SendBlockChange(blockX, blockY, blockZ, level.GetBlock(blockX, blockY, blockZ), level.GetMeta(blockX, blockY, blockZ));
                         //SendItem((short)inventory.current_index, inventory.current_item.item, inventory.current_item.count, inventory.current_item.meta);
@@ -803,7 +803,7 @@ namespace SMP.PLAYER
 
                 if (BlockChange.ItemRightClick.ContainsKey(blockID))
                 {
-                    if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Point3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
+                    if ((bool)BlockChange.ItemRightClick[blockID].DynamicInvoke(this, new BCS(new Vector3(blockX, blockY, blockZ), blockID, direction, amount, damage)))
                     {
                         if (Server.mode == 0) { inventory.Remove(inventory.current_index, 1); experience.Add(1); }
                     }

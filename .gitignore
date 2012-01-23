@@ -12,7 +12,7 @@ obj/
 [Tt]humbs.db
 *.DS_Store
 
-#MonoDevelop junk
+#MonoDevelop stuff
 *.userprefs
 *.usertasks
 *.pidb

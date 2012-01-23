@@ -30,7 +30,7 @@ namespace SMP.ENTITY
         public abstract void Physics();
 
         public int id { get { return e.id; } }
-        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
+        public Vector3 pos { get { return e.pos; } set { e.pos = value; } }
         public float[] rot { get { return e.rot; } set { e.rot = value; } }
         public double[] velocity { get { return e.velocity; } set { e.velocity = value; } }
 

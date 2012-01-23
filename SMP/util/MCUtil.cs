@@ -142,9 +142,9 @@ namespace SMP
                         bytes.Add(item.count);
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes(item.meta));
                     }
-                    else if (obj.GetType() == typeof(Point3))
+                    else if (obj.GetType() == typeof(Vector3))
                     {
-                        Point3 point = (Point3)obj;
+                        Vector3 point = (Vector3)obj;
                         bytes.Add((byte)(0x06 << 5 | i & 0x1F));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.x));
                         bytes.AddRange(util.EndianBitConverter.Big.GetBytes((int)point.y));

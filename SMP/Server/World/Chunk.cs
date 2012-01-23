@@ -203,7 +203,7 @@ namespace SMP
                                 nbtList = nbtCompound["Motion"].ToTagList();
                                 e.velocity = new double[] { nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble() };
                                 nbtList = nbtCompound["Pos"].ToTagList();
-                                e.pos = new Point3(nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble());
+                                e.pos = new Vector3(nbtList[0].ToTagDouble(), nbtList[1].ToTagDouble(), nbtList[2].ToTagDouble());
                                 nbtList = nbtCompound["Rotation"].ToTagList();
                                 e.rot = new float[] { nbtList[0].ToTagFloat(), nbtList[1].ToTagFloat() };
                                 e.age = nbtCompound["Age"].ToTagInt();
@@ -212,12 +212,12 @@ namespace SMP
                                 ch.entityLoad.Add(e);
                             }
                         }
-                        Container c; Point3 point3;
+                        Container c; Vector3 point3;
                         foreach (TagNode tag in nbt.Root["Containers"].ToTagList())
                         {
                             nbtCompound = tag.ToTagCompound();
                             nbtList = nbtCompound["Pos"].ToTagList();
-                            point3 = new Point3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
+                            point3 = new Vector3(nbtList[0].ToTagInt(), nbtList[1].ToTagInt(), nbtList[2].ToTagInt());
                             c = Container.CreateInstance((ContainerType)(byte)nbtCompound["Type"].ToTagByte(), w, point3);
                             c.LoadNBTData(nbtCompound["Items"].ToTagList());
                             if (!w.containers.ContainsKey(point3)) w.containers.Add(point3, c);

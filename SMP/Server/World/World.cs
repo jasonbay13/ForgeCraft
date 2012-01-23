@@ -59,7 +59,7 @@ namespace SMP
 		public Dictionary<Point, Chunk> chunkData;
         public Dictionary<Point, List<BlockChangeData>> blockQueue = new Dictionary<Point, List<BlockChangeData>>();
 		//public Dictionary<Point3, Windows> windows = new Dictionary<Point3, Windows>();
-        public Dictionary<Point3, Container> containers = new Dictionary<Point3, Container>();
+        public Dictionary<Vector3, Container> containers = new Dictionary<Vector3, Container>();
 		public List<Point> ToGenerate = new List<Point>();
         public Physics physics;
 		public byte worldYMax = 128;
@@ -94,11 +94,11 @@ namespace SMP
 		//Custom Command / Plugin Events -------------------------------------------------------------------
 		#endregion
 
-        public Point3 SpawnPos
+        public Vector3 SpawnPos
         {
             get
             {
-                Point3 pos = new Point3(SpawnX + 0.5, SpawnY, SpawnZ + 0.5);
+                Vector3 pos = new Vector3(SpawnX + 0.5, SpawnY, SpawnZ + 0.5);
 
                 /*java.util.Random random = new java.util.Random(seed);
                 int i = 0;
@@ -250,7 +250,7 @@ namespace SMP
             if (((int)w.SpawnX >> 4) != x || ((int)w.SpawnZ >> 4) != z) // Don't unload the spawn chunks!
             {
                 w.physics.RemoveChunkChecks(x, z);
-                foreach (KeyValuePair<Point3, Container> kvp in w.containers.Where(KVP => (((int)KVP.Key.x >> 4) == x && ((int)KVP.Key.z >> 4) == z)).ToList())
+                foreach (KeyValuePair<Vector3, Container> kvp in w.containers.Where(KVP => (((int)KVP.Key.x >> 4) == x && ((int)KVP.Key.z >> 4) == z)).ToList())
                     w.containers.Remove(kvp.Key);
                 lock (w.chunkData)
                     if (w.chunkData.ContainsKey(pt))
@@ -304,7 +304,7 @@ namespace SMP
                 if (Chunk.GetChunk(x >> 4, z >> 4, this) != null)
                     Chunk.GetChunk(x >> 4, z >> 4, this)._dirty = true; // Temporary until we find a good way to make the chunk dirty only when the container is edited.
 
-                Point3 point = new Point3(x, y, z);
+                Vector3 point = new Vector3(x, y, z);
                 if (containers.ContainsKey(point)) return containers[point];
                 switch (GetBlock(x, y, z))
                 {
@@ -317,7 +317,7 @@ namespace SMP
             }
             catch { return null; }
         }
-        public Container GetBlockContainer(Point3 pos)
+        public Container GetBlockContainer(Vector3 pos)
         {
             return GetBlockContainer((int)pos.x, (int)pos.y, (int)pos.z);
         }
@@ -629,7 +629,7 @@ namespace SMP
 
 			foreach (Player p in Player.players.ToArray())
 				if (p.LoggedIn && p.MapLoaded)
-					if (p.pos.mdiff(new Point3(x, y, z)) <= distance)
+					if (p.pos.mdiff(new Vector3(x, y, z)) <= distance)
                         p.SendLightning(x * 32, y * 32, z * 32, e.id);
 
             if (BlockData.IsSolid(GetBlock(x, y - 1, z)))
@@ -720,7 +720,7 @@ namespace SMP
             try
             {
                 Container c;
-                foreach (Point3 pos in containers.Keys.ToArray())
+                foreach (Vector3 pos in containers.Keys.ToArray())
                 {
                     c = containers[pos];
                     c.UpdateState();

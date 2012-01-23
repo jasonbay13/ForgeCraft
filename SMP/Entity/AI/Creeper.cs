@@ -27,7 +27,7 @@ namespace SMP.ENTITY
 	{
 		public Entity e { get { return mye; } }
 		public World level { get { return mylevel; } }
-        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
+        public Vector3 pos { get { return e.pos; } set { e.pos = value; } }
         public float[] rot { get { return e.rot; } set { e.rot = value; } }
 		public byte type { get { return mytype; } }
 		public byte[] meta { get { return mymeta; } set { mymeta = value; } }
@@ -37,7 +37,7 @@ namespace SMP.ENTITY
 		byte mytype = Mob.Creeper;
 		byte[] mymeta = new byte[4] { 0, 0, 0, 0 };
 
-		public Creeper(Point3 pos, World level)
+		public Creeper(Vector3 pos, World level)
 		{
 			mye = new Entity(this, level);
 			mylevel = level;

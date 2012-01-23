@@ -55,7 +55,7 @@ namespace SMP
         public Player p;
         public Container container;
         public Item[] items; //Hold all the items this window has inside it.
-        public Windows(WindowType type, Point3 pos, World world, Player p)
+        public Windows(WindowType type, Vector3 pos, World world, Player p)
         {
             try
             {

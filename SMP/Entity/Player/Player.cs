@@ -73,8 +73,8 @@ namespace SMP.PLAYER
 		public float Saturation = 5.0f;
 		//END Health Stuff
 		public double Stance;
-        public Point3 pos { get { return e.pos; } set { e.pos = value; } }
-        public Point3 oldpos { get { return e.oldpos; } set { e.oldpos = value; } }
+        public Vector3 pos { get { return e.pos; } set { e.pos = value; } }
+        public Vector3 oldpos { get { return e.oldpos; } set { e.oldpos = value; } }
         public float[] rot { get { return e.rot; } set { e.rot = value; } }
         public float[] oldrot { get { return e.oldrot; } set { e.oldrot = value; } }
         byte onground { get { return e.onground; } set { e.onground = value; } }
@@ -93,7 +93,7 @@ namespace SMP.PLAYER
 
 		public List<Point> VisibleChunks = new List<Point>();
 		public List<int> VisibleEntities = new List<int>();
-		public List<Point3> FlyList = new List<Point3>();
+		public List<Vector3> FlyList = new List<Vector3>();
 
         #region Custom Command / Plugin Event
         //Events for Custom Command and Plugins ------------------------------------
@@ -206,7 +206,7 @@ namespace SMP.PLAYER
         public bool isFlying = false;
         public bool isSleeping = false;
         private bool touchedground; // temporary fix for fall damage killing on spawn
-        public Point3 sleepingPos;
+        public Vector3 sleepingPos;
         public int FlyingUpdate = 100;
 		public Account DefaultAccount;
 		public List<Account> Accounts = new List<Account>();
@@ -561,12 +561,12 @@ namespace SMP.PLAYER
                 e.SetMetaBit(0, 1, crouching);
                 GlobalMetaUpdate();
 			}
-            public void SetSleeping(bool sleeping, Point3 pos = new Point3())
+            public void SetSleeping(bool sleeping, Vector3 pos = new Vector3())
             {
                 isSleeping = sleeping;
                 sleepingPos = pos;
             }
-            public void OpenWindow(WindowType type, Point3 pos)
+            public void OpenWindow(WindowType type, Vector3 pos)
             {
                 window = new Windows(type, pos, level, this);
                 SendWindowOpen(window);
@@ -636,11 +636,11 @@ namespace SMP.PLAYER
 			{
 				SendBlockChange(x, y, z, type, 0);
 			}
-			public void SendBlockChange(Point3 a, byte type, byte meta)
+			public void SendBlockChange(Vector3 a, byte type, byte meta)
 			{
 				SendBlockChange((int)a.x, (byte)a.y, (int)a.z, type, meta);
 			}
-			public void SendBlockChange(Point3 a, byte type)
+			public void SendBlockChange(Vector3 a, byte type)
 			{
 				SendBlockChange(a, type, 0);
 			}
@@ -688,15 +688,15 @@ namespace SMP.PLAYER
             {
                 SendSoundEffect(x, y, z, type, 0);
             }
-            public void SendSoundEffect(Point3 a, int type, int data)
+            public void SendSoundEffect(Vector3 a, int type, int data)
             {
                 SendSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data);
             }
-            public void SendSoundEffect(Point3 a, int type)
+            public void SendSoundEffect(Vector3 a, int type)
             {
                 SendSoundEffect(a, type, 0);
             }
-            public void SendExplosion(double x, double y, double z, float radius, Point3[] records)
+            public void SendExplosion(double x, double y, double z, float radius, Vector3[] records)
             {
                 byte[] bytes = new byte[32 + (records.Length * 3)];
                 util.EndianBitConverter.Big.GetBytes(x).CopyTo(bytes, 0);
@@ -705,7 +705,7 @@ namespace SMP.PLAYER
                 util.EndianBitConverter.Big.GetBytes(radius).CopyTo(bytes, 24);
                 util.EndianBitConverter.Big.GetBytes(records.Length).CopyTo(bytes, 28);
 
-                Point3 record, position = new Point3((int)x, (int)y, (int)z);
+                Vector3 record, position = new Vector3((int)x, (int)y, (int)z);
                 for (int i = 0; i < records.Length; i++)
                 {
                     record = records[i] - position;
@@ -716,7 +716,7 @@ namespace SMP.PLAYER
 
                 SendRaw(0x3C, bytes);
             }
-            public void SendExplosion(Point3 a, float radius, Point3[] records)
+            public void SendExplosion(Vector3 a, float radius, Vector3[] records)
             {
                 SendExplosion(a.x, a.y, a.z, radius, records);
             }
@@ -741,7 +741,7 @@ namespace SMP.PLAYER
                 bytes[11] = byte2;
                 SendRaw(0x36, bytes);
             }
-            public void SendBlockAction(Point3 a, byte byte1, byte byte2)
+            public void SendBlockAction(Vector3 a, byte byte1, byte byte2)
             {
                 SendBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2);
             }
@@ -766,7 +766,7 @@ namespace SMP.PLAYER
                 util.EndianBitConverter.Big.GetBytes(z).CopyTo(bytes, 10);
                 SendRaw(0x11, bytes);
             }
-            public void SendUseBed(int eid, Point3 a)
+            public void SendUseBed(int eid, Vector3 a)
             {
                 SendUseBed(eid, (int)a.x, (byte)a.y, (int)a.z);
             }
@@ -814,7 +814,7 @@ namespace SMP.PLAYER
                         p1.SendBlockAction(x, y, z, byte1, byte2);
                 });
             }
-            public static void GlobalBlockAction(Point3 a, byte byte1, byte byte2, World wld)
+            public static void GlobalBlockAction(Vector3 a, byte byte1, byte byte2, World wld)
             {
                 GlobalBlockAction((int)a.x, (short)a.y, (int)a.z, byte1, byte2, wld);
             }
@@ -830,11 +830,11 @@ namespace SMP.PLAYER
             {
                 GlobalSoundEffect(x, y, z, type, 0, wld, exclude);
             }
-            public static void GlobalSoundEffect(Point3 a, int type, int data, World wld, Player exclude = null)
+            public static void GlobalSoundEffect(Vector3 a, int type, int data, World wld, Player exclude = null)
             {
                 GlobalSoundEffect((int)a.x, (byte)a.y, (int)a.z, type, data, wld, exclude);
             }
-            public static void GlobalSoundEffect(Point3 a, int type, World wld, Player exclude = null)
+            public static void GlobalSoundEffect(Vector3 a, int type, World wld, Player exclude = null)
             {
                 GlobalSoundEffect(a, type, 0, wld, exclude);
             }
@@ -843,7 +843,7 @@ namespace SMP.PLAYER
             {
                 GlobalSoundEffect(x, y, z, (int)SoundEffect.BlockBreak, type, wld, exclude);
             }
-            public static void GlobalBreakEffect(Point3 a, int type, World wld, Player exclude = null)
+            public static void GlobalBreakEffect(Vector3 a, int type, World wld, Player exclude = null)
             {
                 GlobalBreakEffect((int)a.x, (byte)a.y, (int)a.z, type, wld, exclude);
             }
@@ -874,17 +874,17 @@ namespace SMP.PLAYER
 			{
 				Teleport_Player(a[0], a[1], a[2], rot[0], rot[1]);
 			}
-			public void Teleport_Player(Point3 a)
+			public void Teleport_Player(Vector3 a)
 			{
 				Teleport_Player(a.x, a.y, a.z, rot[0], rot[1]);
 			}
-            public void Teleport_Player(Point3 a, float yaw, float pitch)
+            public void Teleport_Player(Vector3 a, float yaw, float pitch)
             {
                 Teleport_Player(a.x, a.y, a.z, yaw, pitch);
             }
 			public void Teleport_Player(double x, double y, double z, float yaw, float pitch)
 			{
-                pos = new Point3(x, y, z);
+                pos = new Vector3(x, y, z);
                 rot[0] = yaw;
                 rot[1] = pitch;
 
@@ -1205,7 +1205,7 @@ namespace SMP.PLAYER
 
 					Encoding.BigEndianUnicode.GetBytes(p.username).CopyTo(bytes, 6);
 
-					Point3 sendme = p.pos * 32;
+					Vector3 sendme = p.pos * 32;
 					util.EndianBitConverter.Big.GetBytes((int)(sendme.x)).CopyTo(bytes, (22 + (length * 2)) - 16);
 					util.EndianBitConverter.Big.GetBytes((int)(sendme.y)).CopyTo(bytes, (22 + (length * 2)) - 12);
 					util.EndianBitConverter.Big.GetBytes((int)(sendme.z)).CopyTo(bytes, (22 + (length * 2)) - 8);
@@ -1240,7 +1240,7 @@ namespace SMP.PLAYER
                 byte[] bytes = new byte[21]; // 27 bytes if ghast fireball?
                 util.EndianBitConverter.Big.GetBytes(e1.id).CopyTo(bytes, 0);
                 bytes[4] = e1.obj.type;
-                Point3 sendme = e1.obj.pos * 32;
+                Vector3 sendme = e1.obj.pos * 32;
                 util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 5);
                 util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 9);
                 util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 13);
@@ -1277,7 +1277,7 @@ namespace SMP.PLAYER
 				util.EndianBitConverter.Big.GetBytes(e1.I.id).CopyTo(bytes, 4);
 				bytes[6] = e1.I.count;
 				util.EndianBitConverter.Big.GetBytes(e1.I.meta).CopyTo(bytes, 7);
-				Point3 sendme = e1.I.pos * 32;
+				Vector3 sendme = e1.I.pos * 32;
 				util.EndianBitConverter.Big.GetBytes((int)sendme.x).CopyTo(bytes, 9);
 				util.EndianBitConverter.Big.GetBytes((int)sendme.y).CopyTo(bytes, 13);
 				util.EndianBitConverter.Big.GetBytes((int)sendme.z).CopyTo(bytes, 17);
@@ -1312,7 +1312,7 @@ namespace SMP.PLAYER
             {
                 SendEntityVelocity(eid, a[0], a[1], a[2]);
             }
-            public void SendEntityVelocity(int eid, Point3 a)
+            public void SendEntityVelocity(int eid, Vector3 a)
             {
                 SendEntityVelocity(eid, (short)a.x, (short)a.y, (short)a.z);
             }
@@ -1565,10 +1565,10 @@ namespace SMP.PLAYER
         [Obsolete("Notch added fly into client", false)]
 		internal void FlyCode()
 		{
-			List<Point3> temp = new List<Point3>();
-			Point3 point = pos.RD();
+			List<Vector3> temp = new List<Vector3>();
+			Vector3 point = pos.RD();
 			
-			Point3 p1 = new Point3(point.x, point.y - 1, point.z);
+			Vector3 p1 = new Vector3(point.x, point.y - 1, point.z);
 			temp.Add(p1);
 			if ((level.GetBlock((int)point.x, (int)(point.y) - 1, (int)point.z) == 0) && !FlyList.Contains(p1))
 			{
@@ -1581,7 +1581,7 @@ namespace SMP.PLAYER
 			{
 				for (int z = -1; z <= 1; z++)
 				{
-					Point3 p = new Point3(point.x - x, point.y - 2, point.z - z);
+					Vector3 p = new Vector3(point.x - x, point.y - 2, point.z - z);
 					temp.Add(p);
 					if ((level.GetBlock((int)point.x - x, (int)(point.y) - 2, (int)point.z - z) == 0) && !FlyList.Contains(p))
 					//if (!FlyList.Contains(p))
@@ -1598,7 +1598,7 @@ namespace SMP.PLAYER
 				for (int z = -2; z <= 2; z++)
 				{
 					if (x == 0 && z == 0) continue;
-					Point3 p = new Point3(point.x - x, point.y - 1, point.z - z);
+					Vector3 p = new Vector3(point.x - x, point.y - 1, point.z - z);
 					temp.Add(p);
 					if ((level.GetBlock((int)point.x - x, (int)(point.y) - 1, (int)point.z - z) == 0) && !FlyList.Contains(p))
 					//if (!FlyList.Contains(p))
@@ -1626,7 +1626,7 @@ namespace SMP.PLAYER
 				}
 			}*/
 
-			foreach (Point3 po in FlyList.ToArray())
+			foreach (Vector3 po in FlyList.ToArray())
 			{
 				if (!temp.Contains(po))
 				{

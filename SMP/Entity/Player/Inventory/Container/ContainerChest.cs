@@ -11,15 +11,15 @@ namespace SMP.INVENTORY
     {
         public override ContainerType Type { get { return ContainerType.Chest; } }
         public override int Size { get { return 27; } }
-        public override Point3 Pos { get { return point; } }
+        public override Vector3 Pos { get { return point; } }
         public override bool Open { get { return players.Count > 0; } }
         internal override Item[] Items { get { return items; } }
-        protected Point3 point;
+        protected Vector3 point;
         private Item[] items;
         private List<Player> players = new List<Player>();
 
 
-        public ContainerChest(World level, Point3 point)
+        public ContainerChest(World level, Vector3 point)
             : base(level)
         {
             this.point = point;
@@ -28,7 +28,7 @@ namespace SMP.INVENTORY
                 items[i] = Item.Nothing;
         }
 
-        public ContainerChest(World level, Point3 point, Item[] items)
+        public ContainerChest(World level, Vector3 point, Item[] items)
             : base(level)
         {
             this.point = point;

@@ -10,7 +10,7 @@ namespace SMP.INVENTORY
     {
         public abstract ContainerType Type { get; }
         public abstract int Size { get; }
-        public abstract Point3 Pos { get; }
+        public abstract Vector3 Pos { get; }
         public virtual bool Open { get { return false; } }
         internal abstract Item[] Items { get; }
         public abstract Item GetSlot(int slot);
@@ -29,7 +29,7 @@ namespace SMP.INVENTORY
             this.level = level;
         }
 
-        public static Container CreateInstance(ContainerType type, World level, Point3 point)
+        public static Container CreateInstance(ContainerType type, World level, Vector3 point)
         {
             switch (type)
             {

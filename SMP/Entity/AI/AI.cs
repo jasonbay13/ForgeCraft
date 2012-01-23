@@ -25,7 +25,7 @@ namespace SMP.ENTITY
 	public interface AI
 	{
 		Entity e { get; }
-		Point3 pos { get; set;}
+		Vector3 pos { get; set;}
 		float[] rot { get; set; }
 		World level { get; }
 		byte type { get; }

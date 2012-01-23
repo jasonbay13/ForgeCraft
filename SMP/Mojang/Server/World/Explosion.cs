@@ -12,7 +12,7 @@ namespace SMP
         {
             isFlaming = false;
             ExplosionRNG = new Random();
-            destroyedBlockPositions = new HashSet<Point3>();
+            destroyedBlockPositions = new HashSet<Vector3>();
             worldObj = world;
             //exploder = entity; // Not needed right now
             explosionSize = f;
@@ -63,7 +63,7 @@ namespace SMP
                             }
                             if(f1 > 0.0F)
                             {
-                                destroyedBlockPositions.Add(new Point3(j4, k4, l4));
+                                destroyedBlockPositions.Add(new Vector3(j4, k4, l4));
                             }
                             d5 += d * (double)f2;
                             d7 += d1 * (double)f2;
@@ -119,11 +119,11 @@ namespace SMP
                     pl.SendExplosion((int)explosionX, (int)explosionY, (int)explosionZ, explosionSize, destroyedBlockPositions.ToArray());
             });
 
-            List<Point3> arraylist = new List<Point3>();
+            List<Vector3> arraylist = new List<Vector3>();
             arraylist.AddRange(destroyedBlockPositions);
             for (int i = arraylist.Count - 1; i >= 0; i--)
             {
-                Point3 chunkposition = arraylist[i];
+                Vector3 chunkposition = arraylist[i];
                 int j = (int)chunkposition.x;
                 int k = (int)chunkposition.y;
                 int l = (int)chunkposition.z;
@@ -165,7 +165,7 @@ namespace SMP
             {
                 for (int l2 = arraylist.Count - 1; l2 >= 0; l2--)
                 {
-                    Point3 chunkposition = arraylist[l2];
+                    Vector3 chunkposition = arraylist[l2];
                     int i3 = (int)chunkposition.x;
                     int j3 = (int)chunkposition.y;
                     int k3 = (int)chunkposition.z;
@@ -187,6 +187,6 @@ namespace SMP
         public double explosionZ;
         public Entity exploder;
         public float explosionSize;
-        public HashSet<Point3> destroyedBlockPositions;
+        public HashSet<Vector3> destroyedBlockPositions;
     }
 }

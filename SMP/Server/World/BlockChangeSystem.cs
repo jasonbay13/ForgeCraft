@@ -394,7 +394,7 @@ namespace SMP
 		public static bool PlaceBed(Player a, BCS b)
 		{
             if (b.Direction != 1) return false;
-            Point3 pos2 = b.pos;
+            Vector3 pos2 = b.pos;
             byte rot = DirectionByRotFlat(a, b);
 
             switch (rot)
@@ -614,7 +614,7 @@ namespace SMP
                 case (byte)Blocks.Sapling:
                     if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
-                        Point3 pos2 = BlockclickedPos(a, b);
+                        Vector3 pos2 = BlockclickedPos(a, b);
                         byte meta = a.level.GetMeta((int)pos2.x, (int)pos2.y, (int)pos2.z);
                         a.level.GrowTree((int)pos2.x, (int)pos2.y, (int)pos2.z, meta, Entity.randomJava);
                         return true;
@@ -652,7 +652,7 @@ namespace SMP
                 case (byte)Blocks.Seeds:
                     if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
-                        Point3 pos2 = BlockclickedPos(a, b);
+                        Vector3 pos2 = BlockclickedPos(a, b);
                         a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, (byte)Blocks.Seeds, 0x7);
                         return true;
                     }
@@ -660,7 +660,7 @@ namespace SMP
                 case (byte)Blocks.MushroomBrown:
                     if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
-                        Point3 pos2 = BlockclickedPos(a, b);
+                        Vector3 pos2 = BlockclickedPos(a, b);
                         a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, 0, 0);
                         new WorldGenBigMushroom(0).generate(a.level, Entity.randomJava, (int)pos2.x, (int)pos2.y, (int)pos2.z);
                     }
@@ -668,7 +668,7 @@ namespace SMP
                 case (byte)Blocks.MushroomRed:
                     if (a.current_block_holding.meta == (byte)Dye.BoneMeal)
                     {
-                        Point3 pos2 = BlockclickedPos(a, b);
+                        Vector3 pos2 = BlockclickedPos(a, b);
                         a.level.BlockChange((int)pos2.x, (int)pos2.y, (int)pos2.z, 0, 0);
                         new WorldGenBigMushroom(1).generate(a.level, Entity.randomJava, (int)pos2.x, (int)pos2.y, (int)pos2.z);
                     }
@@ -1131,7 +1131,7 @@ namespace SMP
             byte meta = a.level.GetMeta((int)b.pos.x, (int)b.pos.y, (int)b.pos.z);
             a.level.BlockChange((int)b.pos.x, (int)b.pos.y, (int)b.pos.z, 0, 0);
 
-            Point3 storePos = b.pos;
+            Vector3 storePos = b.pos;
             byte rot = (byte)(meta & 0x3);
             bool head = (meta & 0x8) != 0;
             if (head)
@@ -1426,7 +1426,7 @@ namespace SMP
 
 			return p.level.GetBlock(x, y, z);
 		}
-        public static Point3 BlockclickedPos(Player p, BCS a)
+        public static Vector3 BlockclickedPos(Player p, BCS a)
         {
             int x = (int)a.pos.x;
             int y = (int)a.pos.y;
@@ -1442,7 +1442,7 @@ namespace SMP
                 case 5: x--; break;
             }
 
-            return new Point3(x, y, z);
+            return new Vector3(x, y, z);
         }
         public static byte InvertDirection(byte direction)
         {
@@ -1466,13 +1466,13 @@ namespace SMP
 	}
 	public struct BCS //BlockChangeStruct (This is used to hold the blockchange information)
 	{
-		public Point3 pos;
+		public Vector3 pos;
 		public short ID;
 		public byte Direction;
 		public byte Amount;
 		public short Damage;
 
-		public BCS(Point3 pos, short id, byte direction)
+		public BCS(Vector3 pos, short id, byte direction)
 		{
 			this.pos = pos;
 			ID = id;
@@ -1480,7 +1480,7 @@ namespace SMP
 			Amount = 0;
 			Damage = 0;
 		}
-		public BCS(Point3 pos, short id, byte direction, byte amount, short damage)
+		public BCS(Vector3 pos, short id, byte direction, byte amount, short damage)
 		{
 			this.pos = pos;
 			ID = id;
