@@ -80,6 +80,7 @@ namespace SMP.API.Commands
 			core.Add(new CmdKill());  
             core.Add(new CmdList());
             core.Add(new CmdLoadLVL());
+            core.Add(new CmdMapInfo());
             //core.Add(new CmdMBan());
             core.Add(new CmdMe());
             core.Add(new CmdMetaData());
