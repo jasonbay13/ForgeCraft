@@ -192,6 +192,8 @@ namespace SMP.ENTITY
 
         public void UpdateChunks(bool force, bool forcesend, int queue = 0)
         {
+            if (pos.x == 8.5) return; // cant figure out why pos.x is 8.5 when spawning, which causes spawn area chunks to load when your not there.
+
             if (c == null)
                 level.LoadChunk((int)pos.x >> 4, (int)pos.z >> 4, false, false);
             if (c == null || (c == CurrentChunk && !force))

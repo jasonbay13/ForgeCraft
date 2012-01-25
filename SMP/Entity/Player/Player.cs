@@ -929,6 +929,30 @@ namespace SMP.PLAYER
                     }
                 }
             }
+            public Vector3 Saved_Pos()
+            {
+                    double x,y,z;
+                using (System.Data.DataTable dt = Server.SQLiteDB.GetDataTable("SELECT * FROM SavedLoc WHERE Username='" + username + "' AND World='" + level.name + "'"))
+                {
+                    if (dt.Rows.Count == 1)
+                    {
+                        string name, world;
+
+                        name = dt.Rows[0]["Username"].ToString();
+                        world = dt.Rows[0]["World"].ToString();
+                        x = Convert.ToDouble(dt.Rows[0]["X"]);
+                        y = Convert.ToDouble(dt.Rows[0]["Y"]);
+                        z = Convert.ToDouble(dt.Rows[0]["Z"]);
+                    }
+                    else
+                    {
+                        x = level.SpawnPos.X;
+                        y = level.SpawnPos.Y;
+                        z = level.SpawnPos.Z;
+                    }
+                }
+                return new Vector3(x, y, z);
+            }
 			#endregion
 			#region Login Stuffs
 			void SendLoginPass()
@@ -1095,7 +1119,7 @@ namespace SMP.PLAYER
 				//}
 				//Logger.Log(i + " Chunks sent");
 
-                pos = level.SpawnPos;
+                pos = Saved_Pos();
                 if (level.IsRaining) SendRain(true);
                 int vd = viewdistance; viewdistance = 3;
                 e.UpdateChunks(true, false, -1);
@@ -1106,7 +1130,7 @@ namespace SMP.PLAYER
                 SendLoginDone();
                 MapLoaded = true;
 
-                e.UpdateChunks(true, false);
+                //e.UpdateChunks(true, false);
 			}
 			/// <summary>
 			/// Sends a player a Chunk
@@ -1377,6 +1401,7 @@ namespace SMP.PLAYER
 			}
             public void SendRespawn()
             {
+                touchedground = false;
                 byte[] bytes = new byte[13 + MCUtil.Protocol.GetBytesLength(level.leveltype)];
 
                 bytes[0] = (byte)level.dimension;
@@ -1775,7 +1800,7 @@ namespace SMP.PLAYER
         /// <summary>
         /// Saves players location for use when joining.
         /// </summary>
-        private void SaveLoc()
+        public void SaveLoc()
         {
             if (Server.SQLiteDB.ExecuteNonQuery("UPDATE SavedLoc SET X=" + pos.X + ",Y=" + pos.Y + ",Z=" + pos.Z + ",Yaw=" + rot[0] + ",Pitch=" + rot[1] + " WHERE Username='" + username + "' AND World='" + level.name + "';") == 0)
                 Server.SQLiteDB.ExecuteNonQuery("INSERT INTO SavedLoc (Username,World,X,Y,Z,Yaw,Pitch) VALUES('" + username + "','" + level.name + "'," + pos.X + "," + pos.Y + "," + pos.Z + "," + rot[0] + "," + rot[1] + ");");

@@ -21,61 +21,39 @@ using SMP.PLAYER;
 
 namespace SMP.Commands
 {
-	public class CmdGotoLVL : Command
-	{
-		public override string Category {
-			get {
-				return "Mod";
-			}
-		}
-		public override bool ConsoleUseable {
-			get {
-				return false;
-			}
-		}
-		public override string Description {
-			get {
-				return "Go to a world!";
-			}
-		}
-		public override string Name {
-			get {
-				return "goto";
-			}
-		}
-		public override string PermissionNode {
-			get {
-				return "core.world.goto";
-			}
-		}
-		public override System.Collections.Generic.List<string> Shortcuts {
-			get {
-				return new System.Collections.Generic.List<string>{ "g" };
-			}
-		}
-		public override void Use (Player p, params string[] args)
-		{
-            if (args.Length < 1)
-                Help(p);
+    public class CmdGotoLVL : Command
+    {
+        public override string Category { get { return "Mod"; } }
+        public override bool ConsoleUseable { get { return false; } }
+        public override string Description { get { return "Go to a world!"; } }
+        public override string Name { get { return "goto"; } }
+        public override string PermissionNode { get { return "core.world.goto"; } }
+        public override System.Collections.Generic.List<string> Shortcuts { get { return new System.Collections.Generic.List<string> { "g" }; } }
 
-            string level = args[0].ToLower();
-            if (World.Find(level) != null && p.level.name.ToLower() != level)
-			{
-				Player.players.ForEach(delegate(Player p1) { if (p1.level == p.level) p1.SendDespawn(p.id); p.SendDespawn(p1.id); });
-                foreach (Point pt in p.VisibleChunks.ToArray()) { p.SendPreChunk(pt.x, pt.z, 0); }
-                p.level = World.Find(level);
-                p.Teleport_Spawn();
-				//foreach (Chunk c in p.level.chunkData.Values) { p.SendPreChunk(c, 1); System.Threading.Thread.Sleep(10); p.SendChunk(c); c.RecalculateLight(); } // This is a bad idea!
-				p.VisibleChunks.Clear();
-				p.UpdateChunks(true, true);
-				return;
-			}
-			p.SendMessage("GOTO FAILED");
-		}
-		public override void Help (Player p)
-		{
-			p.SendMessage("Goto a new level");
-		}
-	}
+        public override void Use(Player p, params string[] args)
+        {
+            if (args.Length != 1) { Help(p); return; }
+
+            World w = World.Find(args[0]);
+            if (w == null) { p.SendMessage("Could not find specified level"); return; }
+            if (p.level.name == w.name) { p.SendMessage("Already in " + p.level.name); return; }
+
+            Player.players.ForEach(p1 => { if (p1.level == p.level) { p1.SendDespawn(p.id); p.SendDespawn(p1.id); } }); //dont want to be seen on 2 maps at once do we?
+            //p.VisibleChunks.ForEach(pt => p.SendPreChunk(pt.x, pt.z, 0));  //apparently not needed since respawn packet is used.
+            p.VisibleChunks.Clear();
+
+            p.SaveLoc(); //when we go back to that level we end up at the same place.
+            p.level = w;
+            p.SendRespawn(); //loading screen and map settings information changes.
+            p.pos = p.Saved_Pos();
+            p.UpdateChunks(true, true);
+            p.Teleport_Saved_Pos(); //send to saved position
+            return;
+        }
+        public override void Help(Player p)
+        {
+            p.SendMessage("Goto a new level");
+        }
+    }
 }
 
